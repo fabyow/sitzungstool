@@ -1,0 +1,2 @@
+# sitzungstool
+Für Strategiesitzung
