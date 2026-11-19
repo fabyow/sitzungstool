@@ -332,6 +332,17 @@ body.drueber .ablage,body.drueber .tab-rahmen,body.drueber .dg{border-color:var(
 .fd-neu{gap:.45rem;margin:.2rem 0 1.4rem}
 .zu .fd-neu{display:none}
 .e-fd{list-style:none;padding-left:0}
+.vr-z{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:.4rem}
+.rm-bild{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin:-.2rem 0 .8rem}
+.rm-vorschau{position:relative;display:inline-block}
+.rm-vorschau img{display:block;max-width:14rem;max-height:9rem;border-radius:.7rem;box-shadow:inset 0 0 0 1px var(--sep)}
+.rm-vorschau .xk{position:absolute;top:.3rem;right:.3rem;background:var(--card)}
+.rm-mini{display:flex;align-items:center;gap:.6rem;margin-top:.35rem}
+.rm-mini img{width:4.5rem;height:3rem;object-fit:cover;border-radius:.45rem;box-shadow:inset 0 0 0 1px var(--sep)}
+.k-sort{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;white-space:nowrap;text-align:inherit}
+.k-sort.an{color:var(--accent)}
+.k-such{margin:.1rem 0 .55rem}
+.k-such input{width:100%;height:2.75rem;padding:0 1rem;border-radius:.9rem;border:1px solid var(--sep);background:var(--card);font-size:1rem;color:var(--ink)}
 .pr-sub{margin:.85rem 0 .35rem;font-size:.8125rem;font-weight:600;color:var(--muted)}
 .pr-gr .pr-sub:first-of-type{margin-top:.2rem}
 .z-th{display:inline-block;margin-right:.45rem;padding:.05rem .5rem;border-radius:.45rem;background:var(--fill);color:var(--muted);font-size:.8125rem;font-weight:600;vertical-align:.08em}
@@ -432,6 +443,9 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
 .e-gruppen .e-gr ol{list-style:none;margin:0;padding:0}
 .e-gruppen .e-gr li{padding:.2rem 0;border-top:1px solid var(--sep);font-size:.9375rem}
 .e-gruppen .e-gr li:first-child{border-top:0}
+.e-bst{grid-template-columns:repeat(auto-fill,minmax(15rem,1fr))}
+.e-pers td{padding-top:.3rem;padding-bottom:.3rem}
+.e-pers td:first-child{width:50%}
 .k-erh{display:inline-block;min-width:3.4rem;text-align:center;font-size:.75rem;font-weight:700;padding:.15rem .5rem;border-radius:.55rem;background:var(--fill);color:var(--muted)}
 .k-erh.ja{background:var(--brand-soft);color:var(--accent)}
 .k-erh.offen{background:var(--warn-soft);color:var(--warn)}
@@ -723,7 +737,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '0.8.7';         // Version des Tools, steht in den Einstellungen
+const VERSION = '0.8.8';         // Version des Tools, steht in den Einstellungen
 const FORMAT = 7;              // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
@@ -1003,6 +1017,7 @@ function normal(d) {
   s.glPunkte = (Array.isArray(s.glPunkte) ? s.glPunkte : []).filter((x) => x && typeof x.text === 'string');
   s.glPunkte.forEach((x) => { if (!x.id) x.id = uid(); });
   s.rueckmeldungen = (Array.isArray(s.rueckmeldungen) ? s.rueckmeldungen : []).filter((x) => x && typeof x.text === 'string' && x.text.trim());
+  s.rueckmeldungen.forEach((x) => { if (x.bild && typeof x.bild === 'object' && typeof x.bild.id === 'string') { if (typeof x.bild.inhalt === 'string' && x.bild.inhalt) anhMerken(x.bild.id, x.bild.inhalt); delete x.bild.inhalt; } else x.bild = null; });
   s.rueckmeldungen.forEach((x) => { if (!x.id) x.id = uid(); if (!RM_ARTEN[x.art]) x.art = 'anderes'; if (x.status !== 'uebergeben') x.status = 'offen'; ['wo', 'datum', 'version', 'umgebung'].forEach((k) => { if (typeof x[k] !== 'string') x[k] = ''; }); });
   const bu = d && d.budget && typeof d.budget === 'object' ? d.budget : {};
   s.budget = Object.assign({}, bu, { ziel: typeof bu.ziel === 'number' && isFinite(bu.ziel) && bu.ziel >= 0 ? bu.ziel : null, auftraege: (Array.isArray(bu.auftraege) ? bu.auftraege : []).filter((x) => x && typeof x === 'object'), notiz: typeof bu.notiz === 'string' ? bu.notiz : '' });
@@ -1151,6 +1166,7 @@ function anhHolen(id) {
 }
 /* Inhalte aus einem Stand übernehmen, auch wenn ein neuerer Stand aus dem Zwischenspeicher gezeigt wird */
 function anhSammeln(d) {
+  try { (d && Array.isArray(d.rueckmeldungen) ? d.rueckmeldungen : []).forEach((x) => { const a = x && x.bild; if (a && typeof a.id === 'string' && typeof a.inhalt === 'string' && a.inhalt) anhMerken(a.id, a.inhalt); }); } catch (e) { /* weiter */ }
   try { (d && Array.isArray(d.themen) ? d.themen : []).forEach((t) => { (t && Array.isArray(t.anhaenge) ? t.anhaenge : []).forEach((a) => { if (a && typeof a.id === 'string' && typeof a.inhalt === 'string' && a.inhalt) anhMerken(a.id, a.inhalt); }); }); } catch (e) { /* weiter */ }
 }
 /* Beim Sichern in die Datei: jeder Anhang mit seinem Inhalt */
@@ -2403,6 +2419,47 @@ function budgetTabelle() {
     '<p class="e-klein">Aus den Kunden: Betrag gleichmässig von Baubeginn bis Bauende verteilt.' + (Z.ohne.ja || Z.ohne.offen ? ' Ohne Baubeginn nicht mitgezählt: ' + (Z.ohne.ja + Z.ohne.offen) + '.' : '') + '</p>';
 }
 const offeneListe = () => S.kunden.auftraege.filter((a) => a.erhalten === 'offen').sort((a, b) => (datumWert(a.beginn) || 99999999) - (datumWert(b.beginn) || 99999999) || (b.betrag || 0) - (a.betrag || 0));
+/* ---------- Umsatz-Ziel vorrechnen (242.5, Chefs Entscheid vom 19.11.2026, 18.53 Uhr; seit 0.8.8) ----------
+   Koepfe im Folgejahr aus der Mitarbeiterliste (ohne Buero; Ein- und Austritte und Pensionen anteilig) x Stunden pro Kopf aus dem
+   BAB (eigene Stunden des letzten ganzen Jahres durch die Koepfe jenes Jahres) plus Temporaerstunden, x Ertrag pro Stunde (Schnitt
+   der ganzen Jahre) plus Teuerung. Jeder Wert ist ein Vorschlag und laesst sich im Blatt aendern. */
+function monateIm(m, J) {
+  const e = datumWert(m.eintritt), A = austrittVon(m, J * 10000 + 101), a = A.art === 'hand' || A.art === 'pension' ? A.wert : 0;
+  const von = Math.max(e || 0, J * 10000 + 101), bis = Math.min(a || 99991231, J * 10000 + 1231);
+  if (bis < von) return 0;
+  return Math.max(0, Math.min(12, (Math.floor(bis / 10000) - Math.floor(von / 10000)) * 12 + Math.floor(bis / 100) % 100 - Math.floor(von / 100) % 100 + 1));
+}
+const koepfeIm = (J) => S.mitarbeiter.filter((m) => !imBuero(m)).reduce((x, m) => x + monateIm(m, J), 0) / 12;
+const rund1 = (x) => Math.round(x * 10) / 10;
+function vrBasis() {
+  const Dj = diagrammDaten().filter((d) => !d.bud && /^\s*\d{4}\s*$/.test(d.name) && d.E && d.h), letzt = Dj[Dj.length - 1] || null, jl = letzt ? parseInt(letzt.name, 10) : 0;
+  const sE = Dj.reduce((x, d) => x + d.E, 0), sH = Dj.reduce((x, d) => x + d.h, 0), sG = Dj.reduce((x, d) => x + (d.G || 0), 0);
+  const kl = jl ? koepfeIm(jl) : 0, eigene = letzt ? (letzt.eigene || Math.max(0, letzt.h - (letzt.temp || 0))) : 0;
+  return { J: folgejahr(), jahre: Dj.map((d) => d.name.trim()), jl: jl, koepfe: rund1(koepfeIm(folgejahr())), koepfeL: rund1(kl), proKopf: kl > 0 && eigene ? Math.round(eigene / kl / 10) * 10 : 0,
+    temp: letzt ? Math.round(letzt.temp || 0) : 0, proStd: sH ? Math.round(sE / sH) : 0, gewinnStd: sH ? Math.round(sG / sH) : 0 };
+}
+function quoteDrei() {   // erhalten von gerechnet, Anzahl, die letzten drei Jahre
+  const O = offertenSortiert().filter((o) => o.gerechnet > 0 && typeof o.erhalten === 'number').slice(-3);
+  const g = O.reduce((x, o) => x + o.gerechnet, 0), e = O.reduce((x, o) => x + o.erhalten, 0);
+  return g ? { q: e / g, jahre: O.map((o) => String(o.jahr)) } : null;
+}
+function vrLesen(f) {
+  const w = (n) => { const z = zahl(f.elements[n].value); return z === null ? 0 : z; };
+  return { koepfe: w('koepfe'), proKopf: w('proKopf'), temp: w('temp'), proStd: w('proStd'), teuerung: w('teuerung'), gewinnStd: w('gewinnStd') };
+}
+function vrRechnen(v) {
+  const std = v.koepfe * v.proKopf + v.temp, umsatz = Math.round(std * v.proStd * (1 + v.teuerung / 100) / 1000) * 1000, Z = budgetZahlen(), Q = quoteDrei();
+  const luecke = Math.max(0, umsatz - Z.ja);
+  return { std: std, umsatz: umsatz, ja: Z.ja, luecke: luecke, Q: Q, offerten: Q && Q.q > 0 ? Math.round(luecke / Q.q / 1000) * 1000 : null, ergebnis: Math.round(std * v.gewinnStd * (1 + v.teuerung / 100) / 1000) * 1000 };
+}
+function vrAus(v) {
+  const r = vrRechnen(v);
+  if (!r.umsatz) return '<p class="muted klein">Ohne BAB mit Stunden und Ertrag lässt sich nichts vorrechnen. Werte oben eintragen.</p>';
+  return '<div class="ab-zahlen vr-z"><div><span>Stunden ' + folgejahr() + '</span><b>' + fmt(Math.round(r.std)) + '</b></div><div><span>Umsatz-Vorschlag</span><b>' + fmt(r.umsatz) + '</b></div>' +
+    '<div><span>Noch zu holen</span><b>' + fmt(r.luecke) + '</b><small>nach ' + fmt(r.ja) + ' erhalten</small></div>' +
+    '<div><span>Nötige Offerten</span><b>' + (r.offerten === null ? '–' : fmt(r.offerten)) + '</b><small>' + (r.Q ? 'bei ' + Math.round(r.Q.q * 100) + ' % Quote (' + r.Q.jahre.join(', ') + ')' : 'ohne Quote bei den Kunden') + '</small></div>' +
+    '<div><span>Erwartetes Ergebnis</span><b>' + fmt(r.ergebnis) + '</b><small>Stunden × Gewinn pro Stunde</small></div></div>';
+}
 function auslastungMonate() {   // vom Monat des Strategietags bis Dezember des Folgejahrs
   const von = Math.floor(sitzungWert() / 100), bis = folgejahr() * 100 + 12, M = [];
   let y = Math.floor(von / 100), m = von % 100;
@@ -2488,9 +2545,16 @@ function kundenDiagramme() {
     : [karte('Aufträge', 'Von wem sie kommen und woran wir arbeiten.', '<p class="dg-leer">Noch kein Auftrag erfasst. Unter «Tabelle» einzeln erfassen oder über «Einfügen» eine Tabelle aus Excel holen.</p>')]);
   return '<div class="dgr">' + karten.join('') + '</div>' + (erhaltene().length ? '<p class="muted klein unter">' + esc((Z.text ? Z.text + ': ' : '') + mehrzahl(L.length, 'Auftrag', 'Aufträge') + (eing ? ', davon ' + eing + ' auf Einladung' : '') + '. Grau daneben: die Summe der Beträge in Franken. Hat ein Auftrag mehrere Angaben, zählt er bei jeder.') + '</p>' : '');
 }
+/* Kunden-Tabelle sortieren und durchsuchen (247.2, seit 0.8.8): Spaltenkopf antippen sortiert, nochmals dreht die Richtung.
+   Die Suche blendet nur Zeilen aus, damit der Cursor im Feld bleibt. */
+let KSUCHE = '';
+const ksuchText = (a) => [a.jahr, a.objekt, a.planer, a.bauherr, a.bauherrArt, a.objektArt, a.speziell, a.mitbewerber].filter(Boolean).join(' ').toLowerCase();
 function kundenTabellen() {
-  const K = S.kunden, O = offertenSortiert().reverse(), f = K.filter;
-  const A = K.auftraege.filter((a) => !f || a.erhalten === f).sort((a, b) => jahrZahl(b.jahr) - jahrZahl(a.jahr));
+  const K = S.kunden, O = offertenSortiert().reverse(), f = K.filter, KS = S.ui.ksort && S.ui.ksort.k ? S.ui.ksort : { k: 'jahr', ab: true };
+  const wert = (a) => ({ jahr: jahrZahl(a.jahr) || 0, objekt: a.objekt || '', planer: a.planer || '', bauherr: a.bauherr || '', art: a.objektArt || '', speziell: a.speziell || '', betrag: typeof a.betrag === 'number' ? a.betrag : -1, ausf: datumWert(a.beginn) || 0, erhalten: { ja: 0, offen: 1, nein: 2 }[a.erhalten] || 0 })[KS.k];
+  const A = K.auftraege.filter((a) => !f || a.erhalten === f).sort((a, b) => { const p = wert(a), q = wert(b), c = typeof p === 'number' ? p - q : String(p).localeCompare(String(q), 'de'); return (KS.ab ? -c : c) || jahrZahl(b.jahr) - jahrZahl(a.jahr); });
+  const kopf = (k, t, r) => '<th' + (r ? ' class="r"' : '') + '><button type="button" class="k-sort' + (KS.k === k ? ' an' : '') + '" data-a="ksort" data-k="' + k + '">' + t + (KS.k === k ? (KS.ab ? ' ↓' : ' ↑') : '') + '</button></th>';
+  const q = KSUCHE.trim().toLowerCase();
   const zt = (v) => (v === null || v === undefined ? '' : fmt(v)), ERH = { ja: 'Ja', nein: 'Nein', offen: 'Offen' };
   const offT = '<div class="k-off"><h2 class="bl">Offerten je Jahr</h2>' +
     (O.length ? '<div class="bst-rahmen"><table class="bst" id="t-off"><thead><tr><th>Jahr</th><th class="r">Gerechnet</th><th class="r">Erhalten</th><th class="r">Offen</th><th class="r">Quote</th></tr></thead><tbody>' +
@@ -2504,8 +2568,9 @@ function kundenTabellen() {
   const aufT = '<div class="bl-zeile"><h2 class="bl">Offerten und Aufträge' + (K.auftraege.length ? ' (' + K.auftraege.length + ')' : '') + '</h2><span class="reihe">' +
     (K.auftraege.length ? seg('kfilter', [['', 'Alle'], ['ja', 'Erhalten'], ['offen', 'Offen'], ['nein', 'Nicht erhalten']], f, 'klein') : '') +
     '<button type="button" class="btn klein" data-a="auftrag-neu">' + ic('plus') + '<span>Offerte</span></button></span></div>' +
-    (A.length ? '<div class="bst-rahmen"><table class="bst at" id="t-auf"><thead><tr><th>Jahr</th><th>Objekt</th><th>Planer</th><th>Bauherr</th><th>Art</th><th>Speziell</th><th class="r">Betrag</th><th>Ausführung</th><th>Erhalten</th></tr></thead><tbody>' +
-      A.map((a) => '<tr data-a="auftrag" data-id="' + a.id + '"><td class="tnum">' + esc(a.jahr) + '</td><td><button type="button" data-a="auftrag" data-id="' + a.id + '">' + esc(a.objekt) + '</button></td><td>' + esc(a.planer) + '</td><td>' + esc(a.bauherr) + (a.bauherrArt ? '<small>' + esc(a.bauherrArt) + '</small>' : '') + '</td><td>' + esc(a.objektArt) + '</td><td>' + esc(a.speziell) + '</td><td class="r tnum">' + zt(a.betrag) + '</td><td class="nw">' + esc(ausfText(a)) + '</td><td><span class="k-erh ' + a.erhalten + '">' + ERH[a.erhalten] + '</span></td></tr>').join('') + '</tbody></table></div>'
+    (A.length ? '<div class="k-such"><input type="search" id="k-suche" value="' + esc(KSUCHE) + '" placeholder="Suchen: Objekt, Planer, Bauherr …" aria-label="Offerten durchsuchen" autocomplete="off"></div>' +
+      '<div class="bst-rahmen"><table class="bst at" id="t-auf"><thead><tr>' + kopf('jahr', 'Jahr') + kopf('objekt', 'Objekt') + kopf('planer', 'Planer') + kopf('bauherr', 'Bauherr') + kopf('art', 'Art') + kopf('speziell', 'Speziell') + kopf('betrag', 'Betrag', true) + kopf('ausf', 'Ausführung') + kopf('erhalten', 'Erhalten') + '</tr></thead><tbody>' +
+      A.map((a) => '<tr data-a="auftrag" data-id="' + a.id + '" data-such="' + esc(ksuchText(a)) + '"' + (q && ksuchText(a).indexOf(q) < 0 ? ' hidden' : '') + '><td class="tnum">' + esc(a.jahr) + '</td><td><button type="button" data-a="auftrag" data-id="' + a.id + '">' + esc(a.objekt) + '</button></td><td>' + esc(a.planer) + '</td><td>' + esc(a.bauherr) + (a.bauherrArt ? '<small>' + esc(a.bauherrArt) + '</small>' : '') + '</td><td>' + esc(a.objektArt) + '</td><td>' + esc(a.speziell) + '</td><td class="r tnum">' + zt(a.betrag) + '</td><td class="nw">' + esc(ausfText(a)) + '</td><td><span class="k-erh ' + a.erhalten + '">' + ERH[a.erhalten] + '</span></td></tr>').join('') + '</tbody></table></div>'
       : '<p class="muted klein">' + (K.auftraege.length ? 'Keine mit dieser Auswahl.' : 'Noch keine Offerte. Einzeln erfassen oder über «Einfügen» eure Offertliste aus Excel holen.') + '</p>');
   return offT + aufT + '<div class="unter"><p class="muted klein">Eine Zeile antippen, um sie zu ändern.</p><button type="button" class="textlink" data-a="kunden-weg">Alle Offerten und Aufträge entfernen</button></div>';
 }
@@ -2629,10 +2694,13 @@ function ergebnisHTML() {
     const K = zeigt(t, 'kader') ? alle.filter(istKader) : [], B = zeigt(t, 'betrieb') ? alle.filter((m) => !istKader(m)) : [];
     const W = zeigt(t, 'wechsel') ? wechselListe().filter((x) => inGruppe(x.m, g)) : [], D = zeigt(t, 'bedarf') ? t.bedarf : [];
     if (!B.length && !K.length && !W.length && !D.length) return;
-    const team = (m) => { const n = S.mitarbeiter.filter((x) => x.polier === m.id && aufTafel(x, J)).length; return n ? ' (' + n + ')' : ''; };
-    const tabelle = (titel, L) => '<h3>' + titel + ' (' + L.length + ')</h3><div class="e-tab-rahmen"><table class="e-besch"><tbody>' + posGruppen(L).map((p) => '<tr><td class="th nw">' + esc(p.name) + ' (' + p.liste.length + ')</td><td>' +
-      p.liste.map((m) => { const a = austrittMeta(m, w); return esc(m.name) + (istPolier(m) ? team(m) : '') + (a ? ' <span class="e-grau">' + esc(a) + '</span>' : ''); }).join(', ') + '</td></tr>').join('') + '</tbody></table></div>';
-    h += '<section class="e-teil"><h2>' + esc(nm(t)) + '</h2>' + (K.length ? tabelle('Kader', K) : '') + (B.length ? tabelle('Betriebsmitarbeiter', B) : '') +
+    const team = (m) => { const n = S.mitarbeiter.filter((x) => x.polier === m.id && aufTafel(x, J)).length; return n ? ' · ' + n + ' im Team' : ''; };
+    /* Wie im Tool: eine Zeile je Person, nach Hierarchie, auch mit langen Namen lesbar (244.2, seit 0.8.8) */
+    const tabelle = (titel, L) => '<h3>' + titel + ' (' + L.length + ')</h3><div class="e-tab-rahmen"><table class="e-besch e-pers"><tbody>' + maSortiert(L).map((m) => {
+      const a = austrittMeta(m, w);
+      return '<tr><td>' + esc(m.name) + '</td><td class="nw">' + esc((m.position || 'Ohne Position') + (istPolier(m) ? team(m) : '')) + '</td><td class="nw e-grau">' + esc(a || '') + '</td></tr>';
+    }).join('') + '</tbody></table></div>';
+    h += '<section class="e-teil"><h2>' + esc(nm(t)) + '</h2>' + (K.length ? kaderTeile(K).map((x) => tabelle('Kader ' + x[0], x[1])).join('') : '') + (B.length ? tabelle('Betriebsmitarbeiter', B) : '') +
       (W.length ? '<h3>Ein- und Austritte</h3><div class="e-tab-rahmen"><table class="e-besch"><thead><tr><th>Wer</th><th>Position</th><th></th><th>Wann</th></tr></thead><tbody>' +
         W.map((x) => '<tr><td>' + esc(x.m.name) + '</td><td>' + esc(x.m.position) + '</td><td class="nw">' + EW_ART[x.art] + '</td><td class="nw">' + esc(x.text) + (x.art !== 'pension' && x.wert > w ? ' (geplant)' : '') + '</td></tr>').join('') + '</tbody></table></div>' : '') +
       (D.length ? '<h3>Bedarf und Nachfolge</h3><p class="e-klein">' + D.filter((b) => b.stand !== 'besetzt').length + ' von ' + D.length + ' offen</p><div class="e-tab-rahmen"><table class="e-besch"><thead><tr><th>Wen oder was</th><th>Warum</th><th>Bis wann</th><th>Stand</th></tr></thead><tbody>' +
@@ -2643,8 +2711,8 @@ function ergebnisHTML() {
     h += '<section class="e-teil"><h2>' + esc(t.titel) + '</h2>' +
       (t.ziele.length ? '<p class="e-klein">' + t.ziele.filter((z) => z.stand === 'erreicht').length + ' von ' + t.ziele.length + ' Zielen erreicht</p><ul class="e-rz">' +
         t.ziele.map((z) => '<li><span>' + esc(mitTh(z, z.text)) + '</span><b class="e-st ' + esc(z.stand || '') + '">' + esc(STAND[z.stand || ''] || '') + (z.stand !== 'erreicht' && weiterVon(z) ? (weiterVon(z) === 'ja' ? ' · geht weiter' : ' · fallen gelassen') : '') + '</b></li>').join('') + '</ul>' : '') +
-      (t.baustellen.length ? '<h3>Baustellen (' + t.baustellen.length + ')</h3><div class="e-tab-rahmen"><table class="e-besch"><thead><tr><th>Bauführer</th><th>Baustellen, in Klammern der Polier</th></tr></thead><tbody>' +
-        bstGruppen(t.baustellen, 'bf').map((g) => '<tr><td class="th nw">' + esc(g.name || 'Ohne Bauführer') + ' (' + g.liste.length + ')</td><td>' + g.liste.map((e) => esc(e.b.name) + (e.b.po ? ' <span class="e-grau">(' + esc(e.b.po) + ')</span>' : '')).join(' · ') + '</td></tr>').join('') + '</tbody></table></div>' : '') + '</section>';
+      (t.baustellen.length ? '<h3>Baustellen (' + t.baustellen.length + ')</h3><p class="e-klein">Je Bauführer, in Klammern der Polier.</p><div class="e-gruppen e-bst">' +
+        bstGruppen(t.baustellen, 'bf').map((g) => '<section class="e-gr"><h3>' + esc(g.name || 'Ohne Bauführer') + ' <span>(' + g.liste.length + ')</span></h3><ol>' + g.liste.map((e) => '<li>' + esc(e.b.name) + (e.b.po ? ' <span class="e-grau">(' + esc(e.b.po) + ')</span>' : '') + '</li>').join('') + '</ol></section>').join('') + '</div>' : '') + '</section>';
     etwas = true;
   });
   T.filter((t) => t.art === 'gruppen' && t.leute.length).forEach((t) => {
@@ -2692,7 +2760,7 @@ function umgebung() {
 }
 function rmAlsText(liste) {
   return 'Rückmeldungen zum Strategietag-Tool (Fassung ' + VERSION + '), bitte in den Fahrplan eintragen:\n\n' + liste.map((x, i) =>
-    (i + 1) + '. ' + [RM_ARTEN[x.art], x.wo, zeitKurz(x.datum) ? zeitKurz(x.datum) + ' Uhr' : '', [x.umgebung, x.breite ? x.breite + ' px breit' : ''].filter(Boolean).join(', '), x.version && x.version !== VERSION ? 'notiert in Fassung ' + x.version : ''].filter(Boolean).join(' · ') + '\n' + x.text).join('\n\n') + '\n';
+    (i + 1) + '. ' + [RM_ARTEN[x.art], x.wo, zeitKurz(x.datum) ? zeitKurz(x.datum) + ' Uhr' : '', [x.umgebung, x.breite ? x.breite + ' px breit' : ''].filter(Boolean).join(', '), x.version && x.version !== VERSION ? 'notiert in Fassung ' + x.version : '', x.bild ? 'mit Bild' : ''].filter(Boolean).join(' · ') + '\n' + x.text).join('\n\n') + '\n';
 }
 function rmHalten() {   // was im Sheet schon getippt ist, übersteht ein Neuzeichnen
   const f = $('form[data-form="rueckmeldung"]');
@@ -2711,6 +2779,28 @@ function inAblage(text) {   // legt den Text in die Zwischenablage; meldet, ob e
   };
   if (navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext) return navigator.clipboard.writeText(text).then(() => true, alt);
   return Promise.resolve(alt());
+}
+/* Bild zur Rueckmeldung (380, seit 0.8.8): Inhalt in der Ablage des Browsers wie die Anhaenge, in der Datei beim Sichern dabei */
+async function rmBildDazu(f) {
+  if (!f || !/^image\//.test(f.type || '')) { toast('Nur Bilder lassen sich anfügen.'); return; }
+  try {
+    let url = await dateiLesen(f);
+    if (!/^data:image\//.test(url)) return;
+    if (!/^data:image\/(svg|gif)/.test(url)) url = await bildKleiner(url);
+    const id = uid();
+    anhMerken(id, url);
+    rmHalten();
+    if (sheet) sheet.rmBild = { id: id, name: 'Bild', typ: url.slice(5, url.indexOf(';')) || 'image/png', groesse: Math.round((url.length - url.indexOf(',') - 1) * 0.75) };
+    renderSheet(false);
+  } catch (e) { toast('Das Bild liess sich nicht lesen.'); }
+}
+function pngAus(url) {   // Bild als PNG fuer die Zwischenablage
+  return new Promise((ok, nein) => {
+    const img = new Image();
+    img.onload = () => { try { const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight; c.getContext('2d').drawImage(img, 0, 0); c.toBlob((b) => (b ? ok(b) : nein(new Error('leer'))), 'image/png'); } catch (e) { nein(e); } };
+    img.onerror = () => nein(new Error('Bild'));
+    img.src = url;
+  });
 }
 function rmKopieren(liste, markieren) {
   if (!liste.length) return;
@@ -2908,14 +2998,19 @@ const SHEET = {
   },
   rueckmeldung() {
     const R = S.rueckmeldungen, offen = R.filter((x) => x.status === 'offen'), alt = R.filter((x) => x.status !== 'offen'), art = sheet && RM_ARTEN[sheet.rmArt] ? sheet.rmArt : 'unuebersichtlich';
-    const zeile = (x) => '<li><div><b>' + esc([RM_ARTEN[x.art], x.wo, zeitKnapp(x.datum)].filter(Boolean).join(' · ')) + '</b><p>' + esc(x.text) + '</p></div><button type="button" class="xk" data-a="rm-weg" data-id="' + x.id + '" aria-label="Rückmeldung entfernen">' + ic('x') + '</button></li>';
+    const zeile = (x) => '<li><div><b>' + esc([RM_ARTEN[x.art], x.wo, zeitKnapp(x.datum)].filter(Boolean).join(' · ')) + '</b><p>' + esc(x.text) + '</p>' +
+      (x.bild && ANH[x.bild.id] ? '<div class="rm-mini"><img src="' + ANH[x.bild.id] + '" alt=""><button type="button" class="btn klein" data-a="rm-bild-kopieren" data-id="' + x.id + '">' + ic('kopie') + '<span>Bild kopieren</span></button></div>' : (x.bild ? '<p class="muted klein">Bild fehlt auf diesem Gerät</p>' : '')) +
+      '</div><button type="button" class="xk" data-a="rm-weg" data-id="' + x.id + '" aria-label="Rückmeldung entfernen">' + ic('x') + '</button></li>';
+    const nb = sheet && sheet.rmBild && ANH[sheet.rmBild.id] ? sheet.rmBild : null;
     return formHuelle('Rückmeldung zum Tool', 'rueckmeldung',
       '<p class="muted" id="rm-wo">Wo: ' + esc(woText()) + '</p>' +
       '<div class="rseg" role="radiogroup" aria-label="Art der Rückmeldung">' + Object.keys(RM_ARTEN).map((k) => '<label><input type="radio" name="art" value="' + k + '"' + (k === art ? ' checked' : '') + '><span>' + RM_ARTEN[k] + '</span></label>').join('') + '</div>' +
       '<label class="f" for="rm-t"><span>Was fällt dir auf?</span><textarea id="rm-t" name="text" rows="4" maxlength="1000" data-fokus>' + esc((sheet && sheet.text) || '') + '</textarea></label>' +
+      '<div class="rm-bild">' + (nb ? '<span class="rm-vorschau"><img src="' + ANH[nb.id] + '" alt="Bild zur Rückmeldung"><button type="button" class="xk" data-a="rm-bild-weg" aria-label="Bild entfernen">' + ic('x') + '</button></span>'
+        : '<button type="button" class="btn klein" data-a="rm-bild">' + ic('bild') + '<span>Bild</span></button><span class="muted klein">oder einen Screenshot mit Ctrl+V einfügen</span>') + '</div>' +
       (offen.length ? '<section class="rm-teil"><h3>Noch nicht übergeben (' + offen.length + ')</h3><ul class="rml" id="rm-offen">' + offen.map(zeile).join('') + '</ul>' +
         '<div class="reihe"><button type="button" class="btn stark" data-a="rm-kopieren">' + ic('kopie') + '<span>Für Claude kopieren</span></button></div>' +
-        '<p class="muted klein">Danach im Chat mit Claude einfügen. Claude trägt sie in den Fahrplan ein.</p></section>' : '') +
+        '<p class="muted klein">Danach im Chat mit Claude einfügen. Claude trägt sie in den Fahrplan ein.' + (offen.some((x) => x.bild) ? ' Bilder danach einzeln mit «Bild kopieren» dazulegen.' : '') + '</p></section>' : '') +
       (rmText ? '<label class="f" for="rm-k"><span>Kopieren ging hier nicht: Text markieren und selbst kopieren</span><textarea id="rm-k" rows="6" readonly>' + esc(rmText) + '</textarea></label>' : '') +
       (alt.length ? '<details class="rm-alt"><summary>Schon übergeben (' + alt.length + ')</summary><ul class="rml" id="rm-alt">' + alt.map(zeile).join('') + '</ul><div class="reihe"><button type="button" class="btn" data-a="rm-nochmals">' + ic('kopie') + '<span>Nochmals kopieren</span></button><button type="button" class="btn rot" data-a="rm-leeren">Übergebene entfernen</button></div></details>' : ''),
       'Speichern');
@@ -2933,7 +3028,19 @@ const SHEET = {
     return formHuelle('Ausblick ' + j, 'budget',
       '<label class="f" for="bu-z"><span>Umsatz-Ziel ' + j + ' in Franken</span><input id="bu-z" name="ziel" value="' + (B.ziel === null ? '' : esc(fmt(B.ziel))) + '" inputmode="decimal" autocomplete="off" data-fokus></label>' +
       '<label class="f" for="bu-n"><span>Was ist angedacht? (steht unter den Zahlen)</span><textarea id="bu-n" name="notiz" rows="3">' + esc(B.notiz) + '</textarea></label>' +
-      '<p class="muted klein">Die Aufträge trägst du bei den Zahlen ein: je Auftrag eine Zeile oder alles in einer Summe.</p>');
+      '<button type="button" class="btn" data-a="sheet" data-s="vorrechnen">' + ic('liste') + '<span>Aus Stunden und Ertrag pro Stunde vorrechnen</span></button>' +
+      '<p class="muted klein">Erhalten und offen kommen aus den Kunden.</p>');
+  },
+  vorrechnen() {
+    const B = vrBasis(), j = B.J, je = B.jahre.length ? 'Schnitt ' + B.jahre.join(', ') : 'kein BAB mit Stunden';
+    const feld = (n, label, wert, hilfe) => '<label class="f" for="vr-' + n + '"><span>' + label + '</span><input id="vr-' + n + '" name="' + n + '" value="' + esc(String(wert)) + '" inputmode="decimal" autocomplete="off"><small class="muted">' + esc(hilfe) + '</small></label>';
+    const v = { koepfe: B.koepfe, proKopf: B.proKopf, temp: B.temp, proStd: B.proStd, teuerung: 2, gewinnStd: B.gewinnStd };
+    return formHuelle('Umsatz-Ziel ' + j + ' vorrechnen', 'vorrechnen',
+      '<p class="muted klein">Köpfe × Stunden pro Kopf plus Temporärstunden, × Ertrag pro Stunde plus Teuerung. Jeder Wert ist ein Vorschlag; ändere, was nicht passt.</p>' +
+      '<div class="zwei">' + feld('koepfe', 'Köpfe ' + j + ' ohne Büro', v.koepfe, 'Mitarbeiterliste; Ein- und Austritte, Pensionen anteilig') + feld('proKopf', 'Stunden pro Kopf', v.proKopf, B.jl ? 'BAB ' + B.jl + ': eigene Stunden ÷ ' + B.koepfeL + ' Köpfe' : 'kein BAB mit Stunden') + '</div>' +
+      '<div class="zwei">' + feld('temp', 'Temporärstunden', v.temp, B.jl ? 'wie im BAB ' + B.jl : '') + feld('proStd', 'Ertrag pro Stunde in Franken', v.proStd, je) + '</div>' +
+      '<div class="zwei">' + feld('teuerung', 'Teuerung in %', v.teuerung, 'Annahme, bitte prüfen') + feld('gewinnStd', 'Gewinn pro Stunde in Franken', v.gewinnStd, je) + '</div>' +
+      '<div id="vr-aus">' + vrAus(v) + '</div>', 'Als Ziel');
   },
   bauftrag() {
     const a = sheet && S.budget.auftraege.find((x) => x.id === sheet.id);
@@ -3527,6 +3634,17 @@ const AKT = {
   bauftrag(el) { auf({ art: 'bauftrag', id: el.dataset.id }); },
   'bauftrag-weg'() { if (!sheet) return; merken(); S.budget.auftraege = S.budget.auftraege.filter((x) => x.id !== sheet.id); geaendert(true); toast('Auftrag entfernt', true); },
   'rm-weg'(el) { merken(); S.rueckmeldungen = S.rueckmeldungen.filter((x) => x.id !== el.dataset.id); speichern(); render(); renderSheet(false); toast('Rückmeldung entfernt', true); },
+  'rm-bild'() { const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*'; i.onchange = () => { rmBildDazu(i.files && i.files[0]); }; i.click(); },
+  'rm-bild-weg'() { rmHalten(); if (sheet) sheet.rmBild = null; renderSheet(false); },
+  'rm-bild-kopieren'(el) {
+    const x = S.rueckmeldungen.find((y) => y.id === el.dataset.id), url = x && x.bild && ANH[x.bild.id];
+    if (!url) return;
+    const nein = () => toast('Bild kopieren geht hier nicht. Den Screenshot direkt in den Chat legen.');
+    try {
+      if (!navigator.clipboard || !navigator.clipboard.write || typeof ClipboardItem === 'undefined') { nein(); return; }
+      navigator.clipboard.write([new ClipboardItem({ 'image/png': pngAus(url) })]).then(() => toast('Bild kopiert. Jetzt im Chat mit Claude einfügen.'), nein);
+    } catch (e) { nein(); }
+  },
   'rm-kopieren'() { rmKopieren(S.rueckmeldungen.filter((x) => x.status === 'offen'), true); },
   'rm-nochmals'() { rmKopieren(S.rueckmeldungen.filter((x) => x.status !== 'offen'), false); },
   'rm-leeren'(el) { if (!bestaetigt(el, 'Wirklich entfernen?')) return; merken(); S.rueckmeldungen = S.rueckmeldungen.filter((x) => x.status === 'offen'); speichern(); render(); renderSheet(false); toast('Übergebene entfernt', true); },
@@ -3551,6 +3669,11 @@ const AKT = {
     q.an = an; geaendert();
   },
   'fd-weg'() { entfernen('felder', 'Gelöscht'); },
+  ksort(el) {
+    const k = el.dataset.k, o = S.ui.ksort && S.ui.ksort.k ? S.ui.ksort : { k: 'jahr', ab: true };
+    S.ui.ksort = o.k === k ? { k: k, ab: !o.ab } : { k: k, ab: k === 'jahr' || k === 'betrag' || k === 'ausf' };
+    speichern(true); render();
+  },
   'person-weg'() { entfernen('leute', 'Mitarbeiter entfernt'); },
   'gruppe-neu'() { auf({ art: 'ma', id: '', position: 'Polier' }); },
   'gruppe-weg'() { const t = aktThema(); if (!t || !sheet) return; merken(); t.leute.forEach((p) => { if (p.gruppe === sheet.id) p.gruppe = ''; }); t.gruppen = t.gruppen.filter((g) => g.id !== sheet.id); geaendert(true); toast('Gruppe entfernt', true); },
@@ -3646,7 +3769,8 @@ const FORMS = {
   rueckmeldung(f) {
     const text = f.elements.text.value.replace(/\r\n?/g, '\n').trim();
     if (text.length < 2) { f.elements.text.classList.add('fehlt'); f.elements.text.focus(); return; }
-    S.rueckmeldungen.push({ id: uid(), datum: new Date().toISOString(), wo: woText(), art: RM_ARTEN[f.elements.art.value] ? f.elements.art.value : 'anderes', text: text.slice(0, 1000), version: VERSION, umgebung: umgebung(), breite: window.innerWidth || 0, status: 'offen', uebergeben: '' });
+    S.rueckmeldungen.push({ id: uid(), datum: new Date().toISOString(), wo: woText(), art: RM_ARTEN[f.elements.art.value] ? f.elements.art.value : 'anderes', text: text.slice(0, 1000), version: VERSION, umgebung: umgebung(), breite: window.innerWidth || 0, status: 'offen', uebergeben: '', bild: sheet && sheet.rmBild ? sheet.rmBild : null });
+    if (sheet) sheet.rmBild = null;
     const n = S.rueckmeldungen.filter((x) => x.status === 'offen').length;
     geaendert(true);
     toast('Rückmeldung notiert, ' + n + ' noch nicht übergeben');
@@ -3659,6 +3783,11 @@ const FORMS = {
     geaendert(); fokus('neu-bedarf');
   },
   'bedarf-edit'(f) { const b = imThema('bedarf'), was = b && pflicht(f.elements.was); if (!was) return; b.was = was; b.warum = f.elements.warum.value.trim(); b.bis = ohneBis(f.elements.bis.value); b.notiz = f.elements.notiz.value.trim(); b.gl = f.elements.gl.checked; geaendert(true); },
+  vorrechnen(f) {
+    const r = vrRechnen(vrLesen(f));
+    if (!r.umsatz) { toast('Ohne Werte lässt sich kein Ziel vorrechnen'); return; }
+    S.budget.ziel = r.umsatz; geaendert(true); toast('Umsatz-Ziel ' + folgejahr() + ': ' + fmt(r.umsatz), true);
+  },
   budget(f) { const z = zahl(f.elements.ziel.value); S.budget.ziel = z !== null && z >= 0 ? z : null; S.budget.notiz = f.elements.notiz.value.trim(); geaendert(true); },
   bauftrag(f) {
     const name = f.elements.name.value.trim(), betrag = zahl(f.elements.betrag.value);
@@ -3779,6 +3908,10 @@ document.addEventListener('keydown', (e) => {
 });
 document.addEventListener('paste', (e) => {
   const t = e.target, feld = t && t.matches && t.matches('input,textarea');
+  if (sheet && sheet.art === 'rueckmeldung' && e.clipboardData && e.clipboardData.files && e.clipboardData.files.length) {   // Screenshot zur Rueckmeldung (380)
+    const b = Array.from(e.clipboardData.files).find((x) => /^image\//.test(x.type || ''));
+    if (b) { e.preventDefault(); rmBildDazu(b); return; }
+  }
   const text = e.clipboardData ? e.clipboardData.getData('text') : '';
   const bilder = !feld && S.ui.bereich === 'themen' && e.clipboardData && e.clipboardData.files ? Array.from(e.clipboardData.files).filter(istAnhang) : [];
   if (bilder.length) { e.preventDefault(); if (aktThema() && aktThema().zu) toast(ZU_TEXT); else anhDazu(bilder); return; }   // ein Bildschirmfoto im Thema einfügen
@@ -3789,7 +3922,7 @@ document.addEventListener('paste', (e) => {
   if (feld && (t.id === 'neu-leute' || t.id === 'neu-ziel' || t.id === 'neu-bst')) {   // eine Liste aus Excel: jede Zeile ein Eintrag
     if (!/[\r\n\t]/.test(text.trim())) return;
     e.preventDefault();
-    if (t.id === 'neu-leute') leuteDazu(text); else if (t.id === 'neu-ziel') zieleDazu(text); else baustellenDazu(text);
+    if (t.id === 'neu-leute') leuteDazu(text); else if (t.id === 'neu-ziel') zieleDazu(text, t.form && t.form.elements.thema ? t.form.elements.thema.value : ''); else baustellenDazu(text);
     return;
   }
   const beiKunden = feld ? t.id === 'k-einfuegen' : (S.ui.bereich === 'kunden' && (!sheet || sheet.art === 'kimport'));
@@ -3912,6 +4045,15 @@ if (ALS_LINK) {
   try { const l = document.createElement('link'); l.rel = 'apple-touch-icon'; l.href = 'icon.png'; document.head.appendChild(l); } catch (e) { /* ohne Symbol weiter */ }
   if ('serviceWorker' in navigator) window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { /* ohne Netz-Vorrat weiter */ }); });
 }
+
+document.addEventListener('input', (e) => {   // Suche in der Kunden-Tabelle (247.2); Vorrechnen (242.5) rechnet beim Tippen neu
+  const el = e.target, vf = el && el.closest ? el.closest('form[data-form="vorrechnen"]') : null;
+  if (vf) { const o = document.getElementById('vr-aus'); if (o) o.innerHTML = vrAus(vrLesen(vf)); return; }
+  if (!el || el.id !== 'k-suche') return;
+  KSUCHE = el.value;
+  const q = KSUCHE.trim().toLowerCase();
+  document.querySelectorAll('#t-auf tbody tr').forEach((tr) => { tr.hidden = !!q && (tr.dataset.such || '').indexOf(q) < 0; });
+});
 
 render();
 })();
