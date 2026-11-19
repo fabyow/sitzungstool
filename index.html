@@ -352,6 +352,34 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
 .ma-weg summary{cursor:pointer;color:var(--muted);font-weight:600;padding:.6rem 0}
 .sheet-inhalt > .bl:first-of-type{margin-top:.6rem}
 .f[hidden]{display:none}
+/* Anhänge: Kacheln unter der Frage, Ansicht fast bildschirmfüllend */
+.anh-reihe{display:grid;grid-template-columns:repeat(auto-fill,minmax(12.5rem,1fr));gap:.8rem;margin:1rem 0 .3rem}
+.anh{display:flex;flex-direction:column;background:var(--card);border-radius:1.1rem;box-shadow:var(--shadow);overflow:hidden;text-align:left;min-width:0}
+.anh:hover{box-shadow:var(--shadow),0 0 0 1.5px var(--brand)}
+.anh-bild{height:9rem;background:var(--fill);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.anh-bild img{width:100%;height:100%;object-fit:cover}
+.anh-bild .ic{width:2.4rem;height:2.4rem;color:var(--muted)}
+.anh-name{display:block;padding:.55rem .8rem .6rem;font-weight:600;font-size:.9375rem;line-height:1.25;overflow-wrap:anywhere}
+.anh-name small{display:block;color:var(--muted);font-weight:400;font-size:.8125rem;margin-top:.1rem}
+.sheet-huelle.voll{align-items:center;padding:.6rem}
+.sheet.anh-sheet{width:min(100%,100rem);max-width:none;height:100%;max-height:none;border-radius:1.25rem}
+.anh-sheet > header{grid-template-columns:auto minmax(0,1fr) auto}
+.anh-sheet > header h2{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.anh-sheet .rechts{justify-self:end;gap:.2rem;flex-wrap:nowrap}
+.tbtn.rot{color:var(--alarm)}
+.anh-voll{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:.6rem;border-radius:0 0 1.25rem 1.25rem}
+.anh-voll img{max-width:100%;max-height:100%;object-fit:contain;border-radius:.4rem}
+.anh-voll iframe{width:100%;height:100%;border:0;border-radius:.6rem;background:#fff}
+.anh-voll p{text-align:center;max-width:26rem}
+.anh-sheet:fullscreen{width:100vw;height:100vh;border-radius:0}
+.anh-sheet:fullscreen .anh-voll{border-radius:0}
+.e-gruppen{display:grid;grid-template-columns:repeat(auto-fill,minmax(12rem,1fr));gap:.6rem;margin-top:.4rem}
+.e-gruppen .e-gr{border:1px solid var(--sep);border-radius:.8rem;padding:.5rem .75rem .45rem;break-inside:avoid}
+.e-gruppen .e-gr h3{font-size:1rem;font-weight:700;margin:0 0 .25rem}
+.e-gruppen .e-gr h3 span{color:var(--muted);font-weight:500}
+.e-gruppen .e-gr ol{list-style:none;margin:0;padding:0}
+.e-gruppen .e-gr li{padding:.2rem 0;border-top:1px solid var(--sep);font-size:.9375rem}
+.e-gruppen .e-gr li:first-child{border-top:0}
 .festband{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem .8rem;margin-top:1rem;padding:.55rem .6rem .55rem .9rem;border-radius:1rem;background:var(--brand-soft);font-weight:600}
 .festband .ic{color:var(--accent)}
 .festband > span{flex:1;min-width:10rem}
@@ -579,6 +607,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
 <div id="tip" role="tooltip" hidden></div>
 <input type="file" id="datei-wahl" accept=".xlsx,.xlsm,.csv,.txt,.tsv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,text/plain" multiple hidden>
 <input type="file" id="daten-wahl" accept=".html,.htm,.json,text/html,application/json" hidden>
+<input type="file" id="anhang-wahl" accept="image/*,application/pdf,.pdf" multiple hidden>
 <div id="druck"></div>
 <script id="daten" type="application/json">null</script>
 <script>
@@ -593,7 +622,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '0.8';         // Version des Tools, steht in den Einstellungen
+const VERSION = '0.8.1';         // Version des Tools, steht in den Einstellungen
 const FORMAT = 7;              // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
@@ -644,7 +673,10 @@ const IC = {
   liste: '<path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/>',
   sprech: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
   schloss: '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
-  kopie: '<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>'
+  kopie: '<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+  klammer: '<path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/>',
+  datei: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>',
+  bild: '<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>'
 };
 const ic = (n, klasse) => '<svg class="ic' + (klasse ? ' ' + klasse : '') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + (IC[n] || '') + '</svg>';
 
@@ -674,7 +706,7 @@ const ganz = (v) => (typeof v === 'number' && isFinite(v) && v >= 0 ? Math.round
 
 /* ---------- Aufbau der Daten ---------- */
 function themaNeu(art, titelText, frage) {
-  return { id: uid(), art: art || 'thema', eltern: '', titel: titelText || 'Neues Thema', frage: frage || '', notizen: [], beschluesse: [], ziele: [], gruppen: [], leute: [], baustellen: [], bedarf: [], fest: '' };
+  return { id: uid(), art: art || 'thema', eltern: '', titel: titelText || 'Neues Thema', frage: frage || '', notizen: [], beschluesse: [], ziele: [], gruppen: [], leute: [], baustellen: [], bedarf: [], fest: '', anhaenge: [] };
 }
 /* Unterpunkte stehen direkt hinter ihrem Thema («eltern» nennt es). Es gibt zwei Ebenen: Ein Unterpunkt hat selbst keine Unterpunkte. */
 function ordnen(T) {
@@ -833,6 +865,12 @@ function normal(d) {
     if (typeof t.eltern !== 'string') t.eltern = '';
     ['notizen', 'beschluesse', 'ziele', 'gruppen', 'leute', 'baustellen', 'bedarf'].forEach((k) => { if (!Array.isArray(t[k])) t[k] = []; });
     if (typeof t.fest !== 'string') t.fest = '';
+    t.anhaenge = (Array.isArray(t.anhaenge) ? t.anhaenge : []).filter((a) => a && typeof a === 'object' && typeof a.id === 'string' && a.id);
+    t.anhaenge.forEach((a) => {   // der Inhalt kommt aus der Datei in die Ablage; im Stand bleibt nur, was ihn beschreibt
+      if (typeof a.inhalt === 'string' && a.inhalt) anhMerken(a.id, a.inhalt);
+      delete a.inhalt;
+      a.name = typeof a.name === 'string' && a.name.trim() ? a.name.trim() : 'Anhang'; a.typ = typeof a.typ === 'string' ? a.typ : ''; a.groesse = typeof a.groesse === 'number' && a.groesse > 0 ? a.groesse : 0;
+    });
     t.bedarf = t.bedarf.filter((x) => x && typeof x === 'object');
     t.bedarf.forEach((x) => { if (!x.id) x.id = uid(); ['was', 'warum', 'bis', 'notiz'].forEach((k) => { if (typeof x[k] !== 'string') x[k] = ''; }); if (!BSTAND[x.stand]) x.stand = 'offen'; });
   });
@@ -944,6 +982,31 @@ function spiegeln(s) {
     t.leute = leute.map((m) => ({ id: m.id, name: m.name, gruppe: pid[m.polier] ? m.polier : '' }));
   });
 }
+/* ---------- Anhänge: Inhalt nach Kennung, dazu die Ablage des Browsers ---------- */
+const ANH = {};   // Kennung → data:-Adresse
+const ANH_MAX = 15 * 1024 * 1024;
+let anhDbP = null;
+function anhDb() {
+  if (!anhDbP) anhDbP = new Promise((ok, nein) => {
+    try { const r = indexedDB.open('strategietag-anhaenge', 1); r.onupgradeneeded = () => { r.result.createObjectStore('a'); }; r.onsuccess = () => ok(r.result); r.onerror = () => nein(r.error); } catch (e) { nein(e); }
+  });
+  return anhDbP;
+}
+function anhMerken(id, inhalt) {
+  ANH[id] = inhalt;
+  anhDb().then((db) => { db.transaction('a', 'readwrite').objectStore('a').put(inhalt, id); }).catch(() => { /* ohne Ablage: der Inhalt steht in der Datei */ });
+}
+function anhHolen(id) {
+  return anhDb().then((db) => new Promise((ok) => { const r = db.transaction('a').objectStore('a').get(id); r.onsuccess = () => ok(r.result || null); r.onerror = () => ok(null); })).catch(() => null);
+}
+/* Inhalte aus einem Stand übernehmen, auch wenn ein neuerer Stand aus dem Zwischenspeicher gezeigt wird */
+function anhSammeln(d) {
+  try { (d && Array.isArray(d.themen) ? d.themen : []).forEach((t) => { (t && Array.isArray(t.anhaenge) ? t.anhaenge : []).forEach((a) => { if (a && typeof a.id === 'string' && typeof a.inhalt === 'string' && a.inhalt) anhMerken(a.id, a.inhalt); }); }); } catch (e) { /* weiter */ }
+}
+/* Beim Sichern in die Datei: jeder Anhang mit seinem Inhalt */
+function mitAnhaengen(k, v) {
+  return k && v && typeof v === 'object' && !Array.isArray(v) && typeof v.id === 'string' && typeof v.typ === 'string' && typeof v.groesse === 'number' && v.inhalt === undefined && ANH[v.id] ? Object.assign({}, v, { inhalt: ANH[v.id] }) : v;
+}
 /* Einen gespeicherten Stand übernehmen. Ein Beispiel aus einer älteren Version wird durch das heutige Beispiel ersetzt. */
 function vorbereiten(d) {
   if (d && d.beispiel && (d.v || 2) < FORMAT) {
@@ -965,6 +1028,7 @@ let glAn = IM_RAHMEN;    // Reiter «GL» mit den eigenen Punkten: je Gerät ein
   const eing = lies(() => JSON.parse($('#daten').textContent || 'null'));
   const lokal = lies(() => JSON.parse(localStorage.getItem(KEY) || 'null'));
   const ausDatei = eing && eing.daten ? eing.daten : null;
+  anhSammeln(ausDatei);
   const gesichert = lies(() => localStorage.getItem(KEY_G)) || '';
   if (lokal && ausDatei) {
     if ((lokal.stand || '') > (ausDatei.stand || '')) { S = vorbereiten(lokal); datei.schmutzig = lokal.stand !== gesichert; } else S = vorbereiten(ausDatei);
@@ -1337,7 +1401,7 @@ function kundenLesen(g) {
 /* Eigene Angaben mischen sich nicht mit dem Beispiel: Beispielzahlen und Beispieleinträge gehen weg, die Themen bleiben */
 function beispielWeg() {
   S.beispiel = false; S.zahlen.perioden = []; S.zahlen.zeilen = []; S.ui.auf = {};
-  S.themen.forEach((x) => { x.notizen = []; x.beschluesse = []; x.ziele = []; x.leute = []; x.baustellen = []; x.bedarf = []; x.fest = ''; });
+  S.themen.forEach((x) => { x.notizen = []; x.beschluesse = []; x.ziele = []; x.leute = []; x.baustellen = []; x.bedarf = []; x.fest = ''; x.anhaenge = []; });
   S.parkplatz = []; S.glPunkte = []; S.kunden.offerten = []; S.kunden.auftraege = []; S.budget = { ziel: null, auftraege: [], notiz: '' }; S.mitarbeiter = [];
 }
 /* Gelesene Tabellen übernehmen. Ein Jahr oder ein Auftrag (gleiches Jahr, gleiches Objekt), den es schon gibt, wird ergänzt statt verdoppelt. */
@@ -1437,7 +1501,7 @@ async function ladeDatei(file) {
 }
 function ohneInhalt() {   // nichts eingetragen und die Themen wie am Anfang
   const vor = themenStart();
-  return !S.zahlen.perioden.length && S.themen.length === vor.length && S.themen.every((x, i) => x.titel === vor[i].titel && x.frage === vor[i].frage && !S.parkplatz.length && !S.glPunkte.length && !S.kunden.offerten.length && !S.kunden.auftraege.length && !x.baustellen.length && !x.notizen.length && !x.beschluesse.length && !x.ziele.length && !x.leute.length && !x.bedarf.length) && !S.rueckmeldungen.length && S.budget.ziel === null && !S.budget.auftraege.length && !S.mitarbeiter.length;
+  return !S.zahlen.perioden.length && S.themen.length === vor.length && S.themen.every((x, i) => x.titel === vor[i].titel && x.frage === vor[i].frage && !S.parkplatz.length && !S.glPunkte.length && !S.kunden.offerten.length && !S.kunden.auftraege.length && !x.baustellen.length && !x.notizen.length && !x.beschluesse.length && !x.ziele.length && !x.leute.length && !x.bedarf.length && !x.anhaenge.length) && !S.rueckmeldungen.length && S.budget.ziel === null && !S.budget.auftraege.length && !S.mitarbeiter.length;
 }
 function uebernehmen(d, name) {
   merken();
@@ -1677,6 +1741,7 @@ const mitNr = (t, nr) => (nr[t.id] ? nr[t.id] + ' ' : '') + t.titel;
 const zaehlText = (t) => {
   const n = t.notizen.length, b = t.beschluesse.length, teile = [];
   if (n) teile.push(n + (n === 1 ? ' Notiz' : ' Notizen'));
+  if (t.anhaenge && t.anhaenge.length) teile.push(t.anhaenge.length + (t.anhaenge.length === 1 ? ' Anhang' : ' Anhänge'));
   if (b) teile.push(b + (t.art === 'ziele' ? (b === 1 ? ' Ziel' : ' Ziele') : (b === 1 ? ' Beschluss' : ' Beschlüsse')));
   if (t.art === 'personal' && t.bedarf.length) teile.unshift(t.bedarf.filter((x) => x.stand !== 'besetzt').length + ' offen');
   return teile.join(' · ');
@@ -1690,6 +1755,13 @@ const sitzungsJahr = () => { const j = parseInt(String(S.meta.datum || '').slice
 const folgejahr = () => sitzungsJahr() + 1;
 const budgetSumme = () => S.budget.auftraege.reduce((a, x) => a + (x.betrag || 0), 0);
 const maVon = (id) => S.mitarbeiter.find((m) => m.id === id) || null;
+const nameWoerter = (x) => String(x || '').toLowerCase().replace(/[,;]/g, ' ').split(/\s+/).filter(Boolean);
+const nameSchluessel = (x) => nameWoerter(x).sort().join(' ');
+/* Was ein Thema der Art «Personal» zeigt; ohne eigene Wahl alles ausser der Kader-Liste (der Bestand enthält das Kader) */
+const ZEIGEN = [['bestand', 'Bestand'], ['kader', 'Kader'], ['wechsel', 'Ein- und Austritte'], ['bedarf', 'Bedarf und Nachfolge']];
+const zeigt = (t, k) => (t.zeigen && typeof t.zeigen === 'object' && typeof t.zeigen[k] === 'boolean' ? t.zeigen[k] : k !== 'kader');
+const groesseText = (b) => (b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB');
+const istBildTyp = (typ) => /^image\//.test(typ || '');
 const sitzungWert = () => datumWert(S.meta.datum) || datumWert(heute());
 /* Positionen als Gruppen, in der Reihenfolge von POSITIONEN; andere danach, ohne Position zuletzt */
 function posGruppen(L) {
@@ -1796,15 +1868,23 @@ const TEIL = {
       '<span class="reihe"><button type="button" class="btn klein" data-a="gruppen-drucken"' + (IM_RAHMEN || !t.leute.length ? ' disabled' : '') + '>' + ic('print') + '<span>Drucken</span></button>' +
       (fest ? '' : '<button type="button" class="btn klein stark" data-a="fest"' + (t.leute.length ? '' : ' disabled') + '>' + ic('schloss') + '<span>Festhalten</span></button>') + '</span></div>';
   },
-  bestand() {
+  anhaenge(t) {
+    if (!t.anhaenge.length) return '';
+    return '<div class="anh-reihe">' + t.anhaenge.map((a) => {
+      const url = ANH[a.id], bild = istBildTyp(a.typ);
+      return '<button type="button" class="anh" data-a="anhang" data-id="' + a.id + '"><span class="anh-bild">' + (bild && url ? '<img src="' + url + '" alt="">' : ic(bild ? 'bild' : 'datei')) + '</span>' +
+        '<span class="anh-name">' + esc(a.name) + '<small>' + (url ? (bild ? 'Bild' : 'PDF') + (a.groesse ? ' · ' + groesseText(a.groesse) : '') : 'Fehlt auf diesem Gerät') + '</small></span></button>';
+    }).join('') + '</div>';
+  },
+  bestand(nurKader) {
     const L = S.mitarbeiter;
-    if (!L.length) return '<h2 class="bl">Bestand</h2><div class="ma-leer"><p>Noch keine Mitarbeiterliste. Einmal aus Excel einfügen, je Zeile Name, Position, Polier, Eintritt, Austritt. Gruppenzuteilung, Bestand und Ein- und Austritte lesen daraus.</p><div class="reihe"><button type="button" class="btn stark" data-a="sheet" data-s="maimport">' + ic('liste') + '<span>Liste einfügen</span></button><button type="button" class="btn" data-a="ma-neu">' + ic('plus') + '<span>Mitarbeiter</span></button></div></div>';
-    const w = sitzungWert(), J = sitzungsJahr(), B = L.filter((m) => imBestand(m, w)), kader = B.filter(istKader).length;
+    if (!L.length) return '<h2 class="bl">' + (nurKader ? 'Kader' : 'Bestand') + '</h2><div class="ma-leer"><p>Noch keine Mitarbeiterliste. Einmal aus Excel einfügen, je Zeile Name, Position, Polier, Eintritt, Austritt. Gruppenzuteilung, Bestand und Ein- und Austritte lesen daraus.</p><div class="reihe"><button type="button" class="btn stark" data-a="sheet" data-s="maimport">' + ic('liste') + '<span>Liste einfügen</span></button><button type="button" class="btn" data-a="ma-neu">' + ic('plus') + '<span>Mitarbeiter</span></button></div></div>';
+    const w = sitzungWert(), J = sitzungsJahr(), alle = L.filter((m) => imBestand(m, w)), B = nurKader ? alle.filter(istKader) : alle, kader = alle.filter(istKader).length;
     const team = (m) => { const n = L.filter((x) => x.polier === m.id && aufTafel(x, J)).length; return n ? n + ' im Team' : ''; };
-    return '<div class="bl-zeile"><h2 class="bl">Bestand (' + B.length + (kader ? ', davon ' + kader + ' Kader' : '') + ')</h2><button type="button" class="btn klein" data-a="sheet" data-s="maliste">' + ic('liste') + '<span>Mitarbeiterliste</span></button></div>' +
+    return '<div class="bl-zeile"><h2 class="bl">' + (nurKader ? 'Kader (' + B.length + ')' : 'Bestand (' + B.length + (kader ? ', davon ' + kader + ' Kader' : '') + ')') + '</h2><button type="button" class="btn klein" data-a="sheet" data-s="maliste">' + ic('liste') + '<span>Mitarbeiterliste</span></button></div>' +
       (B.length ? '<div class="bgr bestand">' + posGruppen(B).map((g) => '<section class="bg"><header><b>' + esc(g.name) + '</b><span class="zahl tnum">' + g.liste.length + '</span></header><ul>' +
         g.liste.map((m) => { const grau = [istPolier(m) ? team(m) : '', m.austritt ? 'bis ' + m.austritt : ''].filter(Boolean).join(' · '); return '<li><button type="button" data-a="ma" data-id="' + m.id + '"><span>' + esc(m.name) + '</span>' + (grau ? '<small>' + esc(grau) + '</small>' : '') + '</button></li>'; }).join('') + '</ul></section>').join('') + '</div>'
-        : '<p class="muted klein">Am ' + esc(datumLang(S.meta.datum)) + ' ist niemand aus der Liste angestellt.</p>');
+        : '<p class="muted klein">Am ' + esc(datumLang(S.meta.datum)) + ' ist ' + (nurKader ? 'im Kader ' : '') + 'niemand aus der Liste angestellt.</p>');
   },
   wechsel() {
     const W = wechselListe();
@@ -1849,11 +1929,12 @@ function kartenGleich() {
 }
 function themaInhalt(t, nr) {
   const u = TEIL.unter(t, nr || {});
-  if (t.art === 'rueckblick') return TEIL.frage(t) + TEIL.baustellen(t) + TEIL.rueckblick(t) + u + TEIL.notizen(t);
-  if (t.art === 'gruppen') return TEIL.frage(t) + TEIL.tafel(t) + u + TEIL.notizen(t) + TEIL.beschluss(t);
-  if (t.art === 'ziele') return TEIL.frage(t) + TEIL.offen() + TEIL.beschluss(t) + u + TEIL.notizen(t);
-  if (t.art === 'personal') return TEIL.frage(t) + TEIL.bestand() + TEIL.wechsel() + TEIL.bedarf(t) + u + TEIL.notizen(t) + TEIL.beschluss(t);
-  return TEIL.frage(t) + u + TEIL.notizen(t) + TEIL.beschluss(t);
+  if (t.art === 'rueckblick') return TEIL.frage(t) + TEIL.anhaenge(t) + TEIL.baustellen(t) + TEIL.rueckblick(t) + u + TEIL.notizen(t);
+  if (t.art === 'gruppen') return TEIL.frage(t) + TEIL.anhaenge(t) + TEIL.tafel(t) + u + TEIL.notizen(t) + TEIL.beschluss(t);
+  if (t.art === 'ziele') return TEIL.frage(t) + TEIL.anhaenge(t) + TEIL.offen() + TEIL.beschluss(t) + u + TEIL.notizen(t);
+  if (t.art === 'personal') return TEIL.frage(t) + TEIL.anhaenge(t) + (zeigt(t, 'bestand') ? TEIL.bestand(false) : '') + (zeigt(t, 'kader') && (S.mitarbeiter.length || !zeigt(t, 'bestand')) ? TEIL.bestand(true) : '') +
+    (zeigt(t, 'wechsel') ? TEIL.wechsel() : '') + (zeigt(t, 'bedarf') ? TEIL.bedarf(t) : '') + u + TEIL.notizen(t) + TEIL.beschluss(t);
+  return TEIL.frage(t) + TEIL.anhaenge(t) + u + TEIL.notizen(t) + TEIL.beschluss(t);
 }
 
 /* ---------- Zahlen: Ausblick aufs Folgejahr ---------- */
@@ -1990,6 +2071,7 @@ const ANSICHT = {
     const kopf = '<div class="titel"><div>' + (vater ? '<button type="button" class="pfad" data-a="thema" data-id="' + vater.id + '">' + ic('left') + '<span>' + esc(mitNr(vater, nr)) + '</span></button>' : '') +
       '<h1>' + (nr[akt.id] ? '<span class="tnr tnum">' + esc(nr[akt.id]) + '</span> ' : '') + esc(akt.titel) + '</h1></div><div class="titel-r">' +
       (vater ? '' : '<button type="button" class="btn klein" data-a="unter-neu">' + ic('plus') + '<span>Unterpunkt</span></button>') +
+      '<button type="button" class="rundb" data-a="anhang-wahl" aria-label="Bild oder PDF anhängen" title="Bild oder PDF anhängen">' + ic('klammer') + '</button>' +
       '<button type="button" class="rundb" data-a="sheet" data-s="thema" aria-label="' + (vater ? 'Unterpunkt' : 'Thema') + ' bearbeiten, verschieben oder löschen">' + ic('pen') + '</button></div></div>';
     return '<div class="themen"><nav class="tliste2" aria-label="Themen"><div class="tz">' + oben.map((t, i) => link(t, i * 2, false)).join('') +
       '<button type="button" class="tlink neu" style="order:100000" data-a="thema-neu">' + ic('plus') + '<span>Thema</span></button>' +
@@ -2036,15 +2118,18 @@ function ergebnisHTML() {
       (BU.auftraege.length ? '<ul>' + BU.auftraege.map((a) => '<li>' + esc(a.name || 'Ohne Namen') + (a.betrag === null ? '' : ': ' + fmt(a.betrag)) + '</li>').join('') + '</ul>' : '') + (BU.notiz ? '<p>' + esc(BU.notiz) + '</p>' : '') + '</section>';
     etwas = true;
   }
-  const erstesP = T.find((t) => t.art === 'personal');
-  T.filter((t) => t.art === 'personal' && (t.bedarf.length || (t === erstesP && S.mitarbeiter.length))).forEach((t) => {
-    const w = sitzungWert(), B = t === erstesP ? S.mitarbeiter.filter((m) => imBestand(m, w)) : [], W = t === erstesP ? wechselListe() : [], kader = B.filter(istKader).length;
-    h += '<section class="e-teil"><h2>' + esc(t.titel) + '</h2>' +
-      (B.length ? '<p class="e-klein">Bestand: ' + B.length + (kader ? ', davon ' + kader + ' Kader' : '') + ' (' + posGruppen(B).map((g) => esc(g.name) + ' ' + g.liste.length).join(', ') + ')</p>' : '') +
+  T.filter((t) => t.art === 'personal').forEach((t) => {
+    const w = sitzungWert(), J = sitzungsJahr(), alle = S.mitarbeiter.filter((m) => imBestand(m, w)), kader = alle.filter(istKader);
+    const B = zeigt(t, 'bestand') ? alle : [], K = zeigt(t, 'kader') ? kader : [], W = zeigt(t, 'wechsel') ? wechselListe() : [], D = zeigt(t, 'bedarf') ? t.bedarf : [];
+    if (!B.length && !K.length && !W.length && !D.length) return;
+    const team = (m) => { const n = S.mitarbeiter.filter((x) => x.polier === m.id && aufTafel(x, J)).length; return n ? ' (' + n + ')' : ''; };
+    h += '<section class="e-teil"><h2>' + esc(nm(t)) + '</h2>' +
+      (B.length ? '<p class="e-klein">Bestand: ' + B.length + (kader.length ? ', davon ' + kader.length + ' Kader' : '') + ' (' + posGruppen(B).map((g) => esc(g.name) + ' ' + g.liste.length).join(', ') + ')</p>' : '') +
+      (K.length ? '<div class="e-tab-rahmen"><table class="e-besch"><tbody>' + posGruppen(K).map((g) => '<tr><td class="th nw">' + esc(g.name) + ' (' + g.liste.length + ')</td><td>' + g.liste.map((m) => esc(m.name) + (istPolier(m) ? team(m) : '') + (m.austritt ? ' <span class="e-grau">bis ' + esc(m.austritt) + '</span>' : '')).join(', ') + '</td></tr>').join('') + '</tbody></table></div>' : '') +
       (W.length ? '<h3>Ein- und Austritte</h3><div class="e-tab-rahmen"><table class="e-besch"><thead><tr><th>Wer</th><th>Position</th><th></th><th>Wann</th></tr></thead><tbody>' +
         W.map((x) => '<tr><td>' + esc(x.m.name) + '</td><td>' + esc(x.m.position) + '</td><td class="nw">' + (x.art === 'ein' ? 'Eintritt' : 'Austritt') + '</td><td class="nw">' + esc(x.text) + (x.wert > w ? ' (geplant)' : '') + '</td></tr>').join('') + '</tbody></table></div>' : '') +
-      (t.bedarf.length ? '<h3>Bedarf und Nachfolge</h3><p class="e-klein">' + t.bedarf.filter((b) => b.stand !== 'besetzt').length + ' von ' + t.bedarf.length + ' offen</p><div class="e-tab-rahmen"><table class="e-besch"><thead><tr><th>Wen oder was</th><th>Warum</th><th>Bis wann</th><th>Stand</th></tr></thead><tbody>' +
-        t.bedarf.map((b) => '<tr><td>' + esc(b.was) + marke(b) + '</td><td>' + esc([b.warum, b.notiz].filter(Boolean).join(' · ')) + '</td><td class="nw">' + esc(b.bis) + '</td><td class="nw">' + BSTAND[b.stand] + '</td></tr>').join('') + '</tbody></table></div>' : '') + '</section>';
+      (D.length ? '<h3>Bedarf und Nachfolge</h3><p class="e-klein">' + D.filter((b) => b.stand !== 'besetzt').length + ' von ' + D.length + ' offen</p><div class="e-tab-rahmen"><table class="e-besch"><thead><tr><th>Wen oder was</th><th>Warum</th><th>Bis wann</th><th>Stand</th></tr></thead><tbody>' +
+        D.map((b) => '<tr><td>' + esc(b.was) + marke(b) + '</td><td>' + esc([b.warum, b.notiz].filter(Boolean).join(' · ')) + '</td><td class="nw">' + esc(b.bis) + '</td><td class="nw">' + BSTAND[b.stand] + '</td></tr>').join('') + '</tbody></table></div>' : '') + '</section>';
     etwas = true;
   });
   T.filter((t) => t.art === 'rueckblick' && (t.ziele.length || t.baustellen.length)).forEach((t) => {
@@ -2056,10 +2141,10 @@ function ergebnisHTML() {
     etwas = true;
   });
   T.filter((t) => t.art === 'gruppen' && t.leute.length).forEach((t) => {
-    const namen = (liste) => liste.map((p) => esc(p.name)).join(', ');
     const frei = t.leute.filter((p) => !t.gruppen.some((g) => g.id === p.gruppe));
-    h += '<section class="e-teil"><h2>' + esc(t.titel) + '</h2>' + (t.fest ? '<p class="e-klein">Festgehalten am ' + esc(datumLang(t.fest)) + '</p>' : '') + '<div class="e-tab-rahmen"><table class="e-besch"><tbody>' + t.gruppen.map((g) => { const l = t.leute.filter((p) => p.gruppe === g.id); return '<tr><td class="th nw">' + esc(g.name) + ' (' + l.length + ')</td><td>' + namen(l) + '</td></tr>'; }).join('') +
-      (frei.length ? '<tr><td class="th nw">Noch nicht zugeteilt (' + frei.length + ')</td><td>' + namen(frei) + '</td></tr>' : '') + '</tbody></table></div></section>';
+    const kasten = (name, liste) => '<section class="e-gr"><h3>' + esc(name) + ' <span>(' + liste.length + ')</span></h3><ol>' + liste.map((p) => '<li>' + esc(p.name) + '</li>').join('') + '</ol></section>';
+    h += '<section class="e-teil"><h2>' + esc(nm(t)) + '</h2>' + (t.fest ? '<p class="e-klein">Festgehalten am ' + esc(datumLang(t.fest)) + '</p>' : '') + '<div class="e-gruppen">' +
+      t.gruppen.map((g) => kasten(g.name, t.leute.filter((p) => p.gruppe === g.id))).join('') + (frei.length ? kasten('Noch nicht zugeteilt', frei) : '') + '</div></section>';
     etwas = true;
   });
   const mitN = T.filter((t) => t.notizen.length);
@@ -2223,6 +2308,7 @@ const SHEET = {
     return formHuelle(t.eltern ? 'Unterpunkt' : 'Thema', 'thema-edit', '<label class="f" for="t-t"><span>Titel</span><input id="t-t" name="titel" value="' + esc(t.titel) + '" autocomplete="off" data-fokus></label>' +
       '<label class="f" for="t-f"><span>Worum geht es? (steht unter dem Titel)</span><textarea id="t-f" name="frage" rows="2">' + esc(t.frage) + '</textarea></label>' + wahl +
       '<div class="f"><span>Art</span><div class="seg" role="group">' + ARTEN.map((a) => '<button type="button" data-a="art" data-v="' + a[0] + '" aria-pressed="' + (t.art === a[0]) + '">' + a[1] + '</button>').join('') + '</div></div>' +
+      (t.art === 'personal' ? '<div class="f"><span>Zeigen</span><div class="seg" role="group">' + ZEIGEN.map((z) => '<button type="button" data-a="zeigen" data-v="' + z[0] + '" aria-pressed="' + zeigt(t, z[0]) + '">' + z[1] + '</button>').join('') + '</div></div>' : '') +
       '<p class="muted klein">' + ({ thema: 'Notizen und Beschluss.', rueckblick: 'Baustellen des Jahres und Ziele vom letzten Jahr mit «erreicht», «teilweise» oder «offen».', gruppen: 'Tafel: Mitarbeiter den Polieren zuteilen, festhalten und drucken. Liest aus der Mitarbeiterliste.', ziele: 'Ziele mit «wer» und «bis wann». Was im Rückblick nicht erreicht ist, kommt hier wieder auf den Tisch.', personal: 'Bestand und Ein- und Austritte aus der Mitarbeiterliste, dazu Bedarf und Nachfolge mit Stand. Was offen bleibt, steht nächstes Jahr wieder da.' })[t.art] + '</p>' +
       '<div class="reihe"><button type="button" class="btn" data-a="thema-hoch"' + (i === 0 ? ' disabled' : '') + '>' + ic('up') + '<span>Nach oben</span></button><button type="button" class="btn" data-a="thema-runter"' + (i === ges.length - 1 ? ' disabled' : '') + '>' + ic('down') + '<span>Nach unten</span></button></div>' +
       loeschKnopf('thema-weg', t.eltern ? 'Unterpunkt löschen' : 'Thema löschen'));
@@ -2364,6 +2450,18 @@ const SHEET = {
       '<div class="zwei"><label class="f" for="ma-e"><span>Eintritt</span><input id="ma-e" name="eintritt" value="' + esc(x.eintritt) + '" autocomplete="off" placeholder="z. B. 1.3.2026"></label><label class="f" for="ma-a"><span>Austritt</span><input id="ma-a" name="austritt" value="' + esc(x.austritt) + '" autocomplete="off" placeholder="z. B. Sommer 2027"></label></div>' +
       (m ? '<p class="muted klein">Wer geht, bekommt einen Austritt und bleibt in der Liste; so steht er bei den Ein- und Austritten.</p>' + loeschKnopf('ma-weg', 'Aus der Liste entfernen') : ''), m ? 'Fertig' : 'Hinzufügen');
   },
+  anhang() {
+    const t = aktThema(), a = t && t.anhaenge.find((x) => x.id === sheet.id);
+    if (!a) return '';
+    const url = ANH[a.id], bild = istBildTyp(a.typ);
+    if (url && !bild && !sheet.url) sheet.url = blobAus(url);
+    return '<div class="sheet-huelle voll"><div class="scrim" data-a="zu"></div><div class="sheet anh-sheet" role="dialog" aria-modal="true" aria-label="' + esc(a.name) + '"><header>' +
+      '<button type="button" class="tbtn rot" data-a="anhang-weg">Entfernen</button><h2>' + esc(a.name) + '</h2><span class="reihe rechts">' +
+      (url && !IM_RAHMEN ? '<button type="button" class="tbtn" data-a="anhang-voll">Vollbild</button>' + (bild ? '' : '<button type="button" class="tbtn" data-a="anhang-oeffnen">Öffnen</button>') : '') +
+      '<button type="button" class="tbtn stark" data-a="zu">Fertig</button></span></header><div class="anh-voll">' +
+      (!url ? '<p class="muted">Der Inhalt fehlt auf diesem Gerät. Lade deine gesicherte Datei, dann ist er wieder da.</p>'
+        : (bild ? '<img src="' + url + '" alt="' + esc(a.name) + '">' : '<iframe src="' + esc(sheet.url) + '" title="' + esc(a.name) + '"></iframe>')) + '</div></div></div>';
+  },
   parkplatz() {
     const liste = S.parkplatz.map((x) => '<li><span>' + esc(x.text) + '</span><button type="button" class="xk" data-a="park-weg" data-id="' + x.id + '" aria-label="Entfernen">' + ic('x') + '</button></li>').join('');
     return huelle('Parkplatz', '<p class="muted">Was aufkommt, aber nicht zum Thema gehört. Es steht am Schluss im Ergebnis.</p>' +
@@ -2386,7 +2484,7 @@ const SHEET = {
   }
 };
 function auf(s) { sheet = s; renderSheet(true); }
-function zu() { sheet = null; rmText = ''; renderSheet(false); }
+function zu() { if (sheet && sheet.url) { try { URL.revokeObjectURL(sheet.url); } catch (e) { /* weiter */ } } sheet = null; rmText = ''; renderSheet(false); }
 function renderSheet(neu) {
   const host = $('#sheets');
   if (!neu && sheet && sheet.art === 'rueckmeldung') rmHalten();
@@ -2434,7 +2532,7 @@ function render() {
     const a = on.getBoundingClientRect(), b = z.getBoundingClientRect();
     if (a.left < b.left || a.right > b.right) z.scrollLeft += a.left - b.left - (b.width - a.width) / 2;
   });
-  tipWeg(); diagrammePassen(); kartenGleich();
+  tipWeg(); diagrammePassen(); kartenGleich(); anhNachladen();
 }
 let toastT = 0;
 function toast(text, mitRueck) {
@@ -2480,7 +2578,7 @@ function dateiInhalt() {
   const a = VORLAGE.indexOf(AUF);
   if (a < 0) return null;
   const b = VORLAGE.indexOf(ZU, a);
-  const json = JSON.stringify({ app: 'strategietag-bi', v: FORMAT, version: VERSION, gesichertAm: new Date().toISOString(), daten: S }).replace(/</g, '\\u003c').replace(ZEILENTRENNER, (c) => '\\u' + c.charCodeAt(0).toString(16));
+  const json = JSON.stringify({ app: 'strategietag-bi', v: FORMAT, version: VERSION, gesichertAm: new Date().toISOString(), daten: S }, mitAnhaengen).replace(/</g, '\\u003c').replace(ZEILENTRENNER, (c) => '\\u' + c.charCodeAt(0).toString(16));
   return VORLAGE.slice(0, a + AUF.length) + json + VORLAGE.slice(b);
 }
 /* weg: '' = der übliche Weg dieses Geräts, 'datei' = in eine gewählte Datei schreiben, 'herunter' = herunterladen */
@@ -2555,7 +2653,8 @@ function maLesen(text) {
 function maAnwenden(Z, probe) {
   const gleich = (x) => String(x || '').trim().toLowerCase().replace(/\s+/g, ' ');
   const L = probe ? S.mitarbeiter.map((m) => Object.assign({}, m)) : S.mitarbeiter, n = { neu: 0, alt: 0 };
-  const finde = (name) => L.find((m) => gleich(m.name) === gleich(name)) || null;
+  const finde = (name) => L.find((m) => nameSchluessel(m.name) === nameSchluessel(name)) || null;
+  const findePolier = (name) => { const x = finde(name); if (x) return x; const w = nameWoerter(name), P = L.filter((m) => istPolier(m) && w.every((y) => nameWoerter(m.name).indexOf(y) >= 0)); return P.length === 1 ? P[0] : null; };
   const hole = (name, position) => { let m = finde(name); if (!m) { m = { id: uid(), name: name, position: position || '', polier: '', eintritt: '', austritt: '' }; L.push(m); n.neu++; } return m; };
   Z.forEach((z) => {
     if (finde(z.name)) n.alt++;
@@ -2566,7 +2665,7 @@ function maAnwenden(Z, probe) {
   });
   Z.forEach((z) => {   // der Polier erst jetzt: Er kann weiter unten in der Liste stehen
     if (!z.polier) return;
-    const m = finde(z.name), p = finde(z.polier) || hole(z.polier, 'Polier');
+    const m = finde(z.name), p = findePolier(z.polier) || hole(z.polier, 'Polier');
     if (!p.position) p.position = 'Polier';
     if (m && p !== m && !istPolier(m)) m.polier = p.id;
   });
@@ -2587,6 +2686,65 @@ function leuteDazu(text) {
   geaendert(); fokus('neu-leute');
   if (Z.length > 1) toast(mehrzahl(n.neu, 'Mitarbeiter', 'Mitarbeiter') + ' hinzugefügt' + (n.alt ? ', ' + n.alt + ' gab es schon' : ''), true);
   else if (!n.neu) toast('«' + Z[0].name + '» steht schon in der Liste.');
+}
+/* Anhänge: Bilder und PDF ans gewählte Thema. Grosse Fotos werden auf höchstens 2400 Pixel verkleinert, damit die Datei handlich bleibt. */
+const istAnhang = (f) => !!f && (/^image\//.test(f.type) || f.type === 'application/pdf' || /\.(pdf|png|jpe?g|gif|webp)$/i.test(f.name || ''));
+function dateiLesen(f) { return new Promise((ok, nein) => { const r = new FileReader(); r.onload = () => ok(String(r.result || '')); r.onerror = () => nein(r.error); r.readAsDataURL(f); }); }
+function bildKleiner(url) {
+  return new Promise((ok) => {
+    const img = new Image();
+    img.onload = () => {
+      const g = Math.max(img.naturalWidth, img.naturalHeight), f = g > 2400 ? 2400 / g : 1;
+      if (f === 1 && url.length < 1600000) { ok(url); return; }
+      try {
+        const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(img.naturalWidth * f)); c.height = Math.max(1, Math.round(img.naturalHeight * f));
+        const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
+        const neu = c.toDataURL('image/jpeg', 0.85);
+        ok(neu.length < url.length ? neu : url);
+      } catch (e) { ok(url); }
+    };
+    img.onerror = () => ok(url);
+    img.src = url;
+  });
+}
+function blobAus(url) {
+  try {
+    const i = url.indexOf(','), typ = url.slice(5, url.indexOf(';')), bin = atob(url.slice(i + 1)), b = new Uint8Array(bin.length);
+    for (let k = 0; k < bin.length; k++) b[k] = bin.charCodeAt(k);
+    return URL.createObjectURL(new Blob([b], { type: typ || 'application/pdf' }));
+  } catch (e) { return url; }
+}
+async function anhDazu(liste) {
+  const t = aktThema();
+  if (!t) return;
+  const alle = Array.from(liste || []), dateien = alle.filter(istAnhang), neu = [];
+  if (!dateien.length) { toast('Anhängen lassen sich Bilder und PDF.'); return; }
+  let gross = 0;
+  for (let i = 0; i < dateien.length; i++) {
+    const f = dateien[i];
+    if (f.size > ANH_MAX) { gross++; continue; }
+    try {
+      const pdf = f.type === 'application/pdf' || /\.pdf$/i.test(f.name || '');
+      let url = await dateiLesen(f);
+      if (!/^data:/.test(url)) continue;
+      if (!pdf && !/^data:image\/(svg|gif)/.test(url)) url = await bildKleiner(url);
+      const typ = pdf ? 'application/pdf' : (url.slice(5, url.indexOf(';')) || f.type || 'image/png');
+      const name = String(f.name || '').replace(/\.[^.]+$/, '').trim();
+      const id = uid();
+      anhMerken(id, url);
+      neu.push({ id: id, name: !name || /^image$/i.test(name) ? (pdf ? 'PDF' : 'Bild') : name, typ: typ, groesse: Math.round((url.length - url.indexOf(',') - 1) * 0.75) });
+    } catch (e) { /* Datei nicht lesbar */ }
+  }
+  if (neu.length) { merken(); t.anhaenge = t.anhaenge.concat(neu); geaendert(); }
+  toast((neu.length ? mehrzahl(neu.length, 'Anhang', 'Anhänge') + ' bei «' + t.titel + '»' : 'Nichts angehängt') + (gross ? '. ' + mehrzahl(gross, 'Datei ist', 'Dateien sind') + ' grösser als 15 MB.' : '') + (alle.length > dateien.length ? ' Nur Bilder und PDF lassen sich anhängen.' : ''), neu.length > 0);
+}
+/* Fehlt ein Inhalt (Stand aus dem Zwischenspeicher), wird er einmal in der Ablage des Browsers gesucht */
+const anhVersucht = {};
+function anhNachladen() {
+  const fehlt = [];
+  S.themen.forEach((t) => { t.anhaenge.forEach((a) => { if (!ANH[a.id] && !anhVersucht[a.id]) { anhVersucht[a.id] = 1; fehlt.push(a.id); } }); });
+  if (!fehlt.length) return;
+  Promise.all(fehlt.map((id) => anhHolen(id).then((x) => { if (x && !ANH[id]) { ANH[id] = x; return true; } return false; }))).then((r) => { if (r.some(Boolean)) { render(); if (sheet && sheet.art === 'anhang') renderSheet(false); } });
 }
 function zieleDazu(text) {
   const t = aktThema(), liste = mehrzeilig(text);
@@ -2644,7 +2802,7 @@ function listeLesen(text) {
 }
 /* Die Liste gibt Reihenfolge und Ebenen vor. Ein Thema mit gleichem Titel bleibt mit seinem Inhalt; was nicht in der Liste steht, bleibt am Schluss. probe: nur zählen. */
 function listeAnwenden(liste, probe) {
-  const gleich = (x) => String(x).trim().toLowerCase().replace(/\s+/g, ' ');
+  const gleich = (x) => String(x).trim().toLowerCase().replace(/\s*\/\s*/g, '/').replace(/\s+/g, ' ');
   const frei = S.themen.slice(), neu = [], zahl = { themen: 0, unter: 0, alt: 0 };
   const gibt = (art) => S.themen.concat(neu).some((x) => x.art === art);
   const artAus = (titelText) => {   // «Rückblick», «Ziele …» und «Gruppen…» bekommen ihre Art, wenn es noch kein solches Thema gibt
@@ -2750,6 +2908,15 @@ const AKT = {
   gruppe(el) { auf({ art: 'ma', id: el.dataset.id }); },
   ma(el) { auf({ art: 'ma', id: el.dataset.id, zurueck: el.closest('.sheet') ? 'maliste' : '' }); },
   'ma-neu'(el) { auf({ art: 'ma', id: '', zurueck: el.closest('.sheet') ? 'maliste' : '' }); },
+  zeigen(el) { const t = themaAusForm(); if (!t) return; const z = {}; ZEIGEN.forEach((x) => { z[x[0]] = zeigt(t, x[0]); }); z[el.dataset.v] = !z[el.dataset.v]; t.zeigen = z; speichern(); render(); renderSheet(false); },
+  anhang(el) { auf({ art: 'anhang', id: el.dataset.id }); },
+  'anhang-wahl'() { $('#anhang-wahl').click(); },
+  'anhang-weg'() { const t = aktThema(); if (!t || !sheet) return; merken(); t.anhaenge = t.anhaenge.filter((x) => x.id !== sheet.id); geaendert(true); toast('Anhang entfernt', true); },
+  'anhang-voll'() {
+    const el = $('.anh-sheet');
+    try { if (document.fullscreenElement) document.exitFullscreen(); else if (el && el.requestFullscreen) el.requestFullscreen().catch(() => { toast('Vollbild ist hier nicht möglich.'); }); else toast('Vollbild ist hier nicht möglich.'); } catch (e) { toast('Vollbild ist hier nicht möglich.'); }
+  },
+  'anhang-oeffnen'() { if (!sheet || !sheet.url) return; let w = null; try { w = window.open(sheet.url, '_blank'); } catch (e) { w = null; } if (!w) toast('Das Öffnen hat der Browser verhindert.'); },
   'ma-polier'(el) { const f = el.closest('form'); if (!f) return; f.elements.polier.value = el.dataset.v; $$('[data-a="ma-polier"]', f).forEach((b) => { b.classList.toggle('stark', b === el); }); if (sheet && sheet.tafel && f.requestSubmit) f.requestSubmit(); },
   'ma-weg'() {
     if (!sheet || !sheet.id) return;
@@ -2901,7 +3068,7 @@ const FORMS = {
     if (!name) return;
     const gleich = (x) => x.trim().toLowerCase().replace(/\s+/g, ' ');
     let m = sheet && sheet.id ? maVon(sheet.id) : null;
-    if (S.mitarbeiter.some((x) => x !== m && gleich(x.name) === gleich(name))) { f.elements.name.classList.add('fehlt'); f.elements.name.focus(); toast('«' + name + '» steht schon in der Liste.'); return; }
+    if (S.mitarbeiter.some((x) => x !== m && nameSchluessel(x.name) === nameSchluessel(name))) { f.elements.name.classList.add('fehlt'); f.elements.name.focus(); toast('«' + name + '» steht schon in der Liste.'); return; }
     merken();
     if (!m) { m = { id: uid(), name: '', position: '', polier: '', eintritt: '', austritt: '' }; S.mitarbeiter.push(m); }
     m.name = name.replace(/\s+/g, ' ');
@@ -3005,6 +3172,8 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('paste', (e) => {
   const t = e.target, feld = t && t.matches && t.matches('input,textarea');
   const text = e.clipboardData ? e.clipboardData.getData('text') : '';
+  const bilder = !feld && S.ui.bereich === 'themen' && e.clipboardData && e.clipboardData.files ? Array.from(e.clipboardData.files).filter(istAnhang) : [];
+  if (bilder.length) { e.preventDefault(); anhDazu(bilder); return; }   // ein Bildschirmfoto im Thema einfügen
   if (feld && (t.id === 'neu-leute' || t.id === 'neu-ziel' || t.id === 'neu-bst')) {   // eine Liste aus Excel: jede Zeile ein Eintrag
     if (!/[\r\n\t]/.test(text.trim())) return;
     e.preventDefault();
@@ -3025,10 +3194,12 @@ window.addEventListener('dragover', (e) => { if (!mitDatei(e)) return; e.prevent
 window.addEventListener('drop', (e) => {
   if (!mitDatei(e)) return;
   e.preventDefault(); document.body.classList.remove('drueber');
-  importDateien(e.dataTransfer.files);
+  const fl = Array.from(e.dataTransfer.files || []);
+  if (S.ui.bereich === 'themen' && fl.length && fl.every(istAnhang)) anhDazu(fl); else importDateien(fl);
 });
 $('#datei-wahl').addEventListener('change', (e) => { importDateien(Array.from(e.target.files || [])); e.target.value = ''; });
 $('#daten-wahl').addEventListener('change', (e) => { const file = e.target.files && e.target.files[0]; if (file) ladeDatei(file); e.target.value = ''; });
+$('#anhang-wahl').addEventListener('change', (e) => { const fl = Array.from(e.target.files || []); e.target.value = ''; anhDazu(fl); });
 window.addEventListener('beforeunload', (e) => { if (IM_RAHMEN || !datei.schmutzig || S.beispiel) return; e.preventDefault(); e.returnValue = ''; });
 
 /* Hinweise an den Diagrammen: beim Zeigen und mit der Tastatur */
