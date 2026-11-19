@@ -313,6 +313,28 @@ body.drueber .ablage,body.drueber .tab-rahmen,body.drueber .dg{border-color:var(
 .b-was{font-size:1.1875rem;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
 .b-meta{color:var(--muted);font-size:.9375rem}
 .dreier{display:grid;grid-template-columns:minmax(0,1fr) 10rem 10rem auto;gap:.45rem}
+.dreier.mit-th{grid-template-columns:12rem minmax(0,1fr) 9rem 9rem auto}
+.th-wahl{height:3rem;min-width:0;padding:0 .8rem;border-radius:1rem;border:1px solid var(--sep);background:var(--card);font-size:1rem;font-weight:500}
+.schnell .th-wahl{flex:0 0 12rem}
+.fd{margin-bottom:.4rem}
+.fd-kopf{display:flex;align-items:baseline;gap:.6rem;width:100%;background:none;border:0;padding:0;text-align:left;color:inherit;cursor:pointer}
+.fd-kopf svg{width:.9rem;height:.9rem;color:var(--muted);margin-left:auto;align-self:center}
+.fd-info{color:var(--muted);font-size:.8125rem;font-weight:600}
+.fd-liste{list-style:none;margin:0 0 .5rem;padding:0;display:flex;flex-direction:column;gap:.4rem}
+.fd-p{width:100%;display:flex;align-items:center;gap:.75rem;min-height:3rem;padding:.6rem 1rem;border-radius:1rem;border:0;background:var(--card);box-shadow:var(--shadow);font-size:1.0625rem;text-align:left;color:var(--ink);cursor:pointer}
+.fd-box{flex:none;display:grid;place-items:center;width:1.4rem;height:1.4rem;border-radius:.45rem;box-shadow:inset 0 0 0 1.5px var(--sep);color:transparent}
+.fd-box svg{width:.95rem;height:.95rem}
+.fd.fd-wahl .fd-box{border-radius:50%}
+.fd-p.an .fd-box{background:var(--accent);box-shadow:none;color:#fff}
+.fd-p.an .fd-t{color:var(--muted)}
+.fd.fd-wahl .fd-p.an{box-shadow:inset 0 0 0 2px var(--accent)}
+.fd.fd-wahl .fd-p.an .fd-t{color:var(--ink);font-weight:600}
+.fd-neu{gap:.45rem;margin:.2rem 0 1.4rem}
+.zu .fd-neu{display:none}
+.e-fd{list-style:none;padding-left:0}
+.pr-sub{margin:.85rem 0 .35rem;font-size:.8125rem;font-weight:600;color:var(--muted)}
+.pr-gr .pr-sub:first-of-type{margin-top:.2rem}
+.z-th{display:inline-block;margin-right:.45rem;padding:.05rem .5rem;border-radius:.45rem;background:var(--fill);color:var(--muted);font-size:.8125rem;font-weight:600;vertical-align:.08em}
 .rz{flex-wrap:wrap;gap:.3rem .8rem;padding:.4rem .6rem .4rem 1.1rem}
 .rz .n-text{min-width:12rem}
 .rz .seg button{height:2.1rem;padding:0 .8rem;font-size:.875rem}
@@ -612,6 +634,10 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
   .frage{font-size:1.0625rem}
   .dreier{grid-template-columns:1fr 1fr auto}
   .dreier input:first-child{grid-column:1 / -1}
+  .dreier.mit-th{grid-template-columns:1fr 1fr auto}
+  .dreier.mit-th select,.dreier.mit-th input[name=was]{grid-column:1 / -1}
+  .schnell.mit-th{flex-wrap:wrap}
+  .schnell.mit-th .th-wahl{flex:1 1 100%}
   .ab-zahlen{grid-template-columns:1fr 1fr}
   .ab-zahlen b{font-size:1.375rem}
   .zweier{grid-template-columns:minmax(0,1fr) 6.5rem auto}
@@ -697,7 +723,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '0.8.6';         // Version des Tools, steht in den Einstellungen
+const VERSION = '0.8.7';         // Version des Tools, steht in den Einstellungen
 const FORMAT = 7;              // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
@@ -772,6 +798,8 @@ const POSITIONEN = ['Abteilungsleiter', 'Bauführer', 'Hilfsbauführer', 'Polier
 const istPolier = (m) => /polier/i.test(m.position || '');
 const imBuero = (m) => !istPolier(m) && /leiter|führer|fuehrer/i.test(m.position || '');
 const istKader = (m) => istPolier(m) || imBuero(m) || /vorarbeiter/i.test(m.position || '');
+/* Kader getrennt nach Baustelle (Polier, Vorarbeiter) und Buero (Bauleitung, Abteilungsleitung); Chefs Notiz bei 147.7. Seit 0.8.7. */
+const kaderTeile = (B) => [['Baustelle', B.filter((m) => !imBuero(m))], ['Büro', B.filter((m) => imBuero(m))]].filter((g) => g[1].length);
 const STAND = { erreicht: 'Erreicht', teilweise: 'Teilweise', offen: 'Offen', '': 'Nicht bewertet' };
 /* Kunden: die Textfelder eines Auftrags, und wonach die Ranglisten zählen (Feld, Titel, Unterzeile) */
 const AF = ['jahr', 'objekt', 'planer', 'bauherr', 'bauherrArt', 'objektArt', 'speziell', 'mitbewerber', 'notiz', 'beginn', 'ende'];
@@ -954,7 +982,7 @@ function normal(d) {
     if (typeof t.titel !== 'string') t.titel = 'Thema';
     if (typeof t.frage !== 'string') t.frage = '';
     if (typeof t.eltern !== 'string') t.eltern = '';
-    ['stichworte', 'notizen', 'beschluesse', 'ziele', 'gruppen', 'leute', 'baustellen', 'bedarf'].forEach((k) => { if (!Array.isArray(t[k])) t[k] = []; });
+    ['stichworte', 'notizen', 'beschluesse', 'ziele', 'gruppen', 'leute', 'baustellen', 'bedarf', 'felder'].forEach((k) => { if (!Array.isArray(t[k])) t[k] = []; });
     t.stichworte = t.stichworte.filter((x) => x && typeof x === 'object' && typeof x.text === 'string' && x.text.trim());   // seit 0.8.5: was du sagen willst [{id, text}]
     t.stichworte.forEach((x) => { if (!x.id) x.id = uid(); });
     if (typeof t.fest !== 'string') t.fest = '';
@@ -1557,7 +1585,7 @@ function kundenLesen(g) {
 /* Eigene Angaben mischen sich nicht mit dem Beispiel: Beispielzahlen und Beispieleinträge gehen weg, die Themen bleiben */
 function beispielWeg() {
   S.beispiel = false; S.zahlen.perioden = []; S.zahlen.zeilen = []; S.ui.auf = {};
-  S.themen.forEach((x) => { x.stichworte = []; x.notizen = []; x.beschluesse = []; x.ziele = []; x.leute = []; x.baustellen = []; x.bedarf = []; x.fest = ''; x.zu = ''; x.anhaenge = []; });
+  S.themen.forEach((x) => { x.felder = []; x.stichworte = []; x.notizen = []; x.beschluesse = []; x.ziele = []; x.leute = []; x.baustellen = []; x.bedarf = []; x.fest = ''; x.zu = ''; x.anhaenge = []; });
   S.parkplatz = []; S.glPunkte = []; S.kunden.offerten = []; S.kunden.auftraege = []; S.budget = { ziel: null, auftraege: [], notiz: '' }; S.mitarbeiter = [];
 }
 /* Gelesene Tabellen übernehmen. Ein Jahr oder ein Auftrag (gleiches Jahr, gleiches Objekt), den es schon gibt, wird ergänzt statt verdoppelt. */
@@ -1985,7 +2013,7 @@ function verteilung(a) {
 }
 /* Erhaltene und offene Offerten je Monat zwischen von und bis (JJJJMM). «ohne»: Offerten mit Betrag, aber ohne Baubeginn – erhaltene
    erst ab dem Jahr des Strategietags (ältere sind meist gebaut), offene alle. */
-function volumen(von, bis) {
+function volumen(von, bis, mitHand) {
   const mon = {}, ohne = { ja: 0, offen: 0 }, J = sitzungsJahr();
   S.kunden.auftraege.forEach((a) => {
     if (a.erhalten !== 'ja' && a.erhalten !== 'offen') return;
@@ -1993,7 +2021,23 @@ function volumen(von, bis) {
     if (!v) { if (typeof a.betrag === 'number' && a.betrag > 0 && (a.erhalten === 'offen' || jahrZahl(a.jahr) >= J)) ohne[a.erhalten]++; return; }
     v.forEach((x) => { if (x[0] < von || x[0] > bis) return; const k = mon[x[0]] || (mon[x[0]] = { ja: 0, offen: 0 }); k[a.erhalten] += x[1]; });
   });
-  return { mon: mon, ohne: ohne };
+  /* Auftraege von Hand (Liste aus 0.8 bis 0.8.3) haben keinen Zeitraum: In der Auslastung zaehlen sie als erhalten, gleichmaessig
+     auf die zwoelf Monate des Folgejahrs verteilt, wie sie beim Budget ganz im Folgejahr zaehlen (Chefs Notiz bei 147.55). Seit 0.8.7. */
+  const hand = { n: 0, summe: 0 };
+  if (mitHand) {
+    const fj = folgejahr();
+    S.budget.auftraege.forEach((x) => {
+      if (typeof x.betrag !== 'number' || !(x.betrag > 0)) return;
+      hand.n++; hand.summe += x.betrag;
+      for (let m = 1; m <= 12; m++) {
+        const k = fj * 100 + m;
+        if (k < von || k > bis) continue;
+        const e = mon[k] || (mon[k] = { ja: 0, offen: 0 });
+        e.ja += x.betrag / 12; e.hand = (e.hand || 0) + x.betrag / 12;
+      }
+    });
+  }
+  return { mon: mon, ohne: ohne, hand: hand };
 }
 function budgetZahlen() {
   const j = folgejahr(), V = volumen(j * 100 + 1, j * 100 + 12), hand = budgetSumme();   // «hand»: Liste von Hand aus 0.8 bis 0.8.3
@@ -2125,6 +2169,18 @@ const karteInhalt = (p) => {
 const namenWahl = (id, f) => { const N = S.mitarbeiter.filter((m) => f(m) && imFolgejahr(m, sitzungsJahr())).map((m) => m.name); return N.length ? '<datalist id="' + id + '">' + N.map((n) => '<option value="' + esc(n) + '">').join('') + '</datalist>' : ''; };
 /* Ziele aus dem Rückblick, die nicht erreicht sind: Sie kommen bei den Zielen fürs nächste Jahr wieder auf den Tisch.
    «weiter» hält den Entscheid fest; ein übernommenes Ziel trägt in «aus» die Kennung des alten. */
+/* Ziele mit Thema (Chefs Rueckmeldung vom 19.11.2026, 22.14 Uhr): zur Wahl stehen die Hauptthemen ohne Rueckblick und Ziele.
+   Gespeichert wird der Titel, damit das Thema auch im naechsten Jahr lesbar bleibt. Seit 0.8.7. */
+let ZIEL_TH = '';   // zuletzt gewaehltes Thema beim Hinzufuegen, gilt fuer das naechste Ziel
+function zielThemen() { return S.themen.filter((t) => !t.eltern && t.art !== 'rueckblick' && t.art !== 'ziele').map((t) => t.titel); }
+function themaWahl(name, wert, id, cls) {
+  const L = zielThemen();
+  if (wert && L.indexOf(wert) < 0) L.push(wert);
+  return '<select' + (cls ? ' class="' + cls + '"' : '') + ' name="' + name + '"' + (id ? ' id="' + id + '"' : '') + ' aria-label="Thema"><option value="">Ohne Thema</option>' +
+    L.map((x) => '<option value="' + esc(x) + '"' + (x === wert ? ' selected' : '') + '>' + esc(x) + '</option>').join('') + '</select>';
+}
+const thChip = (x) => (x && x.thema ? '<span class="z-th">' + esc(x.thema) + '</span>' : '');
+const mitTh = (x, text) => (x && x.thema ? x.thema + ': ' : '') + text;
 function offeneZiele() {
   const aus = [];
   S.themen.forEach((t) => { if (t.art === 'rueckblick') t.ziele.forEach((z) => { if (z.stand !== 'erreicht') aus.push(z); }); });
@@ -2163,19 +2219,30 @@ const TEIL = {
     return '<h2 class="bl">Stichworte</h2><div class="stw">' + (L.length ? '<ul>' + L.map((x) => '<li data-zieh="stichworte" data-zid="' + x.id + '"><button type="button" data-a="stichwort" data-id="' + x.id + '"><span>' + esc(x.text) + '</span></button></li>').join('') + '</ul>' : '') +
       '<form class="stw-neu" data-form="stichwort"><button aria-label="Stichwort hinzufügen">' + ic('plus') + '</button><input name="text" id="neu-stw" placeholder="Stichwort hinzufügen …" aria-label="Stichwort hinzufügen" autocomplete="off" enterkeyhint="done"></form></div>';
   },
+  felder(t) {   // Checklisten und Auswahl je Thema (Chefs Rueckmeldung vom 19.11.2026, 22.15 Uhr, bei 7 Anlaesse). Seit 0.8.7.
+    const F = t.felder || [];
+    if (t.zu && !F.length) return '';
+    const feld = (f) => {
+      const wahl = f.art === 'wahl', gew = f.punkte.filter((x) => x.an), info = !f.punkte.length ? '' : (wahl ? (gew.length ? 'gewählt' : 'noch nichts gewählt') : gew.length + ' von ' + f.punkte.length + ' erledigt');
+      return '<section class="fd' + (wahl ? ' fd-wahl' : '') + '"><button type="button" class="fd-kopf" data-a="fd" data-id="' + f.id + '"><h2 class="bl">' + esc(f.titel) + '</h2><span class="fd-info">' + esc(info) + '</span>' + ic('pen') + '</button>' +
+        (f.punkte.length ? '<ul class="fd-liste">' + f.punkte.map((x) => '<li><button type="button" class="fd-p' + (x.an ? ' an' : '') + '" data-a="fd-punkt" data-f="' + f.id + '" data-id="' + x.id + '" aria-pressed="' + !!x.an + '"><span class="fd-box">' + ic('check') + '</span><span class="fd-t">' + esc(x.text) + '</span></button></li>').join('') + '</ul>' : '') +
+        '<form class="schnell" data-form="fdpunkt" data-f="' + f.id + '"><input name="text" id="neu-fd-' + f.id + '" placeholder="' + (wahl ? 'Möglichkeit hinzufügen …' : 'Punkt hinzufügen …') + '" aria-label="' + (wahl ? 'Möglichkeit hinzufügen' : 'Punkt hinzufügen') + '" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Hinzufügen">' + ic('plus') + '</button></form></section>';
+    };
+    return F.map(feld).join('') + '<div class="reihe fd-neu"><button type="button" class="btn klein" data-a="fd-neu" data-v="liste">' + ic('plus') + '<span>Checkliste</span></button><button type="button" class="btn klein" data-a="fd-neu" data-v="wahl">' + ic('plus') + '<span>Auswahl</span></button></div>';
+  },
   notizen(t) {
     return '<h2 class="bl">Notizen</h2><ul class="eintraege">' + t.notizen.map((n) => '<li class="notiz' + (n.gl ? ' gl' : '') + '" data-zieh="notizen" data-zid="' + n.id + '"><button type="button" class="n-text" data-a="notiz" data-id="' + n.id + '">' + esc(n.text) + '</button>' + glKnopf('n', n) + '</li>').join('') + '</ul>' +
       '<form class="schnell" data-form="notiz"><input name="text" id="neu-notiz" placeholder="Notiz hinzufügen …" aria-label="Notiz hinzufügen" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Notiz hinzufügen">' + ic('plus') + '</button></form>';
   },
   beschluss(t) {
     const ziele = t.art === 'ziele';
-    return '<h2 class="bl">' + (ziele ? 'Ziele' : 'Beschluss') + '</h2><ul class="eintraege">' + t.beschluesse.map((b) => '<li class="besch' + (b.gl ? ' gl' : '') + '" data-zieh="beschluesse" data-zid="' + b.id + '"><span class="b-ic">' + ic('check') + '</span><button type="button" class="b-text" data-a="beschluss" data-id="' + b.id + '"><span class="b-was">' + esc(b.was) + '</span>' + (metaMit(b) ? '<span class="b-meta">' + esc(metaMit(b)) + '</span>' : '') + '</button>' + glKnopf('b', b) + '</li>').join('') + '</ul>' +
-      '<form class="dreier" data-form="beschluss"><input name="was" id="neu-was" placeholder="' + (ziele ? 'Ziel hinzufügen …' : 'Beschluss: Was?') + '" aria-label="Was" autocomplete="off"><input name="wer" placeholder="Wer?" aria-label="Wer" autocomplete="off"><input name="bis" placeholder="Bis wann?" aria-label="Bis wann" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Hinzufügen">' + ic('plus') + '</button></form>';
+    return '<h2 class="bl">' + (ziele ? 'Ziele' : 'Beschluss') + '</h2><ul class="eintraege">' + t.beschluesse.map((b) => '<li class="besch' + (b.gl ? ' gl' : '') + '" data-zieh="beschluesse" data-zid="' + b.id + '"><span class="b-ic">' + ic('check') + '</span><button type="button" class="b-text" data-a="beschluss" data-id="' + b.id + '"><span class="b-was">' + (ziele ? thChip(b) : '') + esc(b.was) + '</span>' + (metaMit(b) ? '<span class="b-meta">' + esc(metaMit(b)) + '</span>' : '') + '</button>' + glKnopf('b', b) + '</li>').join('') + '</ul>' +
+      '<form class="dreier' + (ziele ? ' mit-th' : '') + '" data-form="beschluss">' + (ziele ? themaWahl('thema', ZIEL_TH, '', 'th-wahl') : '') + '<input name="was" id="neu-was" placeholder="' + (ziele ? 'Ziel hinzufügen …' : 'Beschluss: Was?') + '" aria-label="Was" autocomplete="off"><input name="wer" placeholder="Wer?" aria-label="Wer" autocomplete="off"><input name="bis" placeholder="Bis wann?" aria-label="Bis wann" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Hinzufügen">' + ic('plus') + '</button></form>';
   },
   rueckblick(t) {
-    return '<h2 class="bl">Ziele vom letzten Jahr</h2><ul class="eintraege">' + t.ziele.map((z) => '<li class="rz" data-zieh="ziele" data-zid="' + z.id + '"><button type="button" class="n-text" data-a="ziel" data-id="' + z.id + '">' + esc(z.text) + '</button><div class="seg" role="group" aria-label="Stand">' +
+    return '<h2 class="bl">Ziele vom letzten Jahr</h2><ul class="eintraege">' + t.ziele.map((z) => '<li class="rz" data-zieh="ziele" data-zid="' + z.id + '"><button type="button" class="n-text" data-a="ziel" data-id="' + z.id + '">' + thChip(z) + esc(z.text) + '</button><div class="seg" role="group" aria-label="Stand">' +
       ['erreicht', 'teilweise', 'offen'].map((s) => '<button type="button" class="st-' + s + '" data-a="stand" data-id="' + z.id + '" data-v="' + s + '" aria-pressed="' + (z.stand === s) + '">' + STAND[s] + '</button>').join('') + '</div></li>').join('') + '</ul>' +
-      '<form class="schnell" data-form="ziel"><input name="text" id="neu-ziel" placeholder="Ziel vom letzten Jahr hinzufügen …" aria-label="Ziel vom letzten Jahr hinzufügen" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Ziel hinzufügen">' + ic('plus') + '</button></form>';
+      '<form class="schnell mit-th" data-form="ziel">' + themaWahl('thema', ZIEL_TH, '', 'th-wahl') + '<input name="text" id="neu-ziel" placeholder="Ziel vom letzten Jahr hinzufügen …" aria-label="Ziel vom letzten Jahr hinzufügen" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Ziel hinzufügen">' + ic('plus') + '</button></form>';
   },
   unter(t, nr) {
     const k = kinderVon(t);
@@ -2222,12 +2289,14 @@ const TEIL = {
     A.M.forEach((k) => { const x = V.mon[k]; if (x) { tJa += x.ja; tOf += x.offen; max = Math.max(max, x.ja + x.offen); } });
     const saeulen = A.M.map((k) => {
       const x = V.mon[k] || { ja: 0, offen: 0 }, mo = k % 100, jj = Math.floor(k / 100);
-      return '<div class="al-m" tabindex="0" data-tip="' + esc(MONATE[mo - 1] + ' ' + jj + '\nErhalten: ' + fmt(Math.round(x.ja)) + '\nOffen: ' + fmt(Math.round(x.offen))) + '"><div class="al-s"><i style="height:' + (x.ja / max * 100).toFixed(1) + '%"></i><i class="of" style="height:' + (x.offen / max * 100).toFixed(1) + '%"></i></div>' +
+      return '<div class="al-m" tabindex="0" data-tip="' + esc(MONATE[mo - 1] + ' ' + jj + '\nErhalten: ' + fmt(Math.round(x.ja)) + (x.hand ? ' (davon von Hand ' + fmt(Math.round(x.hand)) + ')' : '') + '\nOffen: ' + fmt(Math.round(x.offen))) + '"><div class="al-s"><i style="height:' + (x.ja / max * 100).toFixed(1) + '%"></i><i class="of" style="height:' + (x.offen / max * 100).toFixed(1) + '%"></i></div>' +
         '<span>' + MON3(mo) + (mo === 1 || k === A.von ? '<br>' + jj : '') + '</span></div>';
     }).join('');
     return '<h2 class="bl">Auslastung ' + MON3(A.von % 100) + ' ' + Math.floor(A.von / 100) + ' bis Dez ' + Math.floor(A.bis / 100) + '</h2>' +
       '<div class="ausblick im-thema al"><div class="al-chart" role="img" aria-label="Erhaltene und offene Offerten je Monat">' + saeulen + '</div>' +
-      '<p class="ab-leg"><span class="ab-ja"></span>Erhalten ' + fmt(Math.round(tJa)) + '<span class="ab-of"></span>Offen ' + fmt(Math.round(tOf)) + '</p>' + (mitHinweis ? ohneHinweis(V.ohne) : '') + '</div>';
+      '<p class="ab-leg"><span class="ab-ja"></span>Erhalten ' + fmt(Math.round(tJa)) + '<span class="ab-of"></span>Offen ' + fmt(Math.round(tOf)) + '</p>' +
+      (V.hand.n ? '<p class="muted klein ab-ohne">Darin ' + mehrzahl(V.hand.n, 'Auftrag', 'Aufträge') + ' von Hand (zusammen ' + fmt(Math.round(V.hand.summe)) + '): ohne Zeitraum, darum gleichmässig auf ' + folgejahr() + ' verteilt.</p>' : '') +
+      (mitHinweis ? ohneHinweis(V.ohne) : '') + '</div>';
   },
   offene() {
     const L = offeneListe(), summe = L.reduce((s, a) => s + (a.betrag || 0), 0);
@@ -2250,11 +2319,13 @@ const TEIL = {
     if (!L.length) return knopf ? '<h2 class="bl">' + titel + '</h2><div class="ma-leer"><p>Noch keine Mitarbeiterliste. Einmal aus Excel einfügen, je Zeile Name, Vorname, Position, Polier, Eintritt, Geburtsdatum. Gruppenzuteilung, Kader, Betrieb und Ein- und Austritte lesen daraus.</p><div class="reihe"><button type="button" class="btn stark" data-a="sheet" data-s="maimport">' + ic('liste') + '<span>Liste einfügen</span></button><button type="button" class="btn" data-a="ma-neu">' + ic('plus') + '<span>Mitarbeiter</span></button></div></div>' : '';
     const w = sitzungWert(), J = sitzungsJahr(), B = maSortiert(L.filter((m) => imBestand(m, w) && inGruppe(m, art)));
     const team = (m) => { const n = L.filter((x) => x.polier === m.id && aufTafel(x, J)).length; return n ? n + ' im Team' : ''; };
-    return '<section class="pr-gr"><div class="bl-zeile"><h2 class="bl">' + titel + ' (' + B.length + ')</h2>' + (knopf ? '<button type="button" class="btn klein" data-a="sheet" data-s="maliste">' + ic('liste') + '<span>Mitarbeiterliste</span></button>' : '') + '</div>' +
-      (B.length ? '<ul class="pr-liste bestand ' + art + '">' + B.map((m) => {
+    const zeile = (m) => {
         const a = austrittMeta(m, w), was = [m.position || 'Ohne Position', istPolier(m) ? team(m) : ''].filter(Boolean).join(' · ');
         return '<li><button type="button" data-a="ma" data-id="' + m.id + '"><span class="pr-n">' + esc(m.name) + '</span><span class="pr-p">' + esc(was) + '</span>' + (a ? '<span class="pr-a' + (/^bis /.test(a) ? '' : ' pen') + '">' + esc(a) + '</span>' : '') + '</button></li>';
-      }).join('') + '</ul>'
+      };
+    const ul = (X) => '<ul class="pr-liste bestand ' + art + '">' + X.map(zeile).join('') + '</ul>';
+    return '<section class="pr-gr"><div class="bl-zeile"><h2 class="bl">' + titel + ' (' + B.length + ')</h2>' + (knopf ? '<button type="button" class="btn klein" data-a="sheet" data-s="maliste">' + ic('liste') + '<span>Mitarbeiterliste</span></button>' : '') + '</div>' +
+      (B.length ? (art === 'kader' ? kaderTeile(B).map((g) => '<h3 class="pr-sub">' + g[0] + ' (' + g[1].length + ')</h3>' + ul(g[1])).join('') : ul(B))
         : '<p class="muted klein">Am ' + esc(datumLang(S.meta.datum)) + ' ist ' + (art === 'kader' ? 'im Kader' : 'im Betrieb') + ' niemand aus der Liste angestellt.</p>') + '</section>';
   },
   wechsel(gruppe) {
@@ -2275,7 +2346,7 @@ const TEIL = {
     const Z = offeneZiele();
     if (!Z.length) return '';
     const frei = Z.filter((z) => !weiterVon(z)).length;
-    return '<h2 class="bl">Offen aus dem Rückblick' + (frei ? ' (' + frei + ' zu entscheiden)' : '') + '</h2><ul class="eintraege">' + Z.map((z) => '<li class="rz oz"><span class="n-text">' + esc(z.text) + '<small class="oz-st ' + esc(z.stand || '') + '">' + esc(STAND[z.stand || ''] || '') + '</small></span><div class="seg" role="group" aria-label="Wie weiter">' +
+    return '<h2 class="bl">Offen aus dem Rückblick' + (frei ? ' (' + frei + ' zu entscheiden)' : '') + '</h2><ul class="eintraege">' + Z.map((z) => '<li class="rz oz"><span class="n-text">' + thChip(z) + esc(z.text) + '<small class="oz-st ' + esc(z.stand || '') + '">' + esc(STAND[z.stand || ''] || '') + '</small></span><div class="seg" role="group" aria-label="Wie weiter">' +
       '<button type="button" class="st-ja" data-a="weiter" data-id="' + z.id + '" data-v="ja" aria-pressed="' + (weiterVon(z) === 'ja') + '">Weiterverfolgen</button><button type="button" class="st-nein" data-a="weiter" data-id="' + z.id + '" data-v="nein" aria-pressed="' + (weiterVon(z) === 'nein') + '">Fallen lassen</button></div></li>').join('') + '</ul>';
   }
 };
@@ -2300,17 +2371,17 @@ function kartenGleich() {
 }
 function themaInhalt(t, nr) {
   const u = TEIL.unter(t, nr || {});
-  if (t.art === 'rueckblick') return TEIL.frage(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + TEIL.baustellen(t) + TEIL.rueckblick(t) + u + TEIL.notizen(t);
-  if (t.art === 'gruppen') return TEIL.frage(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + TEIL.tafel(t) + u + TEIL.notizen(t) + TEIL.beschluss(t);
-  if (t.art === 'ziele') return TEIL.frage(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + TEIL.offen() + TEIL.beschluss(t) + u + TEIL.notizen(t);
+  if (t.art === 'rueckblick') return TEIL.frage(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + TEIL.baustellen(t) + TEIL.rueckblick(t) + u + TEIL.felder(t) + TEIL.notizen(t);
+  if (t.art === 'gruppen') return TEIL.frage(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + TEIL.tafel(t) + u + TEIL.felder(t) + TEIL.notizen(t) + TEIL.beschluss(t);
+  if (t.art === 'ziele') return TEIL.frage(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + TEIL.offen() + TEIL.beschluss(t) + u + TEIL.felder(t) + TEIL.notizen(t);
   if (t.art === 'personal') {
     const k = zeigt(t, 'kader'), b = zeigt(t, 'betrieb');
     return TEIL.frage(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + (k || b ? '<div class="pr-zwei">' + (k ? TEIL.bestand('kader', true) : '') + (b ? TEIL.bestand('betrieb', !k) : '') + '</div>' : '') +
-      (zeigt(t, 'wechsel') ? TEIL.wechsel(nurGruppe(t)) : '') + (zeigt(t, 'bedarf') ? TEIL.bedarf(t) : '') + u + TEIL.notizen(t) + TEIL.beschluss(t);
+      (zeigt(t, 'wechsel') ? TEIL.wechsel(nurGruppe(t)) : '') + (zeigt(t, 'bedarf') ? TEIL.bedarf(t) : '') + u + TEIL.felder(t) + TEIL.notizen(t) + TEIL.beschluss(t);
   }
   if (t.art === 'auftraege') return TEIL.frage(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + (zeigt(t, 'budget') ? TEIL.budget() : '') + (zeigt(t, 'auslastung') ? TEIL.auslastung(!zeigt(t, 'budget')) : '') +
-    (zeigt(t, 'offen') ? TEIL.offene() : '') + u + TEIL.notizen(t) + TEIL.beschluss(t);
-  return TEIL.frage(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + u + TEIL.notizen(t) + TEIL.beschluss(t);
+    (zeigt(t, 'offen') ? TEIL.offene() : '') + u + TEIL.felder(t) + TEIL.notizen(t) + TEIL.beschluss(t);
+  return TEIL.frage(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + u + TEIL.felder(t) + TEIL.notizen(t) + TEIL.beschluss(t);
 }
 
 /* ---------- Zahlen: Ausblick aufs Folgejahr ---------- */
@@ -2336,7 +2407,7 @@ function auslastungMonate() {   // vom Monat des Strategietags bis Dezember des 
   const von = Math.floor(sitzungWert() / 100), bis = folgejahr() * 100 + 12, M = [];
   let y = Math.floor(von / 100), m = von % 100;
   while (y * 100 + m <= bis && M.length < 36) { M.push(y * 100 + m); if (++m > 12) { m = 1; y++; } }
-  return { von: von, bis: bis, M: M, V: volumen(von, bis) };
+  return { von: von, bis: bis, M: M, V: volumen(von, bis, true) };
 }
 
 const quoteVon = (o) => (o.gerechnet > 0 && o.erhalten !== null ? o.erhalten / o.gerechnet * 100 : null);
@@ -2510,16 +2581,25 @@ function ergebnisHTML() {
   let h = '<header class="e-kopf"><h1>' + esc(m.titel) + '</h1><p>' + esc([m.abteilung, datumLang(m.datum) ? 'Strategietag vom ' + datumLang(m.datum) : ''].filter(Boolean).join(' · ')) + '</p></header>', etwas = false;
   const gl = [];
   T.forEach((t) => {
-    t.beschluesse.forEach((b) => { if (b.gl) gl.push('<li><b>' + esc(nm(t)) + ':</b> ' + esc(b.was) + (metaText(b) ? ' (' + esc(metaText(b)) + ')' : '') + '</li>'); });
+    t.beschluesse.forEach((b) => { if (b.gl) gl.push('<li><b>' + esc(nm(t)) + ':</b> ' + esc(mitTh(b, b.was)) + (metaText(b) ? ' (' + esc(metaText(b)) + ')' : '') + '</li>'); });
     t.notizen.forEach((n) => { if (n.gl) gl.push('<li><b>' + esc(nm(t)) + ':</b> ' + esc(n.text) + '</li>'); });
     t.bedarf.forEach((b) => { if (b.gl) gl.push('<li><b>' + esc(nm(t)) + ':</b> ' + esc(b.was) + (bedarfMeta(b) ? ' (' + esc(bedarfMeta(b)) + ')' : '') + ', Stand: ' + BSTAND[b.stand] + '</li>'); });
   });
   if (gl.length) h += '<section class="e-teil e-gl"><h2>Für die GL</h2><ul>' + gl.join('') + '</ul></section>';
   const tabelle = (themen, mitThema) => '<div class="e-tab-rahmen"><table class="e-besch"><thead><tr>' + (mitThema ? '<th>Thema</th>' : '') + '<th>Was</th><th>Wer</th><th>Bis wann</th></tr></thead><tbody>' +
-    themen.map((t) => t.beschluesse.map((b, i) => '<tr>' + (mitThema ? '<td class="th">' + (i ? '' : esc(nm(t))) + '</td>' : '') + '<td>' + esc(b.was) + marke(b) + '</td><td class="nw">' + esc(b.wer) + '</td><td class="nw">' + esc(b.bis) + '</td></tr>').join('')).join('') + '</tbody></table></div>';
+    themen.map((t) => t.beschluesse.map((b, i) => '<tr>' + (mitThema ? '<td class="th">' + (i ? '' : esc(nm(t))) + '</td>' : '') + '<td>' + esc(mitTh(b, b.was)) + marke(b) + '</td><td class="nw">' + esc(b.wer) + '</td><td class="nw">' + esc(b.bis) + '</td></tr>').join('')).join('') + '</tbody></table></div>';
   const mitB = T.filter((t) => t.art !== 'ziele' && t.beschluesse.length);
   if (mitB.length) { h += '<section class="e-teil"><h2>Beschlüsse</h2>' + tabelle(mitB, true) + '</section>'; etwas = true; }
   T.filter((t) => t.art === 'ziele' && t.beschluesse.length).forEach((t) => { h += '<section class="e-teil"><h2>' + esc(t.titel) + '</h2>' + tabelle([t], false) + '</section>'; etwas = true; });
+  const mitF = T.filter((t) => (t.felder || []).some((f) => f.punkte.length));
+  if (mitF.length) {
+    h += '<section class="e-teil"><h2>Checklisten und Auswahl</h2>' + mitF.map((t) => t.felder.filter((f) => f.punkte.length).map((f) => {
+      const gew = f.punkte.filter((x) => x.an).map((x) => x.text);
+      return '<h3>' + esc(nm(t)) + ' · ' + esc(f.titel) + '</h3>' + (f.art === 'wahl' ? '<p>' + (gew.length ? 'Gewählt: <b>' + esc(gew.join(', ')) + '</b>' : 'Noch nichts gewählt') + '</p><p class="e-klein">Zur Wahl: ' + esc(f.punkte.map((x) => x.text).join(' · ')) + '</p>'
+        : '<ul class="e-fd">' + f.punkte.map((x) => '<li>' + (x.an ? '☑ ' : '☐ ') + esc(x.text) + '</li>').join('') + '</ul>');
+    }).join('')).join('') + '</section>';
+    etwas = true;
+  }
   const BU = S.budget;
   if (BU.ziel !== null || BU.auftraege.length || budgetZahlen().ja || budgetZahlen().offen) {
     h += '<section class="e-teil"><h2>Ausblick ' + folgejahr() + '</h2>' + budgetTabelle() +
@@ -2562,7 +2642,7 @@ function ergebnisHTML() {
   T.filter((t) => t.art === 'rueckblick' && (t.ziele.length || t.baustellen.length)).forEach((t) => {
     h += '<section class="e-teil"><h2>' + esc(t.titel) + '</h2>' +
       (t.ziele.length ? '<p class="e-klein">' + t.ziele.filter((z) => z.stand === 'erreicht').length + ' von ' + t.ziele.length + ' Zielen erreicht</p><ul class="e-rz">' +
-        t.ziele.map((z) => '<li><span>' + esc(z.text) + '</span><b class="e-st ' + esc(z.stand || '') + '">' + esc(STAND[z.stand || ''] || '') + (z.stand !== 'erreicht' && weiterVon(z) ? (weiterVon(z) === 'ja' ? ' · geht weiter' : ' · fallen gelassen') : '') + '</b></li>').join('') + '</ul>' : '') +
+        t.ziele.map((z) => '<li><span>' + esc(mitTh(z, z.text)) + '</span><b class="e-st ' + esc(z.stand || '') + '">' + esc(STAND[z.stand || ''] || '') + (z.stand !== 'erreicht' && weiterVon(z) ? (weiterVon(z) === 'ja' ? ' · geht weiter' : ' · fallen gelassen') : '') + '</b></li>').join('') + '</ul>' : '') +
       (t.baustellen.length ? '<h3>Baustellen (' + t.baustellen.length + ')</h3><div class="e-tab-rahmen"><table class="e-besch"><thead><tr><th>Bauführer</th><th>Baustellen, in Klammern der Polier</th></tr></thead><tbody>' +
         bstGruppen(t.baustellen, 'bf').map((g) => '<tr><td class="th nw">' + esc(g.name || 'Ohne Bauführer') + ' (' + g.liste.length + ')</td><td>' + g.liste.map((e) => esc(e.b.name) + (e.b.po ? ' <span class="e-grau">(' + esc(e.b.po) + ')</span>' : '')).join(' · ') + '</td></tr>').join('') + '</tbody></table></div>' : '') + '</section>';
     etwas = true;
@@ -2704,6 +2784,7 @@ const SHEET = {
     const b = imThema('beschluesse'), ziele = aktThema() && aktThema().art === 'ziele';
     if (!b) return '';
     return formHuelle(ziele ? 'Ziel' : 'Beschluss', 'beschluss-edit', '<label class="f" for="b-was"><span>Was</span><textarea id="b-was" name="was" rows="2" data-fokus>' + esc(b.was) + '</textarea></label>' +
+      (ziele ? '<label class="f" for="b-th"><span>Thema</span>' + themaWahl('thema', b.thema || '', 'b-th') + '</label>' : '') +
       '<div class="zwei"><label class="f" for="b-wer"><span>Wer</span><input id="b-wer" name="wer" value="' + esc(b.wer) + '" autocomplete="off"></label><label class="f" for="b-bis"><span>Bis wann</span><input id="b-bis" name="bis" value="' + esc(b.bis) + '" autocomplete="off"></label></div>' +
       '<label class="schalter" for="b-gl"><span>Für die GL vormerken</span><input type="checkbox" id="b-gl" name="gl"' + (b.gl ? ' checked' : '') + '></label>' + loeschKnopf('beschluss-weg', ziele ? 'Ziel löschen' : 'Beschluss löschen'));
   },
@@ -2715,7 +2796,15 @@ const SHEET = {
   ziel() {
     const z = imThema('ziele');
     if (!z) return '';
-    return formHuelle('Ziel vom letzten Jahr', 'ziel-edit', '<label class="f" for="z-t"><span>Text</span><textarea id="z-t" name="text" rows="2" data-fokus>' + esc(z.text) + '</textarea></label>' + loeschKnopf('ziel-weg', 'Ziel löschen'));
+    return formHuelle('Ziel vom letzten Jahr', 'ziel-edit', '<label class="f" for="z-t"><span>Text</span><textarea id="z-t" name="text" rows="2" data-fokus>' + esc(z.text) + '</textarea></label>' +
+      '<label class="f" for="z-th"><span>Thema</span>' + themaWahl('thema', z.thema || '', 'z-th') + '</label>' + loeschKnopf('ziel-weg', 'Ziel löschen'));
+  },
+  fd() {
+    const f = imThema('felder'), wahl = f && f.art === 'wahl';
+    if (!f) return '';
+    return formHuelle(wahl ? 'Auswahl' : 'Checkliste', 'fd-edit', '<label class="f" for="fd-t"><span>Titel</span><input id="fd-t" name="titel" value="' + esc(f.titel) + '" autocomplete="off" data-fokus></label>' +
+      '<label class="f" for="fd-p"><span>' + (wahl ? 'Möglichkeiten' : 'Punkte') + ', eine Zeile je Eintrag</span><textarea id="fd-p" name="punkte" rows="6">' + esc(f.punkte.map((x) => x.text).join('\n')) + '</textarea></label>' +
+      '<label class="schalter" for="fd-w"><span>Auswahl: nur eine Möglichkeit wählbar</span><input type="checkbox" id="fd-w" name="wahl"' + (wahl ? ' checked' : '') + '></label>' + loeschKnopf('fd-weg', wahl ? 'Auswahl löschen' : 'Checkliste löschen'));
   },
   person() {
     const t = aktThema(), p = imThema('leute');
@@ -3198,11 +3287,11 @@ function anhNachladen() {
   if (!fehlt.length) return;
   Promise.all(fehlt.map((id) => anhHolen(id).then((x) => { if (x && !ANH[id]) { ANH[id] = x; return true; } return false; }))).then((r) => { if (r.some(Boolean)) { render(); if (sheet && sheet.art === 'anhang') renderSheet(false); } });
 }
-function zieleDazu(text) {
+function zieleDazu(text, th) {
   const t = aktThema(), liste = mehrzeilig(text);
   if (!t || !liste.length) return;
   merken();
-  liste.forEach((x) => { t.ziele.push({ id: uid(), text: x, stand: '' }); });
+  liste.forEach((x) => { t.ziele.push(Object.assign({ id: uid(), text: x, stand: '' }, th ? { thema: th } : {})); });
   geaendert(); fokus('neu-ziel');
   if (liste.length > 1) toast(liste.length + ' Ziele hinzugefügt', true);
 }
@@ -3406,7 +3495,7 @@ const AKT = {
     const neu = weiterVon(z) === el.dataset.v ? '' : el.dataset.v;
     merken();
     S.themen.forEach((t) => { if (t.art === 'ziele') t.beschluesse = t.beschluesse.filter((b) => b.aus !== z.id); });
-    if (neu === 'ja') zt.beschluesse.push({ id: uid(), was: z.text, wer: '', bis: '', gl: false, aus: z.id });
+    if (neu === 'ja') zt.beschluesse.push(Object.assign({ id: uid(), was: z.text, wer: '', bis: '', gl: false, aus: z.id }, z.thema ? { thema: z.thema } : {}));
     z.weiter = neu;
     geaendert();
     toast(neu === 'ja' ? 'Als Ziel übernommen' : (neu === 'nein' ? 'Fallen gelassen' : 'Wieder offen'), true);
@@ -3445,6 +3534,23 @@ const AKT = {
   'beschluss-weg'() { entfernen('beschluesse', 'Gelöscht'); },
   'stichwort-weg'() { entfernen('stichworte', 'Stichwort gelöscht'); },
   'ziel-weg'() { entfernen('ziele', 'Ziel gelöscht'); },
+  'fd-neu'(el) {
+    const t = aktThema();
+    if (!t) return;
+    merken();
+    const wahl = el.dataset.v === 'wahl', f = { id: uid(), art: wahl ? 'wahl' : 'liste', titel: wahl ? 'Auswahl' : 'Checkliste', punkte: [] };
+    (t.felder || (t.felder = [])).push(f);
+    geaendert(); auf({ art: 'fd', id: f.id });
+  },
+  fd(el) { auf({ art: 'fd', id: el.dataset.id }); },
+  'fd-punkt'(el) {
+    const t = aktThema(), f = t && (t.felder || []).find((x) => x.id === el.dataset.f), q = f && f.punkte.find((x) => x.id === el.dataset.id);
+    if (!q) return;
+    const an = !q.an;
+    if (f.art === 'wahl') f.punkte.forEach((x) => { x.an = false; });
+    q.an = an; geaendert();
+  },
+  'fd-weg'() { entfernen('felder', 'Gelöscht'); },
   'person-weg'() { entfernen('leute', 'Mitarbeiter entfernt'); },
   'gruppe-neu'() { auf({ art: 'ma', id: '', position: 'Polier' }); },
   'gruppe-weg'() { const t = aktThema(); if (!t || !sheet) return; merken(); t.leute.forEach((p) => { if (p.gruppe === sheet.id) p.gruppe = ''; }); t.gruppen = t.gruppen.filter((g) => g.id !== sheet.id); geaendert(true); toast('Gruppe entfernt', true); },
@@ -3491,14 +3597,33 @@ const FORMS = {
     const t = aktThema(), was = f.elements.was.value.trim();
     if (!t) return;
     if (!was) { f.elements.was.focus(); return; }
-    t.beschluesse.push({ id: uid(), was: was, wer: f.elements.wer.value.trim(), bis: ohneBis(f.elements.bis.value), gl: false });
+    const th = f.elements.thema ? f.elements.thema.value : '';
+    if (f.elements.thema) ZIEL_TH = th;
+    t.beschluesse.push(Object.assign({ id: uid(), was: was, wer: f.elements.wer.value.trim(), bis: ohneBis(f.elements.bis.value), gl: false }, th ? { thema: th } : {}));
     geaendert(); fokus('neu-was');
   },
-  'beschluss-edit'(f) { const b = imThema('beschluesse'), was = b && pflicht(f.elements.was); if (!was) return; b.was = was; b.wer = f.elements.wer.value.trim(); b.bis = ohneBis(f.elements.bis.value); b.gl = f.elements.gl.checked; geaendert(true); },
+  'beschluss-edit'(f) { const b = imThema('beschluesse'), was = b && pflicht(f.elements.was); if (!was) return; b.was = was; b.wer = f.elements.wer.value.trim(); b.bis = ohneBis(f.elements.bis.value); b.gl = f.elements.gl.checked; if (f.elements.thema) b.thema = f.elements.thema.value; geaendert(true); },
   stichwort(f) { stichworteDazu(f.elements.text.value); },
   'stichwort-edit'(f) { const x = imThema('stichworte'), text = x && pflicht(f.elements.text); if (!text) return; x.text = text.replace(/\s*[\r\n]+\s*/g, ' '); geaendert(true); },
-  ziel(f) { zieleDazu(f.elements.text.value); },
-  'ziel-edit'(f) { const z = imThema('ziele'), text = z && pflicht(f.elements.text); if (!text) return; z.text = text; geaendert(true); },
+  ziel(f) { if (f.elements.thema) ZIEL_TH = f.elements.thema.value; zieleDazu(f.elements.text.value, f.elements.thema ? f.elements.thema.value : ''); },
+  fdpunkt(f) {
+    const t = aktThema(), fd = t && (t.felder || []).find((x) => x.id === f.dataset.f), L = fd ? mehrzeilig(f.elements.text.value) : [];
+    if (!L.length) return;
+    merken();
+    L.forEach((x) => { fd.punkte.push({ id: uid(), text: x, an: false }); });
+    geaendert(); fokus('neu-fd-' + fd.id);
+  },
+  'fd-edit'(f) {
+    const fd = imThema('felder'), titel = fd && pflicht(f.elements.titel);
+    if (!titel) return;
+    const alt = {};
+    fd.punkte.forEach((x) => { alt[x.text] = x; });
+    fd.titel = titel; fd.art = f.elements.wahl.checked ? 'wahl' : 'liste';
+    fd.punkte = String(f.elements.punkte.value).split(/[\r\n]+/).map((x) => x.trim()).filter(Boolean).map((x) => alt[x] || { id: uid(), text: x, an: false });
+    if (fd.art === 'wahl') { let eins = false; fd.punkte.forEach((x) => { if (x.an && !eins) eins = true; else x.an = false; }); }
+    geaendert(true);
+  },
+  'ziel-edit'(f) { const z = imThema('ziele'), text = z && pflicht(f.elements.text); if (!text) return; z.text = text; if (f.elements.thema) z.thema = f.elements.thema.value; geaendert(true); },
   leute(f) { leuteDazu(f.elements.text.value); },
   person(f) { const p = imThema('leute'), name = p && pflicht(f.elements.name); if (!name) return; p.name = name; geaendert(true); },
   gruppe(f) { const g = imThema('gruppen'), name = g && pflicht(f.elements.name); if (!name) return; g.name = name; geaendert(true); },
