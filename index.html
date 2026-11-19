@@ -454,6 +454,19 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
 .ab-ja{background:var(--accent-fill)}
 .ab-of{background:var(--brand-soft);box-shadow:inset 0 0 0 1.5px var(--brand)}
 .ab-ohne{margin:.5rem 0 0}
+.bk-kopf{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin:1.25rem 0 .2rem}
+.ausblick .bk-kopf .bl{margin:0}
+.bk-kopf .bl i{display:inline-block;width:.7rem;height:.7rem;border-radius:.2rem;margin-right:.45rem;vertical-align:-.04rem}
+.bk-kopf b{font-size:.9375rem;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bk-liste{list-style:none;margin:0;padding:0}
+.bk-liste li + li{border-top:1px solid var(--sep)}
+.bk-liste button{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n a" "p v";column-gap:1rem;row-gap:.05rem;width:100%;padding:.5rem 0;text-align:left}
+.bk-n{grid-area:n;font-size:1.0625rem;font-weight:600;line-height:1.25;overflow-wrap:anywhere}
+.bk-a{grid-area:a;font-size:1.0625rem;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.bk-p{grid-area:p;color:var(--muted);font-size:.875rem;line-height:1.3;overflow-wrap:anywhere}
+.bk-v{grid-area:v;color:var(--muted);font-size:.8125rem;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.bk-leer{margin:.15rem 0 0}
+.bk .textlink{display:inline-block;margin-top:.1rem}
 .ab-unten{margin-top:.8rem}
 .ausblick.im-thema{margin-top:0}
 .al-chart{display:flex;align-items:flex-end;gap:.3rem;height:11.5rem}
@@ -684,7 +697,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '0.8.5';         // Version des Tools, steht in den Einstellungen
+const VERSION = '0.8.6';         // Version des Tools, steht in den Einstellungen
 const FORMAT = 7;              // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
@@ -1988,6 +2001,51 @@ function budgetZahlen() {
   Object.keys(V.mon).forEach((k) => { ja += V.mon[k].ja; offen += V.mon[k].offen; });
   return { j: j, ziel: S.budget.ziel, ja: Math.round(ja + hand), offen: Math.round(offen), hand: hand, ohne: V.ohne };
 }
+/* Welche Aufträge und Offerten in den Zahlen des Folgejahrs stecken: dieselbe Rechnung wie budgetZahlen(), je Eintrag mit
+   seinem Anteil am Folgejahr, die grössten zuerst. Die Liste von Hand (0.8 bis 0.8.3) zählt bei «Erhalten». «ohne»: mit Betrag,
+   aber ohne Baubeginn, darum nicht mitgezählt (erhaltene ab dem Jahr des Strategietags, offene alle). Seit 0.8.6. */
+function budgetListen() {
+  const j = folgejahr(), von = j * 100 + 1, bis = j * 100 + 12, J = sitzungsJahr(), L = { ja: [], offen: [], ohne: [] };
+  S.kunden.auftraege.forEach((a) => {
+    if (a.erhalten !== 'ja' && a.erhalten !== 'offen') return;
+    const v = verteilung(a);
+    if (!v) { if (typeof a.betrag === 'number' && a.betrag > 0 && (a.erhalten === 'offen' || jahrZahl(a.jahr) >= J)) L.ohne.push({ a: a }); return; }
+    let anteil = 0, n = 0;
+    v.forEach((x) => { if (x[0] >= von && x[0] <= bis) { anteil += x[1]; n++; } });
+    if (n) L[a.erhalten].push({ a: a, anteil: anteil, ganz: n === v.length });
+  });
+  S.budget.auftraege.forEach((x) => { L.ja.push({ hand: x, anteil: x.betrag || 0, ganz: true }); });
+  const nachBetrag = (p, q) => q.anteil - p.anteil;
+  L.ja.sort(nachBetrag); L.offen.sort(nachBetrag);
+  L.ohne.sort((p, q) => (q.a.betrag || 0) - (p.a.betrag || 0));
+  return L;
+}
+const BK_ZEIGEN = 8;   // so viele Zeilen je Liste; der Rest hinter «Alle zeigen»
+function budgetListenHTML() {
+  const L = budgetListen(), j = folgejahr(), auf = S.ui.auf;
+  const zeile = (e) => {
+    const a = e.a, h = e.hand;
+    const unter = h ? 'Von Hand eingetragen' : [a.bauherr || a.planer, ausfText(a)].filter(Boolean).join(' · ');
+    const betrag = h ? (h.betrag === null ? '–' : fmt(h.betrag)) : fmt(Math.round(e.anteil));
+    const von = !h && !e.ganz ? 'von ' + fmt(a.betrag) : '';
+    return '<li><button type="button" data-a="' + (h ? 'bauftrag' : 'auftrag') + '" data-id="' + (h ? h.id : a.id) + '"><span class="bk-n">' + esc(h ? h.name || 'Ohne Namen' : a.objekt) + '</span><span class="bk-a">' + betrag + '</span>' +
+      (unter ? '<span class="bk-p">' + esc(unter) + '</span>' : '') + (von ? '<span class="bk-v">' + von + '</span>' : '') + '</button></li>';
+  };
+  const liste = (k, X) => {
+    const lang = X.length > BK_ZEIGEN + 1;
+    return '<ul class="bk-liste">' + (lang && !auf[k] ? X.slice(0, BK_ZEIGEN) : X).map(zeile).join('') + '</ul>' +
+      (lang ? '<button type="button" class="textlink" data-a="auf" data-k="' + k + '">' + (auf[k] ? 'Weniger zeigen' : 'Alle ' + X.length + ' zeigen') + '</button>' : '');
+  };
+  const gruppe = (k, farbe, titel, X, leer) => '<div class="bk-kopf"><h3 class="bl"><i class="' + farbe + '"></i>' + titel + ' (' + X.length + ')</h3>' +
+    (X.length ? '<b>' + fmt(Math.round(X.reduce((s, e) => s + (e.anteil || 0), 0))) + '</b>' : '') + '</div>' + (X.length ? liste(k, X) : '<p class="muted klein bk-leer">' + leer + '</p>');
+  let h = gruppe('bk-ja', 'ab-ja', 'Erhaltene Aufträge für ' + j, L.ja, 'Noch kein erhaltener Auftrag mit Ausführung ' + j + '.') +
+    gruppe('bk-offen', 'ab-of', 'Offene Offerten für ' + j, L.offen, 'Keine offene Offerte mit Ausführung ' + j + '.');
+  if (L.ohne.length) h += '<div class="bk-kopf"><h3 class="bl">Ohne Baubeginn, nicht mitgezählt (' + L.ohne.length + ')</h3><button type="button" class="textlink" data-a="auf" data-k="bk-ohne">' + (auf['bk-ohne'] ? 'Verbergen' : 'Zeigen') + '</button></div>' +
+    (auf['bk-ohne'] ? '<ul class="bk-liste">' + L.ohne.map((e) => '<li><button type="button" data-a="auftrag" data-id="' + e.a.id + '"><span class="bk-n">' + esc(e.a.objekt) + '</span><span class="bk-a">' + fmt(e.a.betrag) + '</span>' +
+      '<span class="bk-p">' + esc([e.a.erhalten === 'ja' ? 'Erhalten' : 'Offen', e.a.jahr, e.a.bauherr || e.a.planer].filter(Boolean).join(' · ')) + '</span></button></li>').join('') + '</ul>' +
+      '<p class="muted klein bk-leer">Antippen und den Baubeginn nachtragen, dann zählt die Offerte mit.</p>' : '');
+  return '<div class="bk">' + h + '</div>';
+}
 const ohneHinweis = (o) => (o.ja || o.offen ? '<p class="muted klein ab-ohne">Ohne Baubeginn, darum nicht mitgezählt: ' + [o.ja ? mehrzahl(o.ja, 'erhaltene', 'erhaltene') : '', o.offen ? mehrzahl(o.offen, 'offene', 'offene') : ''].filter(Boolean).join(' und ') + '. Baubeginn bei den Kunden nachtragen.</p>' : '');
 /* Zahlen gegen das Umsatz-Ziel: im Kasten «Ausblick» bei den Zahlen (mitIds) und im Thema der Art «Aufträge» */
 function budgetBlock(mitIds) {
@@ -2001,7 +2059,7 @@ function budgetBlock(mitIds) {
       (rest !== null && rest > 0 && Z.offen ? '<small>' + (Z.offen >= rest ? 'die offenen würden reichen' : 'mit allen offenen fehlen ' + fmt(rest - Z.offen)) + '</small>' : '') + '</div></div>' +
     (hat ? '<div class="ab-balken" role="img" aria-label="' + pJa + ' Prozent des Ziels sind erhalten, ' + pOf + ' Prozent offen"><i style="width:' + wJa + '%"></i><i class="of" style="width:' + wOf + '%"></i></div>' +
       '<p class="ab-leg"><span class="ab-ja"></span>Erhalten<span class="ab-of"></span>Offen</p>' : '') +
-    ohneHinweis(Z.ohne);
+    budgetListenHTML();
 }
 const maVon = (id) => S.mitarbeiter.find((m) => m.id === id) || null;
 /* Positionen nach Hierarchie, auch wenn sie anders heissen («Baupolier», «Bau-Facharbeiter», «Maurer EFZ») */
@@ -2258,11 +2316,9 @@ function themaInhalt(t, nr) {
 /* ---------- Zahlen: Ausblick aufs Folgejahr ---------- */
 function ausblickHTML() {
   const B = S.budget, j = folgejahr(), hat = B.ziel !== null && B.ziel > 0;
-  const liste = B.auftraege.map((a) => '<li><button type="button" data-a="bauftrag" data-id="' + a.id + '"><span>' + esc(a.name || 'Ohne Namen') + '</span><b>' + (a.betrag === null ? '' : fmt(a.betrag)) + '</b></button></li>').join('');
   return '<section class="ausblick" id="ausblick"><div class="ab-kopf"><div><h2>Ausblick ' + j + '</h2><p>Das Umsatz-Ziel gegen die erhaltenen und offenen Offerten bei den Kunden, verteilt nach Baubeginn und Bauende.</p></div>' +
     '<button type="button" class="btn klein" data-a="sheet" data-s="budget">' + ic('pen') + '<span>' + (hat ? 'Ziel ändern' : 'Ziel eintragen') + '</span></button></div>' +
     budgetBlock(true) +
-    (liste ? '<h3 class="bl">Von Hand eingetragen</h3><ul class="ab-liste">' + liste + '</ul><p class="muted klein">Zählt bei «Erhalten» mit. Neue Aufträge erfasst du bei den Kunden mit Baubeginn und Bauende.</p>' : '') +
     '<div class="reihe ab-unten"><button type="button" class="btn klein" data-a="auftrag-neu">' + ic('plus') + '<span>Offerte erfassen</span></button></div>' +
     (B.notiz ? '<p class="ab-notiz">' + esc(B.notiz) + '</p>' : '') + '</section>';
 }
