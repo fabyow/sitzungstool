@@ -343,6 +343,21 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
 .ew-art.aus,.ew-art.pension{background:var(--warn-soft);color:var(--warn)}
 .rz.ew{padding-left:.8rem}
 .bestand .bg li button{padding:.38rem 0;font-size:1rem}
+.pr-zwei{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,21rem),1fr));gap:0 1.25rem;align-items:start}
+.pr-gr{min-width:0}
+.pr-gr .bl-zeile{min-height:2.5rem}
+.pr-liste{list-style:none;margin:0 0 .6rem;padding:0 1rem;background:var(--card);border-radius:1.1rem;box-shadow:var(--shadow)}
+.pr-liste li + li{border-top:1px solid var(--sep)}
+.pr-liste button{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n a" "p a";column-gap:.8rem;row-gap:.05rem;width:100%;padding:.5rem 0;text-align:left}
+.pr-n{grid-area:n;font-size:1.0625rem;font-weight:600;line-height:1.25;overflow-wrap:anywhere}
+.pr-p{grid-area:p;color:var(--muted);font-size:.875rem;line-height:1.3;overflow-wrap:anywhere}
+.pr-a{grid-area:a;align-self:center;font-size:.8125rem;font-weight:600;color:var(--muted);text-align:right;white-space:nowrap}
+.pr-a.pen{color:var(--warn)}
+.ew-liste{gap:0;background:var(--card);border-radius:1.1rem;box-shadow:var(--shadow);padding:0 1rem}
+.ew-liste .rz{background:none;box-shadow:none;border-radius:0;padding:.1rem 0}
+.ew-liste .rz + .rz{border-top:1px solid var(--sep)}
+.ew-liste .b-was{font-size:1.0625rem}
+.ew-liste .b-text{padding:.45rem 0}
 .ma-liste{display:flex;flex-direction:column;background:var(--card);border-radius:1rem;box-shadow:var(--shadow);margin-bottom:.4rem}
 .ma-liste li + li{border-top:1px solid var(--sep)}
 .ma-z{display:flex;align-items:center;gap:.7rem;width:100%;min-height:3rem;padding:.45rem .8rem .45rem 1rem;text-align:left}
@@ -388,6 +403,11 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
 .festband .ic{color:var(--accent)}
 .festband > span{flex:1;min-width:10rem}
 .festband .btn{background:var(--card)}
+.thema.zu form,.thema.zu .tafel-unten .textlink{display:none}
+.thema.zu [data-zieh],.thema.zu .karte{cursor:default}
+.zu-band{margin:0 0 .4rem}
+.abschl .ic{stroke-width:2.5}
+@media (max-width:600px){.abschl{width:2.5rem;padding:0;justify-content:center;border-radius:50%}.abschl span{display:none}}
 /* Personal und offene Ziele: Zeilen wie beim Rückblick, rechts der Stand */
 .rz .b-text{min-width:12rem}
 .rz.gl{background:var(--brand-soft);box-shadow:inset 0 0 0 1.5px var(--brand)}
@@ -626,7 +646,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '0.8.2';         // Version des Tools, steht in den Einstellungen
+const VERSION = '0.8.3';         // Version des Tools, steht in den Einstellungen
 const FORMAT = 7;              // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
@@ -875,6 +895,8 @@ function normal(d) {
     if (typeof t.eltern !== 'string') t.eltern = '';
     ['notizen', 'beschluesse', 'ziele', 'gruppen', 'leute', 'baustellen', 'bedarf'].forEach((k) => { if (!Array.isArray(t[k])) t[k] = []; });
     if (typeof t.fest !== 'string') t.fest = '';
+    if (typeof t.zu !== 'string') t.zu = '';
+    if (t.art === 'gruppen' && t.fest && !t.zu) t.zu = t.fest;   // festgehaltene Gruppenzuteilung aus 0.8 bis 0.8.2: gilt als abgeschlossen
     t.anhaenge = (Array.isArray(t.anhaenge) ? t.anhaenge : []).filter((a) => a && typeof a === 'object' && typeof a.id === 'string' && a.id);
     t.anhaenge.forEach((a) => {   // der Inhalt kommt aus der Datei in die Ablage; im Stand bleibt nur, was ihn beschreibt
       if (typeof a.inhalt === 'string' && a.inhalt) anhMerken(a.id, a.inhalt);
@@ -1471,7 +1493,7 @@ function kundenLesen(g) {
 /* Eigene Angaben mischen sich nicht mit dem Beispiel: Beispielzahlen und Beispieleinträge gehen weg, die Themen bleiben */
 function beispielWeg() {
   S.beispiel = false; S.zahlen.perioden = []; S.zahlen.zeilen = []; S.ui.auf = {};
-  S.themen.forEach((x) => { x.notizen = []; x.beschluesse = []; x.ziele = []; x.leute = []; x.baustellen = []; x.bedarf = []; x.fest = ''; x.anhaenge = []; });
+  S.themen.forEach((x) => { x.notizen = []; x.beschluesse = []; x.ziele = []; x.leute = []; x.baustellen = []; x.bedarf = []; x.fest = ''; x.zu = ''; x.anhaenge = []; });
   S.parkplatz = []; S.glPunkte = []; S.kunden.offerten = []; S.kunden.auftraege = []; S.budget = { ziel: null, auftraege: [], notiz: '' }; S.mitarbeiter = [];
 }
 /* Gelesene Tabellen übernehmen. Ein Jahr oder ein Auftrag (gleiches Jahr, gleiches Objekt), den es schon gibt, wird ergänzt statt verdoppelt. */
@@ -1820,11 +1842,15 @@ function tabelleHTML() {
 }
 
 /* Themen: Bausteine, aus denen ein Thema je nach Art besteht */
-const fertig = (t) => t.art === 'rueckblick' ? t.ziele.length > 0 && t.ziele.every((z) => z.stand)
-  : (t.beschluesse.length > 0 || (t.art === 'personal' && t.bedarf.length > 0) || (t.art === 'gruppen' && (!!t.fest || (t.leute.length > 0 && t.leute.every((p) => t.gruppen.some((g) => g.id === p.gruppe))))));
+/* Den Haken setzt du selbst: «Abschliessen» friert das Thema ein, «Öffnen» (Schloss) gibt es wieder frei (seit 0.8.3).
+   Ein Thema mit Unterpunkten hat den Haken auch, wenn alle Unterpunkte abgeschlossen sind. */
+const fertig = (t) => !!t.zu;
 const kinderVon = (t) => S.themen.filter((k) => k.eltern === t.id);
 const vaterVon = (t) => (t && t.eltern && S.themen.find((x) => x.id === t.eltern)) || null;
-const erledigt = (t) => { const k = kinderVon(t); return k.length ? k.every(fertig) : fertig(t); };
+const erledigt = (t) => { const k = kinderVon(t); return !!t.zu || (k.length > 0 && k.every(fertig)); };
+const ZU_ERLAUBT = ['anhang', 'thema', 'auf', 'seg', 'gruppen-drucken', 'oeffnen'];   // was in einem abgeschlossenen Thema noch geht: ansehen, nicht ändern
+const gesperrt = (el) => !!(el.closest && el.closest('.thema.zu')) && !el.closest('.titel, .zu-band') && ZU_ERLAUBT.indexOf(el.dataset.a) < 0;
+const ZU_TEXT = 'Abgeschlossen. Zum Ändern zuerst das Schloss öffnen.';
 /* Nummern wie in einem Mindmap: «1», «1.2». Steht ein Rückblick zuoberst, ist er die Einleitung und zählt nicht mit. */
 function nummern() {
   const nr = {};
@@ -1853,6 +1879,17 @@ const sitzungsJahr = () => { const j = parseInt(String(S.meta.datum || '').slice
 const folgejahr = () => sitzungsJahr() + 1;
 const budgetSumme = () => S.budget.auftraege.reduce((a, x) => a + (x.betrag || 0), 0);
 const maVon = (id) => S.mitarbeiter.find((m) => m.id === id) || null;
+/* Positionen nach Hierarchie, auch wenn sie anders heissen («Baupolier», «Bau-Facharbeiter», «Maurer EFZ») */
+const POS_RANG = ['abteilungsleiter', 'bauführer', 'hilfsbauführer', 'polier', 'vorarbeiter', 'facharbeiter', 'maurer', 'maschinist', 'bauarbeiter', 'hilfsarbeiter', 'lernende'];
+function posRang(pos) {
+  const k = String(pos || '').toLowerCase().trim();
+  if (!k) return 999;
+  const i = POS_RANG.indexOf(k);
+  if (i >= 0) return i;
+  const j = POS_RANG.findIndex((p) => k.indexOf(p) >= 0);
+  return j < 0 ? 100 : j;
+}
+const maSortiert = (L) => L.slice().sort((a, b) => posRang(a.position) - posRang(b.position) || String(a.position).localeCompare(String(b.position), 'de') || a.name.localeCompare(b.name, 'de'));
 const nameWoerter = (x) => String(x || '').toLowerCase().replace(/[,;]/g, ' ').split(/\s+/).filter(Boolean);
 const nameSchluessel = (x) => nameWoerter(x).sort().join(' ');
 /* Was ein Thema der Art «Personal» zeigt; ohne eigene Wahl alles. Kader und Betrieb sind die Mitarbeiter am Tag des Strategietags;
@@ -1878,8 +1915,7 @@ const sitzungWert = () => datumWert(S.meta.datum) || datumWert(heute());
 function posGruppen(L) {
   const g = [], platz = {};
   L.forEach((m) => { const k = (m.position || '').toLowerCase(); if (platz[k] === undefined) { platz[k] = g.length; g.push({ name: m.position || 'Ohne Position', k: k, liste: [] }); } g[platz[k]].liste.push(m); });
-  const RANG = ['abteilungsleiter', 'bauführer', 'hilfsbauführer', 'polier', 'vorarbeiter', 'facharbeiter', 'maurer', 'maschinist', 'bauarbeiter', 'hilfsarbeiter', 'lernende'];
-  const rang = (x) => { if (!x.k) return 999; const i = RANG.indexOf(x.k); if (i >= 0) return i; const j = RANG.findIndex((p) => x.k.indexOf(p) >= 0); return j < 0 ? 100 : j; };
+  const rang = (x) => posRang(x.k);
   return g.sort((a, b) => rang(a) - rang(b) || a.name.localeCompare(b.name, 'de'));
 }
 /* Ein- und Austritte ab dem Jahr des Strategietags, nach Datum. Ein Austritt ohne lesbares Datum steht am Schluss. Dazu die
@@ -1977,12 +2013,12 @@ const TEIL = {
         (fest ? '' : (g ? (leute.length ? '' : '<p class="sp-leer">' + (FEIN ? 'Kärtchen hierher ziehen.' : 'Kärtchen antippen und diesen Polier wählen.') + '</p>')
           : '<form class="sp-neu" data-form="leute"><input name="text" id="neu-leute" placeholder="Name hinzufügen …" aria-label="Namen hinzufügen" autocomplete="off" enterkeyhint="done"></form>' + (S.mitarbeiter.length ? '' : '<p class="sp-leer">Namen eintippen oder die Mitarbeiterliste aus Excel einfügen.</p>'))) + '</section>';
     };
-    return (fest ? '<div class="festband">' + ic('schloss') + '<span>Festgehalten am ' + esc(datumLang(t.fest)) + '. Die Zuteilung gilt, bis ihr sie wieder ändert.</span><button type="button" class="btn klein" data-a="fest-auf">Ändern</button></div>'
+    return (fest && !t.zu ? '<div class="festband">' + ic('schloss') + '<span>Festgehalten am ' + esc(datumLang(t.fest)) + '. Die Zuteilung gilt, bis ihr sie wieder ändert.</span><button type="button" class="btn klein" data-a="fest-auf">Ändern</button></div>'
         : (t.gruppen.length ? '' : '<p class="muted klein">Die Gruppen sind die Poliere aus der Mitarbeiterliste. Noch ist keiner eingetragen: «Polier hinzufügen» oder in der Liste bei der Position «Polier» schreiben.</p>')) +
       '<div class="tafel' + (fest ? ' fest' : '') + '">' + spalte(null) + t.gruppen.map(spalte).join('') + '</div><div class="reihe tafel-unten">' +
       (fest ? '<span></span>' : '<span class="reihe"><button type="button" class="textlink" data-a="gruppe-neu">Polier hinzufügen</button><button type="button" class="textlink" data-a="sheet" data-s="maliste">Mitarbeiterliste</button></span>') +
       '<span class="reihe"><button type="button" class="btn klein" data-a="gruppen-drucken"' + (IM_RAHMEN || !t.leute.length ? ' disabled' : '') + '>' + ic('print') + '<span>Drucken</span></button>' +
-      (fest ? '' : '<button type="button" class="btn klein stark" data-a="fest"' + (t.leute.length ? '' : ' disabled') + '>' + ic('schloss') + '<span>Festhalten</span></button>') + '</span></div>';
+      '</span></div>';
   },
   anhaenge(t) {
     if (!t.anhaenge.length) return '';
@@ -1992,21 +2028,23 @@ const TEIL = {
         '<span class="anh-name">' + esc(a.name) + '<small>' + (url ? (bild ? 'Bild' : 'PDF') + (a.groesse ? ' · ' + groesseText(a.groesse) : '') : 'Fehlt auf diesem Gerät') + '</small></span></button>';
     }).join('') + '</div>';
   },
-  bestand(art, knopf) {   // art: 'kader' oder 'betrieb'; knopf: der erste Block trägt «Mitarbeiterliste»
+  bestand(art, knopf) {   // art: 'kader' oder 'betrieb'; knopf: der erste Block trägt «Mitarbeiterliste». Eine Zeile je Person, nach Hierarchie.
     const L = S.mitarbeiter, titel = GRUPPE_TITEL[art];
-    if (!L.length) return knopf ? '<h2 class="bl">' + titel + '</h2><div class="ma-leer"><p>Noch keine Mitarbeiterliste. Einmal aus Excel einfügen, je Zeile Name, Position, Polier, Eintritt, Austritt. Gruppenzuteilung, Kader, Betrieb und Ein- und Austritte lesen daraus.</p><div class="reihe"><button type="button" class="btn stark" data-a="sheet" data-s="maimport">' + ic('liste') + '<span>Liste einfügen</span></button><button type="button" class="btn" data-a="ma-neu">' + ic('plus') + '<span>Mitarbeiter</span></button></div></div>' : '';
-    const w = sitzungWert(), J = sitzungsJahr(), B = L.filter((m) => imBestand(m, w) && inGruppe(m, art));
+    if (!L.length) return knopf ? '<h2 class="bl">' + titel + '</h2><div class="ma-leer"><p>Noch keine Mitarbeiterliste. Einmal aus Excel einfügen, je Zeile Name, Vorname, Position, Polier, Eintritt, Geburtsdatum. Gruppenzuteilung, Kader, Betrieb und Ein- und Austritte lesen daraus.</p><div class="reihe"><button type="button" class="btn stark" data-a="sheet" data-s="maimport">' + ic('liste') + '<span>Liste einfügen</span></button><button type="button" class="btn" data-a="ma-neu">' + ic('plus') + '<span>Mitarbeiter</span></button></div></div>' : '';
+    const w = sitzungWert(), J = sitzungsJahr(), B = maSortiert(L.filter((m) => imBestand(m, w) && inGruppe(m, art)));
     const team = (m) => { const n = L.filter((x) => x.polier === m.id && aufTafel(x, J)).length; return n ? n + ' im Team' : ''; };
-    return '<div class="bl-zeile"><h2 class="bl">' + titel + ' (' + B.length + ')</h2>' + (knopf ? '<button type="button" class="btn klein" data-a="sheet" data-s="maliste">' + ic('liste') + '<span>Mitarbeiterliste</span></button>' : '') + '</div>' +
-      (B.length ? '<div class="bgr bestand ' + art + '">' + posGruppen(B).map((g) => '<section class="bg"><header><b>' + esc(g.name) + '</b><span class="zahl tnum">' + g.liste.length + '</span></header><ul>' +
-        g.liste.map((m) => { const grau = [istPolier(m) ? team(m) : '', austrittMeta(m, w)].filter(Boolean).join(' · '); return '<li><button type="button" data-a="ma" data-id="' + m.id + '"><span>' + esc(m.name) + '</span>' + (grau ? '<small>' + esc(grau) + '</small>' : '') + '</button></li>'; }).join('') + '</ul></section>').join('') + '</div>'
-        : '<p class="muted klein">Am ' + esc(datumLang(S.meta.datum)) + ' ist ' + (art === 'kader' ? 'im Kader' : 'im Betrieb') + ' niemand aus der Liste angestellt.</p>');
+    return '<section class="pr-gr"><div class="bl-zeile"><h2 class="bl">' + titel + ' (' + B.length + ')</h2>' + (knopf ? '<button type="button" class="btn klein" data-a="sheet" data-s="maliste">' + ic('liste') + '<span>Mitarbeiterliste</span></button>' : '') + '</div>' +
+      (B.length ? '<ul class="pr-liste bestand ' + art + '">' + B.map((m) => {
+        const a = austrittMeta(m, w), was = [m.position || 'Ohne Position', istPolier(m) ? team(m) : ''].filter(Boolean).join(' · ');
+        return '<li><button type="button" data-a="ma" data-id="' + m.id + '"><span class="pr-n">' + esc(m.name) + '</span><span class="pr-p">' + esc(was) + '</span>' + (a ? '<span class="pr-a' + (/^bis /.test(a) ? '' : ' pen') + '">' + esc(a) + '</span>' : '') + '</button></li>';
+      }).join('') + '</ul>'
+        : '<p class="muted klein">Am ' + esc(datumLang(S.meta.datum)) + ' ist ' + (art === 'kader' ? 'im Kader' : 'im Betrieb') + ' niemand aus der Liste angestellt.</p>') + '</section>';
   },
   wechsel(gruppe) {
     const W = wechselListe().filter((x) => inGruppe(x.m, gruppe));
     if (!W.length) return '';
     const w = sitzungWert();
-    return '<h2 class="bl">Ein- und Austritte</h2><ul class="eintraege">' + W.map((x) => '<li class="rz ew"><span class="ew-art ' + x.art + '">' + EW_ART[x.art] + '</span><button type="button" class="b-text" data-a="ma" data-id="' + x.m.id + '"><span class="b-was">' + esc(x.m.name) + '</span><span class="b-meta">' + esc([x.m.position, x.text, x.art !== 'pension' && x.wert > w ? 'geplant' : ''].filter(Boolean).join(' · ')) + '</span></button></li>').join('') + '</ul>';
+    return '<h2 class="bl">Ein- und Austritte</h2><ul class="eintraege ew-liste">' + W.map((x) => '<li class="rz ew"><span class="ew-art ' + x.art + '">' + EW_ART[x.art] + '</span><button type="button" class="b-text" data-a="ma" data-id="' + x.m.id + '"><span class="b-was">' + esc(x.m.name) + '</span><span class="b-meta">' + esc([x.m.position, x.text, x.art !== 'pension' && x.wert > w ? 'geplant' : ''].filter(Boolean).join(' · ')) + '</span></button></li>').join('') + '</ul>';
   },
   bedarf(t) {
     const offen = t.bedarf.filter((b) => b.stand !== 'besetzt').length;
@@ -2050,7 +2088,7 @@ function themaInhalt(t, nr) {
   if (t.art === 'ziele') return TEIL.frage(t) + TEIL.anhaenge(t) + TEIL.offen() + TEIL.beschluss(t) + u + TEIL.notizen(t);
   if (t.art === 'personal') {
     const k = zeigt(t, 'kader'), b = zeigt(t, 'betrieb');
-    return TEIL.frage(t) + TEIL.anhaenge(t) + (k ? TEIL.bestand('kader', true) : '') + (b ? TEIL.bestand('betrieb', !k) : '') +
+    return TEIL.frage(t) + TEIL.anhaenge(t) + (k || b ? '<div class="pr-zwei">' + (k ? TEIL.bestand('kader', true) : '') + (b ? TEIL.bestand('betrieb', !k) : '') + '</div>' : '') +
       (zeigt(t, 'wechsel') ? TEIL.wechsel(nurGruppe(t)) : '') + (zeigt(t, 'bedarf') ? TEIL.bedarf(t) : '') + u + TEIL.notizen(t) + TEIL.beschluss(t);
   }
   return TEIL.frage(t) + TEIL.anhaenge(t) + u + TEIL.notizen(t) + TEIL.beschluss(t);
@@ -2212,14 +2250,16 @@ const ANSICHT = {
     };
     const kopf = '<div class="titel"><div>' + (vater ? '<button type="button" class="pfad" data-a="thema" data-id="' + vater.id + '">' + ic('left') + '<span>' + esc(mitNr(vater, nr)) + '</span></button>' : '') +
       '<h1>' + (nr[akt.id] ? '<span class="tnr tnum">' + esc(nr[akt.id]) + '</span> ' : '') + esc(akt.titel) + '</h1></div><div class="titel-r">' +
-      (vater ? '' : '<button type="button" class="btn klein" data-a="unter-neu">' + ic('plus') + '<span>Unterpunkt</span></button>') +
+      (akt.zu ? '' : (vater ? '' : '<button type="button" class="btn klein" data-a="unter-neu">' + ic('plus') + '<span>Unterpunkt</span></button>') +
       '<button type="button" class="rundb" data-a="anhang-wahl" aria-label="Bild oder PDF anhängen" title="Bild oder PDF anhängen">' + ic('klammer') + '</button>' +
-      '<button type="button" class="rundb" data-a="sheet" data-s="thema" aria-label="' + (vater ? 'Unterpunkt' : 'Thema') + ' bearbeiten, verschieben oder löschen">' + ic('pen') + '</button></div></div>';
+      '<button type="button" class="rundb" data-a="sheet" data-s="thema" aria-label="' + (vater ? 'Unterpunkt' : 'Thema') + ' bearbeiten, verschieben oder löschen">' + ic('pen') + '</button>' +
+      '<button type="button" class="btn klein abschl" data-a="abschliessen" aria-label="Abschliessen" title="Haken setzen und einfrieren">' + ic('check') + '<span>Abschliessen</span></button>') + '</div></div>';
+    const band = akt.zu ? '<div class="festband zu-band">' + ic('check') + '<span>Abgeschlossen am ' + esc(akt.zu.split('-').reverse().map((x) => String(+x)).join('.')) + '</span><button type="button" class="btn klein" data-a="oeffnen">' + ic('schloss') + '<span>Öffnen</span></button></div>' : '';
     return '<div class="themen"><nav class="tliste2" aria-label="Themen"><div class="tz">' + oben.map((t, i) => link(t, i * 2, false)).join('') +
       '<button type="button" class="tlink neu" style="order:100000" data-a="thema-neu">' + ic('plus') + '<span>Thema</span></button>' +
       '<button type="button" class="tlink neu leise" style="order:100001" data-a="sheet" data-s="themenliste">' + ic('liste') + '<span>Liste einfügen</span></button></div>' +
       '<div class="tz kinder" data-h="' + haupt.id + '">' + kinderVon(haupt).map((k) => link(k, hi * 2 + 1, true)).join('') + '</div></nav>' +
-      '<section class="thema">' + kopf + themaInhalt(akt, nr) +
+      '<section class="thema' + (akt.zu ? ' zu' : '') + '">' + kopf + band + themaInhalt(akt, nr) +
       '<p class="muted klein hilfe">' + ic('flag') + '<span>Was die GL wissen oder entscheiden soll, mit «GL» vormerken. Es steht im Ergebnis zuoberst.' + (FEIN ? ' Einträge lassen sich mit der Maus auf und ab schieben.' : '') + '</span></p></section></div>';
   },
 
@@ -3117,6 +3157,16 @@ const AKT = {
     toast('Zuteilung festgehalten' + (frei ? ', ' + frei + ' noch nicht zugeteilt' : ''), true);
   },
   'fest-auf'() { const t = aktThema(); if (!t) return; merken(); t.fest = ''; geaendert(); toast('Zuteilung wieder offen', true); },
+  abschliessen() {
+    const t = aktThema();
+    if (!t) return;
+    merken(); t.zu = heute();
+    if (t.art === 'gruppen' && !t.fest) t.fest = t.zu;   // die Tafel bleibt, wie sie ist
+    geaendert();
+    const frei = t.art === 'gruppen' ? t.leute.filter((p) => !t.gruppen.some((g) => g.id === p.gruppe)).length : 0;
+    toast('Abgeschlossen' + (frei ? ', ' + frei + ' noch nicht zugeteilt' : ''), true);
+  },
+  oeffnen() { const t = aktThema(); if (!t) return; merken(); t.zu = ''; if (t.art === 'gruppen') t.fest = ''; geaendert(); toast('Wieder offen', true); },
   'gruppen-drucken'() {
     const t = aktThema();
     if (!t) return;
@@ -3307,6 +3357,7 @@ document.addEventListener('click', (e) => {
   if (klickSperre) { klickSperre = false; return; }
   const el = e.target.closest('[data-a]');
   if (!el || el.disabled) return;
+  if (gesperrt(el)) { toast(ZU_TEXT); return; }
   const fn = AKT[el.dataset.a];
   if (fn) fn(el, e);
 });
@@ -3314,6 +3365,7 @@ document.addEventListener('submit', (e) => {
   const art = e.target.dataset.form;
   if (!art || !FORMS[art]) return;
   e.preventDefault();
+  if (e.target.closest('.thema.zu')) { toast(ZU_TEXT); return; }
   FORMS[art](e.target);
 });
 document.addEventListener('input', (e) => {
@@ -3339,7 +3391,7 @@ document.addEventListener('paste', (e) => {
   const t = e.target, feld = t && t.matches && t.matches('input,textarea');
   const text = e.clipboardData ? e.clipboardData.getData('text') : '';
   const bilder = !feld && S.ui.bereich === 'themen' && e.clipboardData && e.clipboardData.files ? Array.from(e.clipboardData.files).filter(istAnhang) : [];
-  if (bilder.length) { e.preventDefault(); anhDazu(bilder); return; }   // ein Bildschirmfoto im Thema einfügen
+  if (bilder.length) { e.preventDefault(); if (aktThema() && aktThema().zu) toast(ZU_TEXT); else anhDazu(bilder); return; }   // ein Bildschirmfoto im Thema einfügen
   if (feld && (t.id === 'neu-leute' || t.id === 'neu-ziel' || t.id === 'neu-bst')) {   // eine Liste aus Excel: jede Zeile ein Eintrag
     if (!/[\r\n\t]/.test(text.trim())) return;
     e.preventDefault();
@@ -3361,7 +3413,7 @@ window.addEventListener('drop', (e) => {
   if (!mitDatei(e)) return;
   e.preventDefault(); document.body.classList.remove('drueber');
   const fl = Array.from(e.dataTransfer.files || []);
-  if (S.ui.bereich === 'themen' && fl.length && fl.every(istAnhang)) anhDazu(fl); else importDateien(fl);
+  if (S.ui.bereich === 'themen' && fl.length && fl.every(istAnhang)) { if (aktThema() && aktThema().zu) toast(ZU_TEXT); else anhDazu(fl); } else importDateien(fl);
 });
 $('#datei-wahl').addEventListener('change', (e) => { importDateien(Array.from(e.target.files || [])); e.target.value = ''; });
 $('#daten-wahl').addEventListener('change', (e) => { const file = e.target.files && e.target.files[0]; if (file) ladeDatei(file); e.target.value = ''; });
@@ -3404,7 +3456,7 @@ function zugZiel(e) {
 document.addEventListener('pointerdown', (e) => {
   if (e.pointerType === 'touch' || e.button !== 0 || !e.target.closest || e.target.closest('input,textarea,select')) return;
   const k = e.target.closest('.karte') || e.target.closest('[data-zieh]');
-  if (!k || k.closest('.tafel.fest')) return;
+  if (!k || k.closest('.tafel.fest') || k.closest('.thema.zu')) return;
   const r = k.getBoundingClientRect(), karte = k.classList.contains('karte');
   zug = { id: karte ? k.dataset.id : k.dataset.zid, art: karte ? 'karte' : k.dataset.zieh, el: k, x: e.clientX, y: e.clientY, dx: e.clientX - r.left, dy: e.clientY - r.top, b: r.width, geist: null };
 });
