@@ -9,6 +9,7 @@
 <style>
 /* Ruhige Fläche, Glas-Leiste, Vertiefung in Sheets.
    Aufbau: vier Bereiche in der Leiste (Zahlen, Kunden, Themen, Ergebnis), je ein Bildschirm, eine Aufgabe.
+   Oben rechts: Rückmeldung zum Tool, Parkplatz, Sichern, Einstellungen.
    Diagrammfarben (--dz-*): geprüfter Satz für hell und dunkel; Blau = Ertrag und was bleibt, Grau = Aufwand und Übriges. */
 :root{
   --bg:#F5F5F7; --card:#FFFFFF; --ink:#1D1D1F; --muted:#6E6E73;
@@ -313,7 +314,7 @@ body.drueber .ablage,body.drueber .tab-rahmen,body.drueber .dg{border-color:var(
 .sp-kopf button{font-weight:700;border-radius:.4rem;padding:.1rem .35rem;margin:-.1rem -.35rem;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .sp-kopf button:hover{background:var(--fill)}
 .sp-kopf .zahl{color:var(--muted);font-weight:600;font-size:.875rem}
-.karte{display:block;width:100%;padding:.55rem .75rem;border-radius:.75rem;background:var(--bg);font-weight:500;font-size:1.0625rem;line-height:1.25;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:manipulation;overflow-wrap:anywhere}
+.karte{display:flex;align-items:center;text-align:left;min-height:var(--kh,0);width:100%;padding:.55rem .75rem;border-radius:.75rem;background:var(--bg);font-weight:500;font-size:1.0625rem;line-height:1.25;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:manipulation;overflow-wrap:anywhere}
 .spalte.pool .karte{background:var(--card);box-shadow:var(--shadow)}
 .zieht{opacity:.3}
 .ein-vor,.ein-nach{position:relative}
@@ -328,7 +329,81 @@ body.am-ziehen,body.am-ziehen .karte{cursor:grabbing}
 body.am-ziehen{user-select:none;-webkit-user-select:none}
 .sp-leer{color:var(--muted);font-size:.875rem;line-height:1.3;padding:.3rem .25rem}
 .sp-neu input{width:100%;height:2.6rem;padding:0 .8rem;border-radius:.75rem;border:1px solid var(--sep);background:var(--card);font-size:1rem}
-.tafel-unten{margin-top:.3rem}
+.tafel-unten{margin-top:.3rem;justify-content:space-between}
+.tafel.fest .karte{cursor:default}
+.karte{flex-direction:column;align-items:flex-start;justify-content:center;gap:.1rem}
+.karte small{display:block;color:var(--muted);font-size:.8125rem;font-weight:400;line-height:1.2}
+.sp-hinweis{margin:-.25rem .25rem .1rem;color:var(--warn);font-size:.8125rem;font-weight:600}
+.tafel-unten > .reihe{gap:.2rem 1rem}
+/* Mitarbeiterliste: Bestand, Ein- und Austritte, Liste im Sheet */
+.ma-leer{background:var(--card);border-radius:1.25rem;box-shadow:var(--shadow);padding:1rem 1.2rem;display:flex;flex-direction:column;gap:.8rem}
+.ma-leer p{color:var(--muted)}
+.ew-art{flex:none;min-width:4.6rem;text-align:center;font-size:.75rem;font-weight:700;padding:.2rem .55rem;border-radius:.6rem;background:var(--fill);color:var(--muted)}
+.ew-art.ein{background:var(--brand-soft);color:var(--accent)}
+.ew-art.aus{background:var(--warn-soft);color:var(--warn)}
+.rz.ew{padding-left:.8rem}
+.bestand .bg li button{padding:.38rem 0;font-size:1rem}
+.ma-liste{display:flex;flex-direction:column;background:var(--card);border-radius:1rem;box-shadow:var(--shadow);margin-bottom:.4rem}
+.ma-liste li + li{border-top:1px solid var(--sep)}
+.ma-z{display:flex;align-items:center;gap:.7rem;width:100%;min-height:3rem;padding:.45rem .8rem .45rem 1rem;text-align:left}
+.ma-z .ma-n{font-weight:600;min-width:0;overflow-wrap:anywhere}
+.ma-z .ma-m{flex:1;min-width:0;color:var(--muted);font-size:.875rem;text-align:right}
+.ma-z .pf{width:1rem;height:1rem;color:var(--muted);flex:none}
+.ma-weg summary{cursor:pointer;color:var(--muted);font-weight:600;padding:.6rem 0}
+.sheet-inhalt > .bl:first-of-type{margin-top:.6rem}
+.f[hidden]{display:none}
+.festband{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem .8rem;margin-top:1rem;padding:.55rem .6rem .55rem .9rem;border-radius:1rem;background:var(--brand-soft);font-weight:600}
+.festband .ic{color:var(--accent)}
+.festband > span{flex:1;min-width:10rem}
+.festband .btn{background:var(--card)}
+/* Personal und offene Ziele: Zeilen wie beim Rückblick, rechts der Stand */
+.rz .b-text{min-width:12rem}
+.rz.gl{background:var(--brand-soft);box-shadow:inset 0 0 0 1.5px var(--brand)}
+.rz .seg button.st-besetzt[aria-pressed="true"],.rz .seg button.st-ja[aria-pressed="true"]{background:var(--accent-fill);color:#fff}
+.rz .seg button.st-laeuft[aria-pressed="true"]{background:var(--warn-soft);color:var(--warn);box-shadow:inset 0 0 0 1.5px var(--warn)}
+.oz-st{display:block;font-size:.8125rem;font-weight:700;color:var(--muted)}
+.oz-st.teilweise{color:var(--warn)}
+.f > .seg{display:flex;flex-wrap:wrap}
+.f > .seg button{flex:1 1 auto}
+/* Ausblick aufs Folgejahr */
+.ausblick{background:var(--card);border-radius:1.25rem;box-shadow:var(--shadow);padding:1.1rem 1.25rem 1.1rem;margin-top:1rem}
+.ab-kopf{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:.5rem 1rem}
+.ab-kopf h2{font-size:1.1875rem;font-weight:700}
+.ab-kopf p{color:var(--muted);font-size:.9375rem;margin-top:.1rem}
+.ab-zahlen{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem 1.2rem;margin:1rem 0 .8rem}
+.ab-zahlen > div{min-width:0}
+.ab-zahlen span{display:block;color:var(--muted);font-size:.8125rem;font-weight:600}
+.ab-zahlen b{display:block;font-family:var(--display);font-size:1.75rem;font-weight:700;letter-spacing:-.02em;line-height:1.2;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ab-zahlen small{color:var(--muted);font-size:.8125rem}
+.ab-balken{height:.85rem;border-radius:.45rem;background:var(--fill);overflow:hidden}
+.ab-balken i{display:block;height:100%;background:var(--accent-fill);border-radius:.45rem}
+.ausblick .bl{margin-top:1.1rem}
+.ab-liste{list-style:none;margin:0 0 .6rem;padding:0;display:flex;flex-direction:column;gap:.3rem}
+.ab-liste button{display:flex;justify-content:space-between;gap:1rem;width:100%;padding:.5rem .8rem;border-radius:.75rem;background:var(--bg);font-weight:500}
+.ab-liste button span{min-width:0;overflow-wrap:anywhere}
+.ab-liste button b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.zweier{display:grid;grid-template-columns:minmax(0,1fr) 10rem auto;gap:.45rem;margin-top:.8rem}
+.zweier input{min-width:0;height:3rem;padding:0 1rem;border-radius:1rem;border:1px solid var(--sep);background:var(--bg);font-size:1.0625rem}
+.ab-notiz{color:var(--muted);margin-top:.8rem;white-space:pre-wrap;overflow-wrap:anywhere}
+.e-schmal{width:auto;min-width:min(100%,20rem)}
+/* Rückmeldung zum Tool */
+.rseg{display:flex;flex-wrap:wrap;gap:.2rem;padding:.2rem;border-radius:.85rem;background:var(--fill)}
+.rseg label{position:relative;flex:1 1 auto}
+.rseg input{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;cursor:pointer}
+.rseg span{display:grid;place-items:center;height:2.15rem;padding:0 .7rem;border-radius:.65rem;font-weight:600;font-size:.875rem;color:var(--muted);white-space:nowrap}
+.rseg input:checked + span{background:var(--pill);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.rseg input:focus-visible + span{outline:2px solid var(--accent);outline-offset:1px}
+.rm-teil{display:flex;flex-direction:column;gap:.7rem;border-top:1px solid var(--sep);padding-top:1rem}
+.rm-teil > h3{font-size:1.0625rem;font-weight:700}
+.rml{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.45rem}
+.rml li{display:flex;align-items:flex-start;gap:.6rem;padding:.55rem .5rem .55rem .9rem;border-radius:.9rem;background:var(--bg)}
+.rml li > div{flex:1;min-width:0}
+.rml b{display:block;font-size:.8125rem;color:var(--muted);font-weight:600}
+.rml p{margin-top:.1rem;overflow-wrap:anywhere;white-space:pre-wrap}
+.rm-alt{border-top:1px solid var(--sep);padding-top:.8rem}
+.rm-alt summary{cursor:pointer;color:var(--muted);font-weight:600;width:max-content;border-radius:.3rem}
+.rm-alt[open] summary{margin-bottom:.7rem}
+.rm-alt .reihe{margin-top:.7rem}
 
 /* ---------- Ergebnis ---------- */
 .blatt{max-width:52rem;margin:0 auto;padding:2rem 2.2rem}
@@ -434,6 +509,9 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
   .frage{font-size:1.0625rem}
   .dreier{grid-template-columns:1fr 1fr auto}
   .dreier input:first-child{grid-column:1 / -1}
+  .ab-zahlen{grid-template-columns:1fr 1fr}
+  .ab-zahlen b{font-size:1.375rem}
+  .zweier{grid-template-columns:minmax(0,1fr) 6.5rem auto}
   .blatt{padding:1.3rem 1.2rem}
   .e-besch{font-size:.875rem}
   .e-besch td.nw{white-space:normal}
@@ -481,6 +559,13 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
   #druck .e-tab thead th,#druck .e-besch thead th{color:#444;font-size:8pt}
   #druck .e-fuss{color:#666;font-size:8pt}
   #druck .e-grau{color:#555}
+  #druck .d-gruppen{display:grid;grid-template-columns:repeat(auto-fit,minmax(52mm,1fr));gap:5mm;margin-bottom:12pt}
+  #druck .d-gr{break-inside:avoid;border:.75pt solid #999;border-radius:6pt;padding:6pt 9pt 4pt}
+  #druck .d-gr h2{font-size:12pt;border-bottom:.75pt solid #999;padding-bottom:3pt;margin-bottom:2pt}
+  #druck .d-gr h2 span{font-weight:400;color:#555}
+  #druck .d-gr ol{list-style:none;margin:0;padding:0}
+  #druck .d-gr li{display:flex;align-items:center;min-height:2.7em;padding:1pt 0;border-bottom:.5pt solid #ddd;font-size:11pt;line-height:1.25}
+  #druck .d-gr li:last-child{border-bottom:0}
 }
 </style>
 </head>
@@ -508,8 +593,8 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '0.7';         // Version des Tools, steht in den Einstellungen
-const FORMAT = 6;              // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
+const VERSION = '0.8';         // Version des Tools, steht in den Einstellungen
+const FORMAT = 7;              // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
 const KEY_G = KEY + ':gesichert';   // Stand, der zuletzt in eine Datei ging
@@ -556,7 +641,10 @@ const IC = {
   park: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/>',
   left: '<path d="m15 18-6-6 6-6"/>',
   rueck: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
-  liste: '<path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/>'
+  liste: '<path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/>',
+  sprech: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  schloss: '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  kopie: '<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>'
 };
 const ic = (n, klasse) => '<svg class="ic' + (klasse ? ' ' + klasse : '') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + (IC[n] || '') + '</svg>';
 
@@ -566,7 +654,16 @@ const ZEILENTRENNER = new RegExp('[' + String.fromCharCode(0x2028, 0x2029) + ']'
 const MON = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
 const MON_NR = { jan: 1, feb: 2, 'mär': 3, mrz: 3, mar: 3, apr: 4, mai: 5, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, okt: 10, oct: 10, nov: 11, dez: 12, dec: 12 };
 const monatAus = (text) => MON_NR[String(text).trim().slice(0, 3).toLowerCase()] || 0;   // «Nov 26» → 11
-const ARTEN = [['thema', 'Thema'], ['rueckblick', 'Rückblick'], ['gruppen', 'Gruppen'], ['ziele', 'Ziele']];
+const ARTEN = [['thema', 'Thema'], ['rueckblick', 'Rückblick'], ['gruppen', 'Gruppen'], ['ziele', 'Ziele'], ['personal', 'Personal']];
+const BSTAND = { offen: 'Offen', laeuft: 'Läuft', besetzt: 'Besetzt' };   // Personal: Stand eines Bedarfs
+const RM_ARTEN = { unuebersichtlich: 'Unübersichtlich', fehlt: 'Fehlt etwas', fehler: 'Fehler', idee: 'Idee', anderes: 'Anderes' };   // Rückmeldung zum Tool
+const PERSONAL_FRAGE = 'Sind wir gut besetzt? Wo gibt es Vakanzen, wer geht, und wer folgt nach?';
+/* Mitarbeiterliste: Positionen in der Reihenfolge des Bestands (Vorschläge beim Eintippen). Polier ist, wer «Polier» in der
+   Position hat; Leiter und Bauführer arbeiten im Büro und stehen nicht auf der Tafel; Kader sind sie, die Poliere und die Vorarbeiter. */
+const POSITIONEN = ['Abteilungsleiter', 'Bauführer', 'Hilfsbauführer', 'Polier', 'Vorarbeiter', 'Facharbeiter', 'Maschinist', 'Bauarbeiter', 'Lernender'];
+const istPolier = (m) => /polier/i.test(m.position || '');
+const imBuero = (m) => !istPolier(m) && /leiter|führer|fuehrer/i.test(m.position || '');
+const istKader = (m) => istPolier(m) || imBuero(m) || /vorarbeiter/i.test(m.position || '');
 const STAND = { erreicht: 'Erreicht', teilweise: 'Teilweise', offen: 'Offen', '': 'Nicht bewertet' };
 /* Kunden: die Textfelder eines Auftrags, und wonach die Ranglisten zählen (Feld, Titel, Unterzeile) */
 const AF = ['jahr', 'objekt', 'planer', 'bauherr', 'bauherrArt', 'objektArt', 'speziell', 'mitbewerber', 'notiz'];
@@ -577,7 +674,7 @@ const ganz = (v) => (typeof v === 'number' && isFinite(v) && v >= 0 ? Math.round
 
 /* ---------- Aufbau der Daten ---------- */
 function themaNeu(art, titelText, frage) {
-  return { id: uid(), art: art || 'thema', eltern: '', titel: titelText || 'Neues Thema', frage: frage || '', notizen: [], beschluesse: [], ziele: [], gruppen: [], leute: [], baustellen: [] };
+  return { id: uid(), art: art || 'thema', eltern: '', titel: titelText || 'Neues Thema', frage: frage || '', notizen: [], beschluesse: [], ziele: [], gruppen: [], leute: [], baustellen: [], bedarf: [], fest: '' };
 }
 /* Unterpunkte stehen direkt hinter ihrem Thema («eltern» nennt es). Es gibt zwei Ebenen: Ein Unterpunkt hat selbst keine Unterpunkte. */
 function ordnen(T) {
@@ -614,6 +711,9 @@ function leer() {
     themen: themenStart(),
     parkplatz: [],   // was aufkommt, aber zu keinem Thema gehört: [{id, text}]
     glPunkte: [],    // eigene Punkte für die GL, stehen nie im Ergebnis: [{id, text}]
+    rueckmeldungen: [],   // was am Tool auffällt, zum Weitergeben an Claude: [{id, datum, wo, art, text, version, umgebung, breite, status, uebergeben}]
+    budget: { ziel: null, auftraege: [], notiz: '' },   // Ausblick aufs Folgejahr: Umsatz-Ziel und was schon als Auftrag da ist [{id, name, betrag}]
+    mitarbeiter: [],   // Mitarbeiterliste: [{id, name, position, polier (Kennung des Poliers), eintritt, austritt}]
     // Kunden: Offerten je Jahr [{id, jahr, gerechnet, erhalten}] und Aufträge [{id, jahr, objekt, planer, bauherr, bauherrArt, objektArt, speziell, mitbewerber, eingeladen, betrag, notiz}]
     kunden: { offerten: [], auftraege: [], ansicht: 'diagramme', jahr: '' },
     ui: { bereich: 'zahlen', thema: '', auf: {}, bst: 'bf' }
@@ -662,8 +762,13 @@ function beispiel() {
   const T = s.themen;
   T[0].ziele = [['Rapporte am selben Tag im Büro', 'erreicht'], ['Zwei Mitarbeiter weiterbilden', 'teilweise'], ['Lagerplatz aufräumen', 'offen'], ['Unfallfrei durchs Jahr', 'teilweise']].map((z) => ({ id: uid(), text: z[0], stand: z[1] }));
   T[0].notizen = [N('Weiterbildung: einer hat abgeschlossen, einer startet im Frühling')];
-  const G = T[1].gruppen;
-  T[1].leute = [0, 0, 0, 0, 1, 1, 1, 2, 2, 2, -1].map((g, i) => ({ id: uid(), name: 'Mitarbeiter ' + (i + 1), gruppe: g < 0 ? '' : G[g].id }));
+  const J = parseInt(String(s.meta.datum).slice(0, 4), 10) || new Date().getFullYear();
+  const M = (name, position, polier, eintritt, austritt) => ({ id: uid(), name: name, position: position, polier: polier || '', eintritt: eintritt || '', austritt: austritt || '' });
+  const po = [M('Polier 1', 'Polier', '', '1.4.2009'), M('Polier 2', 'Polier', '', '1.3.2001', 'Sommer ' + (J + 1)), M('Polier 3', 'Polier', '', '1.8.2016')];
+  s.mitarbeiter = [M('Bauführer 1', 'Bauführer', '', '1.1.2012'), M('Bauführer 2', 'Bauführer', '', '1.6.2019'), M('Hilfsbauführer 1', 'Hilfsbauführer', '', '1.10.' + J)].concat(po,
+    [['Vorarbeiter', 0], ['Bauarbeiter', 0], ['Bauarbeiter', 0], ['Lernender', 0], ['Vorarbeiter', 1], ['Bauarbeiter', 1], ['Bauarbeiter', 1], ['Vorarbeiter', 2], ['Bauarbeiter', 2], ['Bauarbeiter', 2], ['Bauarbeiter', -1]]
+      .map((x, i) => M('Mitarbeiter ' + (i + 1), x[0], x[1] < 0 ? '' : po[x[1]].id, i === 10 ? '1.3.' + J : '')),
+    [M('Mitarbeiter 12', 'Bauarbeiter', po[2].id, '1.5.2018', '30.6.' + J)]);
   T[1].beschluesse = [B('Zuteilung gilt ab 1. Januar, Wechsel nur über die Leitung', 'Leitung', '1. Januar')];
   T[2].titel = 'Lagerplatz'; T[2].frage = 'Der Lagerplatz ist unübersichtlich. Was räumen wir auf, und wer macht es bis wann?';
   T[2].notizen = [N('Regale beschriften'), N('Altes Material entsorgen')];
@@ -672,11 +777,16 @@ function beispiel() {
   T[3].notizen = [N('Wünsche bis Mitte Dezember sammeln'), N('Kosten mit der Leitung klären')];
   T[3].beschluesse = [B('Kurswünsche sammeln', 'Alle', '15. Dezember')];
   T[4].beschluesse = [B('Unfallfrei durchs Jahr', 'Alle', 'Ende Jahr'), B('Gruppen bleiben das ganze Jahr bestehen', 'Leitung', 'Ende Jahr'), B('Lagerplatz ist aufgeräumt', 'Gruppe 2', 'Ende März', true)];
+  T[0].ziele[3].weiter = 'ja'; T[4].beschluesse[0].aus = T[0].ziele[3].id; T[0].ziele[2].weiter = 'ja'; T[4].beschluesse[2].aus = T[0].ziele[2].id;
   s.parkplatz = ['Parkplätze beim Lager', 'Neue Kaffeemaschine'].map((x) => ({ id: uid(), text: x }));
   T[0].baustellen = [['Parkhaus Nord, Decke', 'Bauführer 1', 'Polier 1'], ['Brücke am Dorfbach', 'Bauführer 2', 'Polier 2'], ['Schulhaus, Fassade', 'Bauführer 1', 'Polier 3'], ['Tiefgarage Zentrum', 'Bauführer 2', 'Polier 1']].map((b) => ({ id: uid(), name: b[0], bf: b[1], po: b[2] }));
   const U = (titelText, frage, notiz) => { const u = themaNeu('thema', titelText, frage); u.eltern = T[3].id; u.notizen = [N(notiz)]; return u; };
   s.themen.splice(4, 0, U('Kurse im Winter', 'Welche Kurse passen in die ruhigen Monate?', 'Erste-Hilfe-Kurs im Januar'), U('Lernende', 'Wie viele Lernende nehmen wir im Sommer?', 'Ab Sommer ein Lernender mehr'));
   s.glPunkte = ['Zusammenarbeit mit den anderen Abteilungen', 'Gemeinsamer Einkauf von Verbrauchsmaterial'].map((x) => ({ id: uid(), text: x }));
+  const pe = themaNeu('personal', 'Personal', PERSONAL_FRAGE);
+  pe.bedarf = [['Polier', 'Nachfolge, ein Polier hört auf', 'Sommer', 'laeuft', true], ['Bauarbeiter', 'Nachfolge', 'Frühling', 'offen', false], ['Hilfsbauführer', 'Entlastung im Büro', '', 'besetzt', false]].map((b) => ({ id: uid(), was: b[0], warum: b[1], bis: b[2], stand: b[3], notiz: '', gl: b[4] }));
+  s.themen.splice(s.themen.length - 1, 0, pe);
+  s.budget = { ziel: 4600000, auftraege: [['Parkhaus Bahnhof, zweite Etappe', 780000], ['Brücke Mühleweg', 640000], ['Kleinaufträge unter Vertrag', 480000]].map((a) => ({ id: uid(), name: a[0], betrag: a[1] })), notiz: 'Zwei grössere Offerten sind noch offen.' };
   s.kunden.offerten = [['2021', 18, 5], ['2022', 22, 8], ['2023', 20, 9], ['2024', 16, 7], ['2025', 19, 8]].map((o) => ({ id: uid(), jahr: o[0], gerechnet: o[1], erhalten: o[2] }));
   s.kunden.auftraege = [
     ['2023', 'Parkhaus Nord, Decke', 'Ingenieurbüro Nord', 'Gemeinde Musterdorf', 'Gemeinde', 'Parkhaus', '', 'Baufirma A', true, 420000],
@@ -701,6 +811,7 @@ function migriere(d) {
   if (d.v < 4) { if (!Array.isArray(d.parkplatz)) d.parkplatz = []; d.v = 4; }   // 0.5: Parkplatz
   if (d.v < 5) { if (!Array.isArray(d.glPunkte)) d.glPunkte = []; d.v = 5; }     // 0.6: Unterpunkte, Baustellen im Rückblick, Punkte für die GL; normal() ergänzt die Felder der Themen
   if (d.v < 6) { if (!d.kunden || typeof d.kunden !== 'object') d.kunden = { offerten: [], auftraege: [] }; d.v = 6; }   // 0.7: Kunden (Offerten je Jahr, Aufträge)
+  if (d.v < 7) d.v = 7;   // 0.8: Rückmeldungen, Ausblick aufs Folgejahr, Personal, festgehaltene Gruppen, Mitarbeiterliste; normal() ergänzt die Felder und baut die Liste aus der Tafel
   return d;
 }
 function normal(d) {
@@ -720,11 +831,21 @@ function normal(d) {
     if (typeof t.titel !== 'string') t.titel = 'Thema';
     if (typeof t.frage !== 'string') t.frage = '';
     if (typeof t.eltern !== 'string') t.eltern = '';
-    ['notizen', 'beschluesse', 'ziele', 'gruppen', 'leute', 'baustellen'].forEach((k) => { if (!Array.isArray(t[k])) t[k] = []; });
+    ['notizen', 'beschluesse', 'ziele', 'gruppen', 'leute', 'baustellen', 'bedarf'].forEach((k) => { if (!Array.isArray(t[k])) t[k] = []; });
+    if (typeof t.fest !== 'string') t.fest = '';
+    t.bedarf = t.bedarf.filter((x) => x && typeof x === 'object');
+    t.bedarf.forEach((x) => { if (!x.id) x.id = uid(); ['was', 'warum', 'bis', 'notiz'].forEach((k) => { if (typeof x[k] !== 'string') x[k] = ''; }); if (!BSTAND[x.stand]) x.stand = 'offen'; });
   });
   s.themen = ordnen(s.themen);
+  s.mitarbeiter = maNormal(d && d.mitarbeiter, s.themen);
+  spiegeln(s);
   s.glPunkte = (Array.isArray(s.glPunkte) ? s.glPunkte : []).filter((x) => x && typeof x.text === 'string');
   s.glPunkte.forEach((x) => { if (!x.id) x.id = uid(); });
+  s.rueckmeldungen = (Array.isArray(s.rueckmeldungen) ? s.rueckmeldungen : []).filter((x) => x && typeof x.text === 'string' && x.text.trim());
+  s.rueckmeldungen.forEach((x) => { if (!x.id) x.id = uid(); if (!RM_ARTEN[x.art]) x.art = 'anderes'; if (x.status !== 'uebergeben') x.status = 'offen'; ['wo', 'datum', 'version', 'umgebung'].forEach((k) => { if (typeof x[k] !== 'string') x[k] = ''; }); });
+  const bu = d && d.budget && typeof d.budget === 'object' ? d.budget : {};
+  s.budget = Object.assign({}, bu, { ziel: typeof bu.ziel === 'number' && isFinite(bu.ziel) && bu.ziel >= 0 ? bu.ziel : null, auftraege: (Array.isArray(bu.auftraege) ? bu.auftraege : []).filter((x) => x && typeof x === 'object'), notiz: typeof bu.notiz === 'string' ? bu.notiz : '' });
+  s.budget.auftraege.forEach((x) => { if (!x.id) x.id = uid(); x.name = typeof x.name === 'string' ? x.name : ''; x.betrag = typeof x.betrag === 'number' && isFinite(x.betrag) ? x.betrag : null; });
   const kd = d && d.kunden && typeof d.kunden === 'object' ? d.kunden : {};
   const alsText = (x) => (x === null || x === undefined ? '' : String(x)).trim();
   s.kunden = Object.assign({}, kd, {
@@ -744,6 +865,84 @@ function normal(d) {
   if (s.ui.bst !== 'po') s.ui.bst = 'bf';
   if (['zahlen', 'kunden', 'themen', 'ergebnis', 'gl'].indexOf(s.ui.bereich) < 0) s.ui.bereich = 'zahlen';
   return s;
+}
+/* ---------- Mitarbeiterliste ---------- */
+/* In Form bringen. Fehlt die Liste (Datei aus 0.7 oder älter), entsteht sie aus der Tafel der Gruppenzuteilung: Jede Gruppe mit
+   Leuten (oder mit eigenem Namen) wird ein Polier, jeder Name ein Mitarbeiter mit dieser Gruppe. Die Kennungen bleiben dieselben. */
+function maNormal(roh, themen) {
+  const gleich = (x) => String(x || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  let L;
+  if (Array.isArray(roh)) L = roh.filter((x) => x && typeof x === 'object' && typeof x.name === 'string' && x.name.trim());
+  else {
+    L = [];
+    const nach = {};
+    const dazu = (id, name, position, polier) => {
+      const k = gleich(name);
+      if (!k) return null;
+      if (!nach[k]) { nach[k] = { id: id || uid(), name: String(name).trim(), position: position, polier: polier, eintritt: '', austritt: '' }; L.push(nach[k]); }
+      return nach[k];
+    };
+    (themen || []).filter((t) => t.art === 'gruppen').forEach((t) => {
+      const zu = {};
+      t.gruppen.forEach((g) => {
+        if (!g || typeof g !== 'object') return;
+        if (!t.leute.some((p) => p && p.gruppe === g.id) && /^(neue )?(gruppe|polier)( \d+)?$/i.test(String(g.name || '').trim())) return;   // leer und mit Platzhalter wie «Gruppe 1» oder «Polier 1»
+        const m = dazu(g.id, g.name, 'Polier', '');
+        if (m) { if (!m.position) m.position = 'Polier'; zu[g.id] = m.id; }
+      });
+      t.leute.forEach((p) => { if (p && typeof p === 'object') dazu(p.id, p.name, '', zu[p.gruppe] || ''); });
+    });
+  }
+  const ids = {};
+  L.forEach((m) => {
+    if (!m.id || typeof m.id !== 'string' || ids[m.id]) m.id = uid();
+    ids[m.id] = 1;
+    m.name = m.name.trim();
+    ['position', 'polier', 'eintritt', 'austritt'].forEach((k) => { m[k] = typeof m[k] === 'string' ? m[k].trim() : ''; });
+  });
+  L.forEach((m) => { if (m.polier && (!ids[m.polier] || m.polier === m.id)) m.polier = ''; });
+  return L;
+}
+const jahrVon = (s) => { const j = parseInt(String((s && s.meta && s.meta.datum) || '').slice(0, 4), 10); return j > 2000 ? j : new Date().getFullYear(); };
+/* Ein Datum aus der Liste als Zahl JJJJMMTT: «1.3.2026», «2026-03-01», «3.2027», «März 2027», «Sommer 2027», «2027» oder eine
+   Excel-Zahl. Fehlen Tag oder Monat, zählt beim Eintritt der Anfang, beim Austritt («ende») das Ende des Zeitraums. 0 = unbekannt. */
+function datumWert(text, ende) {
+  const s = String(text || '').trim().toLowerCase();
+  if (!s) return 0;
+  let j = 0, m = 0, d = 0, x;
+  if ((x = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) { j = +x[1]; m = +x[2]; d = +x[3]; }
+  else if ((x = s.match(/(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{2,4})/))) { j = +x[3]; m = +x[2]; d = +x[1]; if (j < 100) j += 2000; }
+  else if ((x = s.match(/^(\d{5})$/)) && +x[1] > 20000 && +x[1] < 80000) { const t = new Date(Date.UTC(1899, 11, 30) + (+x[1]) * 864e5); j = t.getUTCFullYear(); m = t.getUTCMonth() + 1; d = t.getUTCDate(); }
+  else if ((x = s.match(/(^|[^\d.])(\d{1,2})[./]\s*(\d{4})/))) { j = +x[3]; m = +x[2]; }
+  else if ((x = s.match(/(19|20)\d{2}/))) {
+    j = +x[0];
+    const w = s.match(/[a-zäöü]+/g) || [], zeit = { 'frühling': [3, 5], fruehling: [3, 5], sommer: [6, 8], herbst: [9, 11] };
+    w.forEach((wort) => { if (!m && MON_NR[wort.slice(0, 3)]) m = MON_NR[wort.slice(0, 3)]; });
+    if (!m) w.forEach((wort) => { if (!m && zeit[wort]) m = zeit[wort][ende ? 1 : 0]; });
+  }
+  if (!j || j < 1950 || j > 2100 || m < 0 || m > 12 || d < 0 || d > 31) return 0;
+  if (!m) m = ende ? 12 : 1;
+  if (!d) d = ende ? 31 : 1;
+  return j * 10000 + m * 100 + d;
+}
+const imFolgejahr = (m, J) => { const a = datumWert(m.austritt, true); return !a || Math.floor(a / 10000) > J; };   // im Jahr nach dem Strategietag noch dabei
+const aufTafel = (m, J) => !istPolier(m) && !imBuero(m) && imFolgejahr(m, J);
+const imBestand = (m, w) => { const e = datumWert(m.eintritt), a = datumWert(m.austritt, true); return (!e || e <= w) && (!a || a >= w); };   // am Tag des Strategietags angestellt
+/* Die Tafel jeder Gruppenzuteilung folgt der Liste: Die Poliere sind die Gruppen, die übrigen Mitarbeiter ausser dem Büro die Kärtchen.
+   «gruppen» und «leute» am Thema sind davon eine Abschrift. Ist die Zuteilung festgehalten, bleibt die Abschrift, wie sie war; nur
+   Namen folgen der Liste. */
+function spiegeln(s) {
+  const L = Array.isArray(s.mitarbeiter) ? s.mitarbeiter : [], J = jahrVon(s), nach = {}, pid = {};
+  L.forEach((m) => { nach[m.id] = m; });
+  const P = L.filter((m) => istPolier(m) && imFolgejahr(m, J));
+  P.forEach((m) => { pid[m.id] = 1; });
+  const leute = L.filter((m) => aufTafel(m, J));
+  s.themen.forEach((t) => {
+    if (t.art !== 'gruppen') return;
+    if (t.fest) { t.gruppen.concat(t.leute).forEach((x) => { if (x && nach[x.id]) x.name = nach[x.id].name; }); return; }
+    t.gruppen = P.map((m) => ({ id: m.id, name: m.name }));
+    t.leute = leute.map((m) => ({ id: m.id, name: m.name, gruppe: pid[m.polier] ? m.polier : '' }));
+  });
 }
 /* Einen gespeicherten Stand übernehmen. Ein Beispiel aus einer älteren Version wird durch das heutige Beispiel ersetzt. */
 function vorbereiten(d) {
@@ -782,6 +981,7 @@ let glAn = IM_RAHMEN;    // Reiter «GL» mit den eigenen Punkten: je Gerät ein
 })();
 
 function speichern(nurAnsicht) {
+  spiegeln(S);
   if (!nurAnsicht) S.stand = new Date().toISOString();
   try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* ohne Zwischenspeicher weiter */ }
   if (nurAnsicht) return;
@@ -1137,8 +1337,8 @@ function kundenLesen(g) {
 /* Eigene Angaben mischen sich nicht mit dem Beispiel: Beispielzahlen und Beispieleinträge gehen weg, die Themen bleiben */
 function beispielWeg() {
   S.beispiel = false; S.zahlen.perioden = []; S.zahlen.zeilen = []; S.ui.auf = {};
-  S.themen.forEach((x) => { x.notizen = []; x.beschluesse = []; x.ziele = []; x.leute = []; x.baustellen = []; });
-  S.parkplatz = []; S.glPunkte = []; S.kunden.offerten = []; S.kunden.auftraege = [];
+  S.themen.forEach((x) => { x.notizen = []; x.beschluesse = []; x.ziele = []; x.leute = []; x.baustellen = []; x.bedarf = []; x.fest = ''; });
+  S.parkplatz = []; S.glPunkte = []; S.kunden.offerten = []; S.kunden.auftraege = []; S.budget = { ziel: null, auftraege: [], notiz: '' }; S.mitarbeiter = [];
 }
 /* Gelesene Tabellen übernehmen. Ein Jahr oder ein Auftrag (gleiches Jahr, gleiches Objekt), den es schon gibt, wird ergänzt statt verdoppelt. */
 function kundenUebernehmen(funde) {
@@ -1237,7 +1437,7 @@ async function ladeDatei(file) {
 }
 function ohneInhalt() {   // nichts eingetragen und die Themen wie am Anfang
   const vor = themenStart();
-  return !S.zahlen.perioden.length && S.themen.length === vor.length && S.themen.every((x, i) => x.titel === vor[i].titel && x.frage === vor[i].frage && !S.parkplatz.length && !S.glPunkte.length && !S.kunden.offerten.length && !S.kunden.auftraege.length && !x.baustellen.length && !x.notizen.length && !x.beschluesse.length && !x.ziele.length && !x.leute.length);
+  return !S.zahlen.perioden.length && S.themen.length === vor.length && S.themen.every((x, i) => x.titel === vor[i].titel && x.frage === vor[i].frage && !S.parkplatz.length && !S.glPunkte.length && !S.kunden.offerten.length && !S.kunden.auftraege.length && !x.baustellen.length && !x.notizen.length && !x.beschluesse.length && !x.ziele.length && !x.leute.length && !x.bedarf.length) && !S.rueckmeldungen.length && S.budget.ziel === null && !S.budget.auftraege.length && !S.mitarbeiter.length;
 }
 function uebernehmen(d, name) {
   merken();
@@ -1459,7 +1659,7 @@ function tabelleHTML() {
 
 /* Themen: Bausteine, aus denen ein Thema je nach Art besteht */
 const fertig = (t) => t.art === 'rueckblick' ? t.ziele.length > 0 && t.ziele.every((z) => z.stand)
-  : (t.beschluesse.length > 0 || (t.art === 'gruppen' && t.leute.length > 0 && t.leute.every((p) => t.gruppen.some((g) => g.id === p.gruppe))));
+  : (t.beschluesse.length > 0 || (t.art === 'personal' && t.bedarf.length > 0) || (t.art === 'gruppen' && (!!t.fest || (t.leute.length > 0 && t.leute.every((p) => t.gruppen.some((g) => g.id === p.gruppe))))));
 const kinderVon = (t) => S.themen.filter((k) => k.eltern === t.id);
 const vaterVon = (t) => (t && t.eltern && S.themen.find((x) => x.id === t.eltern)) || null;
 const erledigt = (t) => { const k = kinderVon(t); return k.length ? k.every(fertig) : fertig(t); };
@@ -1478,10 +1678,51 @@ const zaehlText = (t) => {
   const n = t.notizen.length, b = t.beschluesse.length, teile = [];
   if (n) teile.push(n + (n === 1 ? ' Notiz' : ' Notizen'));
   if (b) teile.push(b + (t.art === 'ziele' ? (b === 1 ? ' Ziel' : ' Ziele') : (b === 1 ? ' Beschluss' : ' Beschlüsse')));
+  if (t.art === 'personal' && t.bedarf.length) teile.unshift(t.bedarf.filter((x) => x.stand !== 'besetzt').length + ' offen');
   return teile.join(' · ');
 };
 const glKnopf = (art, x) => '<button type="button" class="n-gl" data-a="gl" data-art="' + art + '" data-id="' + x.id + '" aria-pressed="' + !!x.gl + '" aria-label="Für die GL vormerken">' + ic('flag') + '<span>GL</span></button>';
 const metaText = (b) => [b.wer, b.bis ? 'bis ' + b.bis : ''].filter(Boolean).join(' · ');
+const metaMit = (b) => [metaText(b), b.aus ? 'aus dem Rückblick' : ''].filter(Boolean).join(' · ');
+const bedarfMeta = (b) => [b.warum, b.bis ? 'bis ' + b.bis : '', b.notiz].filter(Boolean).join(' · ');
+/* Folgejahr: das Jahr nach dem Strategietag. Dorthin zeigen der Ausblick und die Ziele. */
+const sitzungsJahr = () => { const j = parseInt(String(S.meta.datum || '').slice(0, 4), 10); return j > 2000 ? j : new Date().getFullYear(); };
+const folgejahr = () => sitzungsJahr() + 1;
+const budgetSumme = () => S.budget.auftraege.reduce((a, x) => a + (x.betrag || 0), 0);
+const maVon = (id) => S.mitarbeiter.find((m) => m.id === id) || null;
+const sitzungWert = () => datumWert(S.meta.datum) || datumWert(heute());
+/* Positionen als Gruppen, in der Reihenfolge von POSITIONEN; andere danach, ohne Position zuletzt */
+function posGruppen(L) {
+  const g = [], platz = {};
+  L.forEach((m) => { const k = (m.position || '').toLowerCase(); if (platz[k] === undefined) { platz[k] = g.length; g.push({ name: m.position || 'Ohne Position', k: k, liste: [] }); } g[platz[k]].liste.push(m); });
+  const rang = (x) => { if (!x.k) return 999; const i = POSITIONEN.findIndex((p) => p.toLowerCase() === x.k); return i < 0 ? 100 : i; };
+  return g.sort((a, b) => rang(a) - rang(b) || a.name.localeCompare(b.name, 'de'));
+}
+/* Ein- und Austritte ab dem Jahr des Strategietags, nach Datum. Ein Austritt ohne lesbares Datum steht am Schluss. */
+function wechselListe() {
+  const J = sitzungsJahr(), aus = [];
+  S.mitarbeiter.forEach((m) => {
+    const e = datumWert(m.eintritt), a = datumWert(m.austritt, true);
+    if (e && Math.floor(e / 10000) >= J) aus.push({ m: m, art: 'ein', wert: e, text: m.eintritt });
+    if (m.austritt && (!a || Math.floor(a / 10000) >= J)) aus.push({ m: m, art: 'aus', wert: a || 99991231, text: m.austritt });
+  });
+  return aus.sort((x, y) => x.wert - y.wert);
+}
+const maMeta = (m, mitPosition) => { const p = m.polier ? maVon(m.polier) : null, w = sitzungWert(); return [mitPosition ? m.position : '', p ? 'bei ' + p.name : '', m.eintritt ? (datumWert(m.eintritt) > w ? 'ab ' : 'seit ') + m.eintritt : '', m.austritt ? 'bis ' + m.austritt : ''].filter(Boolean).join(' · '); };
+const karteInhalt = (p) => {
+  const m = maVon(p.id), zus = m ? [m.position, m.eintritt && datumWert(m.eintritt) > sitzungWert() ? 'ab ' + m.eintritt : '', m.austritt ? 'bis ' + m.austritt : ''].filter(Boolean).join(' · ') : '';
+  return '<span>' + esc(p.name) + '</span>' + (zus ? '<small>' + esc(zus) + '</small>' : '');
+};
+const namenWahl = (id, f) => { const N = S.mitarbeiter.filter((m) => f(m) && imFolgejahr(m, sitzungsJahr())).map((m) => m.name); return N.length ? '<datalist id="' + id + '">' + N.map((n) => '<option value="' + esc(n) + '">').join('') + '</datalist>' : ''; };
+/* Ziele aus dem Rückblick, die nicht erreicht sind: Sie kommen bei den Zielen fürs nächste Jahr wieder auf den Tisch.
+   «weiter» hält den Entscheid fest; ein übernommenes Ziel trägt in «aus» die Kennung des alten. */
+function offeneZiele() {
+  const aus = [];
+  S.themen.forEach((t) => { if (t.art === 'rueckblick') t.ziele.forEach((z) => { if (z.stand !== 'erreicht') aus.push(z); }); });
+  return aus;
+}
+const zielAus = (z) => S.themen.some((t) => t.art === 'ziele' && t.beschluesse.some((b) => b.aus === z.id));
+const weiterVon = (z) => (z.weiter === 'ja' ? (zielAus(z) ? 'ja' : '') : (z.weiter === 'nein' ? 'nein' : ''));
 /* Die Namen in einem Feld: «A / B», «A, B», «A (B)». Ein Zusatz in Klammern zählt als Name, wenn er gross beginnt
    und keine Ziffer enthält; «(ab Mai)» ist keiner. */
 function namenIn(text) {
@@ -1513,7 +1754,7 @@ const TEIL = {
   },
   beschluss(t) {
     const ziele = t.art === 'ziele';
-    return '<h2 class="bl">' + (ziele ? 'Ziele' : 'Beschluss') + '</h2><ul class="eintraege">' + t.beschluesse.map((b) => '<li class="besch' + (b.gl ? ' gl' : '') + '" data-zieh="beschluesse" data-zid="' + b.id + '"><span class="b-ic">' + ic('check') + '</span><button type="button" class="b-text" data-a="beschluss" data-id="' + b.id + '"><span class="b-was">' + esc(b.was) + '</span>' + (metaText(b) ? '<span class="b-meta">' + esc(metaText(b)) + '</span>' : '') + '</button>' + glKnopf('b', b) + '</li>').join('') + '</ul>' +
+    return '<h2 class="bl">' + (ziele ? 'Ziele' : 'Beschluss') + '</h2><ul class="eintraege">' + t.beschluesse.map((b) => '<li class="besch' + (b.gl ? ' gl' : '') + '" data-zieh="beschluesse" data-zid="' + b.id + '"><span class="b-ic">' + ic('check') + '</span><button type="button" class="b-text" data-a="beschluss" data-id="' + b.id + '"><span class="b-was">' + esc(b.was) + '</span>' + (metaMit(b) ? '<span class="b-meta">' + esc(metaMit(b)) + '</span>' : '') + '</button>' + glKnopf('b', b) + '</li>').join('') + '</ul>' +
       '<form class="dreier" data-form="beschluss"><input name="was" id="neu-was" placeholder="' + (ziele ? 'Ziel hinzufügen …' : 'Beschluss: Was?') + '" aria-label="Was" autocomplete="off"><input name="wer" placeholder="Wer?" aria-label="Wer" autocomplete="off"><input name="bis" placeholder="Bis wann?" aria-label="Bis wann" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Hinzufügen">' + ic('plus') + '</button></form>';
   },
   rueckblick(t) {
@@ -1531,28 +1772,104 @@ const TEIL = {
     return '<div class="bl-zeile"><h2 class="bl">Baustellen' + (B.length ? ' (' + B.length + ')' : '') + '</h2>' + (B.length ? seg('bst', [['bf', 'Bauführer'], ['po', 'Polier']], nach, 'klein') : '') + '</div>' +
       (B.length ? '<div class="bgr">' + bstGruppen(B, nach).map((g) => '<section class="bg"><header><b>' + esc(g.name || (nach === 'bf' ? 'Ohne Bauführer' : 'Ohne Polier')) + '</b><span class="zahl tnum">' + g.liste.length + '</span></header><ul>' +
         g.liste.map((e) => { const grau = [e.b[anderes], e.mit.length ? 'mit ' + e.mit.join(', ') : ''].filter(Boolean).join(' · '); return '<li data-zieh="baustellen" data-zid="' + e.b.id + '"><button type="button" data-a="baustelle" data-id="' + e.b.id + '"><span>' + esc(e.b.name) + '</span>' + (grau ? '<small>' + esc(grau) + '</small>' : '') + '</button></li>'; }).join('') + '</ul></section>').join('') + '</div>' : '') +
-      '<form class="dreier" data-form="baustelle"><input name="name" id="neu-bst" placeholder="Baustelle hinzufügen …" aria-label="Baustelle" autocomplete="off"><input name="bf" placeholder="Bauführer" aria-label="Bauführer" autocomplete="off"><input name="po" placeholder="Polier" aria-label="Polier" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Baustelle hinzufügen">' + ic('plus') + '</button></form>' +
+      '<form class="dreier" data-form="baustelle"><input name="name" id="neu-bst" placeholder="Baustelle hinzufügen …" aria-label="Baustelle" autocomplete="off"><input name="bf" placeholder="Bauführer" aria-label="Bauführer" autocomplete="off" list="dl-bf"><input name="po" placeholder="Polier" aria-label="Polier" autocomplete="off" enterkeyhint="done" list="dl-po"><button class="rund" aria-label="Baustelle hinzufügen">' + ic('plus') + '</button></form>' + namenWahl('dl-bf', imBuero) + namenWahl('dl-po', istPolier) +
       (B.length ? '' : '<p class="muted klein">Einzeln eintippen oder eine Liste aus Excel einfügen: je Zeile Baustelle, Bauführer, Polier.</p>');
   },
   tafel(t) {
+    const fest = !!t.fest;
     const inGruppe = (p) => t.gruppen.some((g) => g.id === p.gruppe);
     const spalte = (g) => {
       const leute = t.leute.filter((p) => (g ? p.gruppe === g.id : !inGruppe(p)));
+      if (fest && !g && !leute.length) return '';
+      const pm = g ? maVon(g.id) : null;
       return '<section class="spalte' + (g ? '' : ' pool') + '" data-spalte="' + (g ? g.id : '') + '"><header class="sp-kopf">' +
-        (g ? '<button type="button" data-a="gruppe" data-id="' + g.id + '" title="Umbenennen oder entfernen">' + esc(g.name) + '</button>' : '<span>Noch nicht zugeteilt</span>') + '<span class="zahl tnum">' + leute.length + '</span></header>' +
-        leute.map((p) => '<button type="button" class="karte" data-a="person" data-id="' + p.id + '">' + esc(p.name) + '</button>').join('') +
-        (g ? (leute.length ? '' : '<p class="sp-leer">' + (FEIN ? 'Kärtchen hierher ziehen.' : 'Kärtchen antippen und diese Gruppe wählen.') + '</p>')
-          : '<form class="sp-neu" data-form="leute"><input name="text" id="neu-leute" placeholder="Name hinzufügen …" aria-label="Namen hinzufügen" autocomplete="off" enterkeyhint="done"></form>' + (t.leute.length ? '' : '<p class="sp-leer">Einzeln eintippen oder eine Liste aus Excel einfügen.</p>')) + '</section>';
+        (g ? (fest ? '<span>' + esc(g.name) + '</span>' : '<button type="button" data-a="gruppe" data-id="' + g.id + '" title="Polier ändern">' + esc(g.name) + '</button>') : '<span>Noch nicht zugeteilt</span>') + '<span class="zahl tnum">' + leute.length + '</span></header>' +
+        (pm && pm.austritt ? '<p class="sp-hinweis">bis ' + esc(pm.austritt) + '</p>' : '') +
+        leute.map((p) => (fest ? '<div class="karte">' + karteInhalt(p) + '</div>' : '<button type="button" class="karte" data-a="person" data-id="' + p.id + '">' + karteInhalt(p) + '</button>')).join('') +
+        (fest ? '' : (g ? (leute.length ? '' : '<p class="sp-leer">' + (FEIN ? 'Kärtchen hierher ziehen.' : 'Kärtchen antippen und diesen Polier wählen.') + '</p>')
+          : '<form class="sp-neu" data-form="leute"><input name="text" id="neu-leute" placeholder="Name hinzufügen …" aria-label="Namen hinzufügen" autocomplete="off" enterkeyhint="done"></form>' + (S.mitarbeiter.length ? '' : '<p class="sp-leer">Namen eintippen oder die Mitarbeiterliste aus Excel einfügen.</p>'))) + '</section>';
     };
-    return '<div class="tafel">' + spalte(null) + t.gruppen.map(spalte).join('') + '</div><div class="reihe tafel-unten"><button type="button" class="textlink" data-a="gruppe-neu">Gruppe hinzufügen</button></div>';
+    return (fest ? '<div class="festband">' + ic('schloss') + '<span>Festgehalten am ' + esc(datumLang(t.fest)) + '. Die Zuteilung gilt, bis ihr sie wieder ändert.</span><button type="button" class="btn klein" data-a="fest-auf">Ändern</button></div>'
+        : (t.gruppen.length ? '' : '<p class="muted klein">Die Gruppen sind die Poliere aus der Mitarbeiterliste. Noch ist keiner eingetragen: «Polier hinzufügen» oder in der Liste bei der Position «Polier» schreiben.</p>')) +
+      '<div class="tafel' + (fest ? ' fest' : '') + '">' + spalte(null) + t.gruppen.map(spalte).join('') + '</div><div class="reihe tafel-unten">' +
+      (fest ? '<span></span>' : '<span class="reihe"><button type="button" class="textlink" data-a="gruppe-neu">Polier hinzufügen</button><button type="button" class="textlink" data-a="sheet" data-s="maliste">Mitarbeiterliste</button></span>') +
+      '<span class="reihe"><button type="button" class="btn klein" data-a="gruppen-drucken"' + (IM_RAHMEN || !t.leute.length ? ' disabled' : '') + '>' + ic('print') + '<span>Drucken</span></button>' +
+      (fest ? '' : '<button type="button" class="btn klein stark" data-a="fest"' + (t.leute.length ? '' : ' disabled') + '>' + ic('schloss') + '<span>Festhalten</span></button>') + '</span></div>';
+  },
+  bestand() {
+    const L = S.mitarbeiter;
+    if (!L.length) return '<h2 class="bl">Bestand</h2><div class="ma-leer"><p>Noch keine Mitarbeiterliste. Einmal aus Excel einfügen, je Zeile Name, Position, Polier, Eintritt, Austritt. Gruppenzuteilung, Bestand und Ein- und Austritte lesen daraus.</p><div class="reihe"><button type="button" class="btn stark" data-a="sheet" data-s="maimport">' + ic('liste') + '<span>Liste einfügen</span></button><button type="button" class="btn" data-a="ma-neu">' + ic('plus') + '<span>Mitarbeiter</span></button></div></div>';
+    const w = sitzungWert(), J = sitzungsJahr(), B = L.filter((m) => imBestand(m, w)), kader = B.filter(istKader).length;
+    const team = (m) => { const n = L.filter((x) => x.polier === m.id && aufTafel(x, J)).length; return n ? n + ' im Team' : ''; };
+    return '<div class="bl-zeile"><h2 class="bl">Bestand (' + B.length + (kader ? ', davon ' + kader + ' Kader' : '') + ')</h2><button type="button" class="btn klein" data-a="sheet" data-s="maliste">' + ic('liste') + '<span>Mitarbeiterliste</span></button></div>' +
+      (B.length ? '<div class="bgr bestand">' + posGruppen(B).map((g) => '<section class="bg"><header><b>' + esc(g.name) + '</b><span class="zahl tnum">' + g.liste.length + '</span></header><ul>' +
+        g.liste.map((m) => { const grau = [istPolier(m) ? team(m) : '', m.austritt ? 'bis ' + m.austritt : ''].filter(Boolean).join(' · '); return '<li><button type="button" data-a="ma" data-id="' + m.id + '"><span>' + esc(m.name) + '</span>' + (grau ? '<small>' + esc(grau) + '</small>' : '') + '</button></li>'; }).join('') + '</ul></section>').join('') + '</div>'
+        : '<p class="muted klein">Am ' + esc(datumLang(S.meta.datum)) + ' ist niemand aus der Liste angestellt.</p>');
+  },
+  wechsel() {
+    const W = wechselListe();
+    if (!W.length) return '';
+    const w = sitzungWert();
+    return '<h2 class="bl">Ein- und Austritte</h2><ul class="eintraege">' + W.map((x) => '<li class="rz ew"><span class="ew-art ' + x.art + '">' + (x.art === 'ein' ? 'Eintritt' : 'Austritt') + '</span><button type="button" class="b-text" data-a="ma" data-id="' + x.m.id + '"><span class="b-was">' + esc(x.m.name) + '</span><span class="b-meta">' + esc([x.m.position, x.text, x.wert > w ? 'geplant' : ''].filter(Boolean).join(' · ')) + '</span></button></li>').join('') + '</ul>';
+  },
+  bedarf(t) {
+    const offen = t.bedarf.filter((b) => b.stand !== 'besetzt').length;
+    return '<h2 class="bl">Bedarf und Nachfolge' + (t.bedarf.length ? ' (' + offen + ' offen)' : '') + '</h2><ul class="eintraege">' + t.bedarf.map((b) => '<li class="rz bd' + (b.gl ? ' gl' : '') + '" data-zieh="bedarf" data-zid="' + b.id + '"><button type="button" class="b-text" data-a="bedarf" data-id="' + b.id + '"><span class="b-was">' + esc(b.was) + '</span>' +
+      (bedarfMeta(b) ? '<span class="b-meta">' + esc(bedarfMeta(b)) + '</span>' : '') + '</button><div class="seg" role="group" aria-label="Stand">' +
+      Object.keys(BSTAND).map((s) => '<button type="button" class="st-' + s + '" data-a="bstand" data-id="' + b.id + '" data-v="' + s + '" aria-pressed="' + (b.stand === s) + '">' + BSTAND[s] + '</button>').join('') + '</div>' + glKnopf('p', b) + '</li>').join('') + '</ul>' +
+      '<form class="dreier" data-form="bedarf"><input name="was" id="neu-bedarf" placeholder="Wen oder was brauchen wir?" aria-label="Wen oder was brauchen wir" autocomplete="off"><input name="warum" placeholder="Warum?" aria-label="Warum" autocomplete="off"><input name="bis" placeholder="Bis wann?" aria-label="Bis wann" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Hinzufügen">' + ic('plus') + '</button></form>' +
+      (t.bedarf.length ? '' : '<p class="muted klein">Zum Beispiel: Polier · Nachfolge · bis Sommer. Was offen bleibt, steht nächstes Jahr wieder da.</p>');
+  },
+  offen() {
+    const Z = offeneZiele();
+    if (!Z.length) return '';
+    const frei = Z.filter((z) => !weiterVon(z)).length;
+    return '<h2 class="bl">Offen aus dem Rückblick' + (frei ? ' (' + frei + ' zu entscheiden)' : '') + '</h2><ul class="eintraege">' + Z.map((z) => '<li class="rz oz"><span class="n-text">' + esc(z.text) + '<small class="oz-st ' + esc(z.stand || '') + '">' + esc(STAND[z.stand || ''] || '') + '</small></span><div class="seg" role="group" aria-label="Wie weiter">' +
+      '<button type="button" class="st-ja" data-a="weiter" data-id="' + z.id + '" data-v="ja" aria-pressed="' + (weiterVon(z) === 'ja') + '">Weiterverfolgen</button><button type="button" class="st-nein" data-a="weiter" data-id="' + z.id + '" data-v="nein" aria-pressed="' + (weiterVon(z) === 'nein') + '">Fallen lassen</button></div></li>').join('') + '</ul>';
   }
 };
+/* Die Gruppenzuteilung als eigenes Blatt zum Drucken: je Gruppe ein Kasten, jede Zeile gleich hoch */
+function gruppenBlatt(t) {
+  const m = S.meta, frei = t.leute.filter((p) => !t.gruppen.some((g) => g.id === p.gruppe));
+  const kasten = (name, leute) => '<section class="d-gr"><h2>' + esc(name) + ' <span>(' + leute.length + ')</span></h2><ol>' + leute.map((p) => '<li>' + esc(p.name) + '</li>').join('') + '</ol></section>';
+  return '<table class="d-seite"><thead><tr><td><div class="d-rand"></div></td></tr></thead><tfoot><tr><td><div class="d-rand"></div></td></tr></tfoot><tbody><tr><td>' +
+    '<header class="e-kopf"><h1>' + esc(t.titel) + '</h1><p>' + esc([m.abteilung, m.titel, t.fest ? 'festgehalten am ' + datumLang(t.fest) : 'Entwurf vom ' + datumLang(heute()) + ', noch nicht festgehalten'].filter(Boolean).join(' · ')) + '</p></header>' +
+    '<div class="d-gruppen">' + t.gruppen.map((g) => kasten(g.name, t.leute.filter((p) => p.gruppe === g.id))).join('') + (frei.length ? kasten('Noch nicht zugeteilt', frei) : '') + '</div>' +
+    (t.beschluesse.length ? '<section class="e-teil"><h2>Beschluss</h2><ul>' + t.beschluesse.map((b) => '<li>' + esc(b.was) + (metaText(b) ? ' (' + esc(metaText(b)) + ')' : '') + '</li>').join('') + '</ul></section>' : '') +
+    '<p class="e-fuss">' + esc(mehrzahl(t.leute.length, 'Mitarbeiter', 'Mitarbeiter') + ' in ' + mehrzahl(t.gruppen.length, 'Gruppe', 'Gruppen')) + '</p></td></tr></tbody></table>';
+}
+/* Alle Kärtchen einer Tafel sind gleich hoch: Ein langer Name, der umbricht, lässt eine Gruppe sonst grösser aussehen */
+function kartenGleich() {
+  $$('.tafel').forEach((tf) => {
+    tf.style.removeProperty('--kh');
+    let h = 0;
+    $$('.karte', tf).forEach((k) => { h = Math.max(h, k.getBoundingClientRect().height); });
+    if (h) tf.style.setProperty('--kh', Math.ceil(h) + 'px');
+  });
+}
 function themaInhalt(t, nr) {
   const u = TEIL.unter(t, nr || {});
   if (t.art === 'rueckblick') return TEIL.frage(t) + TEIL.baustellen(t) + TEIL.rueckblick(t) + u + TEIL.notizen(t);
   if (t.art === 'gruppen') return TEIL.frage(t) + TEIL.tafel(t) + u + TEIL.notizen(t) + TEIL.beschluss(t);
-  if (t.art === 'ziele') return TEIL.frage(t) + TEIL.beschluss(t) + u + TEIL.notizen(t);
+  if (t.art === 'ziele') return TEIL.frage(t) + TEIL.offen() + TEIL.beschluss(t) + u + TEIL.notizen(t);
+  if (t.art === 'personal') return TEIL.frage(t) + TEIL.bestand() + TEIL.wechsel() + TEIL.bedarf(t) + u + TEIL.notizen(t) + TEIL.beschluss(t);
   return TEIL.frage(t) + u + TEIL.notizen(t) + TEIL.beschluss(t);
+}
+
+/* ---------- Zahlen: Ausblick aufs Folgejahr ---------- */
+function ausblickHTML() {
+  const B = S.budget, j = folgejahr(), da = budgetSumme(), ziel = B.ziel, hat = ziel !== null && ziel > 0;
+  const rest = hat ? ziel - da : null, anteil = hat ? Math.round(da / ziel * 100) : null;
+  const liste = B.auftraege.map((a) => '<li><button type="button" data-a="bauftrag" data-id="' + a.id + '"><span>' + esc(a.name || 'Ohne Namen') + '</span><b>' + (a.betrag === null ? '' : fmt(a.betrag)) + '</b></button></li>').join('');
+  return '<section class="ausblick" id="ausblick"><div class="ab-kopf"><div><h2>Ausblick ' + j + '</h2><p>Wie viel Umsatz wir machen wollen und was davon schon als Auftrag da ist.</p></div>' +
+    '<button type="button" class="btn klein" data-a="sheet" data-s="budget">' + ic('pen') + '<span>' + (hat ? 'Ziel ändern' : 'Ziel eintragen') + '</span></button></div>' +
+    '<div class="ab-zahlen"><div><span>Umsatz-Ziel ' + j + '</span><b id="ab-ziel">' + (hat ? fmt(ziel) : '–') + '</b></div>' +
+    '<div><span>Schon als Auftrag da</span><b id="ab-da">' + (B.auftraege.length ? fmt(da) : '–') + '</b>' + (anteil !== null && B.auftraege.length ? '<small>' + anteil + ' % vom Ziel</small>' : '') + '</div>' +
+    '<div><span>' + (rest !== null && rest < 0 ? 'Über dem Ziel' : 'Noch zu holen') + '</span><b id="ab-rest">' + (rest === null ? '–' : fmt(Math.abs(rest))) + '</b></div></div>' +
+    (hat ? '<div class="ab-balken" role="img" aria-label="' + anteil + ' Prozent des Ziels sind als Auftrag da"><i style="width:' + Math.max(0, Math.min(100, anteil)) + '%"></i></div>' : '') +
+    (liste ? '<h3 class="bl">Aufträge für ' + j + '</h3><ul class="ab-liste">' + liste + '</ul>' : '') +
+    '<form class="zweier" data-form="bauftrag"><input name="name" id="neu-bauftrag" placeholder="Auftrag für ' + j + ' hinzufügen …" aria-label="Auftrag" autocomplete="off"><input name="betrag" placeholder="Betrag" aria-label="Betrag in Franken" inputmode="decimal" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Auftrag hinzufügen">' + ic('plus') + '</button></form>' +
+    (B.notiz ? '<p class="ab-notiz">' + esc(B.notiz) + '</p>' : '') + '</section>';
 }
 
 /* ---------- Kunden: Diagramme und Tabellen ---------- */
@@ -1652,10 +1969,10 @@ const ANSICHT = {
 
   zahlen() {
     const Z = S.zahlen;
-    if (!Z.perioden.length) return titel('Zahlen', 'Verlauf der Jahre') + ablage();
+    if (!Z.perioden.length) return titel('Zahlen', 'Verlauf der Jahre') + ablage() + ausblickHTML();
     const tab = Z.ansicht === 'tabelle';
     return titel('Zahlen', 'Verlauf der Jahre', seg('ansicht', [['diagramme', 'Diagramme'], ['tabelle', 'Tabelle']], Z.ansicht) + (tab ? seg('sicht', [['summen', 'Nur Summen'], ['alle', 'Alle Konten']], Z.sicht) : '') +
-      '<button type="button" class="btn stark" data-a="sheet" data-s="import">' + ic('plus') + '<span>Zahlen einfügen</span></button>') + (tab ? tabelleHTML() : diagrammeHTML());
+      '<button type="button" class="btn stark" data-a="sheet" data-s="import">' + ic('plus') + '<span>Zahlen einfügen</span></button>') + (tab ? tabelleHTML() : diagrammeHTML()) + ausblickHTML();
   },
 
   themen() {
@@ -1703,6 +2020,7 @@ function ergebnisHTML() {
   T.forEach((t) => {
     t.beschluesse.forEach((b) => { if (b.gl) gl.push('<li><b>' + esc(nm(t)) + ':</b> ' + esc(b.was) + (metaText(b) ? ' (' + esc(metaText(b)) + ')' : '') + '</li>'); });
     t.notizen.forEach((n) => { if (n.gl) gl.push('<li><b>' + esc(nm(t)) + ':</b> ' + esc(n.text) + '</li>'); });
+    t.bedarf.forEach((b) => { if (b.gl) gl.push('<li><b>' + esc(nm(t)) + ':</b> ' + esc(b.was) + (bedarfMeta(b) ? ' (' + esc(bedarfMeta(b)) + ')' : '') + ', Stand: ' + BSTAND[b.stand] + '</li>'); });
   });
   if (gl.length) h += '<section class="e-teil e-gl"><h2>Für die GL</h2><ul>' + gl.join('') + '</ul></section>';
   const tabelle = (themen, mitThema) => '<div class="e-tab-rahmen"><table class="e-besch"><thead><tr>' + (mitThema ? '<th>Thema</th>' : '') + '<th>Was</th><th>Wer</th><th>Bis wann</th></tr></thead><tbody>' +
@@ -1710,10 +2028,29 @@ function ergebnisHTML() {
   const mitB = T.filter((t) => t.art !== 'ziele' && t.beschluesse.length);
   if (mitB.length) { h += '<section class="e-teil"><h2>Beschlüsse</h2>' + tabelle(mitB, true) + '</section>'; etwas = true; }
   T.filter((t) => t.art === 'ziele' && t.beschluesse.length).forEach((t) => { h += '<section class="e-teil"><h2>' + esc(t.titel) + '</h2>' + tabelle([t], false) + '</section>'; etwas = true; });
+  const BU = S.budget;
+  if (BU.ziel !== null || BU.auftraege.length) {
+    const j = folgejahr(), da = budgetSumme(), hat = BU.ziel !== null && BU.ziel > 0, zeile = (name, wert) => '<tr><th>' + name + '</th><td>' + wert + '</td></tr>';
+    h += '<section class="e-teil"><h2>Ausblick ' + j + '</h2><div class="e-tab-rahmen"><table class="e-tab e-schmal"><tbody>' + (hat ? zeile('Umsatz-Ziel ' + j, '<b>' + fmt(BU.ziel) + '</b>') : '') +
+      (BU.auftraege.length ? zeile('Schon als Auftrag da', fmt(da) + (hat ? ' (' + Math.round(da / BU.ziel * 100) + ' %)' : '')) : '') + (hat ? zeile(BU.ziel - da < 0 ? 'Über dem Ziel' : 'Noch zu holen', fmt(Math.abs(BU.ziel - da))) : '') + '</tbody></table></div>' +
+      (BU.auftraege.length ? '<ul>' + BU.auftraege.map((a) => '<li>' + esc(a.name || 'Ohne Namen') + (a.betrag === null ? '' : ': ' + fmt(a.betrag)) + '</li>').join('') + '</ul>' : '') + (BU.notiz ? '<p>' + esc(BU.notiz) + '</p>' : '') + '</section>';
+    etwas = true;
+  }
+  const erstesP = T.find((t) => t.art === 'personal');
+  T.filter((t) => t.art === 'personal' && (t.bedarf.length || (t === erstesP && S.mitarbeiter.length))).forEach((t) => {
+    const w = sitzungWert(), B = t === erstesP ? S.mitarbeiter.filter((m) => imBestand(m, w)) : [], W = t === erstesP ? wechselListe() : [], kader = B.filter(istKader).length;
+    h += '<section class="e-teil"><h2>' + esc(t.titel) + '</h2>' +
+      (B.length ? '<p class="e-klein">Bestand: ' + B.length + (kader ? ', davon ' + kader + ' Kader' : '') + ' (' + posGruppen(B).map((g) => esc(g.name) + ' ' + g.liste.length).join(', ') + ')</p>' : '') +
+      (W.length ? '<h3>Ein- und Austritte</h3><div class="e-tab-rahmen"><table class="e-besch"><thead><tr><th>Wer</th><th>Position</th><th></th><th>Wann</th></tr></thead><tbody>' +
+        W.map((x) => '<tr><td>' + esc(x.m.name) + '</td><td>' + esc(x.m.position) + '</td><td class="nw">' + (x.art === 'ein' ? 'Eintritt' : 'Austritt') + '</td><td class="nw">' + esc(x.text) + (x.wert > w ? ' (geplant)' : '') + '</td></tr>').join('') + '</tbody></table></div>' : '') +
+      (t.bedarf.length ? '<h3>Bedarf und Nachfolge</h3><p class="e-klein">' + t.bedarf.filter((b) => b.stand !== 'besetzt').length + ' von ' + t.bedarf.length + ' offen</p><div class="e-tab-rahmen"><table class="e-besch"><thead><tr><th>Wen oder was</th><th>Warum</th><th>Bis wann</th><th>Stand</th></tr></thead><tbody>' +
+        t.bedarf.map((b) => '<tr><td>' + esc(b.was) + marke(b) + '</td><td>' + esc([b.warum, b.notiz].filter(Boolean).join(' · ')) + '</td><td class="nw">' + esc(b.bis) + '</td><td class="nw">' + BSTAND[b.stand] + '</td></tr>').join('') + '</tbody></table></div>' : '') + '</section>';
+    etwas = true;
+  });
   T.filter((t) => t.art === 'rueckblick' && (t.ziele.length || t.baustellen.length)).forEach((t) => {
     h += '<section class="e-teil"><h2>' + esc(t.titel) + '</h2>' +
       (t.ziele.length ? '<p class="e-klein">' + t.ziele.filter((z) => z.stand === 'erreicht').length + ' von ' + t.ziele.length + ' Zielen erreicht</p><ul class="e-rz">' +
-        t.ziele.map((z) => '<li><span>' + esc(z.text) + '</span><b class="e-st ' + esc(z.stand || '') + '">' + esc(STAND[z.stand || ''] || '') + '</b></li>').join('') + '</ul>' : '') +
+        t.ziele.map((z) => '<li><span>' + esc(z.text) + '</span><b class="e-st ' + esc(z.stand || '') + '">' + esc(STAND[z.stand || ''] || '') + (z.stand !== 'erreicht' && weiterVon(z) ? (weiterVon(z) === 'ja' ? ' · geht weiter' : ' · fallen gelassen') : '') + '</b></li>').join('') + '</ul>' : '') +
       (t.baustellen.length ? '<h3>Baustellen (' + t.baustellen.length + ')</h3><div class="e-tab-rahmen"><table class="e-besch"><thead><tr><th>Bauführer</th><th>Baustellen, in Klammern der Polier</th></tr></thead><tbody>' +
         bstGruppen(t.baustellen, 'bf').map((g) => '<tr><td class="th nw">' + esc(g.name || 'Ohne Bauführer') + ' (' + g.liste.length + ')</td><td>' + g.liste.map((e) => esc(e.b.name) + (e.b.po ? ' <span class="e-grau">(' + esc(e.b.po) + ')</span>' : '')).join(' · ') + '</td></tr>').join('') + '</tbody></table></div>' : '') + '</section>';
     etwas = true;
@@ -1721,7 +2058,7 @@ function ergebnisHTML() {
   T.filter((t) => t.art === 'gruppen' && t.leute.length).forEach((t) => {
     const namen = (liste) => liste.map((p) => esc(p.name)).join(', ');
     const frei = t.leute.filter((p) => !t.gruppen.some((g) => g.id === p.gruppe));
-    h += '<section class="e-teil"><h2>' + esc(t.titel) + '</h2><div class="e-tab-rahmen"><table class="e-besch"><tbody>' + t.gruppen.map((g) => { const l = t.leute.filter((p) => p.gruppe === g.id); return '<tr><td class="th nw">' + esc(g.name) + ' (' + l.length + ')</td><td>' + namen(l) + '</td></tr>'; }).join('') +
+    h += '<section class="e-teil"><h2>' + esc(t.titel) + '</h2>' + (t.fest ? '<p class="e-klein">Festgehalten am ' + esc(datumLang(t.fest)) + '</p>' : '') + '<div class="e-tab-rahmen"><table class="e-besch"><tbody>' + t.gruppen.map((g) => { const l = t.leute.filter((p) => p.gruppe === g.id); return '<tr><td class="th nw">' + esc(g.name) + ' (' + l.length + ')</td><td>' + namen(l) + '</td></tr>'; }).join('') +
       (frei.length ? '<tr><td class="th nw">Noch nicht zugeteilt (' + frei.length + ')</td><td>' + namen(frei) + '</td></tr>' : '') + '</tbody></table></div></section>';
     etwas = true;
   });
@@ -1746,12 +2083,63 @@ function ergebnisHTML() {
   return h;
 }
 
+/* ---------- Rückmeldung zum Tool: hier sammeln, als Text für Claude kopieren ---------- */
+let rmText = '';   // steht im Sheet, wenn der Browser das Kopieren nicht zulässt
+function woText() {
+  const b = S.ui.bereich, t = S.themen.find((x) => x.id === S.ui.thema) || S.themen[0];
+  if (b === 'themen') return 'Themen' + (t ? ' › ' + mitNr(t, nummern()) : '');
+  if (b === 'zahlen') return 'Zahlen › ' + (S.zahlen.ansicht === 'tabelle' ? 'Tabelle' : 'Diagramme');
+  if (b === 'kunden') return 'Kunden › ' + (S.kunden.ansicht === 'tabelle' ? 'Tabelle' : 'Diagramme');
+  return ({ ergebnis: 'Ergebnis', gl: 'GL' })[b] || b;
+}
+function umgebung() {
+  const u = navigator.userAgent || '';
+  const os = /Android/i.test(u) ? 'Android' : (/iPhone|iPad|iPod/i.test(u) || (/Macintosh/.test(u) && BERUEHRUNG) ? 'iOS' : (/Windows/i.test(u) ? 'Windows' : (/Mac OS X|Macintosh/i.test(u) ? 'macOS' : (/Linux/i.test(u) ? 'Linux' : 'unbekannt'))));
+  const br = /Edg(?:A|iOS)?\//.test(u) ? 'Edge' : (/SamsungBrowser/.test(u) ? 'Samsung Internet' : (/Firefox\/|FxiOS\//.test(u) ? 'Firefox' : (/Chrome\/|CriOS\//.test(u) ? 'Chrome' : (/Safari\//.test(u) ? 'Safari' : 'Browser'))));
+  return br + ' ' + os + (ALS_DATEI ? ', als Datei' : (ALS_LINK ? ', über den Link' : ', Vorschau'));
+}
+function rmAlsText(liste) {
+  return 'Rückmeldungen zum Strategietag-Tool (Fassung ' + VERSION + '), bitte in den Fahrplan eintragen:\n\n' + liste.map((x, i) =>
+    (i + 1) + '. ' + [RM_ARTEN[x.art], x.wo, zeitKurz(x.datum) ? zeitKurz(x.datum) + ' Uhr' : '', [x.umgebung, x.breite ? x.breite + ' px breit' : ''].filter(Boolean).join(', '), x.version && x.version !== VERSION ? 'notiert in Fassung ' + x.version : ''].filter(Boolean).join(' · ') + '\n' + x.text).join('\n\n') + '\n';
+}
+function rmHalten() {   // was im Sheet schon getippt ist, übersteht ein Neuzeichnen
+  const f = $('form[data-form="rueckmeldung"]');
+  if (f && sheet) { sheet.text = f.elements.text.value; sheet.rmArt = f.elements.art.value; }
+}
+function inAblage(text) {   // legt den Text in die Zwischenablage; meldet, ob es geklappt hat
+  const alt = () => {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;left:-99rem;top:0';
+      document.body.appendChild(ta); ta.select();
+      const ok = document.execCommand('copy');
+      ta.remove();
+      return !!ok;
+    } catch (e) { return false; }
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext) return navigator.clipboard.writeText(text).then(() => true, alt);
+  return Promise.resolve(alt());
+}
+function rmKopieren(liste, markieren) {
+  if (!liste.length) return;
+  const text = rmAlsText(liste);
+  inAblage(text).then((ok) => {
+    if (!ok) { rmText = text; renderSheet(false); const k = $('#rm-k'); if (k) { k.focus(); k.select(); } return; }
+    rmText = '';
+    if (markieren) { merken(); const jetzt = new Date().toISOString(); liste.forEach((x) => { x.status = 'uebergeben'; x.uebergeben = jetzt; }); speichern(); render(); }
+    renderSheet(false);
+    toast(mehrzahl(liste.length, 'Rückmeldung', 'Rückmeldungen') + ' kopiert. Jetzt im Chat mit Claude einfügen.', markieren);
+  });
+}
+
 /* ---------- Leiste ---------- */
 function kopfHTML() {
+  const rmOffen = S.rueckmeldungen.filter((x) => x.status === 'offen').length;
   const fest = !!datei.handle, offen = datei.schmutzig && !IM_RAHMEN;   // fest: Änderungen gehen von selbst in die Datei
   return '<div class="kopf1"><div class="marke"><b>' + esc(S.meta.titel) + '</b><span>' + esc(S.meta.abteilung) + '</span></div>' +
     seg('bereich', [['zahlen', 'Zahlen'], ['kunden', 'Kunden'], ['themen', 'Themen'], ['ergebnis', 'Ergebnis']].concat(glAn ? [['gl', 'GL']] : []), S.ui.bereich, 'bereich') +
-    '<div class="kopf-r"><button type="button" class="rundb" data-a="sheet" data-s="parkplatz" aria-label="Parkplatz, ' + S.parkplatz.length + (S.parkplatz.length === 1 ? ' Eintrag' : ' Einträge') + '">' + ic('park') + (S.parkplatz.length ? '<i class="badge tnum">' + S.parkplatz.length + '</i>' : '') + '</button>' +
+    '<div class="kopf-r"><button type="button" class="rundb" data-a="sheet" data-s="rueckmeldung" title="Rückmeldung zum Tool" aria-label="Rückmeldung zum Tool' + (rmOffen ? ', ' + rmOffen + ' noch nicht übergeben' : '') + '">' + ic('sprech') + (rmOffen ? '<i class="badge tnum">' + rmOffen + '</i>' : '') + '</button>' +
+    '<button type="button" class="rundb" data-a="sheet" data-s="parkplatz" aria-label="Parkplatz, ' + S.parkplatz.length + (S.parkplatz.length === 1 ? ' Eintrag' : ' Einträge') + '">' + ic('park') + (S.parkplatz.length ? '<i class="badge tnum">' + S.parkplatz.length + '</i>' : '') + '</button>' +
     '<button type="button" class="btn klein" data-a="sichern" aria-label="' + (fest ? 'Gesichert in der Datei ' + esc(datei.name) : (offen ? 'Sichern, es gibt ungesicherte Änderungen' : 'Sichern')) + '">' + ic(fest ? 'check' : 'disk') + '<span>' + (fest ? 'Gesichert' : 'Sichern') + '</span>' + (offen ? '<i class="punkt"></i>' : '') + '</button>' +
     '<button type="button" class="rundb" data-a="sheet" data-s="einstellungen" aria-label="Einstellungen">' + ic('gear') + '</button></div></div>';
 }
@@ -1835,7 +2223,7 @@ const SHEET = {
     return formHuelle(t.eltern ? 'Unterpunkt' : 'Thema', 'thema-edit', '<label class="f" for="t-t"><span>Titel</span><input id="t-t" name="titel" value="' + esc(t.titel) + '" autocomplete="off" data-fokus></label>' +
       '<label class="f" for="t-f"><span>Worum geht es? (steht unter dem Titel)</span><textarea id="t-f" name="frage" rows="2">' + esc(t.frage) + '</textarea></label>' + wahl +
       '<div class="f"><span>Art</span><div class="seg" role="group">' + ARTEN.map((a) => '<button type="button" data-a="art" data-v="' + a[0] + '" aria-pressed="' + (t.art === a[0]) + '">' + a[1] + '</button>').join('') + '</div></div>' +
-      '<p class="muted klein">' + ({ thema: 'Notizen und Beschluss.', rueckblick: 'Baustellen des Jahres und Ziele vom letzten Jahr mit «erreicht», «teilweise» oder «offen».', gruppen: 'Tafel: Mitarbeiter den Gruppen zuteilen.', ziele: 'Ziele mit «wer» und «bis wann».' })[t.art] + '</p>' +
+      '<p class="muted klein">' + ({ thema: 'Notizen und Beschluss.', rueckblick: 'Baustellen des Jahres und Ziele vom letzten Jahr mit «erreicht», «teilweise» oder «offen».', gruppen: 'Tafel: Mitarbeiter den Polieren zuteilen, festhalten und drucken. Liest aus der Mitarbeiterliste.', ziele: 'Ziele mit «wer» und «bis wann». Was im Rückblick nicht erreicht ist, kommt hier wieder auf den Tisch.', personal: 'Bestand und Ein- und Austritte aus der Mitarbeiterliste, dazu Bedarf und Nachfolge mit Stand. Was offen bleibt, steht nächstes Jahr wieder da.' })[t.art] + '</p>' +
       '<div class="reihe"><button type="button" class="btn" data-a="thema-hoch"' + (i === 0 ? ' disabled' : '') + '>' + ic('up') + '<span>Nach oben</span></button><button type="button" class="btn" data-a="thema-runter"' + (i === ges.length - 1 ? ' disabled' : '') + '>' + ic('down') + '<span>Nach unten</span></button></div>' +
       loeschKnopf('thema-weg', t.eltern ? 'Unterpunkt löschen' : 'Thema löschen'));
   },
@@ -1898,6 +2286,7 @@ const SHEET = {
       '<div class="reihe"><button type="button" class="btn" data-a="vollbild">' + ic('max') + '<span>Vollbild</span></button></div></section>' +
       '<section class="gr"><h3>Für dich</h3><label class="schalter" for="e-gl"><span>Reiter «GL» zeigen</span><input type="checkbox" id="e-gl" data-wahl="glreiter"' + (glAn ? ' checked' : '') + '></label>' +
       '<p class="muted klein">Deine eigenen Punkte für die GL. Der Schalter gilt nur auf diesem Gerät. Im Ergebnis und im PDF stehen die Punkte nie.</p></section>' +
+      '<section class="gr"><h3>Mitarbeiter</h3><div class="reihe zw"><span>' + mehrzahl(S.mitarbeiter.length, 'Eintrag', 'Einträge') + ' in der Mitarbeiterliste</span><button type="button" class="btn" data-a="sheet" data-s="maliste">' + ic('liste') + '<span>Mitarbeiterliste</span></button></div></section>' +
       '<section class="gr"><h3>Daten</h3><div class="reihe"><button type="button" class="btn" data-a="daten-wahl"' + (IM_RAHMEN ? ' disabled' : '') + '>' + ic('upload') + '<span>Aus gesicherter Datei laden</span></button>' +
       (IM_RAHMEN ? '' : '<button type="button" class="btn" data-a="herunter">' + ic('disk') + '<span>Als Datei herunterladen</span></button>' + (TEILEN_ZUERST && window.showSaveFilePicker ? '<button type="button" class="btn" data-a="in-datei">' + ic('pen') + '<span>In eine Datei schreiben</span></button>' : '')) + '</div>' +
       '<p class="muted klein">' + (IM_RAHMEN ? 'In dieser Vorschau ausgeschaltet.' : standText() + ' Auf mehreren Geräten: zuerst die neuste Datei laden, am Schluss sichern. Eine gesicherte Datei lässt sich auch in einer neueren Version des Tools laden.') + '</p>' +
@@ -1906,6 +2295,74 @@ const SHEET = {
   },
   sichern() {
     return huelle('Sichern', '<p class="hinweis">' + ic('info') + '<span>In dieser Vorschau ist das Sichern ausgeschaltet.</span></p><p>Du siehst das Tool eingebettet in einem anderen Programm. Hier kannst du alles ansehen, aber Änderungen gehen verloren.</p><p>Zum Arbeiten öffnest du das Tool über seinen Link oder am Rechner per Doppelklick auf die Datei. Dort gibt «Sichern» eine einzige Datei, die das Tool und alles Eingetragene enthält.</p>');
+  },
+  rueckmeldung() {
+    const R = S.rueckmeldungen, offen = R.filter((x) => x.status === 'offen'), alt = R.filter((x) => x.status !== 'offen'), art = sheet && RM_ARTEN[sheet.rmArt] ? sheet.rmArt : 'unuebersichtlich';
+    const zeile = (x) => '<li><div><b>' + esc([RM_ARTEN[x.art], x.wo, zeitKnapp(x.datum)].filter(Boolean).join(' · ')) + '</b><p>' + esc(x.text) + '</p></div><button type="button" class="xk" data-a="rm-weg" data-id="' + x.id + '" aria-label="Rückmeldung entfernen">' + ic('x') + '</button></li>';
+    return formHuelle('Rückmeldung zum Tool', 'rueckmeldung',
+      '<p class="muted" id="rm-wo">Wo: ' + esc(woText()) + '</p>' +
+      '<div class="rseg" role="radiogroup" aria-label="Art der Rückmeldung">' + Object.keys(RM_ARTEN).map((k) => '<label><input type="radio" name="art" value="' + k + '"' + (k === art ? ' checked' : '') + '><span>' + RM_ARTEN[k] + '</span></label>').join('') + '</div>' +
+      '<label class="f" for="rm-t"><span>Was fällt dir auf?</span><textarea id="rm-t" name="text" rows="4" maxlength="1000" data-fokus>' + esc((sheet && sheet.text) || '') + '</textarea></label>' +
+      (offen.length ? '<section class="rm-teil"><h3>Noch nicht übergeben (' + offen.length + ')</h3><ul class="rml" id="rm-offen">' + offen.map(zeile).join('') + '</ul>' +
+        '<div class="reihe"><button type="button" class="btn stark" data-a="rm-kopieren">' + ic('kopie') + '<span>Für Claude kopieren</span></button></div>' +
+        '<p class="muted klein">Danach im Chat mit Claude einfügen. Claude trägt sie in den Fahrplan ein.</p></section>' : '') +
+      (rmText ? '<label class="f" for="rm-k"><span>Kopieren ging hier nicht: Text markieren und selbst kopieren</span><textarea id="rm-k" rows="6" readonly>' + esc(rmText) + '</textarea></label>' : '') +
+      (alt.length ? '<details class="rm-alt"><summary>Schon übergeben (' + alt.length + ')</summary><ul class="rml" id="rm-alt">' + alt.map(zeile).join('') + '</ul><div class="reihe"><button type="button" class="btn" data-a="rm-nochmals">' + ic('kopie') + '<span>Nochmals kopieren</span></button><button type="button" class="btn rot" data-a="rm-leeren">Übergebene entfernen</button></div></details>' : ''),
+      'Speichern');
+  },
+  bedarf() {
+    const b = imThema('bedarf');
+    if (!b) return '';
+    return formHuelle('Bedarf', 'bedarf-edit', '<label class="f" for="bd-was"><span>Wen oder was brauchen wir?</span><input id="bd-was" name="was" value="' + esc(b.was) + '" autocomplete="off" data-fokus></label>' +
+      '<div class="zwei"><label class="f" for="bd-warum"><span>Warum</span><input id="bd-warum" name="warum" value="' + esc(b.warum) + '" autocomplete="off"></label><label class="f" for="bd-bis"><span>Bis wann</span><input id="bd-bis" name="bis" value="' + esc(b.bis) + '" autocomplete="off"></label></div>' +
+      '<label class="f" for="bd-n"><span>Bemerkung</span><textarea id="bd-n" name="notiz" rows="2">' + esc(b.notiz) + '</textarea></label>' +
+      '<label class="schalter" for="bd-gl"><span>Für die GL vormerken</span><input type="checkbox" id="bd-gl" name="gl"' + (b.gl ? ' checked' : '') + '></label>' + loeschKnopf('bedarf-weg', 'Eintrag löschen'));
+  },
+  budget() {
+    const B = S.budget, j = folgejahr();
+    return formHuelle('Ausblick ' + j, 'budget',
+      '<label class="f" for="bu-z"><span>Umsatz-Ziel ' + j + ' in Franken</span><input id="bu-z" name="ziel" value="' + (B.ziel === null ? '' : esc(fmt(B.ziel))) + '" inputmode="decimal" autocomplete="off" data-fokus></label>' +
+      '<label class="f" for="bu-n"><span>Was ist angedacht? (steht unter den Zahlen)</span><textarea id="bu-n" name="notiz" rows="3">' + esc(B.notiz) + '</textarea></label>' +
+      '<p class="muted klein">Die Aufträge trägst du bei den Zahlen ein: je Auftrag eine Zeile oder alles in einer Summe.</p>');
+  },
+  bauftrag() {
+    const a = sheet && S.budget.auftraege.find((x) => x.id === sheet.id);
+    if (!a) return '';
+    return formHuelle('Auftrag für ' + folgejahr(), 'bauftrag-edit', '<label class="f" for="ba-n"><span>Auftrag</span><input id="ba-n" name="name" value="' + esc(a.name) + '" autocomplete="off" data-fokus></label>' +
+      '<label class="f" for="ba-b"><span>Betrag in Franken</span><input id="ba-b" name="betrag" value="' + (a.betrag === null ? '' : esc(fmt(a.betrag))) + '" inputmode="decimal" autocomplete="off"></label>' + loeschKnopf('bauftrag-weg', 'Auftrag entfernen'));
+  },
+  maliste() {
+    const L = S.mitarbeiter, w = sitzungWert();
+    const weg = L.filter((m) => { const a = datumWert(m.austritt, true); return a && a < w; }), da = L.filter((m) => weg.indexOf(m) < 0);
+    const zeile = (m) => '<li><button type="button" class="ma-z" data-a="ma" data-id="' + m.id + '"><span class="ma-n">' + esc(m.name) + '</span><span class="ma-m">' + esc(maMeta(m, weg.indexOf(m) >= 0)) + '</span>' + ic('right', 'pf') + '</button></li>';
+    return huelle('Mitarbeiter' + (L.length ? ' (' + L.length + ')' : ''),
+      '<div class="reihe"><button type="button" class="btn stark" data-a="ma-neu">' + ic('plus') + '<span>Mitarbeiter</span></button><button type="button" class="btn" data-a="sheet" data-s="maimport">' + ic('liste') + '<span>Liste einfügen</span></button></div>' +
+      (L.length ? posGruppen(da).map((g) => '<h3 class="bl">' + esc(g.name) + ' (' + g.liste.length + ')</h3><ul class="ma-liste">' + g.liste.map(zeile).join('') + '</ul>').join('') +
+        (weg.length ? '<details class="ma-weg"><summary>Ausgetreten (' + weg.length + ')</summary><ul class="ma-liste">' + weg.map(zeile).join('') + '</ul></details>' : '')
+        : '<p class="muted">Noch niemand eingetragen. Am schnellsten: die Liste in Excel kopieren und über «Liste einfügen» übernehmen, je Zeile Name, Position, Polier, Eintritt, Austritt.</p>') +
+      '<p class="muted klein">Steht nur in deiner Datei. Gruppenzuteilung, Bestand und Ein- und Austritte lesen daraus. Wer geht, bekommt einen Austritt und bleibt in der Liste.</p>');
+  },
+  maimport() {
+    return formHuelle('Mitarbeiter als Liste', 'maimport',
+      '<p class="muted">Aus Excel kopieren und hier einfügen: je Zeile ein Mitarbeiter mit Name, Position, Polier, Eintritt, Austritt. Eine Kopfzeile darf dabei sein, Vorname und Name dürfen getrennt stehen. Wer schon in der Liste steht, wird ergänzt.</p>' +
+      '<label class="f" for="ma-t"><span>Liste</span><textarea id="ma-t" name="text" rows="10" data-fokus autocomplete="off" spellcheck="false" placeholder="Name · Position · Polier · Eintritt · Austritt"></textarea></label>' +
+      '<p class="muted klein" id="ma-info">Noch nichts erkannt.</p>', 'Übernehmen');
+  },
+  ma() {
+    const m = sheet.id ? maVon(sheet.id) : null;
+    if (sheet.id && !m) return '';
+    const x = m || { id: '', name: '', position: sheet.position || '', polier: '', eintritt: '', austritt: '' };
+    const P = S.mitarbeiter.filter((p) => istPolier(p) && p !== m && imFolgejahr(p, sitzungsJahr())), drin = P.some((p) => p.id === x.polier);
+    const fest = S.themen.some((t) => t.art === 'gruppen' && t.fest);
+    return formHuelle(m ? 'Mitarbeiter' : (istPolier(x) ? 'Neuer Polier' : 'Neuer Mitarbeiter'), 'ma',
+      '<label class="f" for="ma-n"><span>Name</span><input id="ma-n" name="name" value="' + esc(x.name) + '" autocomplete="off" data-fokus></label>' +
+      '<label class="f" for="ma-p"><span>Position</span><input id="ma-p" name="position" value="' + esc(x.position) + '" list="ma-pos" autocomplete="off" placeholder="z. B. Bauarbeiter"><datalist id="ma-pos">' + POSITIONEN.map((p) => '<option value="' + p + '">').join('') + '</datalist></label>' +
+      '<div class="f" id="ma-po-feld"' + (istPolier(x) || imBuero(x) ? ' hidden' : '') + '><span>Polier (Stammgruppe)</span><input type="hidden" name="polier" value="' + esc(drin ? x.polier : '') + '"><div class="reihe">' +
+        P.map((p) => '<button type="button" class="btn' + (x.polier === p.id ? ' stark' : '') + '" data-a="ma-polier" data-v="' + p.id + '">' + esc(p.name) + '</button>').join('') +
+        '<button type="button" class="btn' + (drin ? '' : ' stark') + '" data-a="ma-polier" data-v="">' + (P.length ? 'Keiner' : 'Noch kein Polier in der Liste') + '</button></div>' +
+        (fest ? '<p class="muted klein">Die Gruppenzuteilung ist festgehalten. Eine Änderung hier zeigt die Tafel erst nach «Ändern».</p>' : '') + '</div>' +
+      '<div class="zwei"><label class="f" for="ma-e"><span>Eintritt</span><input id="ma-e" name="eintritt" value="' + esc(x.eintritt) + '" autocomplete="off" placeholder="z. B. 1.3.2026"></label><label class="f" for="ma-a"><span>Austritt</span><input id="ma-a" name="austritt" value="' + esc(x.austritt) + '" autocomplete="off" placeholder="z. B. Sommer 2027"></label></div>' +
+      (m ? '<p class="muted klein">Wer geht, bekommt einen Austritt und bleibt in der Liste; so steht er bei den Ein- und Austritten.</p>' + loeschKnopf('ma-weg', 'Aus der Liste entfernen') : ''), m ? 'Fertig' : 'Hinzufügen');
   },
   parkplatz() {
     const liste = S.parkplatz.map((x) => '<li><span>' + esc(x.text) + '</span><button type="button" class="xk" data-a="park-weg" data-id="' + x.id + '" aria-label="Entfernen">' + ic('x') + '</button></li>').join('');
@@ -1929,9 +2386,10 @@ const SHEET = {
   }
 };
 function auf(s) { sheet = s; renderSheet(true); }
-function zu() { sheet = null; renderSheet(false); }
+function zu() { sheet = null; rmText = ''; renderSheet(false); }
 function renderSheet(neu) {
   const host = $('#sheets');
+  if (!neu && sheet && sheet.art === 'rueckmeldung') rmHalten();
   const html = sheet ? SHEET[sheet.art]() : '';
   if (!html) { sheet = null; host.innerHTML = ''; document.body.classList.remove('gesperrt'); return; }
   const alt = $('.sheet-inhalt', host), sc = alt ? alt.scrollTop : 0;
@@ -1962,6 +2420,7 @@ function render() {
   if (S.meta.modus === 'hell' || S.meta.modus === 'dunkel') document.documentElement.setAttribute('data-modus', S.meta.modus);
   else document.documentElement.removeAttribute('data-modus');
   if (S.ui.bereich === 'gl' && !glAn) S.ui.bereich = 'zahlen';   // der Reiter «GL» ist auf diesem Gerät ausgeblendet
+  spiegeln(S);
   const rollen = {};
   $$('.tz').forEach((z) => { rollen[z.dataset.h || '0'] = z.scrollLeft; });
   $('#oben').innerHTML = obenHTML();
@@ -1975,7 +2434,7 @@ function render() {
     const a = on.getBoundingClientRect(), b = z.getBoundingClientRect();
     if (a.left < b.left || a.right > b.right) z.scrollLeft += a.left - b.left - (b.width - a.width) / 2;
   });
-  tipWeg(); diagrammePassen();
+  tipWeg(); diagrammePassen(); kartenGleich();
 }
 let toastT = 0;
 function toast(text, mitRueck) {
@@ -2075,13 +2534,59 @@ async function sichern(still, weg) {
 /* ---------- Handlungen ---------- */
 function fokus(id) { const el = document.getElementById(id); if (el) el.focus(); }
 function geaendert(schliessen) { speichern(); if (schliessen) zu(); render(); }
+/* Mitarbeiter aus Excel: je Zeile Name, Position, Polier, Eintritt, Austritt. Eine Kopfzeile ordnet die Spalten; «Vorname» und
+   «Name» werden zusammengesetzt. Ohne Tabulator trennt der Strichpunkt. */
+function maLesen(text) {
+  let Z = String(text || '').replace(/\r/g, '').split('\n').map((z) => (z.indexOf('\t') >= 0 ? z.split('\t') : z.split(';')).map((x) => x.replace(/\s+/g, ' ').trim())).filter((z) => z.some(Boolean));
+  if (!Z.length) return [];
+  const SP = [['vorname', /^vorname$/i], ['name', /^(name|nachname|mitarbeiter(in)?|mitarbeitende|person)$/i], ['position', /^(position|funktion|stelle|beruf|rolle)$/i],
+    ['polier', /^(polier|gruppe|stammgruppe|zuteilung|team)$/i], ['eintritt', /^(eintritt\S*|seit|ab)$/i], ['austritt', /^(austritt\S*|bis|pensionierung|far)$/i]];
+  const kopf = {};
+  Z[0].forEach((x, i) => { const s = SP.find((p) => p[1].test(x)); if (s && kopf[s[0]] === undefined) kopf[s[0]] = i; });
+  if (kopf.name !== undefined && (Object.keys(kopf).length >= 2 || Z[0].length === 1)) Z = Z.slice(1);
+  else ['name', 'position', 'polier', 'eintritt', 'austritt'].forEach((k, i) => { kopf[k] = i; delete kopf.vorname; });
+  return Z.map((z) => {
+    const w = (k) => (kopf[k] === undefined ? '' : z[kopf[k]] || '');
+    return { name: [w('vorname'), w('name')].filter(Boolean).join(' '), position: w('position'), polier: w('polier'), eintritt: w('eintritt'), austritt: w('austritt') };
+  }).filter((x) => x.name);
+}
+/* Gelesene Zeilen in die Liste: Wer schon drin ist (gleicher Name), wird ergänzt; der Polier wird am Namen gesucht und, wenn er
+   fehlt, als Polier angelegt. probe: nur zählen. */
+function maAnwenden(Z, probe) {
+  const gleich = (x) => String(x || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  const L = probe ? S.mitarbeiter.map((m) => Object.assign({}, m)) : S.mitarbeiter, n = { neu: 0, alt: 0 };
+  const finde = (name) => L.find((m) => gleich(m.name) === gleich(name)) || null;
+  const hole = (name, position) => { let m = finde(name); if (!m) { m = { id: uid(), name: name, position: position || '', polier: '', eintritt: '', austritt: '' }; L.push(m); n.neu++; } return m; };
+  Z.forEach((z) => {
+    if (finde(z.name)) n.alt++;
+    const m = hole(z.name, z.position);
+    if (z.position) m.position = z.position;
+    if (z.eintritt) m.eintritt = z.eintritt;
+    if (z.austritt) m.austritt = z.austritt;
+  });
+  Z.forEach((z) => {   // der Polier erst jetzt: Er kann weiter unten in der Liste stehen
+    if (!z.polier) return;
+    const m = finde(z.name), p = finde(z.polier) || hole(z.polier, 'Polier');
+    if (!p.position) p.position = 'Polier';
+    if (m && p !== m && !istPolier(m)) m.polier = p.id;
+  });
+  return n;
+}
+function maInfo(text) {
+  const Z = maLesen(text);
+  if (!Z.length) return 'Noch nichts erkannt.';
+  const n = maAnwenden(Z, true);
+  return 'Erkannt: ' + mehrzahl(Z.length, 'Zeile', 'Zeilen') + '. Neu: ' + n.neu + (n.alt ? ', schon in der Liste: ' + n.alt + ' (wird ergänzt)' : '') + '.';
+}
+/* Namen auf der Tafel eintippen oder als Liste einfügen: Sie kommen in die Mitarbeiterliste, noch ohne Polier */
 function leuteDazu(text) {
-  const t = aktThema(), namen = mehrzeilig(text);
-  if (!t || !namen.length) return;
+  const Z = /\t/.test(text) ? maLesen(text) : mehrzeilig(text).map((x) => ({ name: x, position: '', polier: '', eintritt: '', austritt: '' }));
+  if (!Z.length) return;
   merken();
-  namen.forEach((n) => { t.leute.push({ id: uid(), name: n, gruppe: '' }); });
+  const n = maAnwenden(Z);
   geaendert(); fokus('neu-leute');
-  if (namen.length > 1) toast(namen.length + ' Namen hinzugefügt', true);
+  if (Z.length > 1) toast(mehrzahl(n.neu, 'Mitarbeiter', 'Mitarbeiter') + ' hinzugefügt' + (n.alt ? ', ' + n.alt + ' gab es schon' : ''), true);
+  else if (!n.neu) toast('«' + Z[0].name + '» steht schon in der Liste.');
 }
 function zieleDazu(text) {
   const t = aktThema(), liste = mehrzeilig(text);
@@ -2192,8 +2697,8 @@ const AKT = {
     else if (k === 'bst') { S.ui.bst = v; speichern(true); render(); }
     else if (k === 'modus') { S.meta.modus = v; speichern(true); anzeigeMerken(); render(); renderSheet(false); }
   },
-  sheet(el) { auf({ art: el.dataset.s }); },
-  zu() { zu(); },
+  sheet(el) { auf({ art: el.dataset.s, zurueck: el.dataset.s === 'maimport' && sheet && sheet.art === 'maliste' ? 'maliste' : '' }); },
+  zu() { if (sheet && sheet.zurueck) auf({ art: sheet.zurueck }); else zu(); },
   sichern() { sichern(false); },
   herunter() { sichern(false, 'herunter'); },
   'in-datei'() { sichern(false, 'datei'); },
@@ -2237,20 +2742,67 @@ const AKT = {
   'kunden-weg'(el) { if (!bestaetigt(el, 'Wirklich alle entfernen?')) return; merken(); S.kunden.offerten = []; S.kunden.auftraege = []; S.kunden.jahr = ''; geaendert(); toast('Offerten und Aufträge entfernt', true); },
   glpunkt(el) { auf({ art: 'glpunkt', id: el.dataset.id }); },
   'glpunkt-weg'() { if (!sheet) return; merken(); S.glPunkte = S.glPunkte.filter((x) => x.id !== sheet.id); geaendert(true); toast('Punkt gelöscht', true); },
-  art(el) { const t = themaAusForm(); if (!t) return; t.art = el.dataset.v; if (t.art === 'gruppen' && !t.gruppen.length) t.gruppen = ['Gruppe 1', 'Gruppe 2', 'Gruppe 3'].map((n) => ({ id: uid(), name: n })); speichern(); render(); renderSheet(false); },
+  art(el) { const t = themaAusForm(); if (!t) return; t.art = el.dataset.v; if (t.art === 'personal' && !t.frage) t.frage = PERSONAL_FRAGE; if (t.art === 'gruppen' && !t.gruppen.length) t.gruppen = ['Gruppe 1', 'Gruppe 2', 'Gruppe 3'].map((n) => ({ id: uid(), name: n })); speichern(); render(); renderSheet(false); },
   notiz(el) { auf({ art: 'notiz', id: el.dataset.id }); },
   beschluss(el) { auf({ art: 'beschluss', id: el.dataset.id }); },
   ziel(el) { auf({ art: 'ziel', id: el.dataset.id }); },
-  person(el) { auf({ art: 'person', id: el.dataset.id }); },
-  gruppe(el) { auf({ art: 'gruppe', id: el.dataset.id }); },
-  gl(el) { const t = aktThema(), x = t && t[el.dataset.art === 'b' ? 'beschluesse' : 'notizen'].find((y) => y.id === el.dataset.id); if (!x) return; x.gl = !x.gl; geaendert(); },
+  person(el) { auf({ art: 'ma', id: el.dataset.id, tafel: true }); },
+  gruppe(el) { auf({ art: 'ma', id: el.dataset.id }); },
+  ma(el) { auf({ art: 'ma', id: el.dataset.id, zurueck: el.closest('.sheet') ? 'maliste' : '' }); },
+  'ma-neu'(el) { auf({ art: 'ma', id: '', zurueck: el.closest('.sheet') ? 'maliste' : '' }); },
+  'ma-polier'(el) { const f = el.closest('form'); if (!f) return; f.elements.polier.value = el.dataset.v; $$('[data-a="ma-polier"]', f).forEach((b) => { b.classList.toggle('stark', b === el); }); if (sheet && sheet.tafel && f.requestSubmit) f.requestSubmit(); },
+  'ma-weg'() {
+    if (!sheet || !sheet.id) return;
+    const id = sheet.id, zur = sheet.zurueck, m = maVon(id);
+    merken();
+    S.mitarbeiter = S.mitarbeiter.filter((x) => x.id !== id);
+    S.mitarbeiter.forEach((x) => { if (x.polier === id) x.polier = ''; });
+    speichern(); render();
+    if (zur) auf({ art: zur }); else zu();
+    toast('«' + (m ? m.name : '') + '» aus der Liste entfernt', true);
+  },
+  gl(el) { const t = aktThema(), x = t && t[{ b: 'beschluesse', p: 'bedarf' }[el.dataset.art] || 'notizen'].find((y) => y.id === el.dataset.id); if (!x) return; x.gl = !x.gl; geaendert(); },
   stand(el) { const t = aktThema(), z = t && t.ziele.find((y) => y.id === el.dataset.id); if (!z) return; z.stand = z.stand === el.dataset.v ? '' : el.dataset.v; geaendert(); },
   'notiz-weg'() { entfernen('notizen', 'Notiz gelöscht'); },
+  bedarf(el) { auf({ art: 'bedarf', id: el.dataset.id }); },
+  'bedarf-weg'() { entfernen('bedarf', 'Eintrag gelöscht'); },
+  bstand(el) { const t = aktThema(), b = t && t.bedarf.find((y) => y.id === el.dataset.id); if (!b || b.stand === el.dataset.v) return; b.stand = el.dataset.v; geaendert(); },
+  weiter(el) {   // ein nicht erreichtes Ziel aus dem Rückblick: als Ziel übernehmen oder fallen lassen; nochmals drücken macht es wieder offen
+    const z = offeneZiele().find((y) => y.id === el.dataset.id), zt = aktThema();
+    if (!z || !zt) return;
+    const neu = weiterVon(z) === el.dataset.v ? '' : el.dataset.v;
+    merken();
+    S.themen.forEach((t) => { if (t.art === 'ziele') t.beschluesse = t.beschluesse.filter((b) => b.aus !== z.id); });
+    if (neu === 'ja') zt.beschluesse.push({ id: uid(), was: z.text, wer: '', bis: '', gl: false, aus: z.id });
+    z.weiter = neu;
+    geaendert();
+    toast(neu === 'ja' ? 'Als Ziel übernommen' : (neu === 'nein' ? 'Fallen gelassen' : 'Wieder offen'), true);
+  },
+  fest() {
+    const t = aktThema();
+    if (!t) return;
+    merken(); t.fest = heute(); geaendert();
+    const frei = t.leute.filter((p) => !t.gruppen.some((g) => g.id === p.gruppe)).length;
+    toast('Zuteilung festgehalten' + (frei ? ', ' + frei + ' noch nicht zugeteilt' : ''), true);
+  },
+  'fest-auf'() { const t = aktThema(); if (!t) return; merken(); t.fest = ''; geaendert(); toast('Zuteilung wieder offen', true); },
+  'gruppen-drucken'() {
+    const t = aktThema();
+    if (!t) return;
+    $('#druck').innerHTML = gruppenBlatt(t);
+    setTimeout(() => { window.print(); }, 60);
+  },
+  bauftrag(el) { auf({ art: 'bauftrag', id: el.dataset.id }); },
+  'bauftrag-weg'() { if (!sheet) return; merken(); S.budget.auftraege = S.budget.auftraege.filter((x) => x.id !== sheet.id); geaendert(true); toast('Auftrag entfernt', true); },
+  'rm-weg'(el) { merken(); S.rueckmeldungen = S.rueckmeldungen.filter((x) => x.id !== el.dataset.id); speichern(); render(); renderSheet(false); toast('Rückmeldung entfernt', true); },
+  'rm-kopieren'() { rmKopieren(S.rueckmeldungen.filter((x) => x.status === 'offen'), true); },
+  'rm-nochmals'() { rmKopieren(S.rueckmeldungen.filter((x) => x.status !== 'offen'), false); },
+  'rm-leeren'(el) { if (!bestaetigt(el, 'Wirklich entfernen?')) return; merken(); S.rueckmeldungen = S.rueckmeldungen.filter((x) => x.status === 'offen'); speichern(); render(); renderSheet(false); toast('Übergebene entfernt', true); },
   'park-weg'(el) { merken(); S.parkplatz = S.parkplatz.filter((x) => x.id !== el.dataset.id); speichern(); render(); renderSheet(false); toast('Entfernt', true); },
   'beschluss-weg'() { entfernen('beschluesse', 'Gelöscht'); },
   'ziel-weg'() { entfernen('ziele', 'Ziel gelöscht'); },
   'person-weg'() { entfernen('leute', 'Mitarbeiter entfernt'); },
-  'gruppe-neu'() { const t = aktThema(); if (!t) return; const g = { id: uid(), name: 'Neue Gruppe' }; t.gruppen.push(g); geaendert(); auf({ art: 'gruppe', id: g.id }); },
+  'gruppe-neu'() { auf({ art: 'ma', id: '', position: 'Polier' }); },
   'gruppe-weg'() { const t = aktThema(); if (!t || !sheet) return; merken(); t.leute.forEach((p) => { if (p.gruppe === sheet.id) p.gruppe = ''; }); t.gruppen = t.gruppen.filter((g) => g.id !== sheet.id); geaendert(true); toast('Gruppe entfernt', true); },
   zuteilen(el) { const p = imThema('leute'), f = $('#p-n'); if (!p) return; if (f && f.value.trim()) p.name = f.value.trim(); p.gruppe = el.dataset.g; geaendert(true); },
   zoom(el) {
@@ -2320,6 +2872,57 @@ const FORMS = {
     geaendert(); fokus('neu-bst');
   },
   'baustelle-edit'(f) { const b = imThema('baustellen'), name = b && pflicht(f.elements.name); if (!name) return; b.name = name; b.bf = f.elements.bf.value.trim(); b.po = f.elements.po.value.trim(); geaendert(true); },
+  rueckmeldung(f) {
+    const text = f.elements.text.value.replace(/\r\n?/g, '\n').trim();
+    if (text.length < 2) { f.elements.text.classList.add('fehlt'); f.elements.text.focus(); return; }
+    S.rueckmeldungen.push({ id: uid(), datum: new Date().toISOString(), wo: woText(), art: RM_ARTEN[f.elements.art.value] ? f.elements.art.value : 'anderes', text: text.slice(0, 1000), version: VERSION, umgebung: umgebung(), breite: window.innerWidth || 0, status: 'offen', uebergeben: '' });
+    const n = S.rueckmeldungen.filter((x) => x.status === 'offen').length;
+    geaendert(true);
+    toast('Rückmeldung notiert, ' + n + ' noch nicht übergeben');
+  },
+  bedarf(f) {
+    const t = aktThema(), was = f.elements.was.value.trim();
+    if (!t) return;
+    if (!was) { f.elements.was.focus(); return; }
+    t.bedarf.push({ id: uid(), was: was, warum: f.elements.warum.value.trim(), bis: ohneBis(f.elements.bis.value), stand: 'offen', notiz: '', gl: false });
+    geaendert(); fokus('neu-bedarf');
+  },
+  'bedarf-edit'(f) { const b = imThema('bedarf'), was = b && pflicht(f.elements.was); if (!was) return; b.was = was; b.warum = f.elements.warum.value.trim(); b.bis = ohneBis(f.elements.bis.value); b.notiz = f.elements.notiz.value.trim(); b.gl = f.elements.gl.checked; geaendert(true); },
+  budget(f) { const z = zahl(f.elements.ziel.value); S.budget.ziel = z !== null && z >= 0 ? z : null; S.budget.notiz = f.elements.notiz.value.trim(); geaendert(true); },
+  bauftrag(f) {
+    const name = f.elements.name.value.trim(), betrag = zahl(f.elements.betrag.value);
+    if (!name && betrag === null) { f.elements.name.focus(); return; }
+    S.budget.auftraege.push({ id: uid(), name: name, betrag: betrag });
+    geaendert(); fokus('neu-bauftrag');
+  },
+  'bauftrag-edit'(f) { const a = sheet && S.budget.auftraege.find((x) => x.id === sheet.id); if (!a) return; a.name = f.elements.name.value.trim(); a.betrag = zahl(f.elements.betrag.value); geaendert(true); },
+  ma(f) {
+    const name = pflicht(f.elements.name);
+    if (!name) return;
+    const gleich = (x) => x.trim().toLowerCase().replace(/\s+/g, ' ');
+    let m = sheet && sheet.id ? maVon(sheet.id) : null;
+    if (S.mitarbeiter.some((x) => x !== m && gleich(x.name) === gleich(name))) { f.elements.name.classList.add('fehlt'); f.elements.name.focus(); toast('«' + name + '» steht schon in der Liste.'); return; }
+    merken();
+    if (!m) { m = { id: uid(), name: '', position: '', polier: '', eintritt: '', austritt: '' }; S.mitarbeiter.push(m); }
+    m.name = name.replace(/\s+/g, ' ');
+    m.position = f.elements.position.value.replace(/\s+/g, ' ').trim();
+    m.polier = istPolier(m) || imBuero(m) || f.elements.polier.value === m.id ? '' : f.elements.polier.value;
+    m.eintritt = f.elements.eintritt.value.trim();
+    m.austritt = f.elements.austritt.value.trim();
+    const zur = sheet && sheet.zurueck;
+    speichern(); render();
+    if (zur) auf({ art: zur }); else zu();
+  },
+  maimport(f) {
+    const Z = maLesen(f.elements.text.value);
+    if (!Z.length) { pflicht(f.elements.text); return; }
+    merken();
+    const war = S.beispiel;
+    if (war) beispielWeg();
+    const n = maAnwenden(Z);
+    speichern(); render(); auf({ art: 'maliste' });
+    toast((war ? 'Beispiel entfernt. ' : '') + mehrzahl(n.neu, 'Mitarbeiter', 'Mitarbeiter') + ' übernommen' + (n.alt ? ', ' + n.alt + ' ergänzt' : ''), true);
+  },
   glpunkt(f) { const text = f.elements.text.value.trim(); if (!text) return; S.glPunkte.push({ id: uid(), text: text }); geaendert(); fokus('neu-glpunkt'); },
   offerte(f) { if (offerteAusForm(f, null)) { geaendert(); fokus('neu-off'); } },
   'offerte-edit'(f) { if (offerteAusForm(f, sheet && sheet.id ? S.kunden.offerten.find((x) => x.id === sheet.id) : null)) geaendert(true); },
@@ -2385,6 +2988,8 @@ document.addEventListener('input', (e) => {
   if (el.classList && el.classList.contains('fehlt')) el.classList.remove('fehlt');
   if (el.dataset && el.dataset.f) { S.meta[el.dataset.f] = el.value; speichern(); }
   if (el.id === 'li-t') { const info = $('#li-info'); if (info) info.textContent = listeInfo(el.value); }
+  if (el.id === 'ma-t') { const info = $('#ma-info'); if (info) info.textContent = maInfo(el.value); }
+  if (el.id === 'ma-p') { const feld = $('#ma-po-feld'); if (feld) feld.hidden = /polier|leiter|führer|fuehrer/i.test(el.value); }
 });
 document.addEventListener('change', (e) => {
   const d = e.target.dataset || {};
@@ -2432,7 +3037,7 @@ document.addEventListener('focusin', (e) => { const el = e.target.closest ? e.ta
 document.addEventListener('focusout', tipWeg);
 window.addEventListener('scroll', tipWeg, true);
 let passT = 0;
-window.addEventListener('resize', () => { clearTimeout(passT); passT = setTimeout(diagrammePassen, 120); });
+window.addEventListener('resize', () => { clearTimeout(passT); passT = setTimeout(() => { diagrammePassen(); kartenGleich(); }, 120); });
 
 /* Kärtchen der Gruppenzuteilung mit Maus oder Stift ziehen. Mit dem Finger: antippen und Gruppe wählen. */
 /* Ziehen mit der Maus: Kärtchen der Tafel (in eine andere Gruppe und innerhalb der Gruppe auf und ab), dazu die Einträge
@@ -2462,7 +3067,7 @@ function zugZiel(e) {
 document.addEventListener('pointerdown', (e) => {
   if (e.pointerType === 'touch' || e.button !== 0 || !e.target.closest || e.target.closest('input,textarea,select')) return;
   const k = e.target.closest('.karte') || e.target.closest('[data-zieh]');
-  if (!k) return;
+  if (!k || k.closest('.tafel.fest')) return;
   const r = k.getBoundingClientRect(), karte = k.classList.contains('karte');
   zug = { id: karte ? k.dataset.id : k.dataset.zid, art: karte ? 'karte' : k.dataset.zieh, el: k, x: e.clientX, y: e.clientY, dx: e.clientX - r.left, dy: e.clientY - r.top, b: r.width, geist: null };
 });
@@ -2494,7 +3099,7 @@ document.addEventListener('pointerup', (e) => {
   zugEnde();
   if (!gezogen) return;
   klickSperre = true; setTimeout(() => { klickSperre = false; }, 80);
-  const t = aktThema(), liste = art === 'karte' ? (t && t.leute) : (art === 'gl' ? S.glPunkte : (t && t[art]));
+  const t = aktThema(), liste = art === 'karte' ? S.mitarbeiter : (art === 'gl' ? S.glPunkte : (t && t[art]));
   const x = Array.isArray(liste) ? liste.find((y) => y.id === id) : null;
   if (!z || !x) return;
   const kennung = (el) => (el ? (art === 'karte' ? el.dataset.id : el.dataset.zid) : ''), rest = liste.filter((y) => y !== x);
@@ -2502,10 +3107,10 @@ document.addEventListener('pointerup', (e) => {
   if (z.vor) { const n = rest.findIndex((y) => y.id === kennung(z.vor)); if (n >= 0) i = n; }
   else if (z.nach) { const n = rest.findIndex((y) => y.id === kennung(z.nach)); if (n >= 0) i = n + 1; }
   rest.splice(i, 0, x);
-  const gruppe = art === 'karte' ? z.feld.dataset.spalte : x.gruppe;
-  if (gruppe === x.gruppe && rest.every((y, n) => y === liste[n])) return;   // am alten Platz losgelassen
+  const vorher = art === 'karte' ? ((t && t.leute.find((y) => y.id === id)) || {}).gruppe || '' : '', gruppe = art === 'karte' ? z.feld.dataset.spalte : '';
+  if (gruppe === vorher && rest.every((y, n) => y === liste[n])) return;   // am alten Platz losgelassen
   merken();
-  if (art === 'karte') { x.gruppe = gruppe; t.leute = rest; } else if (art === 'gl') S.glPunkte = rest; else t[art] = rest;
+  if (art === 'karte') { x.polier = gruppe; S.mitarbeiter = rest; } else if (art === 'gl') S.glPunkte = rest; else t[art] = rest;
   geaendert();
 });
 document.addEventListener('pointercancel', zugEnde);
