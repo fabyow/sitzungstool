@@ -429,6 +429,28 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
 .ab-zahlen small{color:var(--muted);font-size:.8125rem}
 .ab-balken{height:.85rem;border-radius:.45rem;background:var(--fill);overflow:hidden}
 .ab-balken i{display:block;height:100%;background:var(--accent-fill);border-radius:.45rem}
+.ab-balken{display:flex}
+.ab-balken i{flex:none;border-radius:0}
+.ab-balken i.of{background:var(--brand-soft);box-shadow:inset 0 0 0 1.5px var(--brand)}
+.ab-zahlen.vier{grid-template-columns:repeat(4,minmax(0,1fr))}
+.ab-leg{display:flex;flex-wrap:wrap;align-items:center;gap:.3rem .5rem;margin:.55rem 0 0;color:var(--muted);font-size:.8125rem;font-weight:600}
+.ab-leg span{width:.8rem;height:.8rem;border-radius:.2rem;display:inline-block}
+.ab-leg span + span,.ab-leg .ab-of{margin-left:.6rem}
+.ab-ja{background:var(--accent-fill)}
+.ab-of{background:var(--brand-soft);box-shadow:inset 0 0 0 1.5px var(--brand)}
+.ab-ohne{margin:.5rem 0 0}
+.ab-unten{margin-top:.8rem}
+.ausblick.im-thema{margin-top:0}
+.al-chart{display:flex;align-items:flex-end;gap:.3rem;height:11.5rem}
+.al-m{flex:1;min-width:0;display:flex;flex-direction:column;align-items:stretch;height:100%;outline:none}
+.al-s{height:9rem;margin-top:auto;display:flex;flex-direction:column-reverse}
+.al-s i{display:block;width:100%;flex:none}
+.al-s i:not(.of){background:var(--accent-fill);border-radius:0 0 .3rem .3rem}
+.al-s i.of{background:var(--brand-soft);box-shadow:inset 0 0 0 1.5px var(--brand);border-radius:.3rem .3rem 0 0}
+.al-m span{display:block;text-align:center;color:var(--muted);font-size:.6875rem;font-weight:600;line-height:1.15;margin-top:.3rem;min-height:1.6rem}
+.al-m:focus-visible .al-s{outline:2px solid var(--accent);outline-offset:2px}
+.of-summe{margin:-.2rem 0 .6rem}
+@media (max-width:700px){.ab-zahlen.vier{grid-template-columns:1fr 1fr}}
 .ausblick .bl{margin-top:1.1rem}
 .ab-liste{list-style:none;margin:0 0 .6rem;padding:0;display:flex;flex-direction:column;gap:.3rem}
 .ab-liste button{display:flex;justify-content:space-between;gap:1rem;width:100%;padding:.5rem .8rem;border-radius:.75rem;background:var(--bg);font-weight:500}
@@ -646,7 +668,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '0.8.3';         // Version des Tools, steht in den Einstellungen
+const VERSION = '0.8.4';         // Version des Tools, steht in den Einstellungen
 const FORMAT = 7;              // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
@@ -710,10 +732,11 @@ const ZEILENTRENNER = new RegExp('[' + String.fromCharCode(0x2028, 0x2029) + ']'
 const MON = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
 const MON_NR = { jan: 1, feb: 2, 'mär': 3, mrz: 3, mar: 3, apr: 4, mai: 5, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, okt: 10, oct: 10, nov: 11, dez: 12, dec: 12 };
 const monatAus = (text) => MON_NR[String(text).trim().slice(0, 3).toLowerCase()] || 0;   // «Nov 26» → 11
-const ARTEN = [['thema', 'Thema'], ['rueckblick', 'Rückblick'], ['gruppen', 'Gruppen'], ['ziele', 'Ziele'], ['personal', 'Personal']];
+const ARTEN = [['thema', 'Thema'], ['rueckblick', 'Rückblick'], ['gruppen', 'Gruppen'], ['ziele', 'Ziele'], ['personal', 'Personal'], ['auftraege', 'Aufträge']];
 const BSTAND = { offen: 'Offen', laeuft: 'Läuft', besetzt: 'Besetzt' };   // Personal: Stand eines Bedarfs
 const RM_ARTEN = { unuebersichtlich: 'Unübersichtlich', fehlt: 'Fehlt etwas', fehler: 'Fehler', idee: 'Idee', anderes: 'Anderes' };   // Rückmeldung zum Tool
 const PERSONAL_FRAGE = 'Sind wir gut besetzt? Wo gibt es Vakanzen, wer geht, und wer folgt nach?';
+const AUFTRAEGE_FRAGE = 'Reichen die Aufträge fürs Budget, und wie sind wir ausgelastet?';
 /* Mitarbeiterliste: Positionen in der Reihenfolge des Bestands (Vorschläge beim Eintippen). Polier ist, wer «Polier» in der
    Position hat; Leiter und Bauführer arbeiten im Büro und stehen nicht auf der Tafel; Kader sind sie, die Poliere und die Vorarbeiter. */
 const POSITIONEN = ['Abteilungsleiter', 'Bauführer', 'Hilfsbauführer', 'Polier', 'Vorarbeiter', 'Facharbeiter', 'Maschinist', 'Bauarbeiter', 'Lernender'];
@@ -722,7 +745,7 @@ const imBuero = (m) => !istPolier(m) && /leiter|führer|fuehrer/i.test(m.positio
 const istKader = (m) => istPolier(m) || imBuero(m) || /vorarbeiter/i.test(m.position || '');
 const STAND = { erreicht: 'Erreicht', teilweise: 'Teilweise', offen: 'Offen', '': 'Nicht bewertet' };
 /* Kunden: die Textfelder eines Auftrags, und wonach die Ranglisten zählen (Feld, Titel, Unterzeile) */
-const AF = ['jahr', 'objekt', 'planer', 'bauherr', 'bauherrArt', 'objektArt', 'speziell', 'mitbewerber', 'notiz'];
+const AF = ['jahr', 'objekt', 'planer', 'bauherr', 'bauherrArt', 'objektArt', 'speziell', 'mitbewerber', 'notiz', 'beginn', 'ende'];
 const RANG = [['planer', 'Planer', 'Von wem die Aufträge kommen.'], ['bauherrArt', 'Bauherren', 'Für wen wir bauen.'], ['objektArt', 'Objekte', 'An welchen Objekten wir arbeiten.'],
   ['speziell', 'Speziell', 'Was dabei besonders war.'], ['mitbewerber', 'Mitbewerber', 'Gegen wen wir gewonnen haben.']];
 const NAMENSFELD = { planer: 1, bauherr: 1, mitbewerber: 1 };   // Namen trennt nur der Strichpunkt, Arten auch das Komma
@@ -842,7 +865,7 @@ function beispiel() {
   const pe = themaNeu('personal', 'Personal', PERSONAL_FRAGE);
   pe.bedarf = [['Polier', 'Nachfolge, ein Polier hört auf', 'Sommer', 'laeuft', true], ['Bauarbeiter', 'Nachfolge', 'Frühling', 'offen', false], ['Hilfsbauführer', 'Entlastung im Büro', '', 'besetzt', false]].map((b) => ({ id: uid(), was: b[0], warum: b[1], bis: b[2], stand: b[3], notiz: '', gl: b[4] }));
   s.themen.splice(s.themen.length - 1, 0, pe);
-  s.budget = { ziel: 4600000, auftraege: [['Parkhaus Bahnhof, zweite Etappe', 780000], ['Brücke Mühleweg', 640000], ['Kleinaufträge unter Vertrag', 480000]].map((a) => ({ id: uid(), name: a[0], betrag: a[1] })), notiz: 'Zwei grössere Offerten sind noch offen.' };
+  s.budget = { ziel: 4600000, auftraege: [], notiz: 'Zwei grössere Offerten sind noch offen.' };
   s.kunden.offerten = [['2021', 18, 5], ['2022', 22, 8], ['2023', 20, 9], ['2024', 16, 7]].map((o) => ({ id: uid(), jahr: o[0], gerechnet: o[1], erhalten: o[2] }));
   s.kunden.auftraege = [
     ['2023', 'Parkhaus Nord, Decke', 'Ingenieurbüro Nord', 'Gemeinde Musterdorf', 'Gemeinde', 'Parkhaus', '', 'Baufirma A', true, 420000],
@@ -863,6 +886,14 @@ function beispiel() {
     ['2025', 'Parkdeck Industrie', 'Büro Mitte', 'Industrie Beispiel AG', 'Privat', 'Parkhaus', '', '', true, 420000, 'nein'],
     ['2025', 'Stützmauer Bachweg', 'Planer Süd AG', 'Gemeinde Beispielwil', 'Gemeinde', 'Stützmauer', '', '', true, 110000, 'offen']
   ].forEach((a) => { s.kunden.auftraege.push({ id: uid(), jahr: a[0], objekt: a[1], planer: a[2], bauherr: a[3], bauherrArt: a[4], objektArt: a[5], speziell: a[6], mitbewerber: a[7], eingeladen: a[8], betrag: a[9], notiz: '', erhalten: a[10] }); });
+  [['2026', 'Parkhaus Bahnhof, zweite Etappe', 'Büro Mitte', 'Immobilien Beispiel AG', 'Privat', 'Parkhaus', 'Nachtarbeit', '', true, 780000, 'ja', '1.3.2027', '31.8.2027'],
+    ['2026', 'Brücke Mühleweg, Instandsetzung', 'Planer Süd AG', 'Gemeinde Beispielwil', 'Gemeinde', 'Brücke', 'Unter Verkehr', '', false, 640000, 'ja', '1.4.2027', '30.9.2027'],
+    ['2026', 'Kleinaufträge unter Vertrag', '', '', '', '', '', '', false, 480000, 'ja', '1.1.2027', '31.12.2027'],
+    ['2026', 'Garage Lindenhof, Sanierung', 'Ingenieurbüro Nord', 'Eigentümer Lindenhof', 'Privat', 'Garage', '', '', true, 200000, 'ja', '1.11.2026', '28.2.2027'],
+    ['2026', 'Tiefgarage Seeblick, Etappe 2', 'Ingenieurbüro Nord', 'Eigentümer Seeblick', 'Privat', 'Garage', '', 'Baufirma A', true, 520000, 'offen', '1.5.2027', '31.10.2027'],
+    ['2026', 'Schulhaus Süd, Balkone', 'Büro Mitte', 'Gemeinde Musterdorf', 'Gemeinde', 'Hochbau', '', '', true, 260000, 'offen', '1.6.2027', '31.8.2027']
+  ].forEach((a) => { s.kunden.auftraege.push({ id: uid(), jahr: a[0], objekt: a[1], planer: a[2], bauherr: a[3], bauherrArt: a[4], objektArt: a[5], speziell: a[6], mitbewerber: a[7], eingeladen: a[8], betrag: a[9], notiz: '', erhalten: a[10], beginn: a[11], ende: a[12] }); });
+  s.kunden.auftraege.forEach((a) => { if (a.beginn === undefined) { a.beginn = ''; a.ende = ''; } });
   return s;
 }
 
@@ -1427,12 +1458,12 @@ const jahrZahl = (j) => +jahrAus(j) || 0;
 const KSPALTEN = [['jahr', /^jahr$/i], ['datum', /datum/i], ['gerechnet', /gerechnet/i], ['erhalten', /^erhalten$/i],
   ['objekt', /^(objekt|projekt|projektbezeichnung|auftrag|baustelle)$/i], ['planer', /^planer/i], ['bauherrArt', /^bauherr\S*[ -]*(art|typ|gruppe)$/i], ['bauherr', /^bauherr(schaft)?$/i],
   ['objektArt', /^objekt\S*[ -]*(art|typ)$|^art$/i], ['speziell', /^spezi/i], ['mitbewerber', /mitbewerber|konkurren/i], ['betrag', /betrag|angebot|summe/i],
-  ['eingeladen', /eingeladen|einladung/i], ['notiz', /bemerkung|notiz/i]];
+  ['eingeladen', /eingeladen|einladung/i], ['notiz', /bemerkung|notiz/i], ['beginn', /^(baubeginn|beginn|ausführung ab)$/i], ['ende', /^(bauende|ende|ausführung bis)$/i]];
 /* Eure Offertliste aus Excel: Kopfzeile mit Datum, «Projektbezeichnung», «Angebot», «Erhalten» und «Planer» oder «Bauherr». In mehrzeiligen
    Zellen ist die erste Zeile der Name (beim Projekt die zweite der Ort). Betrag: das Abgebot, sonst das Angebot. «Erhalten»: Ja,
    offen, sonst nicht erhalten. «Eingeladen» steht in der Bemerkung. */
 const OSPALTEN = [['datum', /datum|^eingabe/i], ['objekt', /projektbezeichnung|^projekt|^objekt/i], ['planer', /planer|auftraggeber/i], ['bauherr', /^bauherr/i],
-  ['angebot', /^angebot/i], ['abgebot', /^abgebot/i], ['notiz', /^bemerkung/i], ['sparte', /^sparte/i], ['erhalten', /^erhalten/i], ['verantwortlich', /^verantw/i], ['kalkulator', /^kalkulator/i]];
+  ['angebot', /^angebot/i], ['abgebot', /^abgebot/i], ['notiz', /^bemerkung/i], ['sparte', /^sparte/i], ['erhalten', /^erhalten/i], ['verantwortlich', /^verantw/i], ['kalkulator', /^kalkulator/i], ['ausfuehrung', /^(baubeginn|ausf(ü|ue)hrung|termin)/i]];
 function offertlisteLesen(g) {
   for (let r = 0; r < Math.min(g.length, 30); r++) {
     const sp = {};
@@ -1451,7 +1482,8 @@ function offertlisteLesen(g) {
       const jahr = serie ? (w ? String(Math.floor(w / 10000)) : '') : (jahrAus(d) || (w ? String(Math.floor(w / 10000)) : ''));
       if (!objekt || !jahr) return;
       const e = roh(z, 'erhalten').trim(), bem = roh(z, 'notiz').replace(/\s+/g, ' ').trim(), ab = zahl(roh(z, 'abgebot')), an = zahl(roh(z, 'angebot'));
-      aus.push({ jahr: jahr, objekt: objekt, ort: zeilenVon(roh(z, 'objekt'))[1] || '', planer: erste(z, 'planer'), bauherr: erste(z, 'bauherr'), betrag: ab !== null ? ab : an,
+      const zr = zeitraumAus(roh(z, 'ausfuehrung'));
+      aus.push({ jahr: jahr, objekt: objekt, ort: zeilenVon(roh(z, 'objekt'))[1] || '', planer: erste(z, 'planer'), bauherr: erste(z, 'bauherr'), betrag: ab !== null ? ab : an, beginn: zr.beginn, ende: zr.ende,
         eingeladen: /eingeladen/i.test(bem), notiz: bem, sparte: roh(z, 'sparte').trim(), verantwortlich: roh(z, 'verantwortlich').trim(), kalkulator: roh(z, 'kalkulator').trim(),
         erhalten: /^(ja|j|x|1|wahr|true|yes|erhalten)$/i.test(e) ? 'ja' : (/^offen/i.test(e) ? 'offen' : 'nein') });
     });
@@ -1526,7 +1558,7 @@ function kundenUebernehmen(funde) {
         const alt = (vorher[schluessel(z)] || []).shift();
         if (!alt) { K.auftraege.push(Object.assign({ id: uid(), bauherrArt: '', objektArt: '', speziell: '', mitbewerber: '', quelle: 'liste' }, z)); L.neu++; return; }
         L.schon++;   // nachgeführt; was von Hand ergänzt ist (Arten, Speziell, Mitbewerber), bleibt
-        ['planer', 'bauherr', 'notiz', 'ort', 'sparte', 'verantwortlich', 'kalkulator'].forEach((k) => { if (z[k]) alt[k] = z[k]; });
+        ['planer', 'bauherr', 'notiz', 'ort', 'sparte', 'verantwortlich', 'kalkulator', 'beginn', 'ende'].forEach((k) => { if (z[k]) alt[k] = z[k]; });
         if (z.betrag !== null) alt.betrag = z.betrag;
         if (z.eingeladen) alt.eingeladen = true;
         alt.erhalten = z.erhalten; alt.quelle = 'liste';
@@ -1878,6 +1910,80 @@ const bedarfMeta = (b) => [b.warum, b.bis ? 'bis ' + b.bis : '', b.notiz].filter
 const sitzungsJahr = () => { const j = parseInt(String(S.meta.datum || '').slice(0, 4), 10); return j > 2000 ? j : new Date().getFullYear(); };
 const folgejahr = () => sitzungsJahr() + 1;
 const budgetSumme = () => S.budget.auftraege.reduce((a, x) => a + (x.betrag || 0), 0);
+/* Baubeginn und Bauende aus einer Zelle der Offertliste: «1.3.2027 30.6.2027», auf zwei Zeilen, ein Datum, eine Excel-Zahl oder «Mär 27»
+   (so liest das Tool eine Datumszelle aus einer Excel-Datei: nur Monat und Jahr; Baubeginn dann am Ersten, Bauende am Monatsende) */
+function zeitraumAus(text) {
+  const s = String(text || '').trim(), W = [];
+  const RX = /(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{2,4})|\b(\d{5})(?:\.\d+)?\b|\b(jan|feb|mär|mrz|mar|apr|mai|may|jun|jul|aug|sep|okt|oct|nov|dez|dec)[a-zäé]*\.?\s*(\d{4}|\d{2})\b/gi;
+  let m;
+  while ((m = RX.exec(s)) && W.length < 2) {
+    let w = 0;
+    if (m[1]) w = datumWert(m[0]);
+    else if (m[4]) w = datumWert(m[4]);
+    else {
+      const mo = MON_NR[m[5].toLowerCase().slice(0, 3)];
+      let y = +m[6]; if (y < 100) y += 2000;
+      if (mo && y >= 1950 && y <= 2100) w = y * 10000 + mo * 100 + (W.length ? new Date(Date.UTC(y, mo, 0)).getUTCDate() : 1);
+    }
+    if (w) W.push(w);
+  }
+  const f = (w) => (w % 100) + '.' + (Math.floor(w / 100) % 100) + '.' + Math.floor(w / 10000);
+  return { beginn: W[0] ? f(W[0]) : '', ende: W[1] ? f(W[1]) : '' };
+}
+const MON3 = (mo) => MONATE[mo - 1].slice(0, 3);
+/* «Mai – Okt 2027», «Nov 2026 – Feb 2027», «ab Mai 2027» oder leer */
+function ausfText(a) {
+  const b = datumWert(a.beginn), e = datumWert(a.ende, true);
+  if (!b) return '';
+  const bm = Math.floor(b / 100) % 100, bj = Math.floor(b / 10000);
+  if (!e || e < b) return 'ab ' + MON3(bm) + ' ' + bj;
+  const em = Math.floor(e / 100) % 100, ej = Math.floor(e / 10000);
+  if (bj === ej && bm === em) return MON3(bm) + ' ' + bj;
+  return bj === ej ? MON3(bm) + ' – ' + MON3(em) + ' ' + ej : MON3(bm) + ' ' + bj + ' – ' + MON3(em) + ' ' + ej;
+}
+/* Betrag einer Offerte je Monat (JJJJMM): gleichmässig von Baubeginn bis Bauende (Chefs Entscheid vom 19.11.2026); ohne Bauende
+   ganz im Monat des Baubeginns. Ohne Baubeginn oder Betrag: null. */
+function verteilung(a) {
+  const b = datumWert(a.beginn);
+  if (!b || typeof a.betrag !== 'number') return null;
+  const e = datumWert(a.ende, true), m0 = Math.floor(b / 100), m1 = e && e >= b ? Math.floor(e / 100) : m0, M = [];
+  let y = Math.floor(m0 / 100), m = m0 % 100;
+  while (y * 100 + m <= m1 && M.length < 120) { M.push(y * 100 + m); if (++m > 12) { m = 1; y++; } }
+  return M.map((x) => [x, a.betrag / M.length]);
+}
+/* Erhaltene und offene Offerten je Monat zwischen von und bis (JJJJMM). «ohne»: Offerten mit Betrag, aber ohne Baubeginn – erhaltene
+   erst ab dem Jahr des Strategietags (ältere sind meist gebaut), offene alle. */
+function volumen(von, bis) {
+  const mon = {}, ohne = { ja: 0, offen: 0 }, J = sitzungsJahr();
+  S.kunden.auftraege.forEach((a) => {
+    if (a.erhalten !== 'ja' && a.erhalten !== 'offen') return;
+    const v = verteilung(a);
+    if (!v) { if (typeof a.betrag === 'number' && a.betrag > 0 && (a.erhalten === 'offen' || jahrZahl(a.jahr) >= J)) ohne[a.erhalten]++; return; }
+    v.forEach((x) => { if (x[0] < von || x[0] > bis) return; const k = mon[x[0]] || (mon[x[0]] = { ja: 0, offen: 0 }); k[a.erhalten] += x[1]; });
+  });
+  return { mon: mon, ohne: ohne };
+}
+function budgetZahlen() {
+  const j = folgejahr(), V = volumen(j * 100 + 1, j * 100 + 12), hand = budgetSumme();   // «hand»: Liste von Hand aus 0.8 bis 0.8.3
+  let ja = 0, offen = 0;
+  Object.keys(V.mon).forEach((k) => { ja += V.mon[k].ja; offen += V.mon[k].offen; });
+  return { j: j, ziel: S.budget.ziel, ja: Math.round(ja + hand), offen: Math.round(offen), hand: hand, ohne: V.ohne };
+}
+const ohneHinweis = (o) => (o.ja || o.offen ? '<p class="muted klein ab-ohne">Ohne Baubeginn, darum nicht mitgezählt: ' + [o.ja ? mehrzahl(o.ja, 'erhaltene', 'erhaltene') : '', o.offen ? mehrzahl(o.offen, 'offene', 'offene') : ''].filter(Boolean).join(' und ') + '. Baubeginn bei den Kunden nachtragen.</p>' : '');
+/* Zahlen gegen das Umsatz-Ziel: im Kasten «Ausblick» bei den Zahlen (mitIds) und im Thema der Art «Aufträge» */
+function budgetBlock(mitIds) {
+  const Z = budgetZahlen(), ziel = Z.ziel, hat = ziel !== null && ziel > 0, id = (x) => (mitIds ? ' id="' + x + '"' : '');
+  const rest = hat ? ziel - Z.ja : null, pJa = hat ? Math.round(Z.ja / ziel * 100) : null, pOf = hat ? Math.round(Z.offen / ziel * 100) : null;
+  const wJa = hat ? Math.max(0, Math.min(100, pJa)) : 0, wOf = hat ? Math.max(0, Math.min(100 - wJa, pOf)) : 0;
+  return '<div class="ab-zahlen vier"><div><span>Umsatz-Ziel ' + Z.j + '</span><b' + id('ab-ziel') + '>' + (hat ? fmt(ziel) : '–') + '</b></div>' +
+    '<div><span>Erhalten</span><b' + id('ab-da') + '>' + (Z.ja ? fmt(Z.ja) : '–') + '</b>' + (pJa !== null && Z.ja ? '<small>' + pJa + ' % vom Ziel</small>' : '') + '</div>' +
+    '<div><span>Offen</span><b' + id('ab-offen') + '>' + (Z.offen ? fmt(Z.offen) : '–') + '</b>' + (pOf !== null && Z.offen ? '<small>' + pOf + ' % vom Ziel</small>' : '<small>noch nicht entschieden</small>') + '</div>' +
+    '<div><span>' + (rest !== null && rest < 0 ? 'Über dem Ziel' : 'Noch zu holen') + '</span><b' + id('ab-rest') + '>' + (rest === null ? '–' : fmt(Math.abs(rest))) + '</b>' +
+      (rest !== null && rest > 0 && Z.offen ? '<small>' + (Z.offen >= rest ? 'die offenen würden reichen' : 'mit allen offenen fehlen ' + fmt(rest - Z.offen)) + '</small>' : '') + '</div></div>' +
+    (hat ? '<div class="ab-balken" role="img" aria-label="' + pJa + ' Prozent des Ziels sind erhalten, ' + pOf + ' Prozent offen"><i style="width:' + wJa + '%"></i><i class="of" style="width:' + wOf + '%"></i></div>' +
+      '<p class="ab-leg"><span class="ab-ja"></span>Erhalten<span class="ab-of"></span>Offen</p>' : '') +
+    ohneHinweis(Z.ohne);
+}
 const maVon = (id) => S.mitarbeiter.find((m) => m.id === id) || null;
 /* Positionen nach Hierarchie, auch wenn sie anders heissen («Baupolier», «Bau-Facharbeiter», «Maurer EFZ») */
 const POS_RANG = ['abteilungsleiter', 'bauführer', 'hilfsbauführer', 'polier', 'vorarbeiter', 'facharbeiter', 'maurer', 'maschinist', 'bauarbeiter', 'hilfsarbeiter', 'lernende'];
@@ -1908,6 +2014,8 @@ function zeigt(t, k) {
 const nurGruppe = (t) => { const k = zeigt(t, 'kader'), b = zeigt(t, 'betrieb'); return k && !b ? 'kader' : b && !k ? 'betrieb' : ''; };
 const inGruppe = (m, g) => !g || (g === 'kader') === istKader(m);
 const GRUPPE_TITEL = { kader: 'Kader', betrieb: 'Betriebsmitarbeiter' };
+const ZEIGEN_A = [['budget', 'Budget'], ['auslastung', 'Auslastung'], ['offen', 'Offene Offerten']];   // Themen der Art «Aufträge»
+const zeigenListe = (t) => (t.art === 'auftraege' ? ZEIGEN_A : ZEIGEN);
 const groesseText = (b) => (b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB');
 const istBildTyp = (typ) => /^image\//.test(typ || '');
 const sitzungWert = () => datumWert(S.meta.datum) || datumWert(heute());
@@ -2020,6 +2128,32 @@ const TEIL = {
       '<span class="reihe"><button type="button" class="btn klein" data-a="gruppen-drucken"' + (IM_RAHMEN || !t.leute.length ? ' disabled' : '') + '>' + ic('print') + '<span>Drucken</span></button>' +
       '</span></div>';
   },
+  budget() {
+    const hat = S.budget.ziel !== null && S.budget.ziel > 0;
+    return '<div class="bl-zeile"><h2 class="bl">Budget ' + folgejahr() + '</h2><button type="button" class="btn klein" data-a="sheet" data-s="budget">' + ic('pen') + '<span>' + (hat ? 'Ziel ändern' : 'Ziel eintragen') + '</span></button></div>' +
+      '<div class="ausblick im-thema">' + budgetBlock(false) + '</div>';
+  },
+  auslastung(mitHinweis) {
+    const A = auslastungMonate(), V = A.V;
+    let tJa = 0, tOf = 0, max = 1;
+    A.M.forEach((k) => { const x = V.mon[k]; if (x) { tJa += x.ja; tOf += x.offen; max = Math.max(max, x.ja + x.offen); } });
+    const saeulen = A.M.map((k) => {
+      const x = V.mon[k] || { ja: 0, offen: 0 }, mo = k % 100, jj = Math.floor(k / 100);
+      return '<div class="al-m" tabindex="0" data-tip="' + esc(MONATE[mo - 1] + ' ' + jj + '\nErhalten: ' + fmt(Math.round(x.ja)) + '\nOffen: ' + fmt(Math.round(x.offen))) + '"><div class="al-s"><i style="height:' + (x.ja / max * 100).toFixed(1) + '%"></i><i class="of" style="height:' + (x.offen / max * 100).toFixed(1) + '%"></i></div>' +
+        '<span>' + MON3(mo) + (mo === 1 || k === A.von ? '<br>' + jj : '') + '</span></div>';
+    }).join('');
+    return '<h2 class="bl">Auslastung ' + MON3(A.von % 100) + ' ' + Math.floor(A.von / 100) + ' bis Dez ' + Math.floor(A.bis / 100) + '</h2>' +
+      '<div class="ausblick im-thema al"><div class="al-chart" role="img" aria-label="Erhaltene und offene Offerten je Monat">' + saeulen + '</div>' +
+      '<p class="ab-leg"><span class="ab-ja"></span>Erhalten ' + fmt(Math.round(tJa)) + '<span class="ab-of"></span>Offen ' + fmt(Math.round(tOf)) + '</p>' + (mitHinweis ? ohneHinweis(V.ohne) : '') + '</div>';
+  },
+  offene() {
+    const L = offeneListe(), summe = L.reduce((s, a) => s + (a.betrag || 0), 0);
+    return '<div class="bl-zeile"><h2 class="bl">Offene Offerten (' + L.length + ')</h2><button type="button" class="btn klein" data-a="auftrag-neu">' + ic('plus') + '<span>Offerte</span></button></div>' +
+      (L.length ? '<ul class="pr-liste of-liste">' + L.map((a) => '<li><button type="button" data-a="auftrag" data-id="' + a.id + '"><span class="pr-n">' + esc(a.objekt) + '</span><span class="pr-p">' +
+        esc([a.bauherr || a.planer, ausfText(a) || 'ohne Baubeginn'].filter(Boolean).join(' · ')) + '</span><span class="pr-a">' + (a.betrag === null ? '' : fmt(a.betrag)) + '</span></button></li>').join('') + '</ul>' +
+        '<p class="muted klein of-summe">Zusammen ' + fmt(summe) + '. Eine Zeile antippen, um Betrag, Baubeginn oder «Erhalten» zu ändern.</p>'
+        : '<p class="muted klein">Keine offene Offerte. Bei den Kunden «Erhalten: Offen» wählen oder hier eine erfassen.</p>');
+  },
   anhaenge(t) {
     if (!t.anhaenge.length) return '';
     return '<div class="anh-reihe">' + t.anhaenge.map((a) => {
@@ -2091,26 +2225,39 @@ function themaInhalt(t, nr) {
     return TEIL.frage(t) + TEIL.anhaenge(t) + (k || b ? '<div class="pr-zwei">' + (k ? TEIL.bestand('kader', true) : '') + (b ? TEIL.bestand('betrieb', !k) : '') + '</div>' : '') +
       (zeigt(t, 'wechsel') ? TEIL.wechsel(nurGruppe(t)) : '') + (zeigt(t, 'bedarf') ? TEIL.bedarf(t) : '') + u + TEIL.notizen(t) + TEIL.beschluss(t);
   }
+  if (t.art === 'auftraege') return TEIL.frage(t) + TEIL.anhaenge(t) + (zeigt(t, 'budget') ? TEIL.budget() : '') + (zeigt(t, 'auslastung') ? TEIL.auslastung(!zeigt(t, 'budget')) : '') +
+    (zeigt(t, 'offen') ? TEIL.offene() : '') + u + TEIL.notizen(t) + TEIL.beschluss(t);
   return TEIL.frage(t) + TEIL.anhaenge(t) + u + TEIL.notizen(t) + TEIL.beschluss(t);
 }
 
 /* ---------- Zahlen: Ausblick aufs Folgejahr ---------- */
 function ausblickHTML() {
-  const B = S.budget, j = folgejahr(), da = budgetSumme(), ziel = B.ziel, hat = ziel !== null && ziel > 0;
-  const rest = hat ? ziel - da : null, anteil = hat ? Math.round(da / ziel * 100) : null;
+  const B = S.budget, j = folgejahr(), hat = B.ziel !== null && B.ziel > 0;
   const liste = B.auftraege.map((a) => '<li><button type="button" data-a="bauftrag" data-id="' + a.id + '"><span>' + esc(a.name || 'Ohne Namen') + '</span><b>' + (a.betrag === null ? '' : fmt(a.betrag)) + '</b></button></li>').join('');
-  return '<section class="ausblick" id="ausblick"><div class="ab-kopf"><div><h2>Ausblick ' + j + '</h2><p>Wie viel Umsatz wir machen wollen und was davon schon als Auftrag da ist.</p></div>' +
+  return '<section class="ausblick" id="ausblick"><div class="ab-kopf"><div><h2>Ausblick ' + j + '</h2><p>Das Umsatz-Ziel gegen die erhaltenen und offenen Offerten bei den Kunden, verteilt nach Baubeginn und Bauende.</p></div>' +
     '<button type="button" class="btn klein" data-a="sheet" data-s="budget">' + ic('pen') + '<span>' + (hat ? 'Ziel ändern' : 'Ziel eintragen') + '</span></button></div>' +
-    '<div class="ab-zahlen"><div><span>Umsatz-Ziel ' + j + '</span><b id="ab-ziel">' + (hat ? fmt(ziel) : '–') + '</b></div>' +
-    '<div><span>Schon als Auftrag da</span><b id="ab-da">' + (B.auftraege.length ? fmt(da) : '–') + '</b>' + (anteil !== null && B.auftraege.length ? '<small>' + anteil + ' % vom Ziel</small>' : '') + '</div>' +
-    '<div><span>' + (rest !== null && rest < 0 ? 'Über dem Ziel' : 'Noch zu holen') + '</span><b id="ab-rest">' + (rest === null ? '–' : fmt(Math.abs(rest))) + '</b></div></div>' +
-    (hat ? '<div class="ab-balken" role="img" aria-label="' + anteil + ' Prozent des Ziels sind als Auftrag da"><i style="width:' + Math.max(0, Math.min(100, anteil)) + '%"></i></div>' : '') +
-    (liste ? '<h3 class="bl">Aufträge für ' + j + '</h3><ul class="ab-liste">' + liste + '</ul>' : '') +
-    '<form class="zweier" data-form="bauftrag"><input name="name" id="neu-bauftrag" placeholder="Auftrag für ' + j + ' hinzufügen …" aria-label="Auftrag" autocomplete="off"><input name="betrag" placeholder="Betrag" aria-label="Betrag in Franken" inputmode="decimal" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Auftrag hinzufügen">' + ic('plus') + '</button></form>' +
+    budgetBlock(true) +
+    (liste ? '<h3 class="bl">Von Hand eingetragen</h3><ul class="ab-liste">' + liste + '</ul><p class="muted klein">Zählt bei «Erhalten» mit. Neue Aufträge erfasst du bei den Kunden mit Baubeginn und Bauende.</p>' : '') +
+    '<div class="reihe ab-unten"><button type="button" class="btn klein" data-a="auftrag-neu">' + ic('plus') + '<span>Offerte erfassen</span></button></div>' +
     (B.notiz ? '<p class="ab-notiz">' + esc(B.notiz) + '</p>' : '') + '</section>';
 }
 
 /* ---------- Kunden: Diagramme und Tabellen ---------- */
+/* Ergebnis: Budget als Tabelle; offene Offerten und Auslastung als Tabellen */
+function budgetTabelle() {
+  const Z = budgetZahlen(), hat = Z.ziel !== null && Z.ziel > 0, zeile = (name, wert) => '<tr><th>' + name + '</th><td>' + wert + '</td></tr>', p = (x) => (hat ? ' (' + Math.round(x / Z.ziel * 100) + ' %)' : '');
+  return '<div class="e-tab-rahmen"><table class="e-tab e-schmal"><tbody>' + (hat ? zeile('Umsatz-Ziel ' + Z.j, '<b>' + fmt(Z.ziel) + '</b>') : '') +
+    zeile('Erhalten', fmt(Z.ja) + p(Z.ja)) + zeile('Offen', fmt(Z.offen) + p(Z.offen)) + (hat ? zeile(Z.ziel - Z.ja < 0 ? 'Über dem Ziel' : 'Noch zu holen', fmt(Math.abs(Z.ziel - Z.ja))) : '') + '</tbody></table></div>' +
+    '<p class="e-klein">Aus den Kunden: Betrag gleichmässig von Baubeginn bis Bauende verteilt.' + (Z.ohne.ja || Z.ohne.offen ? ' Ohne Baubeginn nicht mitgezählt: ' + (Z.ohne.ja + Z.ohne.offen) + '.' : '') + '</p>';
+}
+const offeneListe = () => S.kunden.auftraege.filter((a) => a.erhalten === 'offen').sort((a, b) => (datumWert(a.beginn) || 99999999) - (datumWert(b.beginn) || 99999999) || (b.betrag || 0) - (a.betrag || 0));
+function auslastungMonate() {   // vom Monat des Strategietags bis Dezember des Folgejahrs
+  const von = Math.floor(sitzungWert() / 100), bis = folgejahr() * 100 + 12, M = [];
+  let y = Math.floor(von / 100), m = von % 100;
+  while (y * 100 + m <= bis && M.length < 36) { M.push(y * 100 + m); if (++m > 12) { m = 1; y++; } }
+  return { von: von, bis: bis, M: M, V: volumen(von, bis) };
+}
+
 const quoteVon = (o) => (o.gerechnet > 0 && o.erhalten !== null ? o.erhalten / o.gerechnet * 100 : null);
 /* Offerten je Jahr. Ein Jahr mit eigener Zeile (z. B. bis 2024 aus der Excel-Auswertung) gilt, wie es ist; alle anderen Jahre
    zählen die Liste: jede Offerte ist gerechnet, «Ja» ist erhalten, «Offen» wird gezeigt und zählt als gerechnet. */
@@ -2205,8 +2352,8 @@ function kundenTabellen() {
   const aufT = '<div class="bl-zeile"><h2 class="bl">Offerten und Aufträge' + (K.auftraege.length ? ' (' + K.auftraege.length + ')' : '') + '</h2><span class="reihe">' +
     (K.auftraege.length ? seg('kfilter', [['', 'Alle'], ['ja', 'Erhalten'], ['offen', 'Offen'], ['nein', 'Nicht erhalten']], f, 'klein') : '') +
     '<button type="button" class="btn klein" data-a="auftrag-neu">' + ic('plus') + '<span>Offerte</span></button></span></div>' +
-    (A.length ? '<div class="bst-rahmen"><table class="bst at" id="t-auf"><thead><tr><th>Jahr</th><th>Objekt</th><th>Planer</th><th>Bauherr</th><th>Art</th><th>Speziell</th><th class="r">Betrag</th><th>Erhalten</th></tr></thead><tbody>' +
-      A.map((a) => '<tr data-a="auftrag" data-id="' + a.id + '"><td class="tnum">' + esc(a.jahr) + '</td><td><button type="button" data-a="auftrag" data-id="' + a.id + '">' + esc(a.objekt) + '</button></td><td>' + esc(a.planer) + '</td><td>' + esc(a.bauherr) + (a.bauherrArt ? '<small>' + esc(a.bauherrArt) + '</small>' : '') + '</td><td>' + esc(a.objektArt) + '</td><td>' + esc(a.speziell) + '</td><td class="r tnum">' + zt(a.betrag) + '</td><td><span class="k-erh ' + a.erhalten + '">' + ERH[a.erhalten] + '</span></td></tr>').join('') + '</tbody></table></div>'
+    (A.length ? '<div class="bst-rahmen"><table class="bst at" id="t-auf"><thead><tr><th>Jahr</th><th>Objekt</th><th>Planer</th><th>Bauherr</th><th>Art</th><th>Speziell</th><th class="r">Betrag</th><th>Ausführung</th><th>Erhalten</th></tr></thead><tbody>' +
+      A.map((a) => '<tr data-a="auftrag" data-id="' + a.id + '"><td class="tnum">' + esc(a.jahr) + '</td><td><button type="button" data-a="auftrag" data-id="' + a.id + '">' + esc(a.objekt) + '</button></td><td>' + esc(a.planer) + '</td><td>' + esc(a.bauherr) + (a.bauherrArt ? '<small>' + esc(a.bauherrArt) + '</small>' : '') + '</td><td>' + esc(a.objektArt) + '</td><td>' + esc(a.speziell) + '</td><td class="r tnum">' + zt(a.betrag) + '</td><td class="nw">' + esc(ausfText(a)) + '</td><td><span class="k-erh ' + a.erhalten + '">' + ERH[a.erhalten] + '</span></td></tr>').join('') + '</tbody></table></div>'
       : '<p class="muted klein">' + (K.auftraege.length ? 'Keine mit dieser Auswahl.' : 'Noch keine Offerte. Einzeln erfassen oder über «Einfügen» eure Offertliste aus Excel holen.') + '</p>');
   return offT + aufT + '<div class="unter"><p class="muted klein">Eine Zeile antippen, um sie zu ändern.</p><button type="button" class="textlink" data-a="kunden-weg">Alle Offerten und Aufträge entfernen</button></div>';
 }
@@ -2293,13 +2440,29 @@ function ergebnisHTML() {
   if (mitB.length) { h += '<section class="e-teil"><h2>Beschlüsse</h2>' + tabelle(mitB, true) + '</section>'; etwas = true; }
   T.filter((t) => t.art === 'ziele' && t.beschluesse.length).forEach((t) => { h += '<section class="e-teil"><h2>' + esc(t.titel) + '</h2>' + tabelle([t], false) + '</section>'; etwas = true; });
   const BU = S.budget;
-  if (BU.ziel !== null || BU.auftraege.length) {
-    const j = folgejahr(), da = budgetSumme(), hat = BU.ziel !== null && BU.ziel > 0, zeile = (name, wert) => '<tr><th>' + name + '</th><td>' + wert + '</td></tr>';
-    h += '<section class="e-teil"><h2>Ausblick ' + j + '</h2><div class="e-tab-rahmen"><table class="e-tab e-schmal"><tbody>' + (hat ? zeile('Umsatz-Ziel ' + j, '<b>' + fmt(BU.ziel) + '</b>') : '') +
-      (BU.auftraege.length ? zeile('Schon als Auftrag da', fmt(da) + (hat ? ' (' + Math.round(da / BU.ziel * 100) + ' %)' : '')) : '') + (hat ? zeile(BU.ziel - da < 0 ? 'Über dem Ziel' : 'Noch zu holen', fmt(Math.abs(BU.ziel - da))) : '') + '</tbody></table></div>' +
+  if (BU.ziel !== null || BU.auftraege.length || budgetZahlen().ja || budgetZahlen().offen) {
+    h += '<section class="e-teil"><h2>Ausblick ' + folgejahr() + '</h2>' + budgetTabelle() +
       (BU.auftraege.length ? '<ul>' + BU.auftraege.map((a) => '<li>' + esc(a.name || 'Ohne Namen') + (a.betrag === null ? '' : ': ' + fmt(a.betrag)) + '</li>').join('') + '</ul>' : '') + (BU.notiz ? '<p>' + esc(BU.notiz) + '</p>' : '') + '</section>';
     etwas = true;
   }
+  T.filter((t) => t.art === 'auftraege').forEach((t) => {
+    let teil = '';
+    if (zeigt(t, 'budget')) teil += '<h3>Budget ' + folgejahr() + '</h3>' + budgetTabelle();
+    if (zeigt(t, 'auslastung')) {
+      const A = auslastungMonate(), M = A.M.filter((k) => A.V.mon[k]);
+      if (M.length) teil += '<h3>Auslastung</h3><div class="e-tab-rahmen"><table class="e-besch"><thead><tr><th>Monat</th><th class="r">Erhalten</th><th class="r">Offen</th></tr></thead><tbody>' +
+        M.map((k) => '<tr><td class="nw">' + MONATE[k % 100 - 1] + ' ' + Math.floor(k / 100) + '</td><td class="r nw">' + fmt(Math.round(A.V.mon[k].ja)) + '</td><td class="r nw">' + fmt(Math.round(A.V.mon[k].offen)) + '</td></tr>').join('') + '</tbody></table></div>';
+    }
+    if (zeigt(t, 'offen')) {
+      const L = offeneListe();
+      if (L.length) teil += '<h3>Offene Offerten</h3><div class="e-tab-rahmen"><table class="e-besch"><thead><tr><th>Objekt</th><th>Bauherr</th><th>Ausführung</th><th class="r">Betrag</th></tr></thead><tbody>' +
+        L.map((a) => '<tr><td>' + esc(a.objekt) + '</td><td>' + esc(a.bauherr || a.planer) + '</td><td class="nw">' + esc(ausfText(a)) + '</td><td class="r nw">' + (a.betrag === null ? '' : fmt(a.betrag)) + '</td></tr>').join('') +
+        '<tr><th colspan="3">Zusammen</th><td class="r nw"><b>' + fmt(L.reduce((s, a) => s + (a.betrag || 0), 0)) + '</b></td></tr></tbody></table></div>';
+    }
+    if (!teil) return;
+    h += '<section class="e-teil"><h2>' + esc(nm(t)) + '</h2>' + teil + '</section>';
+    etwas = true;
+  });
   T.filter((t) => t.art === 'personal').forEach((t) => {
     const w = sitzungWert(), J = sitzungsJahr(), alle = S.mitarbeiter.filter((m) => imBestand(m, w)), g = nurGruppe(t);
     const K = zeigt(t, 'kader') ? alle.filter(istKader) : [], B = zeigt(t, 'betrieb') ? alle.filter((m) => !istKader(m)) : [];
@@ -2491,8 +2654,8 @@ const SHEET = {
     return formHuelle(t.eltern ? 'Unterpunkt' : 'Thema', 'thema-edit', '<label class="f" for="t-t"><span>Titel</span><input id="t-t" name="titel" value="' + esc(t.titel) + '" autocomplete="off" data-fokus></label>' +
       '<label class="f" for="t-f"><span>Worum geht es? (steht unter dem Titel)</span><textarea id="t-f" name="frage" rows="2">' + esc(t.frage) + '</textarea></label>' + wahl +
       '<div class="f"><span>Art</span><div class="seg" role="group">' + ARTEN.map((a) => '<button type="button" data-a="art" data-v="' + a[0] + '" aria-pressed="' + (t.art === a[0]) + '">' + a[1] + '</button>').join('') + '</div></div>' +
-      (t.art === 'personal' ? '<div class="f"><span>Zeigen</span><div class="seg" role="group">' + ZEIGEN.map((z) => '<button type="button" data-a="zeigen" data-v="' + z[0] + '" aria-pressed="' + zeigt(t, z[0]) + '">' + z[1] + '</button>').join('') + '</div></div>' : '') +
-      '<p class="muted klein">' + ({ thema: 'Notizen und Beschluss.', rueckblick: 'Baustellen des Jahres und Ziele vom letzten Jahr mit «erreicht», «teilweise» oder «offen».', gruppen: 'Tafel: Mitarbeiter den Polieren zuteilen, festhalten und drucken. Liest aus der Mitarbeiterliste.', ziele: 'Ziele mit «wer» und «bis wann». Was im Rückblick nicht erreicht ist, kommt hier wieder auf den Tisch.', personal: 'Kader und Betriebsmitarbeiter mit ihren Ein- und Austritten aus der Mitarbeiterliste, dazu Bedarf und Nachfolge mit Stand. Was offen bleibt, steht nächstes Jahr wieder da.' })[t.art] + '</p>' +
+      (t.art === 'personal' || t.art === 'auftraege' ? '<div class="f"><span>Zeigen</span><div class="seg" role="group">' + zeigenListe(t).map((z) => '<button type="button" data-a="zeigen" data-v="' + z[0] + '" aria-pressed="' + zeigt(t, z[0]) + '">' + z[1] + '</button>').join('') + '</div></div>' : '') +
+      '<p class="muted klein">' + ({ thema: 'Notizen und Beschluss.', rueckblick: 'Baustellen des Jahres und Ziele vom letzten Jahr mit «erreicht», «teilweise» oder «offen».', gruppen: 'Tafel: Mitarbeiter den Polieren zuteilen, festhalten und drucken. Liest aus der Mitarbeiterliste.', ziele: 'Ziele mit «wer» und «bis wann». Was im Rückblick nicht erreicht ist, kommt hier wieder auf den Tisch.', auftraege: 'Budget, Auslastung und offene Offerten aus den Kunden: Betrag gleichmässig von Baubeginn bis Bauende verteilt.', personal: 'Kader und Betriebsmitarbeiter mit ihren Ein- und Austritten aus der Mitarbeiterliste, dazu Bedarf und Nachfolge mit Stand. Was offen bleibt, steht nächstes Jahr wieder da.' })[t.art] + '</p>' +
       '<div class="reihe"><button type="button" class="btn" data-a="thema-hoch"' + (i === 0 ? ' disabled' : '') + '>' + ic('up') + '<span>Nach oben</span></button><button type="button" class="btn" data-a="thema-runter"' + (i === ges.length - 1 ? ' disabled' : '') + '>' + ic('down') + '<span>Nach unten</span></button></div>' +
       loeschKnopf('thema-weg', t.eltern ? 'Unterpunkt löschen' : 'Thema löschen'));
   },
@@ -2529,6 +2692,7 @@ const SHEET = {
       '<div class="zwei">' + feld('objektArt', 'Art des Objekts', ' placeholder="z. B. Brücke"', true) + feld('speziell', 'Speziell', '', true) + '</div>' +
       '<div class="zwei">' + feld('mitbewerber', 'Mitbewerber', ' placeholder="Wer hat auch offeriert?"', true) +
       '<label class="f" for="au-betrag"><span>Betrag in Franken</span><input id="au-betrag" name="betrag" value="' + (a && a.betrag !== null ? esc(fmt(a.betrag)) : '') + '" inputmode="decimal" autocomplete="off"></label></div>' +
+      '<div class="zwei">' + feld('beginn', 'Baubeginn', ' placeholder="z. B. 1.3.2027"') + feld('ende', 'Bauende', ' placeholder="z. B. 30.6.2027"') + '</div>' +
       '<div class="f"><span>Erhalten</span><input type="hidden" name="erhalten" value="' + (a ? a.erhalten : 'offen') + '"><div class="seg" role="group" aria-label="Erhalten">' +
         [['ja', 'Ja'], ['offen', 'Offen'], ['nein', 'Nein']].map((x) => '<button type="button" data-a="k-erh" data-v="' + x[0] + '" aria-pressed="' + ((a ? a.erhalten : 'offen') === x[0]) + '">' + x[1] + '</button>').join('') + '</div></div>' +
       '<label class="schalter" for="au-eing"><span>Auf Einladung</span><input type="checkbox" id="au-eing" name="eingeladen"' + (a && a.eingeladen ? ' checked' : '') + '></label>' +
@@ -3104,7 +3268,7 @@ const AKT = {
   'kunden-weg'(el) { if (!bestaetigt(el, 'Wirklich alle entfernen?')) return; merken(); S.kunden.offerten = []; S.kunden.auftraege = []; S.kunden.jahr = ''; geaendert(); toast('Offerten und Aufträge entfernt', true); },
   glpunkt(el) { auf({ art: 'glpunkt', id: el.dataset.id }); },
   'glpunkt-weg'() { if (!sheet) return; merken(); S.glPunkte = S.glPunkte.filter((x) => x.id !== sheet.id); geaendert(true); toast('Punkt gelöscht', true); },
-  art(el) { const t = themaAusForm(); if (!t) return; t.art = el.dataset.v; if (t.art === 'personal' && !t.frage) t.frage = PERSONAL_FRAGE; if (t.art === 'gruppen' && !t.gruppen.length) t.gruppen = ['Gruppe 1', 'Gruppe 2', 'Gruppe 3'].map((n) => ({ id: uid(), name: n })); speichern(); render(); renderSheet(false); },
+  art(el) { const t = themaAusForm(); if (!t) return; t.art = el.dataset.v; if (t.art === 'personal' && !t.frage) t.frage = PERSONAL_FRAGE; if (t.art === 'auftraege' && !t.frage) t.frage = AUFTRAEGE_FRAGE; if (t.art === 'gruppen' && !t.gruppen.length) t.gruppen = ['Gruppe 1', 'Gruppe 2', 'Gruppe 3'].map((n) => ({ id: uid(), name: n })); speichern(); render(); renderSheet(false); },
   notiz(el) { auf({ art: 'notiz', id: el.dataset.id }); },
   beschluss(el) { auf({ art: 'beschluss', id: el.dataset.id }); },
   ziel(el) { auf({ art: 'ziel', id: el.dataset.id }); },
@@ -3112,7 +3276,7 @@ const AKT = {
   gruppe(el) { auf({ art: 'ma', id: el.dataset.id }); },
   ma(el) { auf({ art: 'ma', id: el.dataset.id, zurueck: el.closest('.sheet') ? 'maliste' : '' }); },
   'ma-neu'(el) { auf({ art: 'ma', id: '', zurueck: el.closest('.sheet') ? 'maliste' : '' }); },
-  zeigen(el) { const t = themaAusForm(); if (!t) return; const z = {}; ZEIGEN.forEach((x) => { z[x[0]] = zeigt(t, x[0]); }); z[el.dataset.v] = !z[el.dataset.v]; z.bestand = z.kader && z.betrieb; t.zeigen = z; speichern(); render(); renderSheet(false); },
+  zeigen(el) { const t = themaAusForm(); if (!t) return; const z = {}; zeigenListe(t).forEach((x) => { z[x[0]] = zeigt(t, x[0]); }); z[el.dataset.v] = !z[el.dataset.v]; if (t.art === 'personal') z.bestand = z.kader && z.betrieb; t.zeigen = z; speichern(); render(); renderSheet(false); },
   anhang(el) { auf({ art: 'anhang', id: el.dataset.id }); },
   'anhang-wahl'() { $('#anhang-wahl').click(); },
   'anhang-weg'() { const t = aktThema(); if (!t || !sheet) return; merken(); t.anhaenge = t.anhaenge.filter((x) => x.id !== sheet.id); geaendert(true); toast('Anhang entfernt', true); },
