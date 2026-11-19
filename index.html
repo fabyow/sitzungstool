@@ -99,6 +99,7 @@ h1,h2,h3{font-family:var(--display);text-wrap:balance}
 
 /* ---------- Bausteine ---------- */
 main{max-width:84rem;margin:0 auto;padding:1.5rem 1rem 4rem}
+@media (min-width:1800px){main,.kopf1{max-width:112rem}}   /* grosser Bildschirm (seit 0.9): mehr Breite, weniger Umbrüche */
 .titel{display:flex;flex-wrap:wrap;align-items:flex-end;gap:.75rem 1rem;margin-bottom:1rem}
 .titel > div:first-child{flex:1;min-width:12rem}
 .titel h1{font-size:2rem;line-height:1.1;font-weight:700;letter-spacing:-.022em}
@@ -161,7 +162,7 @@ body.drueber .ablage,body.drueber .tab-rahmen,body.drueber .dg{border-color:var(
 
 /* ---------- Zahlen: Diagramme ---------- */
 .c-blau{background:var(--dz-blau)} .c-orange{background:var(--dz-orange)} .c-aqua{background:var(--dz-aqua)} .c-gelb{background:var(--dz-gelb)} .c-grau{background:var(--dz-grau)} .c-grau2{background:var(--dz-grau2)}
-.dgr{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,30rem),1fr));gap:1rem}
+.dgr{display:grid;grid-template-columns:repeat(auto-fit,minmax(max(min(100%,30rem),calc(50% - .5rem)),1fr));gap:1rem}   /* höchstens zwei nebeneinander, auch am grossen Bildschirm */
 .dg{background:var(--card);border-radius:1.25rem;box-shadow:var(--shadow);padding:1.1rem 1.25rem 1rem;min-width:0;border:1.5px solid transparent}
 .dg h2{font-size:1.1875rem;font-weight:700}
 .dg-u{color:var(--muted);font-size:.9375rem;margin:.1rem 0 .7rem}
@@ -252,16 +253,95 @@ body.drueber .ablage,body.drueber .tab-rahmen,body.drueber .dg{border-color:var(
 .bl-zeile{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.4rem 1rem;margin:1.5rem 0 .55rem}
 .bl-zeile .bl{margin:0}
 .seg.klein button{height:1.9rem;padding:0 .8rem;font-size:.8125rem}
-/* Baustellen: je Bauführer oder Polier eine Karte, der andere steht grau daneben */
-.bgr{display:grid;grid-template-columns:repeat(auto-fill,minmax(15.5rem,1fr));gap:.8rem;align-items:start;margin-bottom:.7rem}
-.bg{background:var(--card);border-radius:1.1rem;box-shadow:var(--shadow);padding:.8rem 1rem .45rem;min-width:0}
-.bg header{display:flex;align-items:baseline;justify-content:space-between;gap:.5rem;padding-bottom:.4rem;border-bottom:1px solid var(--sep)}
+/* Baustellen (seit 0.9): je Bauführer oder Polier eine Karte, eine Zeile je Baustelle, der andere in einer eigenen grauen Spalte.
+   Die Karten füllen Spalten von oben nach unten: am Laptop eine, am grossen Bildschirm zwei, ohne Lücken. */
+.bgr{columns:40rem;column-gap:1.1rem;margin-bottom:.2rem}
+.bg{break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;display:block;width:100%;margin:0 0 1rem;background:var(--card);border-radius:1.1rem;box-shadow:var(--shadow);padding:.7rem 1.15rem .3rem;min-width:0}
+.bg header{display:grid;grid-template-columns:minmax(0,1fr) 13rem;align-items:baseline;column-gap:1rem;padding-bottom:.45rem;border-bottom:1px solid var(--sep)}
 .bg header b{font-family:var(--display);font-size:1.1875rem;font-weight:700;overflow-wrap:anywhere}
-.bg header .zahl{color:var(--muted);font-weight:600;font-size:.875rem}
+.bg header .bg-k{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;color:var(--muted);font-size:.8125rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.bg header .zahl{color:var(--muted);font-weight:700;font-size:.9375rem;text-transform:none;letter-spacing:0}
 .bg li + li{border-top:1px solid var(--sep)}
-.bg li button{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:0 .7rem;width:100%;padding:.5rem 0;font-size:1.0625rem;font-weight:500;line-height:1.25}
-.bg li button span{min-width:0;overflow-wrap:anywhere}
-.bg li small{color:var(--muted);font-size:.875rem;font-weight:400}
+.bg li button{display:grid;grid-template-columns:minmax(0,1fr) 13rem;align-items:baseline;column-gap:1rem;width:100%;padding:.5rem 0;text-align:left;font-size:1.0625rem;font-weight:500;line-height:1.3}
+.bg-n{min-width:0;overflow-wrap:anywhere}
+.bg-mit{color:var(--muted);font-size:.875rem;font-weight:400;margin-left:.45rem;white-space:nowrap}
+.bg-d{min-width:0;color:var(--muted);font-size:.9375rem;font-weight:400;overflow-wrap:anywhere}
+.bst-neu{display:flex;flex-wrap:wrap;align-items:center;gap:.3rem 1.2rem;margin:.1rem 0 .4rem}
+.bst-neu .textlink{text-decoration:none;color:var(--accent);font-size:.9375rem;font-weight:600;display:inline-flex;align-items:center;gap:.35rem}
+.bst-neu .textlink .ic{width:1rem;height:1rem}
+.bst-form{margin-bottom:.35rem}
+.thema.zu .bst-neu{display:none}
+
+/* Felder seit 0.9: ein Knopf «Feld hinzufügen», Tabelle und Gruppen */
+.fd-neu .muted{align-self:center}
+.fd-arten{display:flex;flex-direction:column;gap:.5rem}
+.fd-art{display:flex;align-items:center;gap:.9rem;width:100%;padding:.85rem 1rem;border-radius:1rem;background:var(--bg);text-align:left;color:var(--ink)}
+.fd-art:hover{background:var(--fill)}
+.fd-art-ic{flex:none;width:2.4rem;height:2.4rem;border-radius:.75rem;display:grid;place-items:center;background:var(--brand-soft);color:var(--accent)}
+.fd-art-ic .ic{width:1.3rem;height:1.3rem}
+.fd-art-t{flex:1;min-width:0}
+.fd-art b{display:block;font-size:1.0625rem}
+.fd-art small{display:block;color:var(--muted);font-size:.875rem;line-height:1.3;margin-top:.1rem}
+.fd-art .pf{flex:none;color:var(--muted);width:1rem;height:1rem}
+.fd-tab-rahmen{overflow-x:auto;background:var(--card);border-radius:1rem;box-shadow:var(--shadow);margin:0 0 .5rem}
+.fd-tab{width:100%;border-collapse:collapse;font-size:1.0625rem}
+.fd-tab th{text-align:left;font-size:.8125rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:.75rem 1rem .45rem;white-space:nowrap}
+.fd-tab td{padding:.6rem 1rem;border-top:1px solid var(--sep);vertical-align:baseline;overflow-wrap:anywhere}
+.fd-tab td:first-child button{font:inherit;font-weight:600;text-align:left;color:inherit;padding:0;overflow-wrap:anywhere}
+.fd-tab tbody tr{cursor:pointer}
+.fd-tab tbody tr:hover td{background:var(--fill)}
+.fd-tab .r{text-align:right}
+.fd-tab tfoot td{font-weight:700;border-top:1.5px solid var(--sep)}
+.fd-tab tr.ein-vor td{box-shadow:inset 0 3px 0 var(--brand)}
+.fd-tab tr.ein-nach td{box-shadow:inset 0 -3px 0 var(--brand)}
+.fd-tab tr.ein-vor::before,.fd-tab tr.ein-nach::after{content:none}
+.fd-tab-neu{display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr)) auto;gap:.45rem;margin-bottom:.4rem}
+.fd-tab-neu input{min-width:0;height:3rem;padding:0 1rem;border-radius:1rem;border:1px solid var(--sep);background:var(--card);font-size:1.0625rem}
+.fdg-brett{display:grid;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));gap:.8rem;align-items:start;margin:0 0 .5rem}
+.fdg-sp{background:var(--card);border-radius:1.1rem;box-shadow:var(--shadow);padding:.7rem;display:flex;flex-direction:column;gap:.45rem;min-height:7.5rem;border:1.5px solid transparent;min-width:0}
+.fdg-sp.ziel{border-color:var(--brand);background:var(--brand-soft)}
+.fdg-k{display:block;width:100%;text-align:left;padding:.55rem .75rem;border-radius:.75rem;background:var(--bg);font-weight:500;font-size:1.0625rem;line-height:1.25;overflow-wrap:anywhere;color:var(--ink)}
+.fdg-neu input{width:100%;height:2.6rem;padding:0 .8rem;border-radius:.75rem;border:1px solid var(--sep);background:transparent;font-size:1rem;color:var(--ink)}
+.zu .fd-neu,.zu .fd-tab-neu,.zu .fdg-neu{display:none}
+.e-fdg{list-style:none;padding-left:0}
+.e-fdg li{margin:.15rem 0}
+.e-fdtab .r{text-align:right}
+.e-fdtab tfoot td{font-weight:700}
+/* Reiter «GL» seit 0.9: Gruppen, Haken «gesagt», Ergebnis */
+.gl-brett{display:flex;flex-direction:column;gap:1.1rem;margin-bottom:1.3rem}
+.gl-gr{border-radius:1.3rem;border:1.5px solid transparent;margin:-.45rem;padding:.45rem}
+.gl-gr.ziel{border-color:var(--brand);background:var(--brand-soft)}
+.gl-kopf{display:flex;align-items:center;gap:.6rem;margin:0 .1rem .5rem}
+.gl-kopf button{display:flex;align-items:center;gap:.5rem;min-width:0;color:inherit}
+.gl-kopf .bl{margin:0}
+.gl-kopf .ic{width:.9rem;height:.9rem;color:var(--muted)}
+.gl-kopf .fd-info{margin-left:auto}
+.gl-karte{background:var(--card);border-radius:1.1rem;box-shadow:var(--shadow);padding:0 1rem}
+.gl-liste{list-style:none;margin:0;padding:0}
+.gl-liste:empty{display:none}
+.gl-liste + .gl-neu{border-top:1px solid var(--sep)}
+.gl-neu{display:flex;align-items:center;gap:.7rem}
+.gl-neu button{width:1.9rem;height:1.9rem;border-radius:50%;display:grid;place-items:center;color:var(--accent);flex:none}
+.gl-neu button .ic{width:1.15rem;height:1.15rem}
+.gl-neu input{flex:1;min-width:0;height:3rem;padding:0;border:0;background:transparent;font-size:1.0625rem;outline:none;color:var(--ink)}
+.gl-neu input::placeholder{color:var(--muted)}
+.glp{display:flex;align-items:center;gap:.75rem;padding:.15rem 0;position:relative}
+.glp + .glp{border-top:1px solid var(--sep)}
+.glp.ein-vor::before{top:-2px}
+.glp.ein-nach::after{bottom:-2px}
+.glp.geist{padding:.15rem .9rem;border-radius:1rem}
+.glp-box{flex:none;width:1.9rem;height:1.9rem;display:grid;place-items:center;border-radius:.6rem;box-shadow:inset 0 0 0 1.5px var(--idle);color:transparent}
+.glp-box .ic{width:1.1rem;height:1.1rem}
+.glp.an .glp-box{background:var(--accent-fill);box-shadow:none;color:#fff}
+.glp.an .glp-t{color:var(--muted)}
+.glp .n-text{display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;text-align:left}
+.glp-e{font-size:.9375rem;font-weight:500;color:var(--accent);line-height:1.3}
+.glp-e::before{content:"→ "}
+/* Ziehen seit 0.9 auch mit dem Finger: kurz drücken hebt den Eintrag an */
+.hebt{transform:scale(1.03);box-shadow:0 10px 28px rgba(0,0,0,.22)!important;transition:transform .12s ease,box-shadow .12s ease;position:relative;z-index:3}
+.finger [data-zieh],.finger .karte,.finger .tliste2 .tlink[data-id]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.tlink.geist{width:auto;opacity:.95}
+.fd-geist{padding:.6rem 1rem;border-radius:.9rem;font-weight:600;max-width:24rem}
 
 /* ---------- Kunden: Offerten und Aufträge ---------- */
 .wahl{display:inline-flex;align-items:center;gap:.5rem;font-weight:600;font-size:.9375rem;color:var(--muted)}
@@ -279,7 +359,7 @@ body.drueber .ablage,body.drueber .tab-rahmen,body.drueber .dg{border-color:var(
 .bst.at td:first-child{font-weight:400;color:var(--muted)}
 .bst.at td:nth-child(2){font-weight:500;font-size:1.0625rem;min-width:13rem}
 .zwei.js{grid-template-columns:6.5rem minmax(0,1fr)}
-.glseite{max-width:54rem}
+.glseite{max-width:58rem}
 .thema .titel{margin-bottom:.7rem}
 .thema .titel h1{font-size:2.25rem}
 .frage{font-size:1.1875rem;line-height:1.35;color:var(--muted);max-width:54rem;margin-bottom:.4rem}
@@ -333,6 +413,8 @@ body.drueber .ablage,body.drueber .tab-rahmen,body.drueber .dg{border-color:var(
 .zu .fd-neu{display:none}
 .e-fd{list-style:none;padding-left:0}
 .vr-z{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:.4rem}
+.rm-nach{background:var(--warn-soft);border-radius:1rem;padding:.7rem .9rem;margin:.6rem 0}
+.rm-nach h3{margin-top:0}
 .rm-bild{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin:-.2rem 0 .8rem}
 .rm-vorschau{position:relative;display:inline-block}
 .rm-vorschau img{display:block;max-width:14rem;max-height:9rem;border-radius:.7rem;box-shadow:inset 0 0 0 1px var(--sep)}
@@ -390,7 +472,6 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
 .ew-art.ein{background:var(--brand-soft);color:var(--accent)}
 .ew-art.aus,.ew-art.pension{background:var(--warn-soft);color:var(--warn)}
 .rz.ew{padding-left:.8rem}
-.bestand .bg li button{padding:.38rem 0;font-size:1rem}
 .pr-zwei{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,21rem),1fr));gap:0 1.25rem;align-items:start}
 .pr-gr{min-width:0}
 .pr-gr .bl-zeile{min-height:2.5rem}
@@ -505,7 +586,9 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
 .bk .textlink{display:inline-block;margin-top:.1rem}
 .ab-unten{margin-top:.8rem}
 .ausblick.im-thema{margin-top:0}
-.al-chart{display:flex;align-items:flex-end;gap:.3rem;height:11.5rem}
+.al-chart{display:flex;align-items:flex-end;gap:.3rem;height:11.5rem;position:relative}
+.al-kap{position:absolute;left:0;right:0;height:0;border-top:2px dashed var(--warn);pointer-events:none}
+.ab-leg .ab-kap{display:inline-block;width:1.1rem;height:0;border-radius:0;background:none;box-shadow:none;border-top:2px dashed var(--warn);margin:0 .1rem 0 .6rem;vertical-align:middle}
 .al-m{flex:1;min-width:0;display:flex;flex-direction:column;align-items:stretch;height:100%;outline:none}
 .al-s{height:9rem;margin-top:auto;display:flex;flex-direction:column-reverse}
 .al-s i{display:block;width:100%;flex:none}
@@ -554,6 +637,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
 .e-teil ul{list-style:disc;padding-left:1.2rem;display:flex;flex-direction:column;gap:.2rem}
 .e-gl{background:var(--brand-soft);border-radius:1rem;padding:.9rem 1.1rem}
 .e-gl ul,.e-teil ul.e-rz{list-style:none;padding:0;gap:.45rem}
+.e-teil ul.e-fd,.e-teil ul.e-fdg{list-style:none;padding-left:0}
 .e-gl li b{font-weight:700}
 .e-marke{font-size:.6875rem;font-weight:700;color:var(--accent);margin-left:.4rem;letter-spacing:.03em}
 .e-klein{color:var(--muted);font-size:.875rem;margin:-.3rem 0 .5rem}
@@ -624,10 +708,11 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
 @media (max-width:52rem){
   .kopf1{flex-wrap:wrap}
   .seg.bereich{order:3;width:100%}
-  .seg.bereich button{flex:1 1 auto;padding:0 .35rem;font-size:.9375rem}
+  .seg.bereich button{flex:1 1 auto;padding:0 .35rem;font-size:.9375rem;justify-content:center;text-align:center}
   .rg-z{grid-template-columns:minmax(0,1fr) 5rem;gap:.15rem .6rem}
   .rg-n{grid-column:1 / -1;white-space:normal}
-  .bgr{grid-template-columns:repeat(auto-fill,minmax(13rem,1fr))}
+  .bg header,.bg li button{grid-template-columns:minmax(0,1fr) minmax(0,38%);column-gap:.7rem}
+  .bg{padding:.65rem .95rem .25rem}
   .themen{grid-template-columns:minmax(0,1fr);gap:.9rem}
   .tliste2{position:static;gap:.4rem;max-height:none;overflow:visible;padding:0;margin:0;min-width:0}
   .tz{display:flex;gap:.4rem;overflow-x:auto;scrollbar-width:none;padding-bottom:.1rem}
@@ -647,6 +732,10 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
   .stw li button{font-size:1.0625rem}
   .frage{font-size:1.0625rem}
   .dreier{grid-template-columns:1fr 1fr auto}
+  .fd-tab-neu{grid-template-columns:1fr 1fr}
+  .fd-tab-neu .rund{justify-self:end}
+  .tz .tlink.ein-vor::before{top:.35rem;bottom:.35rem;left:-.3rem;right:auto;width:3px;height:auto}
+  .tz .tlink.ein-nach::after{top:.35rem;bottom:.35rem;right:-.3rem;left:auto;width:3px;height:auto}
   .dreier input:first-child{grid-column:1 / -1}
   .dreier.mit-th{grid-template-columns:1fr 1fr auto}
   .dreier.mit-th select,.dreier.mit-th input[name=was]{grid-column:1 / -1}
@@ -737,7 +826,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '0.8.8';         // Version des Tools, steht in den Einstellungen
+const VERSION = '0.9';         // Version des Tools, steht in den Einstellungen
 const FORMAT = 7;              // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
@@ -753,6 +842,7 @@ const ALS_LINK = !IM_RAHMEN && /^https?:$/.test(location.protocol);             
 // iPad und Handy: «Sichern» gibt die Datei über das Teilen-Fenster weiter; am Rechner schreibt der Browser direkt in die Datei
 const BERUEHRUNG = GROB || (navigator.maxTouchPoints || 0) > 0;                          // auch ein iPad mit Tastatur und Trackpad
 const ANDROID = /Android/i.test(navigator.userAgent);
+if (BERUEHRUNG) document.documentElement.classList.add('finger');   // seit 0.9: Ziehen mit dem Finger, ohne Textauswahl beim langen Drücken
 const TEILEN_ZUERST = BERUEHRUNG && (ANDROID || !window.showSaveFilePicker);
 function kannTeilen() {
   try { return !!navigator.share && !!navigator.canShare && navigator.canShare({ files: [new File(['x'], 'x.html', { type: 'text/html' })] }); }
@@ -767,6 +857,10 @@ const uid = () => Math.random().toString(36).slice(2, 10);
 
 const IC = {
   plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+  haken: '<rect width="18" height="18" x="3" y="3" rx="4"/><path d="m8 12 3 3 5-6"/>',
+  wahl: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/>',
+  tabelle: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M12 3v18"/>',
+  spalten: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="M15 3v18"/>',
   minus: '<path d="M5 12h14"/>',
   x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
   check: '<path d="M20 6 9 17l-5-5"/>',
@@ -802,6 +896,10 @@ const MON = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Ok
 const MON_NR = { jan: 1, feb: 2, 'mär': 3, mrz: 3, mar: 3, apr: 4, mai: 5, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, okt: 10, oct: 10, nov: 11, dez: 12, dec: 12 };
 const monatAus = (text) => MON_NR[String(text).trim().slice(0, 3).toLowerCase()] || 0;   // «Nov 26» → 11
 const ARTEN = [['thema', 'Thema'], ['rueckblick', 'Rückblick'], ['gruppen', 'Gruppen'], ['ziele', 'Ziele'], ['personal', 'Personal'], ['auftraege', 'Aufträge']];
+/* Arten der Felder (seit 0.9 hier oben: normal() braucht sie schon beim Start) */
+const FELD_ARTEN = [['liste', 'Checkliste', 'Punkte zum Abhaken', 'haken'], ['wahl', 'Auswahl', 'Möglichkeiten, eine wird gewählt', 'wahl'],
+  ['tabelle', 'Tabelle', 'Zeilen und Spalten, z. B. ein Vergleich; Beträge werden zusammengezählt', 'tabelle'], ['gruppen', 'Gruppen', 'Einträge in Spalten ordnen und verschieben, z. B. sofort, nächstes Jahr, später', 'spalten']];
+const feldArt = (art) => FELD_ARTEN.find((x) => x[0] === art) || FELD_ARTEN[0];
 const BSTAND = { offen: 'Offen', laeuft: 'Läuft', besetzt: 'Besetzt' };   // Personal: Stand eines Bedarfs
 const RM_ARTEN = { unuebersichtlich: 'Unübersichtlich', fehlt: 'Fehlt etwas', fehler: 'Fehler', idee: 'Idee', anderes: 'Anderes' };   // Rückmeldung zum Tool
 const PERSONAL_FRAGE = 'Sind wir gut besetzt? Wo gibt es Vakanzen, wer geht, und wer folgt nach?';
@@ -860,7 +958,9 @@ function leer() {
     zahlen: { perioden: [], zeilen: [], sicht: 'summen', ansicht: 'diagramme' },
     themen: themenStart(),
     parkplatz: [],   // was aufkommt, aber zu keinem Thema gehört: [{id, text}]
-    glPunkte: [],    // eigene Punkte für die GL, stehen nie im Ergebnis: [{id, text}]
+    glPunkte: [],    // eigene Punkte für die GL, stehen nie im Ergebnis: [{id, text, gruppe, an (gesagt), ergebnis, thema}]
+    glGruppen: [],   // seit 0.9: Gruppen der GL-Punkte [{id, titel}]
+    glFelder: [],    // seit 0.9: Felder im Reiter «GL» (Checkliste, Auswahl, Tabelle, Gruppen)
     rueckmeldungen: [],   // was am Tool auffällt, zum Weitergeben an Claude: [{id, datum, wo, art, text, version, umgebung, breite, status, uebergeben}]
     budget: { ziel: null, auftraege: [], notiz: '' },   // Ausblick aufs Folgejahr: Umsatz-Ziel und was schon als Auftrag da ist [{id, name, betrag}]
     mitarbeiter: [],   // Mitarbeiterliste: [{id, name, position, polier (Kennung des Poliers), eintritt, austritt, geburt}]
@@ -933,7 +1033,8 @@ function beispiel() {
   T[0].baustellen = [['Parkhaus Nord, Decke', 'Bauführer 1', 'Polier 1'], ['Brücke am Dorfbach', 'Bauführer 2', 'Polier 2'], ['Schulhaus, Fassade', 'Bauführer 1', 'Polier 3'], ['Tiefgarage Zentrum', 'Bauführer 2', 'Polier 1']].map((b) => ({ id: uid(), name: b[0], bf: b[1], po: b[2] }));
   const U = (titelText, frage, notiz) => { const u = themaNeu('thema', titelText, frage); u.eltern = T[3].id; u.notizen = [N(notiz)]; return u; };
   s.themen.splice(4, 0, U('Kurse im Winter', 'Welche Kurse passen in die ruhigen Monate?', 'Erste-Hilfe-Kurs im Januar'), U('Lernende', 'Wie viele Lernende nehmen wir im Sommer?', 'Ab Sommer ein Lernender mehr'));
-  s.glPunkte = ['Zusammenarbeit mit den anderen Abteilungen', 'Gemeinsamer Einkauf von Verbrauchsmaterial'].map((x) => ({ id: uid(), text: x }));
+  s.glGruppen = [{ id: uid(), titel: 'Zusammenarbeit' }, { id: uid(), titel: 'Einkauf' }];
+  s.glPunkte = [['Zusammenarbeit mit den anderen Abteilungen', 0], ['Gemeinsame Planung der Geräte', 0], ['Gemeinsamer Einkauf von Verbrauchsmaterial', 1]].map((x) => ({ id: uid(), text: x[0], gruppe: s.glGruppen[x[1]].id, an: false, ergebnis: '', thema: '' }));
   const pe = themaNeu('personal', 'Personal', PERSONAL_FRAGE);
   pe.bedarf = [['Polier', 'Nachfolge, ein Polier hört auf', 'Sommer', 'laeuft', true], ['Bauarbeiter', 'Nachfolge', 'Frühling', 'offen', false], ['Hilfsbauführer', 'Entlastung im Büro', '', 'besetzt', false]].map((b) => ({ id: uid(), was: b[0], warum: b[1], bis: b[2], stand: b[3], notiz: '', gl: b[4] }));
   s.themen.splice(s.themen.length - 1, 0, pe);
@@ -997,6 +1098,7 @@ function normal(d) {
     if (typeof t.frage !== 'string') t.frage = '';
     if (typeof t.eltern !== 'string') t.eltern = '';
     ['stichworte', 'notizen', 'beschluesse', 'ziele', 'gruppen', 'leute', 'baustellen', 'bedarf', 'felder'].forEach((k) => { if (!Array.isArray(t[k])) t[k] = []; });
+    t.felder = felderNormal(t.felder);
     t.stichworte = t.stichworte.filter((x) => x && typeof x === 'object' && typeof x.text === 'string' && x.text.trim());   // seit 0.8.5: was du sagen willst [{id, text}]
     t.stichworte.forEach((x) => { if (!x.id) x.id = uid(); });
     if (typeof t.fest !== 'string') t.fest = '';
@@ -1015,7 +1117,11 @@ function normal(d) {
   s.mitarbeiter = maNormal(d && d.mitarbeiter, s.themen);
   spiegeln(s);
   s.glPunkte = (Array.isArray(s.glPunkte) ? s.glPunkte : []).filter((x) => x && typeof x.text === 'string');
-  s.glPunkte.forEach((x) => { if (!x.id) x.id = uid(); });
+  s.glGruppen = (Array.isArray(s.glGruppen) ? s.glGruppen : []).filter((g) => g && typeof g === 'object' && typeof g.titel === 'string');
+  s.glGruppen.forEach((g) => { if (typeof g.id !== 'string' || !g.id) g.id = uid(); });
+  const glIds = s.glGruppen.map((g) => g.id);
+  s.glPunkte.forEach((x) => { if (!x.id) x.id = uid(); if (glIds.indexOf(x.gruppe) < 0) x.gruppe = ''; x.an = !!x.an; ['ergebnis', 'thema'].forEach((k) => { if (typeof x[k] !== 'string') x[k] = ''; }); });
+  s.glFelder = felderNormal(s.glFelder);
   s.rueckmeldungen = (Array.isArray(s.rueckmeldungen) ? s.rueckmeldungen : []).filter((x) => x && typeof x.text === 'string' && x.text.trim());
   s.rueckmeldungen.forEach((x) => { if (x.bild && typeof x.bild === 'object' && typeof x.bild.id === 'string') { if (typeof x.bild.inhalt === 'string' && x.bild.inhalt) anhMerken(x.bild.id, x.bild.inhalt); delete x.bild.inhalt; } else x.bild = null; });
   s.rueckmeldungen.forEach((x) => { if (!x.id) x.id = uid(); if (!RM_ARTEN[x.art]) x.art = 'anderes'; if (x.status !== 'uebergeben') x.status = 'offen'; ['wo', 'datum', 'version', 'umgebung'].forEach((k) => { if (typeof x[k] !== 'string') x[k] = ''; }); });
@@ -1278,6 +1384,7 @@ function monatJahr(s) {
   const mo = monatAus(s), j = /(\d{2,4})\s*$/.exec(s);
   return mo && j ? [mo, jahr(j[1])] : null;
 }
+const zeilenVon = (text) => String(text == null ? '' : text).split(/[\r\n]+/).map((x) => x.trim()).filter(Boolean);   // eine Zeile je Eintrag, ohne Strichpunkt-Trennung
 const mehrzeilig = (text) => String(text).split(/[\r\n\t;]+/).map((x) => x.trim()).filter(Boolean);   // Liste aus Excel: ein Eintrag je Zeile
 
 /* ---------- Einlesen: eingefügter Text, CSV, Excel-Datei ---------- */
@@ -1602,7 +1709,7 @@ function kundenLesen(g) {
 function beispielWeg() {
   S.beispiel = false; S.zahlen.perioden = []; S.zahlen.zeilen = []; S.ui.auf = {};
   S.themen.forEach((x) => { x.felder = []; x.stichworte = []; x.notizen = []; x.beschluesse = []; x.ziele = []; x.leute = []; x.baustellen = []; x.bedarf = []; x.fest = ''; x.zu = ''; x.anhaenge = []; });
-  S.parkplatz = []; S.glPunkte = []; S.kunden.offerten = []; S.kunden.auftraege = []; S.budget = { ziel: null, auftraege: [], notiz: '' }; S.mitarbeiter = [];
+  S.parkplatz = []; S.glPunkte = []; S.glGruppen = []; S.glFelder = []; S.kunden.offerten = []; S.kunden.auftraege = []; S.budget = { ziel: null, auftraege: [], notiz: '' }; S.mitarbeiter = [];
 }
 /* Gelesene Tabellen übernehmen. Ein Jahr oder ein Auftrag (gleiches Jahr, gleiches Objekt), den es schon gibt, wird ergänzt statt verdoppelt. */
 function kundenUebernehmen(funde) {
@@ -1729,7 +1836,7 @@ async function ladeDatei(file) {
 }
 function ohneInhalt() {   // nichts eingetragen und die Themen wie am Anfang
   const vor = themenStart();
-  return !S.zahlen.perioden.length && S.themen.length === vor.length && S.themen.every((x, i) => x.titel === vor[i].titel && x.frage === vor[i].frage && !S.parkplatz.length && !S.glPunkte.length && !S.kunden.offerten.length && !S.kunden.auftraege.length && !x.baustellen.length && !x.stichworte.length && !x.notizen.length && !x.beschluesse.length && !x.ziele.length && !x.leute.length && !x.bedarf.length && !x.anhaenge.length) && !S.rueckmeldungen.length && S.budget.ziel === null && !S.budget.auftraege.length && !S.mitarbeiter.length;
+  return !S.zahlen.perioden.length && S.themen.length === vor.length && S.themen.every((x, i) => x.titel === vor[i].titel && x.frage === vor[i].frage && !S.parkplatz.length && !S.glPunkte.length && !S.glFelder.length && !S.kunden.offerten.length && !S.kunden.auftraege.length && !x.baustellen.length && !x.stichworte.length && !x.notizen.length && !x.beschluesse.length && !x.ziele.length && !x.leute.length && !x.bedarf.length && !x.anhaenge.length) && !S.rueckmeldungen.length && S.budget.ziel === null && !S.budget.auftraege.length && !S.mitarbeiter.length;
 }
 function uebernehmen(d, name) {
   merken();
@@ -2187,6 +2294,7 @@ const namenWahl = (id, f) => { const N = S.mitarbeiter.filter((m) => f(m) && imF
    «weiter» hält den Entscheid fest; ein übernommenes Ziel trägt in «aus» die Kennung des alten. */
 /* Ziele mit Thema (Chefs Rueckmeldung vom 19.11.2026, 22.14 Uhr): zur Wahl stehen die Hauptthemen ohne Rueckblick und Ziele.
    Gespeichert wird der Titel, damit das Thema auch im naechsten Jahr lesbar bleibt. Seit 0.8.7. */
+let BST_OFFEN = false;   // «+ Baustelle» gedrückt: das Formular steht offen, bis «Fertig»
 let ZIEL_TH = '';   // zuletzt gewaehltes Thema beim Hinzufuegen, gilt fuer das naechste Ziel
 function zielThemen() { return S.themen.filter((t) => !t.eltern && t.art !== 'rueckblick' && t.art !== 'ziele').map((t) => t.titel); }
 function themaWahl(name, wert, id, cls) {
@@ -2227,6 +2335,99 @@ function bstGruppen(B, nach) {
   });
   return gruppen.sort((a, b) => (a.name === '') - (b.name === '') || b.liste.length - a.liste.length || a.name.localeCompare(b.name, 'de'));
 }
+/* ---------- Felder (seit 0.8.7 Checkliste und Auswahl, seit 0.9 auch Tabelle und Gruppen) ----------
+   In jedem Thema und Unterpunkt (t.felder) und im Reiter «GL» (S.glFelder), gleich aufgebaut:
+   { id, art: 'liste' | 'wahl' | 'tabelle' | 'gruppen', titel, punkte: [{ id, text, an, spalte }], spalten: [{ id, name }], zeilen: [{ id, w: { Spalte: Text } }] }
+   Tabelle und Gruppen haben auch «punkte» (bei der Tabelle leer), damit ältere Fassungen eine Datei aus 0.9 öffnen, ohne zu stolpern. */
+function felderNormal(L) {
+  return (Array.isArray(L) ? L : []).filter((f) => f && typeof f === 'object').map((f) => {
+    if (typeof f.id !== 'string' || !f.id) f.id = uid();
+    if (!FELD_ARTEN.some((x) => x[0] === f.art)) f.art = 'liste';
+    if (typeof f.titel !== 'string' || !f.titel.trim()) f.titel = feldArt(f.art)[1];
+    f.punkte = (Array.isArray(f.punkte) ? f.punkte : []).filter((x) => x && typeof x === 'object' && typeof x.text === 'string');
+    f.punkte.forEach((x) => { if (typeof x.id !== 'string' || !x.id) x.id = uid(); x.an = !!x.an; });
+    if (f.art === 'tabelle' || f.art === 'gruppen') {
+      f.spalten = (Array.isArray(f.spalten) ? f.spalten : []).filter((x) => x && typeof x === 'object' && typeof x.name === 'string');
+      f.spalten.forEach((x) => { if (typeof x.id !== 'string' || !x.id) x.id = uid(); });
+      if (!f.spalten.length) f.spalten = [{ id: uid(), name: f.art === 'tabelle' ? 'Was' : 'Gruppe 1' }];
+    }
+    if (f.art === 'tabelle') {
+      f.zeilen = (Array.isArray(f.zeilen) ? f.zeilen : []).filter((z) => z && typeof z === 'object');
+      f.zeilen.forEach((z) => { if (typeof z.id !== 'string' || !z.id) z.id = uid(); if (!z.w || typeof z.w !== 'object') z.w = {}; });
+    }
+    if (f.art === 'gruppen') { const ids = f.spalten.map((s) => s.id); f.punkte.forEach((x) => { if (ids.indexOf(x.spalte) < 0) x.spalte = ids[0]; }); }
+    return f;
+  });
+}
+function feldNeu(art) {
+  const f = { id: uid(), art: art, titel: feldArt(art)[1], punkte: [] };
+  if (art === 'tabelle') { f.spalten = ['Was', 'Betrag', 'Bemerkung'].map((n) => ({ id: uid(), name: n })); f.zeilen = []; }
+  if (art === 'gruppen') f.spalten = ['Sofort', String(folgejahr()), 'Später'].map((n) => ({ id: uid(), name: n }));
+  return f;
+}
+/* Ein Betrag in einer Tabellenzelle: «1'200», «CHF 1'200.50», «1200.–». Ein Datum oder eine Prozentzahl zählt nicht. */
+function betragWert(s) {
+  s = String(s == null ? '' : s).trim();
+  if (!s || /%/.test(s) || /^\d{1,2}\.\d{1,2}\.(\d{2}|\d{4})$/.test(s)) return null;
+  s = s.replace(/^(chf|sfr\.?|fr\.?)\s*/i, '').replace(/\s*(chf|sfr\.?|fr\.?)$/i, '').replace(/\.[-–—]+$/, '');
+  return zahl(s);
+}
+const KEINE_SUMME = /jahr|datum|termin|nummer|^nr\.?$|plz|telefon|tel\.?$/i;
+function tabSummen(f) {   // je Spalte die Summe, wenn mindestens zwei Zellen Beträge sind und keine etwas anderes
+  return f.spalten.map((s) => {
+    if (KEINE_SUMME.test(s.name)) return null;
+    let n = 0, summe = 0, ok = true;
+    f.zeilen.forEach((z) => { const v = String(z.w[s.id] || '').trim(); if (!v) return; const x = betragWert(v); if (x === null) ok = false; else { summe += x; n++; } });
+    return ok && n >= 2 ? summe : null;
+  });
+}
+const betragText = (x) => (Math.abs(x - Math.round(x)) > 0.004 ? fmtN(x, 2) : fmt(x));
+function feldInfo(f) {
+  if (f.art === 'tabelle') return f.zeilen.length ? mehrzahl(f.zeilen.length, 'Zeile', 'Zeilen') : '';
+  if (f.art === 'gruppen') return f.punkte.length ? mehrzahl(f.punkte.length, 'Eintrag', 'Einträge') : '';
+  if (!f.punkte.length) return '';
+  const gew = f.punkte.filter((x) => x.an).length;
+  return f.art === 'wahl' ? (gew ? 'gewählt' : 'noch nichts gewählt') : gew + ' von ' + f.punkte.length + ' erledigt';
+}
+function feldHTML(f, o) {
+  const d = ' data-o="' + o + '" data-f="' + f.id + '"';
+  const kopf = '<button type="button" class="fd-kopf" data-a="fd"' + d + ' data-id="' + f.id + '" title="Titel, Einträge oder Spalten ändern"><h2 class="bl">' + esc(f.titel) + '</h2><span class="fd-info">' + esc(feldInfo(f)) + '</span>' + ic('pen') + '</button>';
+  if (f.art === 'tabelle') {
+    const sp = f.spalten, su = tabSummen(f), r = (i) => (su[i] !== null ? ' class="r tnum"' : '');
+    return '<section class="fd fd-tabelle">' + kopf + (f.zeilen.length ? '<div class="fd-tab-rahmen"><table class="fd-tab"><thead><tr>' + sp.map((s, i) => '<th' + (su[i] !== null ? ' class="r"' : '') + '>' + esc(s.name) + '</th>').join('') + '</tr></thead><tbody>' +
+      f.zeilen.map((z) => '<tr data-zieh="fdz" data-zid="' + z.id + '" data-a="fd-zeile" data-id="' + z.id + '"' + d + '>' + sp.map((s, i) => '<td' + r(i) + '>' + (i === 0 ? '<button type="button" data-a="fd-zeile" data-id="' + z.id + '"' + d + '>' + (esc(z.w[s.id] || '') || '<span class="muted">–</span>') + '</button>' : esc(z.w[s.id] || '')) + '</td>').join('') + '</tr>').join('') + '</tbody>' +
+      (su.some((x) => x !== null) ? '<tfoot><tr>' + sp.map((s, i) => '<td' + r(i) + '>' + (su[i] !== null ? esc(betragText(su[i])) : (i === 0 ? 'Summe' : '')) + '</td>').join('') + '</tr></tfoot>' : '') + '</table></div>' : '') +
+      '<form class="fd-tab-neu" data-form="fdzeile"' + d + ' style="--n:' + sp.length + '">' + sp.map((s, i) => '<input name="c' + i + '"' + (i === 0 ? ' id="neu-fz-' + f.id + '"' : '') + ' placeholder="' + esc(s.name) + (i === 0 ? ' …' : '') + '" aria-label="' + esc(s.name) + '" autocomplete="off"' + (i === sp.length - 1 ? ' enterkeyhint="done"' : '') + '>').join('') +
+      '<button class="rund" aria-label="Zeile hinzufügen">' + ic('plus') + '</button></form></section>';
+  }
+  if (f.art === 'gruppen') {
+    return '<section class="fd fd-gruppen">' + kopf + '<div class="fdg-brett" data-brett="fdg-' + f.id + '" style="--n:' + f.spalten.length + '">' + f.spalten.map((s) => {
+      const P = f.punkte.filter((x) => x.spalte === s.id);
+      return '<section class="fdg-sp" data-spalte="' + s.id + '"><header class="sp-kopf"><span>' + esc(s.name) + '</span><span class="zahl tnum">' + P.length + '</span></header>' +
+        P.map((x) => '<button type="button" class="fdg-k" data-zieh="fdg" data-zid="' + x.id + '" data-a="fdg-punkt" data-id="' + x.id + '"' + d + '>' + esc(x.text) + '</button>').join('') +
+        '<form class="fdg-neu" data-form="fdgpunkt"' + d + ' data-s="' + s.id + '"><input name="text" placeholder="Hinzufügen …" aria-label="Zu «' + esc(s.name) + '» hinzufügen" autocomplete="off" enterkeyhint="done"></form></section>';
+    }).join('') + '</div></section>';
+  }
+  const wahl = f.art === 'wahl';
+  return '<section class="fd' + (wahl ? ' fd-wahl' : '') + '">' + kopf +
+    (f.punkte.length ? '<ul class="fd-liste">' + f.punkte.map((x) => '<li data-zieh="fdp" data-zid="' + x.id + '"' + d + '><button type="button" class="fd-p' + (x.an ? ' an' : '') + '" data-a="fd-punkt"' + d + ' data-id="' + x.id + '" aria-pressed="' + !!x.an + '"><span class="fd-box">' + ic('check') + '</span><span class="fd-t">' + esc(x.text) + '</span></button></li>').join('') + '</ul>' : '') +
+    '<form class="schnell" data-form="fdpunkt"' + d + '><input name="text" id="neu-fd-' + f.id + '" placeholder="' + (wahl ? 'Möglichkeit hinzufügen …' : 'Punkt hinzufügen …') + '" aria-label="' + (wahl ? 'Möglichkeit hinzufügen' : 'Punkt hinzufügen') + '" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Hinzufügen">' + ic('plus') + '</button></form></section>';
+}
+function felderHTML(F, o, zu) {
+  if (zu && !F.length) return '';
+  return F.map((f) => feldHTML(f, o)).join('') + '<div class="reihe fd-neu"><button type="button" class="btn klein" data-a="fd-wahl" data-o="' + o + '">' + ic('plus') + '<span>Feld hinzufügen</span></button><span class="muted klein">Checkliste, Auswahl, Tabelle oder Gruppen</span></div>';
+}
+const feldListe = (o) => (o === 'gl' ? S.glFelder : ((aktThema() || {}).felder || null));
+function feldAus(el) { const L = feldListe(el.dataset.o || 't'); return L ? L.find((f) => f.id === el.dataset.f) || null : null; }
+const feldImSheet = () => (sheet ? (feldListe(sheet.o || 't') || []).find((f) => f.id === (sheet.f || sheet.id)) || null : null);
+/* Eine Liste von Namen (eine Zeile je Spalte oder Gruppe) auf die bestehenden legen: gleicher Name bleibt, ein neuer Name an
+   der Stelle eines weggefallenen gilt als umbenannt; was dann noch fehlt, ist neu. */
+function spaltenAus(text, alt) {
+  const namen = String(text || '').split(/[\r\n]+/).map((x) => x.trim()).filter(Boolean), frei = alt.slice(), neu = namen.map(() => null);
+  namen.forEach((n, i) => { const k = frei.findIndex((s) => s.name === n); if (k >= 0) { neu[i] = frei[k]; frei.splice(k, 1); } });
+  namen.forEach((n, i) => { if (neu[i]) return; const a = alt[i]; const k = a ? frei.indexOf(a) : -1; if (k >= 0 && namen.indexOf(a.name) < 0) { a.name = n; neu[i] = a; frei.splice(k, 1); } });
+  return namen.map((n, i) => neu[i] || { id: uid(), name: n });
+}
 const TEIL = {
   frage(t) { return t.frage ? '<p class="frage">' + esc(t.frage) + '</p>' : ''; },
   stichworte(t) {   // was du sagen willst: vorher vorbereitet, in der Sitzung offen für alle, nie im Ergebnis (seit 0.8.5)
@@ -2235,17 +2436,7 @@ const TEIL = {
     return '<h2 class="bl">Stichworte</h2><div class="stw">' + (L.length ? '<ul>' + L.map((x) => '<li data-zieh="stichworte" data-zid="' + x.id + '"><button type="button" data-a="stichwort" data-id="' + x.id + '"><span>' + esc(x.text) + '</span></button></li>').join('') + '</ul>' : '') +
       '<form class="stw-neu" data-form="stichwort"><button aria-label="Stichwort hinzufügen">' + ic('plus') + '</button><input name="text" id="neu-stw" placeholder="Stichwort hinzufügen …" aria-label="Stichwort hinzufügen" autocomplete="off" enterkeyhint="done"></form></div>';
   },
-  felder(t) {   // Checklisten und Auswahl je Thema (Chefs Rueckmeldung vom 19.11.2026, 22.15 Uhr, bei 7 Anlaesse). Seit 0.8.7.
-    const F = t.felder || [];
-    if (t.zu && !F.length) return '';
-    const feld = (f) => {
-      const wahl = f.art === 'wahl', gew = f.punkte.filter((x) => x.an), info = !f.punkte.length ? '' : (wahl ? (gew.length ? 'gewählt' : 'noch nichts gewählt') : gew.length + ' von ' + f.punkte.length + ' erledigt');
-      return '<section class="fd' + (wahl ? ' fd-wahl' : '') + '"><button type="button" class="fd-kopf" data-a="fd" data-id="' + f.id + '"><h2 class="bl">' + esc(f.titel) + '</h2><span class="fd-info">' + esc(info) + '</span>' + ic('pen') + '</button>' +
-        (f.punkte.length ? '<ul class="fd-liste">' + f.punkte.map((x) => '<li><button type="button" class="fd-p' + (x.an ? ' an' : '') + '" data-a="fd-punkt" data-f="' + f.id + '" data-id="' + x.id + '" aria-pressed="' + !!x.an + '"><span class="fd-box">' + ic('check') + '</span><span class="fd-t">' + esc(x.text) + '</span></button></li>').join('') + '</ul>' : '') +
-        '<form class="schnell" data-form="fdpunkt" data-f="' + f.id + '"><input name="text" id="neu-fd-' + f.id + '" placeholder="' + (wahl ? 'Möglichkeit hinzufügen …' : 'Punkt hinzufügen …') + '" aria-label="' + (wahl ? 'Möglichkeit hinzufügen' : 'Punkt hinzufügen') + '" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Hinzufügen">' + ic('plus') + '</button></form></section>';
-    };
-    return F.map(feld).join('') + '<div class="reihe fd-neu"><button type="button" class="btn klein" data-a="fd-neu" data-v="liste">' + ic('plus') + '<span>Checkliste</span></button><button type="button" class="btn klein" data-a="fd-neu" data-v="wahl">' + ic('plus') + '<span>Auswahl</span></button></div>';
-  },
+  felder(t) { return felderHTML(t.felder || [], 't', !!t.zu); },   // Checkliste, Auswahl, Tabelle, Gruppen (seit 0.9 ein Knopf «Feld hinzufügen»)
   notizen(t) {
     return '<h2 class="bl">Notizen</h2><ul class="eintraege">' + t.notizen.map((n) => '<li class="notiz' + (n.gl ? ' gl' : '') + '" data-zieh="notizen" data-zid="' + n.id + '"><button type="button" class="n-text" data-a="notiz" data-id="' + n.id + '">' + esc(n.text) + '</button>' + glKnopf('n', n) + '</li>').join('') + '</ul>' +
       '<form class="schnell" data-form="notiz"><input name="text" id="neu-notiz" placeholder="Notiz hinzufügen …" aria-label="Notiz hinzufügen" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Notiz hinzufügen">' + ic('plus') + '</button></form>';
@@ -2265,13 +2456,14 @@ const TEIL = {
     if (!k.length) return '';
     return '<h2 class="bl">Unterpunkte</h2><div class="uliste">' + k.map((x) => '<button type="button" class="urow" data-a="thema" data-id="' + x.id + '"><span class="u-nr tnum">' + esc(nr[x.id] || '') + '</span><span class="u-t">' + esc(x.titel) + '</span><span class="u-m">' + esc(zaehlText(x)) + '</span>' + (fertig(x) ? ic('check', 'ok') : '') + ic('right', 'pf') + '</button>').join('') + '</div>';
   },
-  baustellen(t) {
-    const B = t.baustellen, nach = S.ui.bst === 'po' ? 'po' : 'bf', anderes = nach === 'bf' ? 'po' : 'bf';
+  baustellen(t) {   // seit 0.9: eine Zeile je Baustelle, der andere (Polier oder Bauführer) in einer eigenen Spalte; Hinzufügen hinter «+ Baustelle»
+    const B = t.baustellen, nach = S.ui.bst === 'po' ? 'po' : 'bf', anderes = nach === 'bf' ? 'po' : 'bf', offen = BST_OFFEN || !B.length;
     return '<div class="bl-zeile"><h2 class="bl">Baustellen' + (B.length ? ' (' + B.length + ')' : '') + '</h2>' + (B.length ? seg('bst', [['bf', 'Bauführer'], ['po', 'Polier']], nach, 'klein') : '') + '</div>' +
-      (B.length ? '<div class="bgr">' + bstGruppen(B, nach).map((g) => '<section class="bg"><header><b>' + esc(g.name || (nach === 'bf' ? 'Ohne Bauführer' : 'Ohne Polier')) + '</b><span class="zahl tnum">' + g.liste.length + '</span></header><ul>' +
-        g.liste.map((e) => { const grau = [e.b[anderes], e.mit.length ? 'mit ' + e.mit.join(', ') : ''].filter(Boolean).join(' · '); return '<li data-zieh="baustellen" data-zid="' + e.b.id + '"><button type="button" data-a="baustelle" data-id="' + e.b.id + '"><span>' + esc(e.b.name) + '</span>' + (grau ? '<small>' + esc(grau) + '</small>' : '') + '</button></li>'; }).join('') + '</ul></section>').join('') + '</div>' : '') +
-      '<form class="dreier" data-form="baustelle"><input name="name" id="neu-bst" placeholder="Baustelle hinzufügen …" aria-label="Baustelle" autocomplete="off"><input name="bf" placeholder="Bauführer" aria-label="Bauführer" autocomplete="off" list="dl-bf"><input name="po" placeholder="Polier" aria-label="Polier" autocomplete="off" enterkeyhint="done" list="dl-po"><button class="rund" aria-label="Baustelle hinzufügen">' + ic('plus') + '</button></form>' + namenWahl('dl-bf', imBuero) + namenWahl('dl-po', istPolier) +
-      (B.length ? '' : '<p class="muted klein">Einzeln eintippen oder eine Liste aus Excel einfügen: je Zeile Baustelle, Bauführer, Polier.</p>');
+      (B.length ? '<div class="bgr">' + bstGruppen(B, nach).map((g) => '<section class="bg"><header><b>' + esc(g.name || (nach === 'bf' ? 'Ohne Bauführer' : 'Ohne Polier')) + '</b><span class="bg-k"><span>' + (anderes === 'po' ? 'Polier' : 'Bauführer') + '</span><span class="zahl tnum">' + g.liste.length + '</span></span></header><ul>' +
+        g.liste.map((e) => '<li data-zieh="baustellen" data-zid="' + e.b.id + '"><button type="button" data-a="baustelle" data-id="' + e.b.id + '"><span class="bg-n">' + esc(e.b.name) + (e.mit.length ? '<span class="bg-mit">mit ' + esc(e.mit.join(', ')) + '</span>' : '') + '</span><span class="bg-d">' + esc(e.b[anderes] || '') + '</span></button></li>').join('') + '</ul></section>').join('') + '</div>' : '') +
+      (offen ? '<form class="dreier bst-form" data-form="baustelle"><input name="name" id="neu-bst" placeholder="Baustelle hinzufügen …" aria-label="Baustelle" autocomplete="off"><input name="bf" placeholder="Bauführer" aria-label="Bauführer" autocomplete="off" list="dl-bf"><input name="po" placeholder="Polier" aria-label="Polier" autocomplete="off" enterkeyhint="done" list="dl-po"><button class="rund" aria-label="Baustelle hinzufügen">' + ic('plus') + '</button></form>' + namenWahl('dl-bf', imBuero) + namenWahl('dl-po', istPolier) +
+        '<div class="bst-neu"><span class="muted klein">Je Zeile Baustelle, Bauführer, Polier, auch als Liste aus Excel.</span>' + (B.length ? '<button type="button" class="textlink" data-a="bst-zu">Fertig</button>' : '') + '</div>'
+        : '<div class="bst-neu"><button type="button" class="textlink" data-a="bst-neu">' + ic('plus') + '<span>Baustelle</span></button></div>');
   },
   tafel(t) {
     const fest = !!t.fest;
@@ -2284,12 +2476,12 @@ const TEIL = {
         (g ? (fest ? '<span>' + esc(g.name) + '</span>' : '<button type="button" data-a="gruppe" data-id="' + g.id + '" title="Polier ändern">' + esc(g.name) + '</button>') : '<span>Noch nicht zugeteilt</span>') + '<span class="zahl tnum">' + leute.length + '</span></header>' +
         (pm && austrittMeta(pm) ? '<p class="sp-hinweis">' + esc(austrittMeta(pm)) + '</p>' : '') +
         leute.map((p) => (fest ? '<div class="karte">' + karteInhalt(p) + '</div>' : '<button type="button" class="karte" data-a="person" data-id="' + p.id + '">' + karteInhalt(p) + '</button>')).join('') +
-        (fest ? '' : (g ? (leute.length ? '' : '<p class="sp-leer">' + (FEIN ? 'Kärtchen hierher ziehen.' : 'Kärtchen antippen und diesen Polier wählen.') + '</p>')
+        (fest ? '' : (g ? (leute.length ? '' : '<p class="sp-leer">' + (FEIN ? 'Kärtchen hierher ziehen.' : 'Kärtchen kurz drücken und hierher ziehen, oder antippen und diesen Polier wählen.') + '</p>')
           : '<form class="sp-neu" data-form="leute"><input name="text" id="neu-leute" placeholder="Name hinzufügen …" aria-label="Namen hinzufügen" autocomplete="off" enterkeyhint="done"></form>' + (S.mitarbeiter.length ? '' : '<p class="sp-leer">Namen eintippen oder die Mitarbeiterliste aus Excel einfügen.</p>'))) + '</section>';
     };
     return (fest && !t.zu ? '<div class="festband">' + ic('schloss') + '<span>Festgehalten am ' + esc(datumLang(t.fest)) + '. Die Zuteilung gilt, bis ihr sie wieder ändert.</span><button type="button" class="btn klein" data-a="fest-auf">Ändern</button></div>'
         : (t.gruppen.length ? '' : '<p class="muted klein">Die Gruppen sind die Poliere aus der Mitarbeiterliste. Noch ist keiner eingetragen: «Polier hinzufügen» oder in der Liste bei der Position «Polier» schreiben.</p>')) +
-      '<div class="tafel' + (fest ? ' fest' : '') + '">' + spalte(null) + t.gruppen.map(spalte).join('') + '</div><div class="reihe tafel-unten">' +
+      '<div class="tafel' + (fest ? ' fest' : '') + '" data-brett="tafel">' + spalte(null) + t.gruppen.map(spalte).join('') + '</div><div class="reihe tafel-unten">' +
       (fest ? '<span></span>' : '<span class="reihe"><button type="button" class="textlink" data-a="gruppe-neu">Polier hinzufügen</button><button type="button" class="textlink" data-a="sheet" data-s="maliste">Mitarbeiterliste</button></span>') +
       '<span class="reihe"><button type="button" class="btn klein" data-a="gruppen-drucken"' + (IM_RAHMEN || !t.leute.length ? ' disabled' : '') + '>' + ic('print') + '<span>Drucken</span></button>' +
       '</span></div>';
@@ -2303,14 +2495,18 @@ const TEIL = {
     const A = auslastungMonate(), V = A.V;
     let tJa = 0, tOf = 0, max = 1;
     A.M.forEach((k) => { const x = V.mon[k]; if (x) { tJa += x.ja; tOf += x.offen; max = Math.max(max, x.ja + x.offen); } });
+    // seit 0.9 (242.5): Kapazität aus den Stunden des Folgejahrs × Ertrag pro Stunde, gleichmässig auf zwölf Monate
+    const B = vrBasis(), kap = B.proStd > 0 && B.proKopf > 0 && B.koepfe > 0 ? (B.koepfe * B.proKopf + B.temp) * B.proStd / 12 : 0;
+    if (kap) max = Math.max(max, kap * 1.08);
     const saeulen = A.M.map((k) => {
       const x = V.mon[k] || { ja: 0, offen: 0 }, mo = k % 100, jj = Math.floor(k / 100);
-      return '<div class="al-m" tabindex="0" data-tip="' + esc(MONATE[mo - 1] + ' ' + jj + '\nErhalten: ' + fmt(Math.round(x.ja)) + (x.hand ? ' (davon von Hand ' + fmt(Math.round(x.hand)) + ')' : '') + '\nOffen: ' + fmt(Math.round(x.offen))) + '"><div class="al-s"><i style="height:' + (x.ja / max * 100).toFixed(1) + '%"></i><i class="of" style="height:' + (x.offen / max * 100).toFixed(1) + '%"></i></div>' +
+      return '<div class="al-m" tabindex="0" data-tip="' + esc(MONATE[mo - 1] + ' ' + jj + '\nErhalten: ' + fmt(Math.round(x.ja)) + (x.hand ? ' (davon von Hand ' + fmt(Math.round(x.hand)) + ')' : '') + '\nOffen: ' + fmt(Math.round(x.offen)) + (kap ? '\nKapazität: rund ' + fmt(Math.round(kap / 1000) * 1000) + ' (erhalten ' + Math.round(x.ja / kap * 100) + ' %)' : '')) + '"><div class="al-s"><i style="height:' + (x.ja / max * 100).toFixed(1) + '%"></i><i class="of" style="height:' + (x.offen / max * 100).toFixed(1) + '%"></i></div>' +
         '<span>' + MON3(mo) + (mo === 1 || k === A.von ? '<br>' + jj : '') + '</span></div>';
     }).join('');
     return '<h2 class="bl">Auslastung ' + MON3(A.von % 100) + ' ' + Math.floor(A.von / 100) + ' bis Dez ' + Math.floor(A.bis / 100) + '</h2>' +
-      '<div class="ausblick im-thema al"><div class="al-chart" role="img" aria-label="Erhaltene und offene Offerten je Monat">' + saeulen + '</div>' +
-      '<p class="ab-leg"><span class="ab-ja"></span>Erhalten ' + fmt(Math.round(tJa)) + '<span class="ab-of"></span>Offen ' + fmt(Math.round(tOf)) + '</p>' +
+      '<div class="ausblick im-thema al"><div class="al-chart" role="img" aria-label="Erhaltene und offene Offerten je Monat">' + saeulen + (kap ? '<i class="al-kap" style="bottom:calc(1.9rem + ' + (kap / max * 9).toFixed(2) + 'rem)"></i>' : '') + '</div>' +
+      '<p class="ab-leg"><span class="ab-ja"></span>Erhalten ' + fmt(Math.round(tJa)) + '<span class="ab-of"></span>Offen ' + fmt(Math.round(tOf)) + (kap ? '<span class="ab-kap"></span>Kapazität rund ' + fmt(Math.round(kap / 1000) * 1000) + ' pro Monat' : '') + '</p>' +
+      (kap ? '<p class="muted klein ab-ohne">Kapazität: ' + fmt(Math.round(B.koepfe * B.proKopf + B.temp)) + ' Stunden ' + folgejahr() + ' (' + fmtN(B.koepfe, 1) + ' Köpfe × ' + fmt(B.proKopf) + ' Stunden, dazu ' + fmt(B.temp) + ' temporär) × ' + fmt(B.proStd) + ' Franken Ertrag pro Stunde (Schnitt der ganzen Jahre im BAB), gleichmässig auf zwölf Monate.</p>' : '') +
       (V.hand.n ? '<p class="muted klein ab-ohne">Darin ' + mehrzahl(V.hand.n, 'Auftrag', 'Aufträge') + ' von Hand (zusammen ' + fmt(Math.round(V.hand.summe)) + '): ohne Zeitraum, darum gleichmässig auf ' + folgejahr() + ' verteilt.</p>' : '') +
       (mitHinweis ? ohneHinweis(V.ohne) : '') + '</div>';
   },
@@ -2624,7 +2820,7 @@ const ANSICHT = {
       '<button type="button" class="tlink neu leise" style="order:100001" data-a="sheet" data-s="themenliste">' + ic('liste') + '<span>Liste einfügen</span></button></div>' +
       '<div class="tz kinder" data-h="' + haupt.id + '">' + kinderVon(haupt).map((k) => link(k, hi * 2 + 1, true)).join('') + '</div></nav>' +
       '<section class="thema' + (akt.zu ? ' zu' : '') + '">' + kopf + band + themaInhalt(akt, nr) +
-      '<p class="muted klein hilfe">' + ic('flag') + '<span>Was die GL wissen oder entscheiden soll, mit «GL» vormerken. Es steht im Ergebnis zuoberst.' + (FEIN ? ' Einträge lassen sich mit der Maus auf und ab schieben.' : '') + '</span></p></section></div>';
+      '<p class="muted klein hilfe">' + ic('flag') + '<span>Was die GL wissen oder entscheiden soll, mit «GL» vormerken. Es steht im Ergebnis zuoberst.' + (FEIN ? ' Einträge, Themen und Unterpunkte lassen sich mit der Maus schieben.' : (BERUEHRUNG ? ' Zum Schieben einen Eintrag kurz drücken, bis er sich anhebt.' : '')) + '</span></p></section></div>';
   },
 
   ergebnis() {
@@ -2633,13 +2829,35 @@ const ANSICHT = {
       (IM_RAHMEN ? '<span class="muted klein">In dieser Vorschau ausgeschaltet.</span>' : '<span class="muted klein">Im Druckfenster «Als PDF speichern» wählen.</span>') + '</div>';
   },
 
-  gl() {
-    return titel('Meine Punkte für die GL', 'Was du an der GL-Strategie sagen willst, abseits der Abteilung.') +
-      '<section class="glseite"><ul class="eintraege">' + S.glPunkte.map((x) => '<li class="notiz" data-zieh="gl" data-zid="' + x.id + '"><button type="button" class="n-text" data-a="glpunkt" data-id="' + x.id + '">' + esc(x.text) + '</button></li>').join('') + '</ul>' +
-      '<form class="schnell" data-form="glpunkt"><input name="text" id="neu-glpunkt" placeholder="Punkt hinzufügen …" aria-label="Punkt hinzufügen" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Punkt hinzufügen">' + ic('plus') + '</button></form>' +
-      '<p class="muted klein hilfe">' + ic('info') + '<span>Nur für dich: Diese Punkte stehen nicht im Ergebnis und nicht im PDF. Den Reiter blendest du in den Einstellungen aus, je Gerät.</span></p></section>';
+  gl() {   // seit 0.9: Gruppen, Haken «gesagt», Ergebnis je Punkt, dazu Felder wie in den Themen
+    const G = S.glGruppen, P = S.glPunkte;
+    const punkt = (x) => '<li class="glp' + (x.an ? ' an' : '') + '" data-zieh="gl" data-zid="' + x.id + '"><button type="button" class="glp-box" data-a="glhaken" data-id="' + x.id + '" aria-pressed="' + !!x.an + '" aria-label="Gesagt" title="Gesagt">' + ic('check') + '</button>' +
+      '<button type="button" class="n-text" data-a="glpunkt" data-id="' + x.id + '"><span class="glp-t">' + thChip(x) + esc(x.text) + '</span>' + (x.ergebnis ? '<span class="glp-e">' + esc(x.ergebnis) + '</span>' : '') + '</button></li>';
+    const block = (g) => {
+      const L = P.filter((x) => (g ? x.gruppe === g.id : !x.gruppe)), gesagt = L.filter((x) => x.an).length;
+      const info = '<span class="fd-info">' + (L.length ? gesagt + ' von ' + L.length + ' gesagt' : '') + '</span>';
+      const kopf = g ? '<header class="gl-kopf"><button type="button" data-a="glgruppe" data-id="' + g.id + '" title="Gruppe umbenennen, verschieben oder löschen"><h2 class="bl">' + esc(g.titel) + '</h2>' + ic('pen') + '</button>' + info + '</header>'
+        : (G.length && L.length ? '<header class="gl-kopf"><h2 class="bl">Ohne Gruppe</h2>' + info + '</header>' : '');
+      return '<section class="gl-gr' + (g ? '' : ' ohne') + '" data-spalte="' + (g ? g.id : '') + '">' + kopf + '<div class="gl-karte"><ul class="gl-liste">' + L.map(punkt).join('') + '</ul>' +
+        '<form class="gl-neu" data-form="glpunkt" data-g="' + (g ? g.id : '') + '"><button aria-label="Punkt hinzufügen">' + ic('plus') + '</button><input name="text"' + (g ? '' : ' id="neu-glpunkt"') + ' placeholder="Punkt hinzufügen …" aria-label="Punkt hinzufügen' + (g ? ' zu ' + esc(g.titel) : '') + '" autocomplete="off" enterkeyhint="done"></form></div></section>';
+    };
+    return '<div class="glseite">' + titel('Meine Punkte für die GL', 'Was du an der GL-Strategie sagen willst, abseits der Abteilung.', '<button type="button" class="btn" data-a="glgruppe-neu">' + ic('plus') + '<span>Gruppe</span></button>') +
+      '<div class="gl-brett" data-brett="gl">' + block(null) + G.map(block).join('') + '</div>' + felderHTML(S.glFelder, 'gl', false) +
+      '<p class="muted klein hilfe">' + ic('info') + '<span>Nur für dich: Diese Punkte stehen nicht im Ergebnis und nicht im PDF. Abhaken, was du an der GL gesagt hast; was die GL dazu sagt, hältst du im Punkt unter «Ergebnis» fest. Punkte lassen sich in eine andere Gruppe schieben. Den Reiter blendest du in den Einstellungen aus, je Gerät.</span></p></div>';
   }
 };
+const feldGefuellt = (f) => (f.art === 'tabelle' ? (f.zeilen || []).length > 0 : f.punkte.length > 0);
+function feldErgebnis(f) {   // ein Feld im Ergebnis und im PDF
+  if (f.art === 'wahl') { const gew = f.punkte.filter((x) => x.an).map((x) => x.text); return '<p>' + (gew.length ? 'Gewählt: <b>' + esc(gew.join(', ')) + '</b>' : 'Noch nichts gewählt') + '</p><p class="e-klein">Zur Wahl: ' + esc(f.punkte.map((x) => x.text).join(' · ')) + '</p>'; }
+  if (f.art === 'tabelle') {
+    const su = tabSummen(f), r = (i) => (su[i] !== null ? ' class="r"' : '');
+    return '<div class="e-tab-rahmen"><table class="e-besch e-fdtab"><thead><tr>' + f.spalten.map((s, i) => '<th' + r(i) + '>' + esc(s.name) + '</th>').join('') + '</tr></thead><tbody>' +
+      f.zeilen.map((z) => '<tr>' + f.spalten.map((s, i) => '<td' + r(i) + '>' + esc(z.w[s.id] || '') + '</td>').join('') + '</tr>').join('') + '</tbody>' +
+      (su.some((x) => x !== null) ? '<tfoot><tr>' + f.spalten.map((s, i) => '<td' + r(i) + '>' + (su[i] !== null ? esc(betragText(su[i])) : (i === 0 ? 'Summe' : '')) + '</td>').join('') + '</tr></tfoot>' : '') + '</table></div>';
+  }
+  if (f.art === 'gruppen') return '<ul class="e-fdg">' + f.spalten.map((s) => { const P = f.punkte.filter((x) => x.spalte === s.id); return P.length ? '<li><b>' + esc(s.name) + ':</b> ' + esc(P.map((x) => x.text).join(' · ')) + '</li>' : ''; }).join('') + '</ul>';
+  return '<ul class="e-fd">' + f.punkte.map((x) => '<li>' + (x.an ? '☑ ' : '☐ ') + esc(x.text) + '</li>').join('') + '</ul>';
+}
 function ergebnisHTML() {
   const m = S.meta, T = S.themen, nr = nummern(), nm = (t) => mitNr(t, nr);
   const marke = (x) => (x.gl ? '<span class="e-marke">GL</span>' : '');
@@ -2656,13 +2874,11 @@ function ergebnisHTML() {
   const mitB = T.filter((t) => t.art !== 'ziele' && t.beschluesse.length);
   if (mitB.length) { h += '<section class="e-teil"><h2>Beschlüsse</h2>' + tabelle(mitB, true) + '</section>'; etwas = true; }
   T.filter((t) => t.art === 'ziele' && t.beschluesse.length).forEach((t) => { h += '<section class="e-teil"><h2>' + esc(t.titel) + '</h2>' + tabelle([t], false) + '</section>'; etwas = true; });
-  const mitF = T.filter((t) => (t.felder || []).some((f) => f.punkte.length));
+  const mitF = T.filter((t) => (t.felder || []).some(feldGefuellt));
   if (mitF.length) {
-    h += '<section class="e-teil"><h2>Checklisten und Auswahl</h2>' + mitF.map((t) => t.felder.filter((f) => f.punkte.length).map((f) => {
-      const gew = f.punkte.filter((x) => x.an).map((x) => x.text);
-      return '<h3>' + esc(nm(t)) + ' · ' + esc(f.titel) + '</h3>' + (f.art === 'wahl' ? '<p>' + (gew.length ? 'Gewählt: <b>' + esc(gew.join(', ')) + '</b>' : 'Noch nichts gewählt') + '</p><p class="e-klein">Zur Wahl: ' + esc(f.punkte.map((x) => x.text).join(' · ')) + '</p>'
-        : '<ul class="e-fd">' + f.punkte.map((x) => '<li>' + (x.an ? '☑ ' : '☐ ') + esc(x.text) + '</li>').join('') + '</ul>');
-    }).join('')).join('') + '</section>';
+    const arten = FELD_ARTEN.filter((a) => mitF.some((t) => t.felder.some((f) => f.art === a[0] && feldGefuellt(f)))).map((a) => ({ liste: 'Checklisten', wahl: 'Auswahl', tabelle: 'Tabellen', gruppen: 'Gruppen' })[a[0]]);
+    h += '<section class="e-teil"><h2>' + esc(arten.length > 1 ? arten.slice(0, -1).join(', ') + ' und ' + arten[arten.length - 1] : arten[0]) + '</h2>' +
+      mitF.map((t) => t.felder.filter(feldGefuellt).map((f) => '<h3>' + esc(nm(t)) + ' · ' + esc(f.titel) + '</h3>' + feldErgebnis(f)).join('')).join('') + '</section>';
     etwas = true;
   }
   const BU = S.budget;
@@ -2808,6 +3024,7 @@ function rmKopieren(liste, markieren) {
   inAblage(text).then((ok) => {
     if (!ok) { rmText = text; renderSheet(false); const k = $('#rm-k'); if (k) { k.focus(); k.select(); } return; }
     rmText = '';
+    if (sheet) sheet.rmNach = liste.filter((x) => x.bild && ANH[x.bild.id]).map((x) => x.id);
     if (markieren) { merken(); const jetzt = new Date().toISOString(); liste.forEach((x) => { x.status = 'uebergeben'; x.uebergeben = jetzt; }); speichern(); render(); }
     renderSheet(false);
     toast(mehrzahl(liste.length, 'Rückmeldung', 'Rückmeldungen') + ' kopiert. Jetzt im Chat mit Claude einfügen.', markieren);
@@ -2890,11 +3107,32 @@ const SHEET = {
       '<label class="f" for="z-th"><span>Thema</span>' + themaWahl('thema', z.thema || '', 'z-th') + '</label>' + loeschKnopf('ziel-weg', 'Ziel löschen'));
   },
   fd() {
-    const f = imThema('felder'), wahl = f && f.art === 'wahl';
+    const f = feldImSheet();
     if (!f) return '';
-    return formHuelle(wahl ? 'Auswahl' : 'Checkliste', 'fd-edit', '<label class="f" for="fd-t"><span>Titel</span><input id="fd-t" name="titel" value="' + esc(f.titel) + '" autocomplete="off" data-fokus></label>' +
-      '<label class="f" for="fd-p"><span>' + (wahl ? 'Möglichkeiten' : 'Punkte') + ', eine Zeile je Eintrag</span><textarea id="fd-p" name="punkte" rows="6">' + esc(f.punkte.map((x) => x.text).join('\n')) + '</textarea></label>' +
-      '<label class="schalter" for="fd-w"><span>Auswahl: nur eine Möglichkeit wählbar</span><input type="checkbox" id="fd-w" name="wahl"' + (wahl ? ' checked' : '') + '></label>' + loeschKnopf('fd-weg', wahl ? 'Auswahl löschen' : 'Checkliste löschen'));
+    const a = feldArt(f.art), loesch = loeschKnopf('fd-weg', a[1] + ' löschen');
+    const titelFeld = '<label class="f" for="fd-t"><span>Titel</span><input id="fd-t" name="titel" value="' + esc(f.titel) + '" autocomplete="off" data-fokus></label>';
+    if (f.art === 'tabelle' || f.art === 'gruppen') {
+      const tab = f.art === 'tabelle';
+      return formHuelle(a[1], 'fd-edit', titelFeld + '<label class="f" for="fd-s"><span>' + (tab ? 'Spalten, eine Zeile je Spalte' : 'Gruppen, eine Zeile je Gruppe') + '</span><textarea id="fd-s" name="spalten" rows="5">' + esc(f.spalten.map((s) => s.name).join('\n')) + '</textarea></label>' +
+        '<p class="muted klein">' + (tab ? 'Umbenennen behält die Einträge der Spalte. Eine Spalte, die du weglässt, verschwindet samt ihren Einträgen.' : 'Umbenennen behält die Einträge. Die Einträge einer Gruppe, die du weglässt, kommen in die erste Gruppe.') + '</p>' + loesch);
+    }
+    const wahl = f.art === 'wahl';
+    return formHuelle(a[1], 'fd-edit', titelFeld + '<label class="f" for="fd-p"><span>' + (wahl ? 'Möglichkeiten' : 'Punkte') + ', eine Zeile je Eintrag</span><textarea id="fd-p" name="punkte" rows="6">' + esc(f.punkte.map((x) => x.text).join('\n')) + '</textarea></label>' +
+      '<label class="schalter" for="fd-w"><span>Auswahl: nur eine Möglichkeit wählbar</span><input type="checkbox" id="fd-w" name="wahl"' + (wahl ? ' checked' : '') + '></label>' + loesch);
+  },
+  'fd-neu'() {
+    return huelle('Feld hinzufügen', '<div class="fd-arten">' + FELD_ARTEN.map((a) => '<button type="button" class="fd-art" data-a="fd-art" data-v="' + a[0] + '" data-o="' + (sheet.o === 'gl' ? 'gl' : 't') + '"><span class="fd-art-ic">' + ic(a[3]) + '</span><span class="fd-art-t"><b>' + a[1] + '</b><small>' + esc(a[2]) + '</small></span>' + ic('right', 'pf') + '</button>').join('') + '</div>');
+  },
+  'fd-zeile'() {
+    const f = feldImSheet(), z = f && f.zeilen ? f.zeilen.find((x) => x.id === sheet.id) : null;
+    if (!z) return '';
+    return formHuelle('Zeile', 'fdz-edit', f.spalten.map((s, i) => '<label class="f" for="fz-' + i + '"><span>' + esc(s.name) + '</span><input id="fz-' + i + '" name="c' + i + '" value="' + esc(z.w[s.id] || '') + '" autocomplete="off"' + (i ? '' : ' data-fokus') + '></label>').join('') + loeschKnopf('fdz-weg', 'Zeile löschen'));
+  },
+  'fdg-punkt'() {
+    const f = feldImSheet(), x = f ? f.punkte.find((y) => y.id === sheet.id) : null;
+    if (!x || !f.spalten) return '';
+    return formHuelle('Eintrag', 'fdg-edit', '<label class="f" for="fg-t"><span>Text</span><textarea id="fg-t" name="text" rows="3" data-fokus>' + esc(x.text) + '</textarea></label>' +
+      '<label class="f" for="fg-s"><span>Gruppe</span><select id="fg-s" name="spalte">' + f.spalten.map((s) => '<option value="' + s.id + '"' + (s.id === x.spalte ? ' selected' : '') + '>' + esc(s.name) + '</option>').join('') + '</select></label>' + loeschKnopf('fdg-weg', 'Eintrag löschen'));
   },
   person() {
     const t = aktThema(), p = imThema('leute');
@@ -2974,7 +3212,19 @@ const SHEET = {
   glpunkt() {
     const x = sheet && S.glPunkte.find((y) => y.id === sheet.id);
     if (!x) return '';
-    return formHuelle('Punkt', 'glpunkt-edit', '<label class="f" for="gp-t"><span>Text</span><textarea id="gp-t" name="text" rows="3" data-fokus>' + esc(x.text) + '</textarea></label>' + loeschKnopf('glpunkt-weg', 'Punkt löschen'));
+    return formHuelle('Punkt für die GL', 'glpunkt-edit', '<label class="f" for="gp-t"><span>Was du sagen willst</span><textarea id="gp-t" name="text" rows="3" data-fokus>' + esc(x.text) + '</textarea></label>' +
+      '<div class="zwei">' + (S.glGruppen.length ? '<label class="f" for="gp-g"><span>Gruppe</span><select id="gp-g" name="gruppe"><option value="">Ohne Gruppe</option>' + S.glGruppen.map((g) => '<option value="' + g.id + '"' + (g.id === x.gruppe ? ' selected' : '') + '>' + esc(g.titel) + '</option>').join('') + '</select></label>' : '') +
+      '<label class="f" for="gp-th"><span>Thema</span>' + themaWahl('thema', x.thema || '', 'gp-th') + '</label></div>' +
+      '<label class="f" for="gp-e"><span>Ergebnis: was die GL dazu sagt oder entscheidet</span><textarea id="gp-e" name="ergebnis" rows="3">' + esc(x.ergebnis || '') + '</textarea></label>' +
+      '<label class="schalter" for="gp-an"><span>Gesagt</span><input type="checkbox" id="gp-an" name="an"' + (x.an ? ' checked' : '') + '></label>' + loeschKnopf('glpunkt-weg', 'Punkt löschen'));
+  },
+  glgruppe() {
+    const g = sheet && S.glGruppen.find((y) => y.id === sheet.id);
+    if (!g) return '';
+    const i = S.glGruppen.indexOf(g);
+    return formHuelle('Gruppe', 'glgruppe-edit', '<label class="f" for="gg-t"><span>Titel</span><input id="gg-t" name="titel" value="' + esc(g.titel) + '" autocomplete="off" data-fokus></label>' +
+      '<div class="reihe"><button type="button" class="btn klein" data-a="glgruppe-schieben" data-d="-1"' + (i > 0 ? '' : ' disabled') + '>' + ic('up') + '<span>Nach oben</span></button><button type="button" class="btn klein" data-a="glgruppe-schieben" data-d="1"' + (i < S.glGruppen.length - 1 ? '' : ' disabled') + '>' + ic('down') + '<span>Nach unten</span></button></div>' +
+      '<p class="muted klein">Löschen nimmt nur die Gruppe weg; ihre Punkte bleiben, ohne Gruppe.</p>' + loeschKnopf('glgruppe-weg', 'Gruppe löschen'));
   },
   einstellungen() {
     const m = S.meta;
@@ -2999,7 +3249,7 @@ const SHEET = {
   rueckmeldung() {
     const R = S.rueckmeldungen, offen = R.filter((x) => x.status === 'offen'), alt = R.filter((x) => x.status !== 'offen'), art = sheet && RM_ARTEN[sheet.rmArt] ? sheet.rmArt : 'unuebersichtlich';
     const zeile = (x) => '<li><div><b>' + esc([RM_ARTEN[x.art], x.wo, zeitKnapp(x.datum)].filter(Boolean).join(' · ')) + '</b><p>' + esc(x.text) + '</p>' +
-      (x.bild && ANH[x.bild.id] ? '<div class="rm-mini"><img src="' + ANH[x.bild.id] + '" alt=""><button type="button" class="btn klein" data-a="rm-bild-kopieren" data-id="' + x.id + '">' + ic('kopie') + '<span>Bild kopieren</span></button></div>' : (x.bild ? '<p class="muted klein">Bild fehlt auf diesem Gerät</p>' : '')) +
+      (x.bild && ANH[x.bild.id] ? '<div class="rm-mini"><img src="' + ANH[x.bild.id] + '" alt=""><button type="button" class="btn klein" data-a="rm-bild-kopieren" data-id="' + x.id + '">' + ic('kopie') + '<span>Bild kopieren</span></button><button type="button" class="btn klein" data-a="rm-bild-speichern" data-id="' + x.id + '">' + ic('disk') + '<span>Speichern</span></button></div>' : (x.bild ? '<p class="muted klein">Bild fehlt auf diesem Gerät</p>' : '')) +
       '</div><button type="button" class="xk" data-a="rm-weg" data-id="' + x.id + '" aria-label="Rückmeldung entfernen">' + ic('x') + '</button></li>';
     const nb = sheet && sheet.rmBild && ANH[sheet.rmBild.id] ? sheet.rmBild : null;
     return formHuelle('Rückmeldung zum Tool', 'rueckmeldung',
@@ -3011,6 +3261,7 @@ const SHEET = {
       (offen.length ? '<section class="rm-teil"><h3>Noch nicht übergeben (' + offen.length + ')</h3><ul class="rml" id="rm-offen">' + offen.map(zeile).join('') + '</ul>' +
         '<div class="reihe"><button type="button" class="btn stark" data-a="rm-kopieren">' + ic('kopie') + '<span>Für Claude kopieren</span></button></div>' +
         '<p class="muted klein">Danach im Chat mit Claude einfügen. Claude trägt sie in den Fahrplan ein.' + (offen.some((x) => x.bild) ? ' Bilder danach einzeln mit «Bild kopieren» dazulegen.' : '') + '</p></section>' : '') +
+      (sheet && sheet.rmNach && sheet.rmNach.length ? (() => { const B = R.filter((x) => sheet.rmNach.indexOf(x.id) >= 0 && x.bild && ANH[x.bild.id]); return B.length ? '<section class="rm-teil rm-nach"><h3>Jetzt noch ' + (B.length === 1 ? 'das Bild' : 'die ' + B.length + ' Bilder') + ' dazulegen</h3><p class="muted klein">Der Text ist kopiert. Je Bild «Bild kopieren» drücken und im Chat einfügen, oder «Speichern» und die Datei in den Chat ziehen.</p><ul class="rml">' + B.map(zeile).join('') + '</ul></section>' : ''; })() : '') +
       (rmText ? '<label class="f" for="rm-k"><span>Kopieren ging hier nicht: Text markieren und selbst kopieren</span><textarea id="rm-k" rows="6" readonly>' + esc(rmText) + '</textarea></label>' : '') +
       (alt.length ? '<details class="rm-alt"><summary>Schon übergeben (' + alt.length + ')</summary><ul class="rml" id="rm-alt">' + alt.map(zeile).join('') + '</ul><div class="reihe"><button type="button" class="btn" data-a="rm-nochmals">' + ic('kopie') + '<span>Nochmals kopieren</span></button><button type="button" class="btn rot" data-a="rm-leeren">Übergebene entfernen</button></div></details>' : ''),
       'Speichern');
@@ -3446,6 +3697,30 @@ function themaZu(id) {   // einem Thema als Unterpunkt zuweisen oder wieder zum 
   speichern(); render(); renderSheet(false);
 }
 /* Themen als Liste: eine Zeile pro Thema; Unterpunkte sind eingerückt oder tragen eine Nummer wie «1.1» */
+function listeEinfuegen(form, text) {   // mehrere Zeilen auf einmal: je Zeile ein Eintrag, bei der Tabelle je Tabulator eine Spalte
+  const art = form.dataset.form;
+  if (art === 'fdzeile') {
+    const fd = feldAus(form);
+    if (!fd || !fd.zeilen) return;
+    let Z = String(text).split(/\r?\n/).map((z) => z.split('\t').map((x) => x.trim())).filter((z) => z.some(Boolean));
+    if (Z.length > 1 && Z[0].length > 1 && Z[0].every((x, i) => !fd.spalten[i] || x.toLowerCase() === String(fd.spalten[i].name).toLowerCase())) Z = Z.slice(1);   // Kopfzeile
+    if (!Z.length) return;
+    merken();
+    Z.forEach((z) => { const w = {}; fd.spalten.forEach((s, i) => { if (z[i]) w[s.id] = z[i]; }); if (Object.keys(w).length) fd.zeilen.push({ id: uid(), w: w }); });
+    geaendert(); toast(mehrzahl(Z.length, 'Zeile', 'Zeilen') + ' eingefügt', true);
+    return;
+  }
+  const L = zeilenVon(String(text).replace(/\t+/g, ' '));
+  if (!L.length) return;
+  if (art === 'glpunkt') { merken(); L.forEach((x) => { S.glPunkte.push({ id: uid(), text: x, gruppe: form.dataset.g || '', an: false, ergebnis: '', thema: '' }); }); }
+  else {
+    const fd = feldAus(form);
+    if (!fd) return;
+    merken();
+    L.forEach((x) => { fd.punkte.push(art === 'fdgpunkt' ? { id: uid(), text: x, an: false, spalte: form.dataset.s } : { id: uid(), text: x, an: false }); });
+  }
+  geaendert(); toast(mehrzahl(L.length, 'Eintrag', 'Einträge') + ' eingefügt', true);
+}
 function listeLesen(text) {
   const zeilen = String(text).split(String.fromCharCode(160)).join(' ').split(/\r?\n/).map((roh) => {
     const ein = roh.match(/^[ \t]*/)[0].replace(/\t/g, '    ').length;
@@ -3550,6 +3825,8 @@ const AKT = {
   },
   'unter-neu'() { const v = aktThema(); if (!v || v.eltern) return; const t = themaNeu('thema', 'Neuer Unterpunkt'); t.eltern = v.id; S.themen.push(t); S.themen = ordnen(S.themen); S.ui.thema = t.id; geaendert(); auf({ art: 'thema' }); },
   baustelle(el) { auf({ art: 'baustelle', id: el.dataset.id }); },
+  'bst-neu'() { BST_OFFEN = true; render(); fokus('neu-bst'); },
+  'bst-zu'() { BST_OFFEN = false; render(); },
   'baustelle-weg'() { entfernen('baustellen', 'Baustelle entfernt'); },
   offerte(el) { auf({ art: 'offerte', id: el.dataset.id }); },
   'offerte-neu'() { auf({ art: 'offerte', id: '' }); },
@@ -3561,6 +3838,18 @@ const AKT = {
   'kunden-weg'(el) { if (!bestaetigt(el, 'Wirklich alle entfernen?')) return; merken(); S.kunden.offerten = []; S.kunden.auftraege = []; S.kunden.jahr = ''; geaendert(); toast('Offerten und Aufträge entfernt', true); },
   glpunkt(el) { auf({ art: 'glpunkt', id: el.dataset.id }); },
   'glpunkt-weg'() { if (!sheet) return; merken(); S.glPunkte = S.glPunkte.filter((x) => x.id !== sheet.id); geaendert(true); toast('Punkt gelöscht', true); },
+  glhaken(el) { const x = S.glPunkte.find((y) => y.id === el.dataset.id); if (!x) return; merken(); x.an = !x.an; geaendert(); },
+  'glgruppe-neu'() { merken(); const g = { id: uid(), titel: 'Neue Gruppe' }; S.glGruppen.push(g); geaendert(); auf({ art: 'glgruppe', id: g.id }); },
+  glgruppe(el) { auf({ art: 'glgruppe', id: el.dataset.id }); },
+  'glgruppe-schieben'(el) {
+    const i = sheet ? S.glGruppen.findIndex((g) => g.id === sheet.id) : -1, j = i + Number(el.dataset.d);
+    if (i < 0 || j < 0 || j >= S.glGruppen.length) return;
+    merken();
+    const tf = document.getElementById('gg-t'), g = S.glGruppen.splice(i, 1)[0];
+    if (tf && tf.value.trim()) g.titel = tf.value.trim();
+    S.glGruppen.splice(j, 0, g); speichern(); render(); renderSheet(false);
+  },
+  'glgruppe-weg'() { if (!sheet) return; merken(); const id = sheet.id; S.glGruppen = S.glGruppen.filter((g) => g.id !== id); S.glPunkte.forEach((x) => { if (x.gruppe === id) x.gruppe = ''; }); geaendert(true); toast('Gruppe gelöscht', true); },
   art(el) { const t = themaAusForm(); if (!t) return; t.art = el.dataset.v; if (t.art === 'personal' && !t.frage) t.frage = PERSONAL_FRAGE; if (t.art === 'auftraege' && !t.frage) t.frage = AUFTRAEGE_FRAGE; if (t.art === 'gruppen' && !t.gruppen.length) t.gruppen = ['Gruppe 1', 'Gruppe 2', 'Gruppe 3'].map((n) => ({ id: uid(), name: n })); speichern(); render(); renderSheet(false); },
   notiz(el) { auf({ art: 'notiz', id: el.dataset.id }); },
   beschluss(el) { auf({ art: 'beschluss', id: el.dataset.id }); },
@@ -3645,6 +3934,16 @@ const AKT = {
       navigator.clipboard.write([new ClipboardItem({ 'image/png': pngAus(url) })]).then(() => toast('Bild kopiert. Jetzt im Chat mit Claude einfügen.'), nein);
     } catch (e) { nein(); }
   },
+  'rm-bild-speichern'(el) {   // seit 0.9: das Bild als Datei, zum Hineinziehen in den Chat
+    const i = S.rueckmeldungen.findIndex((y) => y.id === el.dataset.id), x = S.rueckmeldungen[i], url = x && x.bild && ANH[x.bild.id];
+    if (!url) return;
+    pngAus(url).then((b) => {
+      const a = document.createElement('a'), u = URL.createObjectURL(b);
+      a.href = u; a.download = 'Rueckmeldung-' + (i + 1) + '.png'; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => { URL.revokeObjectURL(u); }, 4000);
+      toast('Bild gespeichert. Die Datei in den Chat mit Claude ziehen.');
+    }, () => toast('Speichern geht hier nicht. Den Screenshot direkt in den Chat legen.'));
+  },
   'rm-kopieren'() { rmKopieren(S.rueckmeldungen.filter((x) => x.status === 'offen'), true); },
   'rm-nochmals'() { rmKopieren(S.rueckmeldungen.filter((x) => x.status !== 'offen'), false); },
   'rm-leeren'(el) { if (!bestaetigt(el, 'Wirklich entfernen?')) return; merken(); S.rueckmeldungen = S.rueckmeldungen.filter((x) => x.status === 'offen'); speichern(); render(); renderSheet(false); toast('Übergebene entfernt', true); },
@@ -3652,23 +3951,33 @@ const AKT = {
   'beschluss-weg'() { entfernen('beschluesse', 'Gelöscht'); },
   'stichwort-weg'() { entfernen('stichworte', 'Stichwort gelöscht'); },
   'ziel-weg'() { entfernen('ziele', 'Ziel gelöscht'); },
-  'fd-neu'(el) {
-    const t = aktThema();
-    if (!t) return;
+  'fd-wahl'(el) { auf({ art: 'fd-neu', o: el.dataset.o === 'gl' ? 'gl' : 't' }); },
+  'fd-art'(el) {
+    const o = el.dataset.o === 'gl' ? 'gl' : 't', t = aktThema();
+    if (o === 't' && (!t || t.zu)) { if (t && t.zu) toast(ZU_TEXT); return; }
+    const L = o === 'gl' ? S.glFelder : (t.felder || (t.felder = []));
     merken();
-    const wahl = el.dataset.v === 'wahl', f = { id: uid(), art: wahl ? 'wahl' : 'liste', titel: wahl ? 'Auswahl' : 'Checkliste', punkte: [] };
-    (t.felder || (t.felder = [])).push(f);
-    geaendert(); auf({ art: 'fd', id: f.id });
+    const f = feldNeu(el.dataset.v);
+    L.push(f);
+    geaendert(); auf({ art: 'fd', id: f.id, o: o });
   },
-  fd(el) { auf({ art: 'fd', id: el.dataset.id }); },
+  fd(el) { auf({ art: 'fd', id: el.dataset.id, o: el.dataset.o === 'gl' ? 'gl' : 't' }); },
   'fd-punkt'(el) {
-    const t = aktThema(), f = t && (t.felder || []).find((x) => x.id === el.dataset.f), q = f && f.punkte.find((x) => x.id === el.dataset.id);
+    const f = feldAus(el), q = f && f.punkte.find((x) => x.id === el.dataset.id);
     if (!q) return;
     const an = !q.an;
     if (f.art === 'wahl') f.punkte.forEach((x) => { x.an = false; });
     q.an = an; geaendert();
   },
-  'fd-weg'() { entfernen('felder', 'Gelöscht'); },
+  'fd-weg'() {
+    const L = sheet && feldListe(sheet.o || 't'), i = L ? L.findIndex((f) => f.id === sheet.id) : -1;
+    if (i < 0) return;
+    merken(); L.splice(i, 1); geaendert(true); toast('Gelöscht', true);
+  },
+  'fd-zeile'(el) { auf({ art: 'fd-zeile', id: el.dataset.id, f: el.dataset.f, o: el.dataset.o === 'gl' ? 'gl' : 't' }); },
+  'fdz-weg'() { const f = feldImSheet(); if (!f || !f.zeilen) return; merken(); f.zeilen = f.zeilen.filter((z) => z.id !== sheet.id); geaendert(true); toast('Zeile gelöscht', true); },
+  'fdg-punkt'(el) { auf({ art: 'fdg-punkt', id: el.dataset.id, f: el.dataset.f, o: el.dataset.o === 'gl' ? 'gl' : 't' }); },
+  'fdg-weg'() { const f = feldImSheet(); if (!f) return; merken(); f.punkte = f.punkte.filter((x) => x.id !== sheet.id); geaendert(true); toast('Eintrag gelöscht', true); },
   ksort(el) {
     const k = el.dataset.k, o = S.ui.ksort && S.ui.ksort.k ? S.ui.ksort : { k: 'jahr', ab: true };
     S.ui.ksort = o.k === k ? { k: k, ab: !o.ab } : { k: k, ab: k === 'jahr' || k === 'betrag' || k === 'ausf' };
@@ -3730,21 +4039,59 @@ const FORMS = {
   'stichwort-edit'(f) { const x = imThema('stichworte'), text = x && pflicht(f.elements.text); if (!text) return; x.text = text.replace(/\s*[\r\n]+\s*/g, ' '); geaendert(true); },
   ziel(f) { if (f.elements.thema) ZIEL_TH = f.elements.thema.value; zieleDazu(f.elements.text.value, f.elements.thema ? f.elements.thema.value : ''); },
   fdpunkt(f) {
-    const t = aktThema(), fd = t && (t.felder || []).find((x) => x.id === f.dataset.f), L = fd ? mehrzeilig(f.elements.text.value) : [];
+    const fd = feldAus(f), L = fd ? mehrzeilig(f.elements.text.value) : [];
     if (!L.length) return;
     merken();
     L.forEach((x) => { fd.punkte.push({ id: uid(), text: x, an: false }); });
     geaendert(); fokus('neu-fd-' + fd.id);
   },
   'fd-edit'(f) {
-    const fd = imThema('felder'), titel = fd && pflicht(f.elements.titel);
+    const fd = feldImSheet(), titel = fd && pflicht(f.elements.titel);
     if (!titel) return;
+    if (fd.art === 'tabelle' || fd.art === 'gruppen') {
+      const neu = spaltenAus(f.elements.spalten.value, fd.spalten);
+      if (!neu.length) { f.elements.spalten.classList.add('fehlt'); f.elements.spalten.focus(); return; }
+      merken();
+      fd.titel = titel; fd.spalten = neu;
+      if (fd.art === 'gruppen') { const ids = neu.map((s) => s.id); fd.punkte.forEach((x) => { if (ids.indexOf(x.spalte) < 0) x.spalte = ids[0]; }); }
+      geaendert(true); return;
+    }
+    merken();
     const alt = {};
     fd.punkte.forEach((x) => { alt[x.text] = x; });
     fd.titel = titel; fd.art = f.elements.wahl.checked ? 'wahl' : 'liste';
     fd.punkte = String(f.elements.punkte.value).split(/[\r\n]+/).map((x) => x.trim()).filter(Boolean).map((x) => alt[x] || { id: uid(), text: x, an: false });
     if (fd.art === 'wahl') { let eins = false; fd.punkte.forEach((x) => { if (x.an && !eins) eins = true; else x.an = false; }); }
     geaendert(true);
+  },
+  fdzeile(f) {
+    const fd = feldAus(f);
+    if (!fd || !fd.zeilen) return;
+    const w = {};
+    fd.spalten.forEach((s, i) => { const el = f.elements['c' + i], v = el ? el.value.trim() : ''; if (v) w[s.id] = v; });
+    if (!Object.keys(w).length) { const e0 = f.elements.c0; if (e0) { e0.classList.add('fehlt'); e0.focus(); } return; }
+    merken(); fd.zeilen.push({ id: uid(), w: w }); geaendert(); fokus('neu-fz-' + fd.id);
+  },
+  'fdz-edit'(f) {
+    const fd = feldImSheet(), z = fd && fd.zeilen ? fd.zeilen.find((x) => x.id === sheet.id) : null;
+    if (!z) return;
+    const w = {};
+    fd.spalten.forEach((s, i) => { const el = f.elements['c' + i], v = el ? el.value.trim() : ''; if (v) w[s.id] = v; });
+    merken(); z.w = w; geaendert(true);
+  },
+  fdgpunkt(f) {
+    const fd = feldAus(f), L = fd ? zeilenVon(f.elements.text.value) : [], sp = f.dataset.s;
+    if (!L.length) return;
+    merken();
+    L.forEach((x) => { fd.punkte.push({ id: uid(), text: x, an: false, spalte: sp }); });
+    geaendert();
+    const neu = document.querySelector('form[data-form="fdgpunkt"][data-f="' + fd.id + '"][data-s="' + sp + '"] input');
+    if (neu) neu.focus();
+  },
+  'fdg-edit'(f) {
+    const fd = feldImSheet(), x = fd ? fd.punkte.find((y) => y.id === sheet.id) : null, text = x && pflicht(f.elements.text);
+    if (!text) return;
+    merken(); x.text = text.replace(/\s*[\r\n]+\s*/g, ' '); x.spalte = f.elements.spalte.value; geaendert(true);
   },
   'ziel-edit'(f) { const z = imThema('ziele'), text = z && pflicht(f.elements.text); if (!text) return; z.text = text; if (f.elements.thema) z.thema = f.elements.thema.value; geaendert(true); },
   leute(f) { leuteDazu(f.elements.text.value); },
@@ -3824,7 +4171,15 @@ const FORMS = {
     speichern(); render(); auf({ art: 'maliste' });
     toast((war ? 'Beispiel entfernt. ' : '') + mehrzahl(n.neu, 'Mitarbeiter', 'Mitarbeiter') + ' übernommen' + (n.alt ? ', ' + n.alt + ' ergänzt' : ''), true);
   },
-  glpunkt(f) { const text = f.elements.text.value.trim(); if (!text) return; S.glPunkte.push({ id: uid(), text: text }); geaendert(); fokus('neu-glpunkt'); },
+  glpunkt(f) {
+    const L = zeilenVon(f.elements.text.value), g = f.dataset.g || '';
+    if (!L.length) return;
+    merken();
+    L.forEach((text) => { S.glPunkte.push({ id: uid(), text: text, gruppe: g, an: false, ergebnis: '', thema: '' }); });
+    geaendert();
+    const neu = document.querySelector('form[data-form="glpunkt"][data-g="' + g + '"] input');
+    if (neu) neu.focus();
+  },
   offerte(f) { if (offerteAusForm(f, null)) { geaendert(); fokus('neu-off'); } },
   'offerte-edit'(f) { if (offerteAusForm(f, sheet && sheet.id ? S.kunden.offerten.find((x) => x.id === sheet.id) : null)) geaendert(true); },
   'auftrag-edit'(f) {
@@ -3839,7 +4194,16 @@ const FORMS = {
     a.erhalten = ['ja', 'nein', 'offen'].indexOf(f.elements.erhalten.value) >= 0 ? f.elements.erhalten.value : 'offen';
     geaendert(true);
   },
-  'glpunkt-edit'(f) { const x = sheet && S.glPunkte.find((y) => y.id === sheet.id), text = x && pflicht(f.elements.text); if (!text) return; x.text = text; geaendert(true); },
+  'glpunkt-edit'(f) {
+    const x = sheet && S.glPunkte.find((y) => y.id === sheet.id), text = x && pflicht(f.elements.text);
+    if (!text) return;
+    merken();
+    x.text = text; x.ergebnis = f.elements.ergebnis.value.trim(); x.an = f.elements.an.checked;
+    if (f.elements.gruppe) x.gruppe = f.elements.gruppe.value;
+    if (f.elements.thema) x.thema = f.elements.thema.value;
+    geaendert(true);
+  },
+  'glgruppe-edit'(f) { const g = sheet && S.glGruppen.find((y) => y.id === sheet.id), titel = g && pflicht(f.elements.titel); if (!titel) return; g.titel = titel; geaendert(true); },
   'thema-edit'(f) { const t = aktThema(), titelNeu = t && pflicht(f.elements.titel); if (!titelNeu) return; t.titel = titelNeu; t.frage = f.elements.frage.value.trim(); geaendert(true); },
   spalte(f) { const p = S.zahlen.perioden.find((x) => x.id === sheet.id), name = f.elements.name.value.trim(); if (!p || !name) return; p.name = name; S.zahlen.perioden.sort((a, b) => periodeOrdnung(a.name) - periodeOrdnung(b.name)); geaendert(true); },
   spalten(f) {
@@ -3913,6 +4277,8 @@ document.addEventListener('paste', (e) => {
     if (b) { e.preventDefault(); rmBildDazu(b); return; }
   }
   const text = e.clipboardData ? e.clipboardData.getData('text') : '';
+  const fo = feld && t.form ? t.form.dataset.form : '';
+  if (/^(fdpunkt|fdgpunkt|glpunkt|fdzeile)$/.test(fo) && /[\r\n\t]/.test(text.trim())) { e.preventDefault(); listeEinfuegen(t.form, text); return; }   // eine Liste aus Excel in ein Feld oder zu den GL-Punkten (seit 0.9)
   const bilder = !feld && S.ui.bereich === 'themen' && e.clipboardData && e.clipboardData.files ? Array.from(e.clipboardData.files).filter(istAnhang) : [];
   if (bilder.length) { e.preventDefault(); if (aktThema() && aktThema().zu) toast(ZU_TEXT); else anhDazu(bilder); return; }   // ein Bildschirmfoto im Thema einfügen
   if (feld && t.id === 'neu-stw') {   // mehrere Zeilen: jede ein Stichwort
@@ -3955,81 +4321,203 @@ window.addEventListener('scroll', tipWeg, true);
 let passT = 0;
 window.addEventListener('resize', () => { clearTimeout(passT); passT = setTimeout(() => { diagrammePassen(); kartenGleich(); }, 120); });
 
-/* Kärtchen der Gruppenzuteilung mit Maus oder Stift ziehen. Mit dem Finger: antippen und Gruppe wählen. */
-/* Ziehen mit der Maus: Kärtchen der Tafel (in eine andere Gruppe und innerhalb der Gruppe auf und ab), dazu die Einträge
-   der Listen (Notizen, Beschlüsse, Ziele, Baustellen, Punkte für die GL) auf und ab. Mit dem Finger wird getippt, nicht gezogen. */
-let zug = null;
+/* Ziehen (seit 0.9 auch mit dem Finger). Mit Maus oder Stift sofort; mit dem Finger einen Eintrag kurz drücken, bis er sich
+   anhebt, dann schieben (vorher bewegt, rollt die Seite wie gewohnt; kurz getippt, öffnet er sich wie bisher).
+   Was sich ziehen lässt: Kärtchen der Tafel, Einträge der Listen (Notizen, Beschlüsse, Ziele, Baustellen, Stichworte, Punkte der
+   Felder, Zeilen der Tabellen, Punkte für die GL) und Themen und Unterpunkte in der Themenliste. Kärtchen, GL-Punkte und Einträge
+   eines Felds «Gruppen» wandern auch in eine andere Spalte ihres Bretts ([data-brett] mit [data-spalte]); alles andere bleibt in
+   seiner Liste. Nah am oberen oder unteren Rand rollt die Seite mit. */
+let zug = null, zugRoll = 0;
+const HALTEN_MS = 380;
 function markenWeg() { $$('.ein-vor,.ein-nach').forEach((x) => { x.classList.remove('ein-vor', 'ein-nach'); }); }
 function zugEnde() {
   if (!zug) return;
+  clearTimeout(zug.halten);
+  cancelAnimationFrame(zugRoll);
   if (zug.geist) zug.geist.remove();
-  if (zug.el) zug.el.classList.remove('zieht');
-  $$('.spalte.ziel').forEach((s) => s.classList.remove('ziel'));
+  if (zug.el) zug.el.classList.remove('zieht', 'hebt');
+  $$('.ziel').forEach((s) => s.classList.remove('ziel'));
   markenWeg();
   document.body.classList.remove('am-ziehen');
   zug = null;
 }
-const spalteUnter = (e) => { const el = document.elementFromPoint(e.clientX, e.clientY); return el && el.closest ? el.closest('[data-spalte]') : null; };
-/* Wohin der gezogene Eintrag käme: vor einen Nachbarn («vor») oder hinter den letzten («nach»). Ein Kärtchen kann in jede
-   Spalte der Tafel, ein Listeneintrag bleibt in seiner Liste. */
-function zugZiel(e) {
-  const karte = zug.art === 'karte', feld = karte ? spalteUnter(e) : zug.el.parentNode;
-  if (!feld) return null;
-  if (!karte) { const r = feld.getBoundingClientRect(); if (e.clientX < r.left - 60 || e.clientX > r.right + 60 || e.clientY < r.top - 60 || e.clientY > r.bottom + 60) return null; }
-  const nachbarn = (karte ? $$('.karte', feld) : Array.from(feld.children).filter((x) => x.dataset && x.dataset.zieh)).filter((x) => x !== zug.el);
-  const vor = nachbarn.find((x) => { const r = x.getBoundingClientRect(); return e.clientY < r.top + r.height / 2; }) || null;
-  return { feld: feld, vor: vor, nach: vor ? null : (nachbarn[nachbarn.length - 1] || null) };
+function ziehbar(t) {   // das Element, das sich ziehen lässt, oder nichts
+  if (!t || !t.closest || t.closest('input,textarea,select,.sheet-huelle')) return null;
+  const k = t.closest('.karte') || t.closest('[data-zieh]') || t.closest('.tliste2 .tlink[data-id]');
+  if (!k || k.closest('.tafel.fest') || k.closest('.thema.zu')) return null;
+  return k;
 }
-document.addEventListener('pointerdown', (e) => {
-  if (e.pointerType === 'touch' || e.button !== 0 || !e.target.closest || e.target.closest('input,textarea,select')) return;
-  const k = e.target.closest('.karte') || e.target.closest('[data-zieh]');
-  if (!k || k.closest('.tafel.fest') || k.closest('.thema.zu')) return;
-  const r = k.getBoundingClientRect(), karte = k.classList.contains('karte');
-  zug = { id: karte ? k.dataset.id : k.dataset.zid, art: karte ? 'karte' : k.dataset.zieh, el: k, x: e.clientX, y: e.clientY, dx: e.clientX - r.left, dy: e.clientY - r.top, b: r.width, geist: null };
-});
-document.addEventListener('pointermove', (e) => {
-  if (!zug) return;
-  if (!zug.geist) {
-    if (Math.hypot(e.clientX - zug.x, e.clientY - zug.y) < 6) return;
-    const kopie = zug.el.cloneNode(true);
-    if (zug.art === 'baustellen' || zug.art === 'stichworte') {   // die Zeile braucht ihre Karte um sich, sonst verliert sie ihr Aussehen
-      const ul = document.createElement('ul');
-      ul.appendChild(kopie);
-      zug.geist = document.createElement('div'); zug.geist.className = (zug.art === 'stichworte' ? 'stw' : 'bg') + ' geist'; zug.geist.appendChild(ul);
-    } else { zug.geist = kopie; zug.geist.className = (zug.art === 'karte' ? 'karte' : zug.el.className) + ' geist'; }
-    zug.geist.style.width = zug.b + 'px';
-    document.body.appendChild(zug.geist);
-    zug.el.classList.add('zieht');
-    document.body.classList.add('am-ziehen');
+function zugBeginnen(k, x, y) {
+  const r = k.getBoundingClientRect(), art = k.classList.contains('karte') ? 'karte' : (k.classList.contains('tlink') ? 'thema' : k.dataset.zieh);
+  zug = { el: k, art: art, id: art === 'karte' || art === 'thema' ? k.dataset.id : k.dataset.zid, x: x, y: y, lx: x, ly: y, dx: x - r.left, dy: y - r.top, b: r.width, geist: null, brett: art === 'thema' ? null : k.closest('[data-brett]') };
+}
+function geistMachen() {
+  const k = zug.el;
+  if (zug.art === 'baustellen' || zug.art === 'stichworte') {   // die Zeile braucht ihre Karte um sich, sonst verliert sie ihr Aussehen
+    const ul = document.createElement('ul');
+    ul.appendChild(k.cloneNode(true));
+    zug.geist = document.createElement('div'); zug.geist.className = (zug.art === 'stichworte' ? 'stw' : 'bg') + ' geist'; zug.geist.appendChild(ul);
+  } else if (zug.art === 'fdz') {   // Tabellenzeile: als Kärtchen mit dem Inhalt der Zellen
+    zug.geist = document.createElement('div'); zug.geist.className = 'fd-geist geist';
+    zug.geist.textContent = Array.from(k.children).map((c) => c.textContent.trim()).filter((x) => x && x !== '–').join(' · ');
+  } else { zug.geist = k.cloneNode(true); zug.geist.className = (zug.art === 'karte' ? 'karte' : k.className.replace(/\b(hebt|zieht|ein-vor|ein-nach)\b/g, '')) + ' geist'; zug.geist.removeAttribute('style'); }
+  zug.geist.style.width = (zug.art === 'fdz' ? Math.min(zug.b, 420) : zug.b) + 'px';
+  document.body.appendChild(zug.geist);
+  k.classList.remove('hebt');
+  k.classList.add('zieht');
+  document.body.classList.add('am-ziehen');
+}
+const vorWem = (nachbarn, wert, quer) => nachbarn.find((n) => { const r = n.getBoundingClientRect(); return quer ? wert < r.left + r.width / 2 : wert < r.top + r.height / 2; }) || null;
+function zugZiel(x, y) {   // wohin der Eintrag käme: vor einen Nachbarn («vor») oder hinter den letzten («nach»), dazu die Spalte
+  if (zug.art === 'thema') {
+    const nav = zug.el.closest('.tliste2');
+    if (!nav) return null;
+    const quer = getComputedStyle(zug.el.parentNode).display === 'flex', r = nav.getBoundingClientRect();   // schmaler Bildschirm: Themen in einer Zeile
+    if (quer ? (y < r.top - 60 || y > r.bottom + 60) : (x < r.left - 80 || x > r.right + 80)) return null;
+    const kind = zug.el.classList.contains('kind');
+    const nachbarn = $$(kind ? '.tlink.kind[data-id]' : '.tlink[data-id]:not(.kind)', nav).filter((n) => n !== zug.el);
+    const vor = vorWem(nachbarn, quer ? x : y, quer);
+    return { spalte: null, vor: vor, nach: vor ? null : (nachbarn[nachbarn.length - 1] || null) };
   }
-  zug.geist.style.transform = 'translate(' + (e.clientX - zug.dx) + 'px,' + (e.clientY - zug.dy) + 'px)';
-  const z = zugZiel(e), spalte = z && zug.art === 'karte' ? z.feld : null;
-  $$('.spalte.ziel').forEach((s) => { if (s !== spalte) s.classList.remove('ziel'); });
-  if (spalte) spalte.classList.add('ziel');
+  if (zug.brett) {
+    const unter = document.elementFromPoint(x, y), sp = unter && unter.closest ? unter.closest('[data-spalte]') : null;
+    if (!sp || !zug.brett.contains(sp)) return null;
+    const sel = zug.art === 'karte' ? '.karte' : '[data-zieh="' + zug.art + '"]';
+    const nachbarn = $$(sel, sp).filter((n) => n !== zug.el && n.closest('[data-spalte]') === sp);
+    const vor = vorWem(nachbarn, y, false);
+    return { spalte: sp, vor: vor, nach: vor ? null : (nachbarn[nachbarn.length - 1] || null) };
+  }
+  const feld = zug.el.parentNode;
+  if (!feld || !feld.getBoundingClientRect) return null;
+  const r = feld.getBoundingClientRect();
+  if (x < r.left - 60 || x > r.right + 60 || y < r.top - 60 || y > r.bottom + 60) return null;
+  const nachbarn = Array.from(feld.children).filter((n) => n.dataset && n.dataset.zieh && n !== zug.el);
+  const vor = vorWem(nachbarn, y, false);
+  return { spalte: null, vor: vor, nach: vor ? null : (nachbarn[nachbarn.length - 1] || null) };
+}
+function zugMarken() {
+  const z = zugZiel(zug.lx, zug.ly);
+  $$('.ziel').forEach((s) => { if (!z || s !== z.spalte) s.classList.remove('ziel'); });
+  if (z && z.spalte) z.spalte.classList.add('ziel');
   markenWeg();
   if (z && z.vor) z.vor.classList.add('ein-vor'); else if (z && z.nach) z.nach.classList.add('ein-nach');
-});
-document.addEventListener('pointerup', (e) => {
-  if (!zug) return;
-  const gezogen = !!zug.geist, id = zug.id, art = zug.art, z = gezogen ? zugZiel(e) : null;
-  zugEnde();
-  if (!gezogen) return;
-  klickSperre = true; setTimeout(() => { klickSperre = false; }, 80);
-  const t = aktThema(), liste = art === 'karte' ? S.mitarbeiter : (art === 'gl' ? S.glPunkte : (t && t[art]));
-  const x = Array.isArray(liste) ? liste.find((y) => y.id === id) : null;
-  if (!z || !x) return;
-  const kennung = (el) => (el ? (art === 'karte' ? el.dataset.id : el.dataset.zid) : ''), rest = liste.filter((y) => y !== x);
+}
+function randRollen() {   // nah am Rand rollt die Seite mit, solange gezogen wird
+  cancelAnimationFrame(zugRoll);
+  const kopf = document.getElementById('kopf'), oben = (kopf ? kopf.getBoundingClientRect().bottom : 0) + 56, unten = window.innerHeight - 56;
+  const v = zug.ly < oben ? -Math.min(18, Math.ceil((oben - zug.ly) / 4)) : (zug.ly > unten ? Math.min(18, Math.ceil((zug.ly - unten) / 4)) : 0);
+  if (!v) return;
+  const schritt = () => {
+    if (!zug || !zug.geist) return;
+    const vorher = window.scrollY;
+    window.scrollBy(0, v);
+    if (window.scrollY === vorher) return;
+    zugMarken();
+    zugRoll = requestAnimationFrame(schritt);
+  };
+  zugRoll = requestAnimationFrame(schritt);
+}
+function zugBewegen(x, y) {
+  if (!document.body.contains(zug.el)) { zugEnde(); return; }   // inzwischen neu gezeichnet
+  if (!zug.geist) geistMachen();
+  zug.lx = x; zug.ly = y;
+  zug.geist.style.transform = 'translate(' + (x - zug.dx) + 'px,' + (y - zug.dy) + 'px)';
+  zugMarken();
+  randRollen();
+}
+/* Zwischen Ablegen und dem folgenden Klick: der Klick soll nichts öffnen */
+let klickT = 0;
+function klickSperren(ms) { klickSperre = true; clearTimeout(klickT); klickT = setTimeout(() => { klickSperre = false; }, ms || 80); }
+function zugQuelle(art, el) {   // die Liste hinter dem gezogenen Eintrag, dazu das Feld, das die Spalte nennt
+  if (art === 'karte') return { liste: S.mitarbeiter, feld: 'polier', setzen: (L) => { S.mitarbeiter = L; } };
+  if (art === 'gl') return { liste: S.glPunkte, feld: 'gruppe', setzen: (L) => { S.glPunkte = L; } };
+  if (art === 'fdp' || art === 'fdg' || art === 'fdz') {
+    const f = feldAus(el), k = art === 'fdz' ? 'zeilen' : 'punkte';
+    return f && Array.isArray(f[k]) ? { liste: f[k], feld: art === 'fdg' ? 'spalte' : '', setzen: (L) => { f[k] = L; } } : null;
+  }
+  const t = aktThema();
+  return t && Array.isArray(t[art]) ? { liste: t[art], feld: '', setzen: (L) => { t[art] = L; } } : null;
+}
+function einreihen(rest, z, kennung) {   // Stelle in der Liste ohne den gezogenen Eintrag
   let i = rest.length;
   if (z.vor) { const n = rest.findIndex((y) => y.id === kennung(z.vor)); if (n >= 0) i = n; }
   else if (z.nach) { const n = rest.findIndex((y) => y.id === kennung(z.nach)); if (n >= 0) i = n + 1; }
-  rest.splice(i, 0, x);
-  const vorher = art === 'karte' ? ((t && t.leute.find((y) => y.id === id)) || {}).gruppe || '' : '', gruppe = art === 'karte' ? z.feld.dataset.spalte : '';
-  if (gruppe === vorher && rest.every((y, n) => y === liste[n])) return;   // am alten Platz losgelassen
+  return i;
+}
+function themaFallen(id, z) {   // Thema innerhalb der Themen, Unterpunkt innerhalb seines Themas; Unterpunkte wandern mit
+  const T = S.themen, x0 = T.find((t) => t.id === id);
+  if (!x0) return;
+  const kennung = (n) => (n ? n.dataset.id : ''), geschw = x0.eltern ? T.filter((t) => t.eltern === x0.eltern) : T.filter((t) => !t.eltern), rest = geschw.filter((t) => t !== x0);
+  rest.splice(einreihen(rest, z, kennung), 0, x0);
+  if (rest.every((t, n) => t === geschw[n])) return;
   merken();
-  if (art === 'karte') { x.polier = gruppe; S.mitarbeiter = rest; } else if (art === 'gl') S.glPunkte = rest; else t[art] = rest;
+  if (x0.eltern) { let k = 0; S.themen = T.map((t) => (t.eltern === x0.eltern ? rest[k++] : t)); }
+  else S.themen = ordnen(rest.concat(T.filter((t) => t.eltern)));
   geaendert();
+}
+function zugFallen(x, y, finger) {
+  const gezogen = !!zug.geist, art = zug.art, id = zug.id, el = zug.el;
+  zug.lx = x; zug.ly = y;
+  const z = gezogen ? zugZiel(x, y) : null;
+  zugEnde();
+  if (!gezogen) return;
+  klickSperren(finger ? 150 : 80);
+  if (!z) return;
+  if (art === 'thema') { themaFallen(id, z); return; }
+  const q = zugQuelle(art, el);
+  if (!q) return;
+  const liste = q.liste, x0 = liste.find((y2) => y2.id === id);
+  if (!x0) return;
+  const kennung = (n) => (n ? (art === 'karte' ? n.dataset.id : n.dataset.zid) : ''), rest = liste.filter((y2) => y2 !== x0);
+  rest.splice(einreihen(rest, z, kennung), 0, x0);
+  const neuSp = q.feld && z.spalte ? z.spalte.dataset.spalte || '' : null, vorher = q.feld ? x0[q.feld] || '' : null;
+  if ((neuSp === null || neuSp === vorher) && rest.every((y2, n) => y2 === liste[n])) return;   // am alten Platz losgelassen
+  merken();
+  if (neuSp !== null) x0[q.feld] = neuSp;
+  q.setzen(rest);
+  geaendert();
+}
+/* Maus und Stift */
+document.addEventListener('pointerdown', (e) => {
+  if (e.pointerType === 'touch' || e.button !== 0 || zug) return;
+  const k = ziehbar(e.target);
+  if (k) zugBeginnen(k, e.clientX, e.clientY);
 });
-document.addEventListener('pointercancel', zugEnde);
+document.addEventListener('pointermove', (e) => {
+  if (!zug || zug.finger !== undefined) return;
+  if (!zug.geist && Math.hypot(e.clientX - zug.x, e.clientY - zug.y) < 6) return;
+  zugBewegen(e.clientX, e.clientY);
+});
+document.addEventListener('pointerup', (e) => { if (zug && zug.finger === undefined) zugFallen(e.clientX, e.clientY, false); });
+document.addEventListener('pointercancel', () => { if (zug && zug.finger === undefined) zugEnde(); });
+/* Finger: kurz drücken, bis sich der Eintrag anhebt, dann schieben */
+document.addEventListener('touchstart', (e) => {
+  if (zug || e.touches.length !== 1) { if (zug && zug.finger !== undefined && !zug.geist) zugEnde(); return; }
+  const k = ziehbar(e.target);
+  if (!k) return;
+  const t0 = e.touches[0];
+  zugBeginnen(k, t0.clientX, t0.clientY);
+  zug.finger = t0.identifier;
+  zug.halten = setTimeout(() => { if (!zug || zug.el !== k) return; zug.bereit = true; k.classList.add('hebt'); try { if (navigator.vibrate) navigator.vibrate(10); } catch (x) { /* ohne Rütteln */ } }, HALTEN_MS);
+}, { passive: true });
+document.addEventListener('touchmove', (e) => {
+  if (!zug || zug.finger === undefined) return;
+  const t0 = Array.prototype.find.call(e.touches, (t) => t.identifier === zug.finger);
+  if (!t0) return;
+  if (!zug.bereit) { if (Math.hypot(t0.clientX - zug.x, t0.clientY - zug.y) > 10) zugEnde(); return; }   // vor dem Anheben bewegt: die Seite rollt
+  if (e.cancelable) e.preventDefault();
+  zugBewegen(t0.clientX, t0.clientY);
+}, { passive: false });
+document.addEventListener('touchend', (e) => {
+  if (!zug || zug.finger === undefined) return;
+  if (!zug.bereit) { zugEnde(); return; }   // kurz getippt: der Klick folgt wie bisher
+  if (e.cancelable) e.preventDefault();   // nach dem Anheben kein Klick
+  const t0 = Array.prototype.find.call(e.changedTouches, (t) => t.identifier === zug.finger);
+  if (!zug.geist) { zugEnde(); klickSperren(150); return; }   // angehoben, aber nicht geschoben
+  zugFallen(t0 ? t0.clientX : zug.lx, t0 ? t0.clientY : zug.ly, true);
+}, { passive: false });
+document.addEventListener('touchcancel', () => { if (zug && zug.finger !== undefined) zugEnde(); });
+document.addEventListener('contextmenu', (e) => { if (zug && zug.finger !== undefined) e.preventDefault(); });   // langes Drücken: kein Menü des Browsers
 
 /* Bildschirmtastatur (iPad, Handy): Sheets richten sich nach dem sichtbaren Teil des Bildschirms */
 if (window.visualViewport) {
