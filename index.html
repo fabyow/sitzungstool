@@ -340,7 +340,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
 .ma-leer p{color:var(--muted)}
 .ew-art{flex:none;min-width:4.6rem;text-align:center;font-size:.75rem;font-weight:700;padding:.2rem .55rem;border-radius:.6rem;background:var(--fill);color:var(--muted)}
 .ew-art.ein{background:var(--brand-soft);color:var(--accent)}
-.ew-art.aus{background:var(--warn-soft);color:var(--warn)}
+.ew-art.aus,.ew-art.pension{background:var(--warn-soft);color:var(--warn)}
 .rz.ew{padding-left:.8rem}
 .bestand .bg li button{padding:.38rem 0;font-size:1rem}
 .ma-liste{display:flex;flex-direction:column;background:var(--card);border-radius:1rem;box-shadow:var(--shadow);margin-bottom:.4rem}
@@ -380,6 +380,10 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
 .e-gruppen .e-gr ol{list-style:none;margin:0;padding:0}
 .e-gruppen .e-gr li{padding:.2rem 0;border-top:1px solid var(--sep);font-size:.9375rem}
 .e-gruppen .e-gr li:first-child{border-top:0}
+.k-erh{display:inline-block;min-width:3.4rem;text-align:center;font-size:.75rem;font-weight:700;padding:.15rem .5rem;border-radius:.55rem;background:var(--fill);color:var(--muted)}
+.k-erh.ja{background:var(--brand-soft);color:var(--accent)}
+.k-erh.offen{background:var(--warn-soft);color:var(--warn)}
+.bst tr.aus-liste td small{display:block;color:var(--muted);font-size:.75rem;font-weight:400}
 .festband{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem .8rem;margin-top:1rem;padding:.55rem .6rem .55rem .9rem;border-radius:1rem;background:var(--brand-soft);font-weight:600}
 .festband .ic{color:var(--accent)}
 .festband > span{flex:1;min-width:10rem}
@@ -622,7 +626,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '0.8.1';         // Version des Tools, steht in den Einstellungen
+const VERSION = '0.8.2';         // Version des Tools, steht in den Einstellungen
 const FORMAT = 7;              // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
@@ -745,9 +749,9 @@ function leer() {
     glPunkte: [],    // eigene Punkte für die GL, stehen nie im Ergebnis: [{id, text}]
     rueckmeldungen: [],   // was am Tool auffällt, zum Weitergeben an Claude: [{id, datum, wo, art, text, version, umgebung, breite, status, uebergeben}]
     budget: { ziel: null, auftraege: [], notiz: '' },   // Ausblick aufs Folgejahr: Umsatz-Ziel und was schon als Auftrag da ist [{id, name, betrag}]
-    mitarbeiter: [],   // Mitarbeiterliste: [{id, name, position, polier (Kennung des Poliers), eintritt, austritt}]
+    mitarbeiter: [],   // Mitarbeiterliste: [{id, name, position, polier (Kennung des Poliers), eintritt, austritt, geburt}]
     // Kunden: Offerten je Jahr [{id, jahr, gerechnet, erhalten}] und Aufträge [{id, jahr, objekt, planer, bauherr, bauherrArt, objektArt, speziell, mitbewerber, eingeladen, betrag, notiz}]
-    kunden: { offerten: [], auftraege: [], ansicht: 'diagramme', jahr: '' },
+    kunden: { offerten: [], auftraege: [], ansicht: 'diagramme', jahr: '', filter: '' },
     ui: { bereich: 'zahlen', thema: '', auf: {}, bst: 'bf' }
   };
 }
@@ -819,7 +823,7 @@ function beispiel() {
   pe.bedarf = [['Polier', 'Nachfolge, ein Polier hört auf', 'Sommer', 'laeuft', true], ['Bauarbeiter', 'Nachfolge', 'Frühling', 'offen', false], ['Hilfsbauführer', 'Entlastung im Büro', '', 'besetzt', false]].map((b) => ({ id: uid(), was: b[0], warum: b[1], bis: b[2], stand: b[3], notiz: '', gl: b[4] }));
   s.themen.splice(s.themen.length - 1, 0, pe);
   s.budget = { ziel: 4600000, auftraege: [['Parkhaus Bahnhof, zweite Etappe', 780000], ['Brücke Mühleweg', 640000], ['Kleinaufträge unter Vertrag', 480000]].map((a) => ({ id: uid(), name: a[0], betrag: a[1] })), notiz: 'Zwei grössere Offerten sind noch offen.' };
-  s.kunden.offerten = [['2021', 18, 5], ['2022', 22, 8], ['2023', 20, 9], ['2024', 16, 7], ['2025', 19, 8]].map((o) => ({ id: uid(), jahr: o[0], gerechnet: o[1], erhalten: o[2] }));
+  s.kunden.offerten = [['2021', 18, 5], ['2022', 22, 8], ['2023', 20, 9], ['2024', 16, 7]].map((o) => ({ id: uid(), jahr: o[0], gerechnet: o[1], erhalten: o[2] }));
   s.kunden.auftraege = [
     ['2023', 'Parkhaus Nord, Decke', 'Ingenieurbüro Nord', 'Gemeinde Musterdorf', 'Gemeinde', 'Parkhaus', '', 'Baufirma A', true, 420000],
     ['2023', 'Brücke am Dorfbach', 'Planer Süd AG', 'Kanton', 'Kanton', 'Brücke', 'Unter Verkehr', '', false, 310000],
@@ -832,7 +836,13 @@ function beispiel() {
     ['2025', 'Parkhaus Bahnhof', 'Büro Mitte', 'Immobilien Beispiel AG', 'Privat', 'Parkhaus', 'Nachtarbeit', 'Baufirma A; Baufirma C', true, 510000],
     ['2025', 'Garage Sonnenhof', 'Ingenieurbüro Nord', 'Eigentümer Sonnenhof', 'Privat', 'Garage', '', '', true, 76000],
     ['2025', 'Unterführung Dorfstrasse', 'Planer Süd AG', 'Kanton', 'Kanton', 'Unterführung, Brücke', '', '', false, 230000]
-  ].map((a) => ({ id: uid(), jahr: a[0], objekt: a[1], planer: a[2], bauherr: a[3], bauherrArt: a[4], objektArt: a[5], speziell: a[6], mitbewerber: a[7], eingeladen: a[8], betrag: a[9], notiz: '' }));
+  ].map((a) => ({ id: uid(), jahr: a[0], objekt: a[1], planer: a[2], bauherr: a[3], bauherrArt: a[4], objektArt: a[5], speziell: a[6], mitbewerber: a[7], eingeladen: a[8], betrag: a[9], notiz: '', erhalten: 'ja' }));
+  [['2025', 'Tiefgarage Seefeld', 'Planer Süd AG', 'Immobilien Beispiel AG', 'Privat', 'Garage', '', 'Baufirma A', true, 380000, 'nein'],
+    ['2025', 'Balkone Rosenweg', 'Büro Mitte', 'Genossenschaft Rosenweg', 'Privat', 'Hochbau', '', '', false, 150000, 'nein'],
+    ['2025', 'Brücke Feldweg', 'Ingenieurbüro Nord', 'Kanton', 'Kanton', 'Brücke', 'Unter Verkehr', 'Baufirma B', true, 290000, 'nein'],
+    ['2025', 'Parkdeck Industrie', 'Büro Mitte', 'Industrie Beispiel AG', 'Privat', 'Parkhaus', '', '', true, 420000, 'nein'],
+    ['2025', 'Stützmauer Bachweg', 'Planer Süd AG', 'Gemeinde Beispielwil', 'Gemeinde', 'Stützmauer', '', '', true, 110000, 'offen']
+  ].forEach((a) => { s.kunden.auftraege.push({ id: uid(), jahr: a[0], objekt: a[1], planer: a[2], bauherr: a[3], bauherrArt: a[4], objektArt: a[5], speziell: a[6], mitbewerber: a[7], eingeladen: a[8], betrag: a[9], notiz: '', erhalten: a[10] }); });
   return s;
 }
 
@@ -889,13 +899,15 @@ function normal(d) {
   s.kunden = Object.assign({}, kd, {
     offerten: (Array.isArray(kd.offerten) ? kd.offerten : []).filter((x) => x && typeof x === 'object'),
     auftraege: (Array.isArray(kd.auftraege) ? kd.auftraege : []).filter((x) => x && typeof x === 'object'),
-    ansicht: kd.ansicht === 'tabelle' ? 'tabelle' : 'diagramme', jahr: alsText(kd.jahr)
+    ansicht: kd.ansicht === 'tabelle' ? 'tabelle' : 'diagramme', jahr: alsText(kd.jahr), filter: ['ja', 'nein', 'offen'].indexOf(kd.filter) >= 0 ? kd.filter : ''
   });
   s.kunden.offerten.forEach((x) => { if (!x.id) x.id = uid(); x.jahr = alsText(x.jahr); x.gerechnet = ganz(x.gerechnet); x.erhalten = ganz(x.erhalten); });
   s.kunden.auftraege.forEach((x) => {
     if (!x.id) x.id = uid();
     AF.forEach((k) => { x[k] = alsText(x[k]); });
     x.eingeladen = !!x.eingeladen;
+    x.erhalten = ['ja', 'nein', 'offen'].indexOf(x.erhalten) >= 0 ? x.erhalten : 'ja';   // bis 0.8.1 standen hier nur erhaltene Aufträge
+    ['quelle', 'ort', 'sparte', 'verantwortlich', 'kalkulator'].forEach((k) => { if (x[k] !== undefined) x[k] = alsText(x[k]); });
     x.betrag = typeof x.betrag === 'number' && isFinite(x.betrag) ? x.betrag : null;
   });
   s.ui = Object.assign({}, l.ui, (d && d.ui) || {});
@@ -936,7 +948,7 @@ function maNormal(roh, themen) {
     if (!m.id || typeof m.id !== 'string' || ids[m.id]) m.id = uid();
     ids[m.id] = 1;
     m.name = m.name.trim();
-    ['position', 'polier', 'eintritt', 'austritt'].forEach((k) => { m[k] = typeof m[k] === 'string' ? m[k].trim() : ''; });
+    ['position', 'polier', 'eintritt', 'austritt', 'geburt'].forEach((k) => { m[k] = typeof m[k] === 'string' ? m[k].trim() : ''; });
   });
   L.forEach((m) => { if (m.polier && (!ids[m.polier] || m.polier === m.id)) m.polier = ''; });
   return L;
@@ -963,18 +975,43 @@ function datumWert(text, ende) {
   if (!d) d = ende ? 31 : 1;
   return j * 10000 + m * 100 + d;
 }
-const imFolgejahr = (m, J) => { const a = datumWert(m.austritt, true); return !a || Math.floor(a / 10000) > J; };   // im Jahr nach dem Strategietag noch dabei
-const aufTafel = (m, J) => !istPolier(m) && !imBuero(m) && imFolgejahr(m, J);
-const imBestand = (m, w) => { const e = datumWert(m.eintritt), a = datumWert(m.austritt, true); return (!e || e <= w) && (!a || a >= w); };   // am Tag des Strategietags angestellt
+/* Pension aus dem Geburtsdatum (Chefs Entscheide vom 19.11.2026): Bauarbeiter bis und mit Polier mit 60, Büro (Abteilungsleiter,
+   Bauführer) mit 65, auf das Ende des Monats, in dem jemand so alt wird. In Listen erscheint sie bis 5 Jahre nach dem Strategietag. */
+const PENSION = { betrieb: 60, buero: 65 }, VORAUS = 5;
+const MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+const stichtagVon = (s) => datumWert(s && s.meta && s.meta.datum) || datumWert(heute());   // Tag des Strategietags als JJJJMMTT
+/* Austritt eines Mitarbeiters am Stichtag w. art: 'hand' (eingetragen, geht vor), 'pension' (berechnet, nach w), 'erreicht' (Alter
+   vor w erreicht und noch in der Liste: Datum offen) oder ''. wert: JJJJMMTT oder 0. */
+function austrittVon(m, w) {
+  if (m.austritt) return { art: 'hand', wert: datumWert(m.austritt, true), text: m.austritt, mit: 0 };
+  let g = datumWert(m.geburt, true);
+  if (g && Math.floor(g / 10000) > new Date().getFullYear()) g -= 1000000;   // «25.6.75»: 1975, nicht 2075
+  if (!g) return { art: '', wert: 0, text: '', mit: 0 };
+  const mit = imBuero(m) ? PENSION.buero : PENSION.betrieb, j = Math.floor(g / 10000) + mit, mo = Math.floor(g / 100) % 100;
+  const wert = j * 10000 + mo * 100 + new Date(Date.UTC(j, mo, 0)).getUTCDate();
+  if (wert < (w === undefined ? stichtagVon(S) : w)) return { art: 'erreicht', wert: 0, text: '', mit: mit };
+  return { art: 'pension', wert: wert, text: MONATE[mo - 1] + ' ' + j, mit: mit };
+}
+/* Für Listen und Kärtchen: «bis …», «Pension Juni 2029» (nur bis 5 Jahre voraus), «Pensionsalter erreicht» oder nichts */
+function austrittMeta(m, w) {
+  if (w === undefined) w = stichtagVon(S);
+  const A = austrittVon(m, w);
+  if (A.art === 'hand') return 'bis ' + A.text;
+  if (A.art === 'erreicht') return 'Pensionsalter erreicht';
+  return A.art === 'pension' && Math.floor(A.wert / 10000) <= Math.floor(w / 10000) + VORAUS ? 'Pension ' + A.text : '';
+}
+const imFolgejahr = (m, J, w) => { const a = austrittVon(m, w).wert; return !a || Math.floor(a / 10000) > J; };   // im Jahr nach dem Strategietag noch dabei
+const aufTafel = (m, J, w) => !istPolier(m) && !imBuero(m) && imFolgejahr(m, J, w);
+const imBestand = (m, w) => { const e = datumWert(m.eintritt), a = austrittVon(m, w).wert; return (!e || e <= w) && (!a || a >= w); };   // am Tag des Strategietags angestellt
 /* Die Tafel jeder Gruppenzuteilung folgt der Liste: Die Poliere sind die Gruppen, die übrigen Mitarbeiter ausser dem Büro die Kärtchen.
    «gruppen» und «leute» am Thema sind davon eine Abschrift. Ist die Zuteilung festgehalten, bleibt die Abschrift, wie sie war; nur
    Namen folgen der Liste. */
 function spiegeln(s) {
-  const L = Array.isArray(s.mitarbeiter) ? s.mitarbeiter : [], J = jahrVon(s), nach = {}, pid = {};
+  const L = Array.isArray(s.mitarbeiter) ? s.mitarbeiter : [], J = jahrVon(s), w = stichtagVon(s), nach = {}, pid = {};
   L.forEach((m) => { nach[m.id] = m; });
-  const P = L.filter((m) => istPolier(m) && imFolgejahr(m, J));
+  const P = L.filter((m) => istPolier(m) && imFolgejahr(m, J, w));
   P.forEach((m) => { pid[m.id] = 1; });
-  const leute = L.filter((m) => aufTafel(m, J));
+  const leute = L.filter((m) => aufTafel(m, J, w));
   s.themen.forEach((t) => {
     if (t.art !== 'gruppen') return;
     if (t.fest) { t.gruppen.concat(t.leute).forEach((x) => { if (x && nach[x.id]) x.name = nach[x.id].name; }); return; }
@@ -1369,7 +1406,40 @@ const KSPALTEN = [['jahr', /^jahr$/i], ['datum', /datum/i], ['gerechnet', /gerec
   ['objekt', /^(objekt|projekt|projektbezeichnung|auftrag|baustelle)$/i], ['planer', /^planer/i], ['bauherrArt', /^bauherr\S*[ -]*(art|typ|gruppe)$/i], ['bauherr', /^bauherr(schaft)?$/i],
   ['objektArt', /^objekt\S*[ -]*(art|typ)$|^art$/i], ['speziell', /^spezi/i], ['mitbewerber', /mitbewerber|konkurren/i], ['betrag', /betrag|angebot|summe/i],
   ['eingeladen', /eingeladen|einladung/i], ['notiz', /bemerkung|notiz/i]];
+/* Eure Offertliste aus Excel: Kopfzeile mit Datum, «Projektbezeichnung», «Angebot», «Erhalten» und «Planer» oder «Bauherr». In mehrzeiligen
+   Zellen ist die erste Zeile der Name (beim Projekt die zweite der Ort). Betrag: das Abgebot, sonst das Angebot. «Erhalten»: Ja,
+   offen, sonst nicht erhalten. «Eingeladen» steht in der Bemerkung. */
+const OSPALTEN = [['datum', /datum|^eingabe/i], ['objekt', /projektbezeichnung|^projekt|^objekt/i], ['planer', /planer|auftraggeber/i], ['bauherr', /^bauherr/i],
+  ['angebot', /^angebot/i], ['abgebot', /^abgebot/i], ['notiz', /^bemerkung/i], ['sparte', /^sparte/i], ['erhalten', /^erhalten/i], ['verantwortlich', /^verantw/i], ['kalkulator', /^kalkulator/i]];
+function offertlisteLesen(g) {
+  for (let r = 0; r < Math.min(g.length, 30); r++) {
+    const sp = {};
+    (g[r] || []).forEach((x, c) => {
+      const kopf = String(x == null ? '' : x).replace(/\s+/g, ' ').trim();
+      const k = kopf && OSPALTEN.find((s) => sp[s[0]] === undefined && s[1].test(kopf));
+      if (k) sp[k[0]] = c;
+    });
+    if (sp.objekt === undefined || sp.angebot === undefined || sp.datum === undefined || sp.erhalten === undefined || (sp.planer === undefined && sp.bauherr === undefined)) continue;   // ohne «Erhalten»: eine Tabelle erhaltener Aufträge
+    const roh = (z, k) => (sp[k] === undefined || z[sp[k]] == null ? '' : String(z[sp[k]]));
+    const zeilenVon = (t) => t.split(/\r?\n/).map((x) => x.replace(/\s+/g, ' ').trim()).filter(Boolean);
+    const erste = (z, k) => zeilenVon(roh(z, k))[0] || '';
+    const aus = [];
+    g.slice(r + 1).forEach((z) => {
+      const objekt = erste(z, 'objekt'), d = roh(z, 'datum').trim(), serie = /^\d{5}(\.\d+)?$/.test(d), w = datumWert(d.replace(/\.\d+$/, ''));
+      const jahr = serie ? (w ? String(Math.floor(w / 10000)) : '') : (jahrAus(d) || (w ? String(Math.floor(w / 10000)) : ''));
+      if (!objekt || !jahr) return;
+      const e = roh(z, 'erhalten').trim(), bem = roh(z, 'notiz').replace(/\s+/g, ' ').trim(), ab = zahl(roh(z, 'abgebot')), an = zahl(roh(z, 'angebot'));
+      aus.push({ jahr: jahr, objekt: objekt, ort: zeilenVon(roh(z, 'objekt'))[1] || '', planer: erste(z, 'planer'), bauherr: erste(z, 'bauherr'), betrag: ab !== null ? ab : an,
+        eingeladen: /eingeladen/i.test(bem), notiz: bem, sparte: roh(z, 'sparte').trim(), verantwortlich: roh(z, 'verantwortlich').trim(), kalkulator: roh(z, 'kalkulator').trim(),
+        erhalten: /^(ja|j|x|1|wahr|true|yes|erhalten)$/i.test(e) ? 'ja' : (/^offen/i.test(e) ? 'offen' : 'nein') });
+    });
+    if (aus.length) return { art: 'liste', zeilen: aus };
+  }
+  return null;
+}
 function kundenLesen(g) {
+  const liste = offertlisteLesen(g);
+  if (liste) return liste;
   for (let r = 0; r < Math.min(g.length, 30); r++) {
     const sp = {};
     (g[r] || []).forEach((x, c) => {
@@ -1407,22 +1477,42 @@ function beispielWeg() {
 /* Gelesene Tabellen übernehmen. Ein Jahr oder ein Auftrag (gleiches Jahr, gleiches Objekt), den es schon gibt, wird ergänzt statt verdoppelt. */
 function kundenUebernehmen(funde) {
   const anzahl = (art) => funde.filter((f) => f.art === art).reduce((a, f) => a + f.zeilen.length, 0);
-  const nO = anzahl('offerten'), nA = anzahl('auftraege');
-  if (!nO && !nA) return;
+  const nO = anzahl('offerten'), nA = anzahl('auftraege'), nL = anzahl('liste');
+  if (!nO && !nA && !nL) return;
   merken();
   const warBeispiel = S.beispiel;
   if (warBeispiel) beispielWeg();
   const K = S.kunden, schluessel = (a) => a.jahr + '|' + String(a.objekt).toLowerCase().replace(/\s+/g, ' ').trim(), vorher = {};
   K.auftraege.forEach((a) => { const k = schluessel(a); (vorher[k] = vorher[k] || []).push(a); });
   let schon = 0;
+  const L = { neu: 0, schon: 0, weg: {}, ersetzt: {}, ja: 0, offen: 0 };
   funde.forEach((f) => {
     if (f.art === 'offerten') f.zeilen.forEach((z) => {
       const alt = K.offerten.find((o) => o.jahr === z.jahr);
       if (alt) { alt.gerechnet = z.gerechnet; if (z.erhalten !== null) alt.erhalten = z.erhalten; } else K.offerten.push(Object.assign({ id: uid() }, z));
     });
+    else if (f.art === 'liste') {
+      /* Eure Offertliste. Ihr erstes Jahr steckt meist auch im bisherigen Stand (z. B. 2024): Hat es eine eigene Zeile unter «Offerten
+         je Jahr», bleibt diese, und die Liste wird für dieses Jahr übersprungen. Ab dem zweiten Jahr gilt die Liste; eine Zeile von Hand
+         für ein solches Jahr fällt weg, sonst würde die Liste dort nie zählen. */
+      const erstes = Math.min.apply(null, f.zeilen.map((z) => jahrZahl(z.jahr)).filter((j) => j > 0).concat([99999]));
+      f.zeilen.forEach((z) => {
+        const j = jahrZahl(z.jahr), zeile = K.offerten.find((o) => jahrZahl(o.jahr) === j);
+        if (zeile && j <= erstes) { L.weg[z.jahr] = (L.weg[z.jahr] || 0) + 1; return; }
+        if (zeile) { K.offerten = K.offerten.filter((o) => o !== zeile); L.ersetzt[zeile.jahr] = 1; }
+        if (z.erhalten === 'ja') L.ja++; else if (z.erhalten === 'offen') L.offen++;
+        const alt = (vorher[schluessel(z)] || []).shift();
+        if (!alt) { K.auftraege.push(Object.assign({ id: uid(), bauherrArt: '', objektArt: '', speziell: '', mitbewerber: '', quelle: 'liste' }, z)); L.neu++; return; }
+        L.schon++;   // nachgeführt; was von Hand ergänzt ist (Arten, Speziell, Mitbewerber), bleibt
+        ['planer', 'bauherr', 'notiz', 'ort', 'sparte', 'verantwortlich', 'kalkulator'].forEach((k) => { if (z[k]) alt[k] = z[k]; });
+        if (z.betrag !== null) alt.betrag = z.betrag;
+        if (z.eingeladen) alt.eingeladen = true;
+        alt.erhalten = z.erhalten; alt.quelle = 'liste';
+      });
+    }
     else f.zeilen.forEach((z) => {
       const alt = (vorher[schluessel(z)] || []).shift();
-      if (!alt) { K.auftraege.push(Object.assign({ id: uid() }, z)); return; }
+      if (!alt) { K.auftraege.push(Object.assign({ id: uid(), erhalten: 'ja' }, z)); return; }
       schon++;   // was in der Tabelle leer ist, lässt den bisherigen Eintrag stehen
       AF.forEach((k) => { if (z[k]) alt[k] = z[k]; });
       if (z.betrag !== null) alt.betrag = z.betrag;
@@ -1435,12 +1525,20 @@ function kundenUebernehmen(funde) {
   const teile = [];
   if (nO) teile.push('Offerten für ' + mehrzahl(nO, 'Jahr', 'Jahre'));
   if (nA) teile.push(mehrzahl(nA, 'Auftrag', 'Aufträge'));
-  toast((warBeispiel ? 'Beispiel entfernt. ' : '') + teile.join(' und ') + ' übernommen' + (schon ? ' (' + schon + ' gab es schon)' : ''), true);
+  let text = teile.length ? teile.join(' und ') + ' übernommen' + (schon ? ' (' + schon + ' gab es schon)' : '') : '';
+  if (nL) {
+    const weg = Object.keys(L.weg).sort(), w = weg.reduce((a, j) => a + L.weg[j], 0), ersetzt = Object.keys(L.ersetzt).sort();
+    const undListe = (a) => (a.length > 1 ? a.slice(0, -1).join(', ') + ' und ' + a[a.length - 1] : a.join(''));
+    text += (text ? '. ' : '') + 'Aus der Offertliste ' + mehrzahl(L.neu + L.schon, 'Offerte', 'Offerten') + ' übernommen (' + L.ja + ' erhalten, ' + L.offen + ' offen' + (L.schon ? ', ' + L.schon + ' nachgeführt' : '') + ').' +
+      (w ? ' ' + w + ' aus ' + weg.join(', ') + ' übersprungen: Dort gilt der bisherige Stand.' : '') +
+      (ersetzt.length ? ' Für ' + undListe(ersetzt) + ' zählt jetzt die Liste statt der Zahlen von Hand.' : '');
+  }
+  toast((warBeispiel ? 'Beispiel entfernt. ' : '') + text, true);
 }
 function kundenText(text) {
   const k = kundenLesen(gitterAusText(text));
   if (k) kundenUebernehmen([k]);
-  else toast('Darin finde ich keine Tabelle. Es braucht eine Kopfzeile: «Jahr», «Gerechnet», «Erhalten» oder «Jahr», «Objekt», «Planer».');
+  else toast('Darin finde ich keine Tabelle. Es braucht eine Kopfzeile wie in eurer Offertliste (Datum, Projektbezeichnung, Planer, Bauherr, Angebot) oder «Jahr», «Gerechnet», «Erhalten».');
 }
 /* Eine oder mehrere Dateien: gesicherte Datei des Tools → Daten laden; sonst je Datei ein BAB (z. B. je Jahr eine). */
 async function importDateien(liste) {
@@ -1463,7 +1561,7 @@ async function importDateien(liste) {
   if (!teile.length) {
     const beiKunden = S.ui.bereich === 'kunden';
     toast(alt ? 'Alte Excel-Dateien (.xls) kann ich nicht lesen. Die Tabelle in Excel kopieren und einfügen geht immer.'
-      : beiKunden ? 'Darin finde ich keine Tabelle mit Offerten oder Aufträgen. Es braucht eine Kopfzeile: «Jahr», «Gerechnet», «Erhalten» oder «Jahr», «Objekt», «Planer».'
+      : beiKunden ? 'Darin finde ich keine Tabelle mit Offerten. Es braucht eine Kopfzeile wie in eurer Offertliste (Datum, Projektbezeichnung, Planer, Bauherr, Angebot) oder «Jahr», «Gerechnet», «Erhalten».'
       : (dateien.length > 1 ? 'In diesen Dateien finde ich keinen BAB.' : 'In dieser Datei finde ich keinen BAB. Die Tabelle in Excel kopieren und einfügen geht immer.'));
     return;
   }
@@ -1757,9 +1855,22 @@ const budgetSumme = () => S.budget.auftraege.reduce((a, x) => a + (x.betrag || 0
 const maVon = (id) => S.mitarbeiter.find((m) => m.id === id) || null;
 const nameWoerter = (x) => String(x || '').toLowerCase().replace(/[,;]/g, ' ').split(/\s+/).filter(Boolean);
 const nameSchluessel = (x) => nameWoerter(x).sort().join(' ');
-/* Was ein Thema der Art «Personal» zeigt; ohne eigene Wahl alles ausser der Kader-Liste (der Bestand enthält das Kader) */
-const ZEIGEN = [['bestand', 'Bestand'], ['kader', 'Kader'], ['wechsel', 'Ein- und Austritte'], ['bedarf', 'Bedarf und Nachfolge']];
-const zeigt = (t, k) => (t.zeigen && typeof t.zeigen === 'object' && typeof t.zeigen[k] === 'boolean' ? t.zeigen[k] : k !== 'kader');
+/* Was ein Thema der Art «Personal» zeigt; ohne eigene Wahl alles. Kader und Betrieb sind die Mitarbeiter am Tag des Strategietags;
+   die Ein- und Austritte gehören zur gezeigten Gruppe. Aus 0.8.1 stammt «bestand» (alle): Es gilt dann für Kader und Betrieb. */
+const ZEIGEN = [['kader', 'Kader'], ['betrieb', 'Betrieb'], ['wechsel', 'Ein- und Austritte'], ['bedarf', 'Bedarf und Nachfolge']];
+function zeigt(t, k) {
+  const z = t.zeigen && typeof t.zeigen === 'object' ? t.zeigen : null;
+  if (!z) return true;
+  if (typeof z.betrieb !== 'boolean' && typeof z.bestand === 'boolean') {   // Wahl aus 0.8.1
+    if (k === 'betrieb') return z.bestand;
+    if (k === 'kader') return z.bestand || z.kader === true;
+  }
+  return typeof z[k] === 'boolean' ? z[k] : true;
+}
+/* Zeigt ein Thema nur eine der beiden Gruppen, gelten seine Ein- und Austritte nur für sie */
+const nurGruppe = (t) => { const k = zeigt(t, 'kader'), b = zeigt(t, 'betrieb'); return k && !b ? 'kader' : b && !k ? 'betrieb' : ''; };
+const inGruppe = (m, g) => !g || (g === 'kader') === istKader(m);
+const GRUPPE_TITEL = { kader: 'Kader', betrieb: 'Betriebsmitarbeiter' };
 const groesseText = (b) => (b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB');
 const istBildTyp = (typ) => /^image\//.test(typ || '');
 const sitzungWert = () => datumWert(S.meta.datum) || datumWert(heute());
@@ -1767,22 +1878,27 @@ const sitzungWert = () => datumWert(S.meta.datum) || datumWert(heute());
 function posGruppen(L) {
   const g = [], platz = {};
   L.forEach((m) => { const k = (m.position || '').toLowerCase(); if (platz[k] === undefined) { platz[k] = g.length; g.push({ name: m.position || 'Ohne Position', k: k, liste: [] }); } g[platz[k]].liste.push(m); });
-  const rang = (x) => { if (!x.k) return 999; const i = POSITIONEN.findIndex((p) => p.toLowerCase() === x.k); return i < 0 ? 100 : i; };
+  const RANG = ['abteilungsleiter', 'bauführer', 'hilfsbauführer', 'polier', 'vorarbeiter', 'facharbeiter', 'maurer', 'maschinist', 'bauarbeiter', 'hilfsarbeiter', 'lernende'];
+  const rang = (x) => { if (!x.k) return 999; const i = RANG.indexOf(x.k); if (i >= 0) return i; const j = RANG.findIndex((p) => x.k.indexOf(p) >= 0); return j < 0 ? 100 : j; };
   return g.sort((a, b) => rang(a) - rang(b) || a.name.localeCompare(b.name, 'de'));
 }
-/* Ein- und Austritte ab dem Jahr des Strategietags, nach Datum. Ein Austritt ohne lesbares Datum steht am Schluss. */
+/* Ein- und Austritte ab dem Jahr des Strategietags, nach Datum. Ein Austritt ohne lesbares Datum steht am Schluss. Dazu die
+   berechneten Pensionen bis 5 Jahre voraus; wer das Alter schon erreicht hat, steht beim Stichtag. */
+const EW_ART = { ein: 'Eintritt', aus: 'Austritt', pension: 'Pension' };
 function wechselListe() {
-  const J = sitzungsJahr(), aus = [];
+  const J = sitzungsJahr(), w = sitzungWert(), aus = [];
   S.mitarbeiter.forEach((m) => {
-    const e = datumWert(m.eintritt), a = datumWert(m.austritt, true);
+    const e = datumWert(m.eintritt), A = austrittVon(m, w), a = A.wert;
     if (e && Math.floor(e / 10000) >= J) aus.push({ m: m, art: 'ein', wert: e, text: m.eintritt });
-    if (m.austritt && (!a || Math.floor(a / 10000) >= J)) aus.push({ m: m, art: 'aus', wert: a || 99991231, text: m.austritt });
+    if (A.art === 'hand' && (!a || Math.floor(a / 10000) >= J)) aus.push({ m: m, art: 'aus', wert: a || 99991231, text: m.austritt });
+    else if (A.art === 'pension' && Math.floor(a / 10000) <= J + VORAUS) aus.push({ m: m, art: 'pension', wert: a, text: A.text + ' (mit ' + A.mit + ')' });
+    else if (A.art === 'erreicht') aus.push({ m: m, art: 'pension', wert: w, text: 'Pensionsalter erreicht (' + A.mit + ')' });
   });
   return aus.sort((x, y) => x.wert - y.wert);
 }
-const maMeta = (m, mitPosition) => { const p = m.polier ? maVon(m.polier) : null, w = sitzungWert(); return [mitPosition ? m.position : '', p ? 'bei ' + p.name : '', m.eintritt ? (datumWert(m.eintritt) > w ? 'ab ' : 'seit ') + m.eintritt : '', m.austritt ? 'bis ' + m.austritt : ''].filter(Boolean).join(' · '); };
+const maMeta = (m, mitPosition) => { const p = m.polier ? maVon(m.polier) : null, w = sitzungWert(); return [mitPosition ? m.position : '', p ? 'bei ' + p.name : '', m.eintritt ? (datumWert(m.eintritt) > w ? 'ab ' : 'seit ') + m.eintritt : '', austrittMeta(m, w)].filter(Boolean).join(' · '); };
 const karteInhalt = (p) => {
-  const m = maVon(p.id), zus = m ? [m.position, m.eintritt && datumWert(m.eintritt) > sitzungWert() ? 'ab ' + m.eintritt : '', m.austritt ? 'bis ' + m.austritt : ''].filter(Boolean).join(' · ') : '';
+  const m = maVon(p.id), zus = m ? [m.position, m.eintritt && datumWert(m.eintritt) > sitzungWert() ? 'ab ' + m.eintritt : '', austrittMeta(m)].filter(Boolean).join(' · ') : '';
   return '<span>' + esc(p.name) + '</span>' + (zus ? '<small>' + esc(zus) + '</small>' : '');
 };
 const namenWahl = (id, f) => { const N = S.mitarbeiter.filter((m) => f(m) && imFolgejahr(m, sitzungsJahr())).map((m) => m.name); return N.length ? '<datalist id="' + id + '">' + N.map((n) => '<option value="' + esc(n) + '">').join('') + '</datalist>' : ''; };
@@ -1856,7 +1972,7 @@ const TEIL = {
       const pm = g ? maVon(g.id) : null;
       return '<section class="spalte' + (g ? '' : ' pool') + '" data-spalte="' + (g ? g.id : '') + '"><header class="sp-kopf">' +
         (g ? (fest ? '<span>' + esc(g.name) + '</span>' : '<button type="button" data-a="gruppe" data-id="' + g.id + '" title="Polier ändern">' + esc(g.name) + '</button>') : '<span>Noch nicht zugeteilt</span>') + '<span class="zahl tnum">' + leute.length + '</span></header>' +
-        (pm && pm.austritt ? '<p class="sp-hinweis">bis ' + esc(pm.austritt) + '</p>' : '') +
+        (pm && austrittMeta(pm) ? '<p class="sp-hinweis">' + esc(austrittMeta(pm)) + '</p>' : '') +
         leute.map((p) => (fest ? '<div class="karte">' + karteInhalt(p) + '</div>' : '<button type="button" class="karte" data-a="person" data-id="' + p.id + '">' + karteInhalt(p) + '</button>')).join('') +
         (fest ? '' : (g ? (leute.length ? '' : '<p class="sp-leer">' + (FEIN ? 'Kärtchen hierher ziehen.' : 'Kärtchen antippen und diesen Polier wählen.') + '</p>')
           : '<form class="sp-neu" data-form="leute"><input name="text" id="neu-leute" placeholder="Name hinzufügen …" aria-label="Namen hinzufügen" autocomplete="off" enterkeyhint="done"></form>' + (S.mitarbeiter.length ? '' : '<p class="sp-leer">Namen eintippen oder die Mitarbeiterliste aus Excel einfügen.</p>'))) + '</section>';
@@ -1876,21 +1992,21 @@ const TEIL = {
         '<span class="anh-name">' + esc(a.name) + '<small>' + (url ? (bild ? 'Bild' : 'PDF') + (a.groesse ? ' · ' + groesseText(a.groesse) : '') : 'Fehlt auf diesem Gerät') + '</small></span></button>';
     }).join('') + '</div>';
   },
-  bestand(nurKader) {
-    const L = S.mitarbeiter;
-    if (!L.length) return '<h2 class="bl">' + (nurKader ? 'Kader' : 'Bestand') + '</h2><div class="ma-leer"><p>Noch keine Mitarbeiterliste. Einmal aus Excel einfügen, je Zeile Name, Position, Polier, Eintritt, Austritt. Gruppenzuteilung, Bestand und Ein- und Austritte lesen daraus.</p><div class="reihe"><button type="button" class="btn stark" data-a="sheet" data-s="maimport">' + ic('liste') + '<span>Liste einfügen</span></button><button type="button" class="btn" data-a="ma-neu">' + ic('plus') + '<span>Mitarbeiter</span></button></div></div>';
-    const w = sitzungWert(), J = sitzungsJahr(), alle = L.filter((m) => imBestand(m, w)), B = nurKader ? alle.filter(istKader) : alle, kader = alle.filter(istKader).length;
+  bestand(art, knopf) {   // art: 'kader' oder 'betrieb'; knopf: der erste Block trägt «Mitarbeiterliste»
+    const L = S.mitarbeiter, titel = GRUPPE_TITEL[art];
+    if (!L.length) return knopf ? '<h2 class="bl">' + titel + '</h2><div class="ma-leer"><p>Noch keine Mitarbeiterliste. Einmal aus Excel einfügen, je Zeile Name, Position, Polier, Eintritt, Austritt. Gruppenzuteilung, Kader, Betrieb und Ein- und Austritte lesen daraus.</p><div class="reihe"><button type="button" class="btn stark" data-a="sheet" data-s="maimport">' + ic('liste') + '<span>Liste einfügen</span></button><button type="button" class="btn" data-a="ma-neu">' + ic('plus') + '<span>Mitarbeiter</span></button></div></div>' : '';
+    const w = sitzungWert(), J = sitzungsJahr(), B = L.filter((m) => imBestand(m, w) && inGruppe(m, art));
     const team = (m) => { const n = L.filter((x) => x.polier === m.id && aufTafel(x, J)).length; return n ? n + ' im Team' : ''; };
-    return '<div class="bl-zeile"><h2 class="bl">' + (nurKader ? 'Kader (' + B.length + ')' : 'Bestand (' + B.length + (kader ? ', davon ' + kader + ' Kader' : '') + ')') + '</h2><button type="button" class="btn klein" data-a="sheet" data-s="maliste">' + ic('liste') + '<span>Mitarbeiterliste</span></button></div>' +
-      (B.length ? '<div class="bgr bestand">' + posGruppen(B).map((g) => '<section class="bg"><header><b>' + esc(g.name) + '</b><span class="zahl tnum">' + g.liste.length + '</span></header><ul>' +
-        g.liste.map((m) => { const grau = [istPolier(m) ? team(m) : '', m.austritt ? 'bis ' + m.austritt : ''].filter(Boolean).join(' · '); return '<li><button type="button" data-a="ma" data-id="' + m.id + '"><span>' + esc(m.name) + '</span>' + (grau ? '<small>' + esc(grau) + '</small>' : '') + '</button></li>'; }).join('') + '</ul></section>').join('') + '</div>'
-        : '<p class="muted klein">Am ' + esc(datumLang(S.meta.datum)) + ' ist ' + (nurKader ? 'im Kader ' : '') + 'niemand aus der Liste angestellt.</p>');
+    return '<div class="bl-zeile"><h2 class="bl">' + titel + ' (' + B.length + ')</h2>' + (knopf ? '<button type="button" class="btn klein" data-a="sheet" data-s="maliste">' + ic('liste') + '<span>Mitarbeiterliste</span></button>' : '') + '</div>' +
+      (B.length ? '<div class="bgr bestand ' + art + '">' + posGruppen(B).map((g) => '<section class="bg"><header><b>' + esc(g.name) + '</b><span class="zahl tnum">' + g.liste.length + '</span></header><ul>' +
+        g.liste.map((m) => { const grau = [istPolier(m) ? team(m) : '', austrittMeta(m, w)].filter(Boolean).join(' · '); return '<li><button type="button" data-a="ma" data-id="' + m.id + '"><span>' + esc(m.name) + '</span>' + (grau ? '<small>' + esc(grau) + '</small>' : '') + '</button></li>'; }).join('') + '</ul></section>').join('') + '</div>'
+        : '<p class="muted klein">Am ' + esc(datumLang(S.meta.datum)) + ' ist ' + (art === 'kader' ? 'im Kader' : 'im Betrieb') + ' niemand aus der Liste angestellt.</p>');
   },
-  wechsel() {
-    const W = wechselListe();
+  wechsel(gruppe) {
+    const W = wechselListe().filter((x) => inGruppe(x.m, gruppe));
     if (!W.length) return '';
     const w = sitzungWert();
-    return '<h2 class="bl">Ein- und Austritte</h2><ul class="eintraege">' + W.map((x) => '<li class="rz ew"><span class="ew-art ' + x.art + '">' + (x.art === 'ein' ? 'Eintritt' : 'Austritt') + '</span><button type="button" class="b-text" data-a="ma" data-id="' + x.m.id + '"><span class="b-was">' + esc(x.m.name) + '</span><span class="b-meta">' + esc([x.m.position, x.text, x.wert > w ? 'geplant' : ''].filter(Boolean).join(' · ')) + '</span></button></li>').join('') + '</ul>';
+    return '<h2 class="bl">Ein- und Austritte</h2><ul class="eintraege">' + W.map((x) => '<li class="rz ew"><span class="ew-art ' + x.art + '">' + EW_ART[x.art] + '</span><button type="button" class="b-text" data-a="ma" data-id="' + x.m.id + '"><span class="b-was">' + esc(x.m.name) + '</span><span class="b-meta">' + esc([x.m.position, x.text, x.art !== 'pension' && x.wert > w ? 'geplant' : ''].filter(Boolean).join(' · ')) + '</span></button></li>').join('') + '</ul>';
   },
   bedarf(t) {
     const offen = t.bedarf.filter((b) => b.stand !== 'besetzt').length;
@@ -1932,8 +2048,11 @@ function themaInhalt(t, nr) {
   if (t.art === 'rueckblick') return TEIL.frage(t) + TEIL.anhaenge(t) + TEIL.baustellen(t) + TEIL.rueckblick(t) + u + TEIL.notizen(t);
   if (t.art === 'gruppen') return TEIL.frage(t) + TEIL.anhaenge(t) + TEIL.tafel(t) + u + TEIL.notizen(t) + TEIL.beschluss(t);
   if (t.art === 'ziele') return TEIL.frage(t) + TEIL.anhaenge(t) + TEIL.offen() + TEIL.beschluss(t) + u + TEIL.notizen(t);
-  if (t.art === 'personal') return TEIL.frage(t) + TEIL.anhaenge(t) + (zeigt(t, 'bestand') ? TEIL.bestand(false) : '') + (zeigt(t, 'kader') && (S.mitarbeiter.length || !zeigt(t, 'bestand')) ? TEIL.bestand(true) : '') +
-    (zeigt(t, 'wechsel') ? TEIL.wechsel() : '') + (zeigt(t, 'bedarf') ? TEIL.bedarf(t) : '') + u + TEIL.notizen(t) + TEIL.beschluss(t);
+  if (t.art === 'personal') {
+    const k = zeigt(t, 'kader'), b = zeigt(t, 'betrieb');
+    return TEIL.frage(t) + TEIL.anhaenge(t) + (k ? TEIL.bestand('kader', true) : '') + (b ? TEIL.bestand('betrieb', !k) : '') +
+      (zeigt(t, 'wechsel') ? TEIL.wechsel(nurGruppe(t)) : '') + (zeigt(t, 'bedarf') ? TEIL.bedarf(t) : '') + u + TEIL.notizen(t) + TEIL.beschluss(t);
+  }
   return TEIL.frage(t) + TEIL.anhaenge(t) + u + TEIL.notizen(t) + TEIL.beschluss(t);
 }
 
@@ -1955,10 +2074,25 @@ function ausblickHTML() {
 
 /* ---------- Kunden: Diagramme und Tabellen ---------- */
 const quoteVon = (o) => (o.gerechnet > 0 && o.erhalten !== null ? o.erhalten / o.gerechnet * 100 : null);
-function offertenSortiert() { return S.kunden.offerten.slice().sort((a, b) => jahrZahl(a.jahr) - jahrZahl(b.jahr) || String(a.jahr).localeCompare(String(b.jahr))); }
-function kundenJahre() { const s = {}; S.kunden.auftraege.forEach((a) => { const j = jahrZahl(a.jahr); if (j) s[j] = 1; }); return Object.keys(s).map(Number).sort((a, b) => b - a); }
+/* Offerten je Jahr. Ein Jahr mit eigener Zeile (z. B. bis 2024 aus der Excel-Auswertung) gilt, wie es ist; alle anderen Jahre
+   zählen die Liste: jede Offerte ist gerechnet, «Ja» ist erhalten, «Offen» wird gezeigt und zählt als gerechnet. */
+function offertenSortiert() {
+  const alt = {}, aus = [], nach = {};
+  S.kunden.offerten.forEach((o) => { alt[jahrZahl(o.jahr) || o.jahr] = 1; aus.push(Object.assign({}, o, { quelle: 'alt', offen: 0 })); });
+  S.kunden.auftraege.forEach((a) => {
+    const j = jahrZahl(a.jahr);
+    if (!j || alt[j]) return;
+    const x = nach[j] || (nach[j] = { id: '', jahr: String(j), gerechnet: 0, erhalten: 0, offen: 0, quelle: 'liste' });
+    x.gerechnet++;
+    if (a.erhalten === 'ja') x.erhalten++; else if (a.erhalten === 'offen') x.offen++;
+  });
+  Object.keys(nach).forEach((j) => { aus.push(nach[j]); });
+  return aus.sort((a, b) => jahrZahl(a.jahr) - jahrZahl(b.jahr) || String(a.jahr).localeCompare(String(b.jahr)));
+}
+const erhaltene = () => S.kunden.auftraege.filter((a) => a.erhalten === 'ja');
+function kundenJahre() { const s = {}; erhaltene().forEach((a) => { const j = jahrZahl(a.jahr); if (j) s[j] = 1; }); return Object.keys(s).map(Number).sort((a, b) => b - a); }
 function zeitraum() {   // was die Ranglisten zählen: alle Jahre, die letzten drei oder ein einzelnes
-  const J = kundenJahre(), f = S.kunden.jahr, A = S.kunden.auftraege;
+  const J = kundenJahre(), f = S.kunden.jahr, A = erhaltene();
   if (f === 'l3' && J.length > 3) { const ab = J.slice(0, 3); return { liste: A.filter((a) => ab.indexOf(jahrZahl(a.jahr)) >= 0), text: ab[2] + ' bis ' + ab[0] }; }
   if (f && J.indexOf(+f) >= 0) return { liste: A.filter((a) => jahrZahl(a.jahr) === +f), text: String(f) };
   return { liste: A, text: J.length > 1 ? J[J.length - 1] + ' bis ' + J[0] : (J.length ? String(J[0]) : '') };
@@ -1994,13 +2128,13 @@ function rangKarte(r, liste) {
 function offertenKarte() {
   const alle = offertenSortiert(), O = alle.slice(-8);
   if (!O.length) return karte('Offerten', 'Gerechnet und erhalten je Jahr.', '<p class="dg-leer">Noch kein Jahr erfasst.</p>');
-  const D = O.map((o) => ({ name: o.jahr, bud: false, g: o.gerechnet, e: o.erhalten, q: quoteVon(o) }));
+  const D = O.map((o) => ({ name: o.jahr, bud: false, g: o.gerechnet, e: o.erhalten, q: quoteVon(o), o: o.offen || 0 }));
   const voll = alle.filter((o) => quoteVon(o) !== null), sG = voll.reduce((a, o) => a + o.gerechnet, 0), sE = voll.reduce((a, o) => a + o.erhalten, 0);
   const leerOder = (v, f) => (v === null || v === undefined ? '' : f(v));
   return karte('Offerten', 'Gerechnet und erhalten je Jahr.',
     legende([['c-grau', 'Gerechnet'], ['c-blau', 'Erhalten']]) +
     saeulen(D, { ganz: true, reihen: [{ klasse: 'c-grau', wert: (d) => d.g }, { klasse: 'c-blau', wert: (d) => d.e }], oben: (d) => (d.q === null ? '' : Math.round(d.q) + ' %'), achse: (v) => fmt(v),
-      tip: (d) => ['Gerechnet: ' + leerOder(d.g, fmt), 'Erhalten: ' + leerOder(d.e, fmt)].concat(d.q === null ? [] : ['Quote: ' + Math.round(d.q) + ' %'].concat(d.e > 0 ? ['Eine von ' + fmtN(d.g / d.e, 1)] : [])) }) +
+      tip: (d) => ['Gerechnet: ' + leerOder(d.g, fmt), 'Erhalten: ' + leerOder(d.e, fmt)].concat(d.o ? ['Noch offen: ' + fmt(d.o)] : []).concat(d.q === null ? [] : ['Quote: ' + Math.round(d.q) + ' %'].concat(d.e > 0 ? ['Eine von ' + fmtN(d.g / d.e, 1)] : [])) }) +
     '<p class="dg-n"><span class="dg-on">Über den Säulen: die Quote, erhalten von gerechnet. </span>' + (sG ? esc('Über alle Jahre: ' + fmt(sE) + ' von ' + fmt(sG) + ', das sind ' + Math.round(sE / sG * 100) + ' %.') : '') + '</p>' +
     werteTabelle(D.map((d) => d.name), [['Gerechnet', D.map((d) => leerOder(d.g, fmt))], ['Erhalten', D.map((d) => leerOder(d.e, fmt))], ['Quote', D.map((d) => (d.q === null ? '' : Math.round(d.q) + ' %'))], ['Eine von', D.map((d) => (d.q === null || !(d.e > 0) ? '' : fmtN(d.g / d.e, 1)))]]) +
     (alle.length > O.length ? '<p class="dg-n">Gezeigt sind die neusten Jahre; alle stehen unter «Tabelle».</p>' : ''));
@@ -2013,30 +2147,38 @@ function zeitraumWahl() {
 }
 function kundenDiagramme() {
   const Z = zeitraum(), L = Z.liste, eing = L.filter((a) => a.eingeladen).length;
-  const karten = [offertenKarte()].concat(S.kunden.auftraege.length ? RANG.map((r) => rangKarte(r, L))
+  const karten = [offertenKarte()].concat(erhaltene().length ? RANG.map((r) => rangKarte(r, L))
     : [karte('Aufträge', 'Von wem sie kommen und woran wir arbeiten.', '<p class="dg-leer">Noch kein Auftrag erfasst. Unter «Tabelle» einzeln erfassen oder über «Einfügen» eine Tabelle aus Excel holen.</p>')]);
-  return '<div class="dgr">' + karten.join('') + '</div>' + (S.kunden.auftraege.length ? '<p class="muted klein unter">' + esc((Z.text ? Z.text + ': ' : '') + mehrzahl(L.length, 'Auftrag', 'Aufträge') + (eing ? ', davon ' + eing + ' auf Einladung' : '') + '. Grau daneben: die Summe der Beträge in Franken. Hat ein Auftrag mehrere Angaben, zählt er bei jeder.') + '</p>' : '');
+  return '<div class="dgr">' + karten.join('') + '</div>' + (erhaltene().length ? '<p class="muted klein unter">' + esc((Z.text ? Z.text + ': ' : '') + mehrzahl(L.length, 'Auftrag', 'Aufträge') + (eing ? ', davon ' + eing + ' auf Einladung' : '') + '. Grau daneben: die Summe der Beträge in Franken. Hat ein Auftrag mehrere Angaben, zählt er bei jeder.') + '</p>' : '');
 }
 function kundenTabellen() {
-  const O = offertenSortiert().reverse(), A = S.kunden.auftraege.slice().sort((a, b) => jahrZahl(b.jahr) - jahrZahl(a.jahr));
-  const zt = (v) => (v === null || v === undefined ? '' : fmt(v));
+  const K = S.kunden, O = offertenSortiert().reverse(), f = K.filter;
+  const A = K.auftraege.filter((a) => !f || a.erhalten === f).sort((a, b) => jahrZahl(b.jahr) - jahrZahl(a.jahr));
+  const zt = (v) => (v === null || v === undefined ? '' : fmt(v)), ERH = { ja: 'Ja', nein: 'Nein', offen: 'Offen' };
   const offT = '<div class="k-off"><h2 class="bl">Offerten je Jahr</h2>' +
-    (O.length ? '<div class="bst-rahmen"><table class="bst" id="t-off"><thead><tr><th>Jahr</th><th class="r">Gerechnet</th><th class="r">Erhalten</th><th class="r">Quote</th></tr></thead><tbody>' +
-      O.map((o) => { const q = quoteVon(o); return '<tr data-a="offerte" data-id="' + o.id + '"><td><button type="button" data-a="offerte" data-id="' + o.id + '">' + esc(o.jahr) + '</button></td><td class="r tnum">' + zt(o.gerechnet) + '</td><td class="r tnum">' + zt(o.erhalten) + '</td><td class="r tnum">' + (q === null ? '' : Math.round(q) + ' %') + '</td></tr>'; }).join('') + '</tbody></table></div>' : '') +
-    '<form class="dreier" data-form="offerte"><input name="jahr" id="neu-off" placeholder="Jahr hinzufügen …" aria-label="Jahr" inputmode="numeric" autocomplete="off"><input name="gerechnet" placeholder="Gerechnet" aria-label="Offerten gerechnet" inputmode="numeric" autocomplete="off"><input name="erhalten" placeholder="Erhalten" aria-label="Davon erhalten" inputmode="numeric" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Jahr hinzufügen">' + ic('plus') + '</button></form></div>';
-  const aufT = '<div class="bl-zeile"><h2 class="bl">Aufträge' + (A.length ? ' (' + A.length + ')' : '') + '</h2><button type="button" class="btn klein" data-a="auftrag-neu">' + ic('plus') + '<span>Auftrag</span></button></div>' +
-    (A.length ? '<div class="bst-rahmen"><table class="bst at" id="t-auf"><thead><tr><th>Jahr</th><th>Objekt</th><th>Planer</th><th>Bauherr</th><th>Art</th><th>Speziell</th><th class="r">Betrag</th></tr></thead><tbody>' +
-      A.map((a) => '<tr data-a="auftrag" data-id="' + a.id + '"><td class="tnum">' + esc(a.jahr) + '</td><td><button type="button" data-a="auftrag" data-id="' + a.id + '">' + esc(a.objekt) + '</button></td><td>' + esc(a.planer) + '</td><td>' + esc(a.bauherr) + (a.bauherrArt ? '<small>' + esc(a.bauherrArt) + '</small>' : '') + '</td><td>' + esc(a.objektArt) + '</td><td>' + esc(a.speziell) + '</td><td class="r tnum">' + zt(a.betrag) + '</td></tr>').join('') + '</tbody></table></div>'
-      : '<p class="muted klein">Noch kein Auftrag. Einzeln erfassen oder über «Einfügen» eine Tabelle aus Excel holen.</p>');
+    (O.length ? '<div class="bst-rahmen"><table class="bst" id="t-off"><thead><tr><th>Jahr</th><th class="r">Gerechnet</th><th class="r">Erhalten</th><th class="r">Offen</th><th class="r">Quote</th></tr></thead><tbody>' +
+      O.map((o) => {
+        const q = quoteVon(o), liste = o.quelle === 'liste';
+        return '<tr' + (liste ? ' class="aus-liste"' : ' data-a="offerte" data-id="' + o.id + '"') + '><td>' + (liste ? esc(o.jahr) + '<small>aus der Liste</small>' : '<button type="button" data-a="offerte" data-id="' + o.id + '">' + esc(o.jahr) + '</button>') +
+          '</td><td class="r tnum">' + zt(o.gerechnet) + '</td><td class="r tnum">' + zt(o.erhalten) + '</td><td class="r tnum">' + (o.offen ? fmt(o.offen) : '') + '</td><td class="r tnum">' + (q === null ? '' : Math.round(q) + ' %') + '</td></tr>';
+      }).join('') + '</tbody></table></div>' : '') +
+    '<p class="muted klein">Ein Jahr ohne eigene Zeile zählt die Offerten unten: Jede ist gerechnet, «Ja» ist erhalten. Eigene Zeilen gelten für ältere Jahre ohne Liste.</p>' +
+    '<form class="dreier" data-form="offerte"><input name="jahr" id="neu-off" placeholder="Älteres Jahr …" aria-label="Jahr" inputmode="numeric" autocomplete="off"><input name="gerechnet" placeholder="Gerechnet" aria-label="Offerten gerechnet" inputmode="numeric" autocomplete="off"><input name="erhalten" placeholder="Erhalten" aria-label="Davon erhalten" inputmode="numeric" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Jahr hinzufügen">' + ic('plus') + '</button></form></div>';
+  const aufT = '<div class="bl-zeile"><h2 class="bl">Offerten und Aufträge' + (K.auftraege.length ? ' (' + K.auftraege.length + ')' : '') + '</h2><span class="reihe">' +
+    (K.auftraege.length ? seg('kfilter', [['', 'Alle'], ['ja', 'Erhalten'], ['offen', 'Offen'], ['nein', 'Nicht erhalten']], f, 'klein') : '') +
+    '<button type="button" class="btn klein" data-a="auftrag-neu">' + ic('plus') + '<span>Offerte</span></button></span></div>' +
+    (A.length ? '<div class="bst-rahmen"><table class="bst at" id="t-auf"><thead><tr><th>Jahr</th><th>Objekt</th><th>Planer</th><th>Bauherr</th><th>Art</th><th>Speziell</th><th class="r">Betrag</th><th>Erhalten</th></tr></thead><tbody>' +
+      A.map((a) => '<tr data-a="auftrag" data-id="' + a.id + '"><td class="tnum">' + esc(a.jahr) + '</td><td><button type="button" data-a="auftrag" data-id="' + a.id + '">' + esc(a.objekt) + '</button></td><td>' + esc(a.planer) + '</td><td>' + esc(a.bauherr) + (a.bauherrArt ? '<small>' + esc(a.bauherrArt) + '</small>' : '') + '</td><td>' + esc(a.objektArt) + '</td><td>' + esc(a.speziell) + '</td><td class="r tnum">' + zt(a.betrag) + '</td><td><span class="k-erh ' + a.erhalten + '">' + ERH[a.erhalten] + '</span></td></tr>').join('') + '</tbody></table></div>'
+      : '<p class="muted klein">' + (K.auftraege.length ? 'Keine mit dieser Auswahl.' : 'Noch keine Offerte. Einzeln erfassen oder über «Einfügen» eure Offertliste aus Excel holen.') + '</p>');
   return offT + aufT + '<div class="unter"><p class="muted klein">Eine Zeile antippen, um sie zu ändern.</p><button type="button" class="textlink" data-a="kunden-weg">Alle Offerten und Aufträge entfernen</button></div>';
 }
 function kundenAblage(imSheet) {
   return '<section class="card ablage">' + ic('upload') + '<h2>Offerten und Aufträge einfügen</h2><p class="muted">' + (FEIN ? 'Die Excel-Datei auf diese Seite ziehen. Oder in Excel eine Tabelle samt Kopfzeile kopieren und hier einfügen.' : 'Die Excel-Datei wählen. Oder in Excel eine Tabelle samt Kopfzeile kopieren und hier einfügen.') + '</p>' +
     '<textarea id="k-einfuegen" class="einfuegen" rows="1" placeholder="' + (FEIN ? 'Hier klicken und einfügen (Ctrl+V)' : 'Hier antippen und einfügen') + '" aria-label="Tabelle hier einfügen"></textarea>' +
     '<button type="button" class="btn" data-a="datei-wahl">Datei wählen</button>' +
-    '<p class="muted klein">Kopfzeile für Offerten: Jahr, Gerechnet, Erhalten. Für Aufträge: Jahr, Objekt, Planer, Bauherr, Bauherr-Art, Objekt-Art, Speziell, Mitbewerber, Betrag.</p>' +
+    '<p class="muted klein">Eure Offertliste so, wie sie ist, samt Kopfzeile; in der Spalte «Erhalten» Ja, offen oder leer (nicht erhalten). Für ältere Jahre ohne Liste: Jahr, Gerechnet, Erhalten.</p>' +
     (IM_RAHMEN ? '<p class="klein warn">Vorschau: Hier wird nichts gesichert. Nur Beispielangaben einfügen.</p>' : '') +
-    (imSheet ? '' : '<div class="reihe"><button type="button" class="textlink" data-a="offerte-neu">Jahr von Hand erfassen</button><button type="button" class="textlink" data-a="auftrag-neu">Auftrag von Hand erfassen</button></div>') + '</section>';
+    (imSheet ? '' : '<div class="reihe"><button type="button" class="textlink" data-a="auftrag-neu">Offerte von Hand erfassen</button><button type="button" class="textlink" data-a="offerte-neu">Älteres Jahr von Hand</button></div>') + '</section>';
 }
 
 const ANSICHT = {
@@ -2119,15 +2261,16 @@ function ergebnisHTML() {
     etwas = true;
   }
   T.filter((t) => t.art === 'personal').forEach((t) => {
-    const w = sitzungWert(), J = sitzungsJahr(), alle = S.mitarbeiter.filter((m) => imBestand(m, w)), kader = alle.filter(istKader);
-    const B = zeigt(t, 'bestand') ? alle : [], K = zeigt(t, 'kader') ? kader : [], W = zeigt(t, 'wechsel') ? wechselListe() : [], D = zeigt(t, 'bedarf') ? t.bedarf : [];
+    const w = sitzungWert(), J = sitzungsJahr(), alle = S.mitarbeiter.filter((m) => imBestand(m, w)), g = nurGruppe(t);
+    const K = zeigt(t, 'kader') ? alle.filter(istKader) : [], B = zeigt(t, 'betrieb') ? alle.filter((m) => !istKader(m)) : [];
+    const W = zeigt(t, 'wechsel') ? wechselListe().filter((x) => inGruppe(x.m, g)) : [], D = zeigt(t, 'bedarf') ? t.bedarf : [];
     if (!B.length && !K.length && !W.length && !D.length) return;
     const team = (m) => { const n = S.mitarbeiter.filter((x) => x.polier === m.id && aufTafel(x, J)).length; return n ? ' (' + n + ')' : ''; };
-    h += '<section class="e-teil"><h2>' + esc(nm(t)) + '</h2>' +
-      (B.length ? '<p class="e-klein">Bestand: ' + B.length + (kader.length ? ', davon ' + kader.length + ' Kader' : '') + ' (' + posGruppen(B).map((g) => esc(g.name) + ' ' + g.liste.length).join(', ') + ')</p>' : '') +
-      (K.length ? '<div class="e-tab-rahmen"><table class="e-besch"><tbody>' + posGruppen(K).map((g) => '<tr><td class="th nw">' + esc(g.name) + ' (' + g.liste.length + ')</td><td>' + g.liste.map((m) => esc(m.name) + (istPolier(m) ? team(m) : '') + (m.austritt ? ' <span class="e-grau">bis ' + esc(m.austritt) + '</span>' : '')).join(', ') + '</td></tr>').join('') + '</tbody></table></div>' : '') +
+    const tabelle = (titel, L) => '<h3>' + titel + ' (' + L.length + ')</h3><div class="e-tab-rahmen"><table class="e-besch"><tbody>' + posGruppen(L).map((p) => '<tr><td class="th nw">' + esc(p.name) + ' (' + p.liste.length + ')</td><td>' +
+      p.liste.map((m) => { const a = austrittMeta(m, w); return esc(m.name) + (istPolier(m) ? team(m) : '') + (a ? ' <span class="e-grau">' + esc(a) + '</span>' : ''); }).join(', ') + '</td></tr>').join('') + '</tbody></table></div>';
+    h += '<section class="e-teil"><h2>' + esc(nm(t)) + '</h2>' + (K.length ? tabelle('Kader', K) : '') + (B.length ? tabelle('Betriebsmitarbeiter', B) : '') +
       (W.length ? '<h3>Ein- und Austritte</h3><div class="e-tab-rahmen"><table class="e-besch"><thead><tr><th>Wer</th><th>Position</th><th></th><th>Wann</th></tr></thead><tbody>' +
-        W.map((x) => '<tr><td>' + esc(x.m.name) + '</td><td>' + esc(x.m.position) + '</td><td class="nw">' + (x.art === 'ein' ? 'Eintritt' : 'Austritt') + '</td><td class="nw">' + esc(x.text) + (x.wert > w ? ' (geplant)' : '') + '</td></tr>').join('') + '</tbody></table></div>' : '') +
+        W.map((x) => '<tr><td>' + esc(x.m.name) + '</td><td>' + esc(x.m.position) + '</td><td class="nw">' + EW_ART[x.art] + '</td><td class="nw">' + esc(x.text) + (x.art !== 'pension' && x.wert > w ? ' (geplant)' : '') + '</td></tr>').join('') + '</tbody></table></div>' : '') +
       (D.length ? '<h3>Bedarf und Nachfolge</h3><p class="e-klein">' + D.filter((b) => b.stand !== 'besetzt').length + ' von ' + D.length + ' offen</p><div class="e-tab-rahmen"><table class="e-besch"><thead><tr><th>Wen oder was</th><th>Warum</th><th>Bis wann</th><th>Stand</th></tr></thead><tbody>' +
         D.map((b) => '<tr><td>' + esc(b.was) + marke(b) + '</td><td>' + esc([b.warum, b.notiz].filter(Boolean).join(' · ')) + '</td><td class="nw">' + esc(b.bis) + '</td><td class="nw">' + BSTAND[b.stand] + '</td></tr>').join('') + '</tbody></table></div>' : '') + '</section>';
     etwas = true;
@@ -2163,7 +2306,7 @@ function ergebnisHTML() {
   if (O.length) {
     const zeile = (name, f) => '<tr><th>' + name + '</th>' + O.map((o) => '<td>' + f(o) + '</td>').join('') + '</tr>';
     h += '<section class="e-teil"><h2>Offerten</h2><div class="e-tab-rahmen"><table class="e-tab"><thead><tr><th></th>' + O.map((o) => '<th>' + esc(o.jahr) + '</th>').join('') + '</tr></thead><tbody>' +
-      zeile('Gerechnet', (o) => (o.gerechnet === null ? '' : fmt(o.gerechnet))) + zeile('Erhalten', (o) => (o.erhalten === null ? '' : fmt(o.erhalten))) + zeile('Quote', (o) => { const q = quoteVon(o); return q === null ? '' : '<b>' + Math.round(q) + ' %</b>'; }) + '</tbody></table></div></section>';
+      zeile('Gerechnet', (o) => (o.gerechnet === null ? '' : fmt(o.gerechnet))) + zeile('Erhalten', (o) => (o.erhalten === null ? '' : fmt(o.erhalten))) + (O.some((o) => o.offen) ? zeile('Noch offen', (o) => (o.offen ? fmt(o.offen) : '')) : '') + zeile('Quote', (o) => { const q = quoteVon(o); return q === null ? '' : '<b>' + Math.round(q) + ' %</b>'; }) + '</tbody></table></div></section>';
   }
   return h;
 }
@@ -2309,7 +2452,7 @@ const SHEET = {
       '<label class="f" for="t-f"><span>Worum geht es? (steht unter dem Titel)</span><textarea id="t-f" name="frage" rows="2">' + esc(t.frage) + '</textarea></label>' + wahl +
       '<div class="f"><span>Art</span><div class="seg" role="group">' + ARTEN.map((a) => '<button type="button" data-a="art" data-v="' + a[0] + '" aria-pressed="' + (t.art === a[0]) + '">' + a[1] + '</button>').join('') + '</div></div>' +
       (t.art === 'personal' ? '<div class="f"><span>Zeigen</span><div class="seg" role="group">' + ZEIGEN.map((z) => '<button type="button" data-a="zeigen" data-v="' + z[0] + '" aria-pressed="' + zeigt(t, z[0]) + '">' + z[1] + '</button>').join('') + '</div></div>' : '') +
-      '<p class="muted klein">' + ({ thema: 'Notizen und Beschluss.', rueckblick: 'Baustellen des Jahres und Ziele vom letzten Jahr mit «erreicht», «teilweise» oder «offen».', gruppen: 'Tafel: Mitarbeiter den Polieren zuteilen, festhalten und drucken. Liest aus der Mitarbeiterliste.', ziele: 'Ziele mit «wer» und «bis wann». Was im Rückblick nicht erreicht ist, kommt hier wieder auf den Tisch.', personal: 'Bestand und Ein- und Austritte aus der Mitarbeiterliste, dazu Bedarf und Nachfolge mit Stand. Was offen bleibt, steht nächstes Jahr wieder da.' })[t.art] + '</p>' +
+      '<p class="muted klein">' + ({ thema: 'Notizen und Beschluss.', rueckblick: 'Baustellen des Jahres und Ziele vom letzten Jahr mit «erreicht», «teilweise» oder «offen».', gruppen: 'Tafel: Mitarbeiter den Polieren zuteilen, festhalten und drucken. Liest aus der Mitarbeiterliste.', ziele: 'Ziele mit «wer» und «bis wann». Was im Rückblick nicht erreicht ist, kommt hier wieder auf den Tisch.', personal: 'Kader und Betriebsmitarbeiter mit ihren Ein- und Austritten aus der Mitarbeiterliste, dazu Bedarf und Nachfolge mit Stand. Was offen bleibt, steht nächstes Jahr wieder da.' })[t.art] + '</p>' +
       '<div class="reihe"><button type="button" class="btn" data-a="thema-hoch"' + (i === 0 ? ' disabled' : '') + '>' + ic('up') + '<span>Nach oben</span></button><button type="button" class="btn" data-a="thema-runter"' + (i === ges.length - 1 ? ' disabled' : '') + '>' + ic('down') + '<span>Nach unten</span></button></div>' +
       loeschKnopf('thema-weg', t.eltern ? 'Unterpunkt löschen' : 'Thema löschen'));
   },
@@ -2339,17 +2482,19 @@ const SHEET = {
       return '<datalist id="dl-' + k + '">' + Object.keys(s).sort((p, q) => p.localeCompare(q, 'de')).map((y) => '<option value="' + esc(y) + '"></option>').join('') + '</datalist>';
     };
     const feld = (k, name, mehr, mitVorrat) => '<label class="f" for="au-' + k + '"><span>' + name + '</span><input id="au-' + k + '" name="' + k + '" value="' + wert(k) + '" autocomplete="off"' + (mitVorrat ? ' list="dl-' + k + '"' : '') + (mehr || '') + '></label>' + (mitVorrat ? vorrat(k) : '');
-    return formHuelle(a ? 'Auftrag' : 'Auftrag erfassen', 'auftrag-edit',
+    return formHuelle(a ? 'Offerte' : 'Offerte erfassen', 'auftrag-edit',
       '<div class="zwei js">' + feld('jahr', 'Jahr', ' inputmode="numeric"') + feld('objekt', 'Objekt', a ? '' : ' data-fokus') + '</div>' +
       feld('planer', 'Planer', '', true) +
       '<div class="zwei">' + feld('bauherr', 'Bauherr', '', true) + feld('bauherrArt', 'Art des Bauherrn', ' placeholder="z. B. Gemeinde"', true) + '</div>' +
       '<div class="zwei">' + feld('objektArt', 'Art des Objekts', ' placeholder="z. B. Brücke"', true) + feld('speziell', 'Speziell', '', true) + '</div>' +
       '<div class="zwei">' + feld('mitbewerber', 'Mitbewerber', ' placeholder="Wer hat auch offeriert?"', true) +
       '<label class="f" for="au-betrag"><span>Betrag in Franken</span><input id="au-betrag" name="betrag" value="' + (a && a.betrag !== null ? esc(fmt(a.betrag)) : '') + '" inputmode="decimal" autocomplete="off"></label></div>' +
+      '<div class="f"><span>Erhalten</span><input type="hidden" name="erhalten" value="' + (a ? a.erhalten : 'offen') + '"><div class="seg" role="group" aria-label="Erhalten">' +
+        [['ja', 'Ja'], ['offen', 'Offen'], ['nein', 'Nein']].map((x) => '<button type="button" data-a="k-erh" data-v="' + x[0] + '" aria-pressed="' + ((a ? a.erhalten : 'offen') === x[0]) + '">' + x[1] + '</button>').join('') + '</div></div>' +
       '<label class="schalter" for="au-eing"><span>Auf Einladung</span><input type="checkbox" id="au-eing" name="eingeladen"' + (a && a.eingeladen ? ' checked' : '') + '></label>' +
       '<label class="f" for="au-notiz"><span>Bemerkung</span><textarea id="au-notiz" name="notiz" rows="2">' + esc(a ? a.notiz : '') + '</textarea></label>' +
       '<p class="muted klein">Mehrere Arten mit Komma trennen, mehrere Mitbewerber mit Strichpunkt.</p>' +
-      (a ? loeschKnopf('auftrag-weg', 'Auftrag entfernen') : ''));
+      (a ? loeschKnopf('auftrag-weg', 'Offerte entfernen') : ''));
   },
   baustelle() {
     const b = imThema('baustellen');
@@ -2419,25 +2564,29 @@ const SHEET = {
   },
   maliste() {
     const L = S.mitarbeiter, w = sitzungWert();
-    const weg = L.filter((m) => { const a = datumWert(m.austritt, true); return a && a < w; }), da = L.filter((m) => weg.indexOf(m) < 0);
+    const weg = L.filter((m) => { const a = austrittVon(m, w); return a.art === 'hand' && a.wert && a.wert < w; }), da = L.filter((m) => weg.indexOf(m) < 0);
     const zeile = (m) => '<li><button type="button" class="ma-z" data-a="ma" data-id="' + m.id + '"><span class="ma-n">' + esc(m.name) + '</span><span class="ma-m">' + esc(maMeta(m, weg.indexOf(m) >= 0)) + '</span>' + ic('right', 'pf') + '</button></li>';
     return huelle('Mitarbeiter' + (L.length ? ' (' + L.length + ')' : ''),
       '<div class="reihe"><button type="button" class="btn stark" data-a="ma-neu">' + ic('plus') + '<span>Mitarbeiter</span></button><button type="button" class="btn" data-a="sheet" data-s="maimport">' + ic('liste') + '<span>Liste einfügen</span></button></div>' +
       (L.length ? posGruppen(da).map((g) => '<h3 class="bl">' + esc(g.name) + ' (' + g.liste.length + ')</h3><ul class="ma-liste">' + g.liste.map(zeile).join('') + '</ul>').join('') +
         (weg.length ? '<details class="ma-weg"><summary>Ausgetreten (' + weg.length + ')</summary><ul class="ma-liste">' + weg.map(zeile).join('') + '</ul></details>' : '')
-        : '<p class="muted">Noch niemand eingetragen. Am schnellsten: die Liste in Excel kopieren und über «Liste einfügen» übernehmen, je Zeile Name, Position, Polier, Eintritt, Austritt.</p>') +
-      '<p class="muted klein">Steht nur in deiner Datei. Gruppenzuteilung, Bestand und Ein- und Austritte lesen daraus. Wer geht, bekommt einen Austritt und bleibt in der Liste.</p>');
+        : '<p class="muted">Noch niemand eingetragen. Am schnellsten: die Liste in Excel samt Kopfzeile kopieren und über «Liste einfügen» übernehmen: Name, Vorname, Position, Polier, Eintritt, Geburtsdatum.</p>') +
+      '<p class="muted klein">Steht nur in deiner Datei. Gruppenzuteilung, Kader, Betrieb und Ein- und Austritte lesen daraus. Wer geht, bekommt einen Austritt und bleibt in der Liste.</p>');
   },
   maimport() {
     return formHuelle('Mitarbeiter als Liste', 'maimport',
-      '<p class="muted">Aus Excel kopieren und hier einfügen: je Zeile ein Mitarbeiter mit Name, Position, Polier, Eintritt, Austritt. Eine Kopfzeile darf dabei sein, Vorname und Name dürfen getrennt stehen. Wer schon in der Liste steht, wird ergänzt.</p>' +
-      '<label class="f" for="ma-t"><span>Liste</span><textarea id="ma-t" name="text" rows="10" data-fokus autocomplete="off" spellcheck="false" placeholder="Name · Position · Polier · Eintritt · Austritt"></textarea></label>' +
+      '<p class="muted">Aus Excel samt Kopfzeile kopieren und hier einfügen: Name, Vorname, Position, Polier, Eintritt, Geburtsdatum (oder Austritt). Wer schon in der Liste steht, wird ergänzt. Aus dem Geburtsdatum rechnet das Tool die Pension: Bauarbeiter bis Polier mit 60, Büro mit 65.</p>' +
+      '<label class="f" for="ma-t"><span>Liste</span><textarea id="ma-t" name="text" rows="10" data-fokus autocomplete="off" spellcheck="false" placeholder="Name · Vorname · Position · Polier · Eintritt · Geburtsdatum"></textarea></label>' +
       '<p class="muted klein" id="ma-info">Noch nichts erkannt.</p>', 'Übernehmen');
   },
   ma() {
     const m = sheet.id ? maVon(sheet.id) : null;
     if (sheet.id && !m) return '';
-    const x = m || { id: '', name: '', position: sheet.position || '', polier: '', eintritt: '', austritt: '' };
+    const x = m || { id: '', name: '', position: sheet.position || '', polier: '', eintritt: '', austritt: '', geburt: '' };
+    const pen = austrittVon(Object.assign({}, x, { austritt: '' }));
+    const penText = pen.art === 'pension' ? 'Ohne Austritt gilt die Pension mit ' + pen.mit + ': Ende ' + pen.text + '. Ein Austritt hier geht vor.'
+      : pen.art === 'erreicht' ? 'Pensionsalter (' + pen.mit + ') erreicht. Steht der Austritt fest, hier eintragen.'
+      : 'Mit dem Geburtsdatum rechnet das Tool die Pension: Bauarbeiter bis Polier mit 60, Büro mit 65.';
     const P = S.mitarbeiter.filter((p) => istPolier(p) && p !== m && imFolgejahr(p, sitzungsJahr())), drin = P.some((p) => p.id === x.polier);
     const fest = S.themen.some((t) => t.art === 'gruppen' && t.fest);
     return formHuelle(m ? 'Mitarbeiter' : (istPolier(x) ? 'Neuer Polier' : 'Neuer Mitarbeiter'), 'ma',
@@ -2447,8 +2596,10 @@ const SHEET = {
         P.map((p) => '<button type="button" class="btn' + (x.polier === p.id ? ' stark' : '') + '" data-a="ma-polier" data-v="' + p.id + '">' + esc(p.name) + '</button>').join('') +
         '<button type="button" class="btn' + (drin ? '' : ' stark') + '" data-a="ma-polier" data-v="">' + (P.length ? 'Keiner' : 'Noch kein Polier in der Liste') + '</button></div>' +
         (fest ? '<p class="muted klein">Die Gruppenzuteilung ist festgehalten. Eine Änderung hier zeigt die Tafel erst nach «Ändern».</p>' : '') + '</div>' +
-      '<div class="zwei"><label class="f" for="ma-e"><span>Eintritt</span><input id="ma-e" name="eintritt" value="' + esc(x.eintritt) + '" autocomplete="off" placeholder="z. B. 1.3.2026"></label><label class="f" for="ma-a"><span>Austritt</span><input id="ma-a" name="austritt" value="' + esc(x.austritt) + '" autocomplete="off" placeholder="z. B. Sommer 2027"></label></div>' +
-      (m ? '<p class="muted klein">Wer geht, bekommt einen Austritt und bleibt in der Liste; so steht er bei den Ein- und Austritten.</p>' + loeschKnopf('ma-weg', 'Aus der Liste entfernen') : ''), m ? 'Fertig' : 'Hinzufügen');
+      '<div class="zwei"><label class="f" for="ma-e"><span>Eintritt</span><input id="ma-e" name="eintritt" value="' + esc(x.eintritt) + '" autocomplete="off" placeholder="z. B. 1.3.2026"></label><label class="f" for="ma-g"><span>Geburtsdatum</span><input id="ma-g" name="geburt" value="' + esc(x.geburt || '') + '" autocomplete="off" placeholder="z. B. 25.6.1975"></label></div>' +
+      '<label class="f" for="ma-a"><span>Austritt</span><input id="ma-a" name="austritt" value="' + esc(x.austritt) + '" autocomplete="off" placeholder="' + esc(pen.art === 'pension' ? 'Pension ' + pen.text : 'z. B. Sommer 2027') + '"></label>' +
+      '<p class="muted klein" id="ma-pen">' + esc(penText) + (m ? ' Wer geht, bleibt mit seinem Austritt in der Liste.' : '') + '</p>' +
+      (m ? loeschKnopf('ma-weg', 'Aus der Liste entfernen') : ''), m ? 'Fertig' : 'Hinzufügen');
   },
   anhang() {
     const t = aktThema(), a = t && t.anhaenge.find((x) => x.id === sheet.id);
@@ -2638,30 +2789,41 @@ function maLesen(text) {
   let Z = String(text || '').replace(/\r/g, '').split('\n').map((z) => (z.indexOf('\t') >= 0 ? z.split('\t') : z.split(';')).map((x) => x.replace(/\s+/g, ' ').trim())).filter((z) => z.some(Boolean));
   if (!Z.length) return [];
   const SP = [['vorname', /^vorname$/i], ['name', /^(name|nachname|mitarbeiter(in)?|mitarbeitende|person)$/i], ['position', /^(position|funktion|stelle|beruf|rolle)$/i],
-    ['polier', /^(polier|gruppe|stammgruppe|zuteilung|team)$/i], ['eintritt', /^(eintritt\S*|seit|ab)$/i], ['austritt', /^(austritt\S*|bis|pensionierung|far)$/i]];
+    ['polier', /^(polier|gruppe|stammgruppe|zuteilung|team)$/i], ['eintritt', /^(eintritt\S*|seit|ab)$/i], ['austritt', /^(austritt\S*|bis|pensionierung|far)$/i],
+    ['geburt', /^(geburtsdatum|geburtstag|geboren|geb\.?|jahrgang)$/i]];
   const kopf = {};
   Z[0].forEach((x, i) => { const s = SP.find((p) => p[1].test(x)); if (s && kopf[s[0]] === undefined) kopf[s[0]] = i; });
   if (kopf.name !== undefined && (Object.keys(kopf).length >= 2 || Z[0].length === 1)) Z = Z.slice(1);
   else ['name', 'position', 'polier', 'eintritt', 'austritt'].forEach((k, i) => { kopf[k] = i; delete kopf.vorname; });
   return Z.map((z) => {
     const w = (k) => (kopf[k] === undefined ? '' : z[kopf[k]] || '');
-    return { name: [w('vorname'), w('name')].filter(Boolean).join(' '), position: w('position'), polier: w('polier'), eintritt: w('eintritt'), austritt: w('austritt') };
+    return { name: [w('vorname'), w('name')].filter(Boolean).join(' '), position: w('position'), polier: w('polier'), eintritt: w('eintritt'), austritt: w('austritt'), geburt: w('geburt') };
   }).filter((x) => x.name);
 }
 /* Gelesene Zeilen in die Liste: Wer schon drin ist (gleicher Name), wird ergänzt; der Polier wird am Namen gesucht und, wenn er
    fehlt, als Polier angelegt. probe: nur zählen. */
 function maAnwenden(Z, probe) {
-  const gleich = (x) => String(x || '').trim().toLowerCase().replace(/\s+/g, ' ');
-  const L = probe ? S.mitarbeiter.map((m) => Object.assign({}, m)) : S.mitarbeiter, n = { neu: 0, alt: 0 };
+  const L = probe ? S.mitarbeiter.map((m) => Object.assign({}, m)) : S.mitarbeiter, n = { neu: 0, alt: 0 }, vorher = L.slice(), belegt = [];
   const finde = (name) => L.find((m) => nameSchluessel(m.name) === nameSchluessel(name)) || null;
   const findePolier = (name) => { const x = finde(name); if (x) return x; const w = nameWoerter(name), P = L.filter((m) => istPolier(m) && w.every((y) => nameWoerter(m.name).indexOf(y) >= 0)); return P.length === 1 ? P[0] : null; };
-  const hole = (name, position) => { let m = finde(name); if (!m) { m = { id: uid(), name: name, position: position || '', polier: '', eintritt: '', austritt: '' }; L.push(m); n.neu++; } return m; };
+  const hole = (name, position) => { let m = finde(name); if (!m) { m = { id: uid(), name: name, position: position || '', polier: '', eintritt: '', austritt: '', geburt: '' }; L.push(m); n.neu++; } return m; };
+  /* Steht jemand nur mit einem Teil des Namens in der Liste (z. B. von der Tafel «Muster» statt «Hans Muster»), ist er derselbe, wenn
+     es genau eine solche Person gibt und nur eine Zeile der neuen Liste zu ihr passt. Er bekommt dann den Namen aus der Liste. */
+  const genau = Z.map((z) => finde(z.name)).filter(Boolean);
+  const teil = (z) => {
+    const w = nameWoerter(z.name), K = vorher.filter((m) => genau.indexOf(m) < 0 && belegt.indexOf(m) < 0 && nameWoerter(m.name).length && nameWoerter(m.name).every((y) => w.indexOf(y) >= 0));
+    if (K.length !== 1) return null;
+    const mw = nameWoerter(K[0].name);
+    return Z.filter((y) => mw.every((x) => nameWoerter(y.name).indexOf(x) >= 0)).length === 1 ? K[0] : null;
+  };
   Z.forEach((z) => {
-    if (finde(z.name)) n.alt++;
-    const m = hole(z.name, z.position);
+    let m = finde(z.name);
+    if (!m) { m = teil(z); if (m) m.name = z.name; }
+    if (m) { n.alt++; belegt.push(m); } else m = hole(z.name, z.position);
     if (z.position) m.position = z.position;
     if (z.eintritt) m.eintritt = z.eintritt;
     if (z.austritt) m.austritt = z.austritt;
+    if (z.geburt) m.geburt = z.geburt;
   });
   Z.forEach((z) => {   // der Polier erst jetzt: Er kann weiter unten in der Liste stehen
     if (!z.polier) return;
@@ -2852,6 +3014,7 @@ const AKT = {
     else if (k === 'sicht') { S.zahlen.sicht = v; speichern(true); render(); }
     else if (k === 'ansicht') { S.zahlen.ansicht = v; speichern(true); render(); }
     else if (k === 'kansicht') { S.kunden.ansicht = v; speichern(true); render(); }
+    else if (k === 'kfilter') { S.kunden.filter = v; speichern(true); render(); }
     else if (k === 'bst') { S.ui.bst = v; speichern(true); render(); }
     else if (k === 'modus') { S.meta.modus = v; speichern(true); anzeigeMerken(); render(); renderSheet(false); }
   },
@@ -2896,7 +3059,8 @@ const AKT = {
   'offerte-weg'() { if (!sheet) return; merken(); S.kunden.offerten = S.kunden.offerten.filter((x) => x.id !== sheet.id); geaendert(true); toast('Jahr entfernt', true); },
   auftrag(el) { auf({ art: 'auftrag', id: el.dataset.id }); },
   'auftrag-neu'() { auf({ art: 'auftrag', id: '' }); },
-  'auftrag-weg'() { if (!sheet) return; merken(); S.kunden.auftraege = S.kunden.auftraege.filter((x) => x.id !== sheet.id); geaendert(true); toast('Auftrag entfernt', true); },
+  'k-erh'(el) { const f = el.closest('form'); if (!f) return; f.elements.erhalten.value = el.dataset.v; $$('[data-a="k-erh"]', f).forEach((b) => { b.setAttribute('aria-pressed', String(b === el)); }); },
+  'auftrag-weg'() { if (!sheet) return; merken(); S.kunden.auftraege = S.kunden.auftraege.filter((x) => x.id !== sheet.id); geaendert(true); toast('Offerte entfernt', true); },
   'kunden-weg'(el) { if (!bestaetigt(el, 'Wirklich alle entfernen?')) return; merken(); S.kunden.offerten = []; S.kunden.auftraege = []; S.kunden.jahr = ''; geaendert(); toast('Offerten und Aufträge entfernt', true); },
   glpunkt(el) { auf({ art: 'glpunkt', id: el.dataset.id }); },
   'glpunkt-weg'() { if (!sheet) return; merken(); S.glPunkte = S.glPunkte.filter((x) => x.id !== sheet.id); geaendert(true); toast('Punkt gelöscht', true); },
@@ -2908,7 +3072,7 @@ const AKT = {
   gruppe(el) { auf({ art: 'ma', id: el.dataset.id }); },
   ma(el) { auf({ art: 'ma', id: el.dataset.id, zurueck: el.closest('.sheet') ? 'maliste' : '' }); },
   'ma-neu'(el) { auf({ art: 'ma', id: '', zurueck: el.closest('.sheet') ? 'maliste' : '' }); },
-  zeigen(el) { const t = themaAusForm(); if (!t) return; const z = {}; ZEIGEN.forEach((x) => { z[x[0]] = zeigt(t, x[0]); }); z[el.dataset.v] = !z[el.dataset.v]; t.zeigen = z; speichern(); render(); renderSheet(false); },
+  zeigen(el) { const t = themaAusForm(); if (!t) return; const z = {}; ZEIGEN.forEach((x) => { z[x[0]] = zeigt(t, x[0]); }); z[el.dataset.v] = !z[el.dataset.v]; z.bestand = z.kader && z.betrieb; t.zeigen = z; speichern(); render(); renderSheet(false); },
   anhang(el) { auf({ art: 'anhang', id: el.dataset.id }); },
   'anhang-wahl'() { $('#anhang-wahl').click(); },
   'anhang-weg'() { const t = aktThema(); if (!t || !sheet) return; merken(); t.anhaenge = t.anhaenge.filter((x) => x.id !== sheet.id); geaendert(true); toast('Anhang entfernt', true); },
@@ -3070,12 +3234,13 @@ const FORMS = {
     let m = sheet && sheet.id ? maVon(sheet.id) : null;
     if (S.mitarbeiter.some((x) => x !== m && nameSchluessel(x.name) === nameSchluessel(name))) { f.elements.name.classList.add('fehlt'); f.elements.name.focus(); toast('«' + name + '» steht schon in der Liste.'); return; }
     merken();
-    if (!m) { m = { id: uid(), name: '', position: '', polier: '', eintritt: '', austritt: '' }; S.mitarbeiter.push(m); }
+    if (!m) { m = { id: uid(), name: '', position: '', polier: '', eintritt: '', austritt: '', geburt: '' }; S.mitarbeiter.push(m); }
     m.name = name.replace(/\s+/g, ' ');
     m.position = f.elements.position.value.replace(/\s+/g, ' ').trim();
     m.polier = istPolier(m) || imBuero(m) || f.elements.polier.value === m.id ? '' : f.elements.polier.value;
     m.eintritt = f.elements.eintritt.value.trim();
     m.austritt = f.elements.austritt.value.trim();
+    m.geburt = f.elements.geburt.value.trim();
     const zur = sheet && sheet.zurueck;
     speichern(); render();
     if (zur) auf({ art: zur }); else zu();
@@ -3102,6 +3267,7 @@ const FORMS = {
     a.jahr = jahrAus(a.jahr) || a.jahr;
     a.betrag = zahl(f.elements.betrag.value);
     a.eingeladen = f.elements.eingeladen.checked;
+    a.erhalten = ['ja', 'nein', 'offen'].indexOf(f.elements.erhalten.value) >= 0 ? f.elements.erhalten.value : 'offen';
     geaendert(true);
   },
   'glpunkt-edit'(f) { const x = sheet && S.glPunkte.find((y) => y.id === sheet.id), text = x && pflicht(f.elements.text); if (!text) return; x.text = text; geaendert(true); },
