@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Strategietag</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2300767E'/%3E%3Cpath d='M17 46V32M32 46V18M47 46V26' stroke='%23fff' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+/* Ruhige Fläche, Glas-Leiste, Vertiefung in Sheets.
+   Aufbau: drei Bereiche in der Leiste (Zahlen, Themen, Ergebnis), je ein Bildschirm, eine Aufgabe.
+   Diagrammfarben (--dz-*): geprüfter Satz für hell und dunkel; Blau = Ertrag und was bleibt, Grau = Aufwand und Übriges. */
+:root{
+  --bg:#F5F5F7; --card:#FFFFFF; --ink:#1D1D1F; --muted:#6E6E73;
+  --sep:rgba(60,60,67,.12); --fill:rgba(120,120,128,.10);
+  --accent:#00767E; --accent-fill:#00767E; --brand:#008C95; --brand-soft:#E3F3F4;
+  --idle:#C7C7CC; --alarm:#D70015; --warn:#B45309; --warn-soft:rgba(255,149,0,.15);
+  --scrim:rgba(0,0,0,.24); --glass:rgba(245,245,247,.82); --pill:#FFFFFF;
+  --dz-blau:#2a78d6; --dz-orange:#eb6834; --dz-aqua:#1baf7a; --dz-gelb:#eda100; --dz-grau:#8E8E93; --dz-grau2:#5E5E62; --dz-gelb-ink:#0b0b0b;
+  --shadow:0 1px 2px rgba(0,0,0,.04),0 6px 20px rgba(0,0,0,.05);
+  --display:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --body:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]):not([data-modus="hell"]){
+    --bg:#000000; --card:#1C1C1E; --ink:#F5F5F7; --muted:#98989F;
+    --sep:rgba(84,84,88,.48); --fill:rgba(120,120,128,.24);
+    --accent:#5CCBD2; --accent-fill:#00767E; --brand:#2FB5BE; --brand-soft:#0E3436;
+    --idle:#545458; --alarm:#FF6961; --warn:#FFB340; --warn-soft:rgba(255,159,10,.18);
+    --scrim:rgba(0,0,0,.58); --glass:rgba(18,18,20,.80); --pill:#48484A;
+    --dz-blau:#3987e5; --dz-orange:#d95926; --dz-aqua:#199e70; --dz-gelb:#c98500; --dz-gelb-ink:#ffffff;
+    --shadow:0 0 0 1px rgba(255,255,255,.05);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]:not([data-modus="hell"]), :root[data-modus="dunkel"]{
+  --bg:#000000; --card:#1C1C1E; --ink:#F5F5F7; --muted:#98989F;
+  --sep:rgba(84,84,88,.48); --fill:rgba(120,120,128,.24);
+  --accent:#5CCBD2; --accent-fill:#00767E; --brand:#2FB5BE; --brand-soft:#0E3436;
+  --idle:#545458; --alarm:#FF6961; --warn:#FFB340; --warn-soft:rgba(255,159,10,.18);
+  --scrim:rgba(0,0,0,.58); --glass:rgba(18,18,20,.80); --pill:#48484A;
+  --dz-blau:#3987e5; --dz-orange:#d95926; --dz-aqua:#199e70; --dz-gelb:#c98500; --dz-gelb-ink:#ffffff;
+  --shadow:0 0 0 1px rgba(255,255,255,.05);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html{font-size:16px;-webkit-text-size-adjust:100%;color-scheme:light}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:1rem;line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+body.gesperrt{overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit;margin:0}
+button{border:0;background:none;padding:0;cursor:pointer;text-align:inherit}
+button:disabled{cursor:default;opacity:.38}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+h1,h2,h3,p,ul,ol{margin:0}
+ul,ol{padding:0;list-style:none}
+h1,h2,h3{font-family:var(--display);text-wrap:balance}
+.tnum{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.klein{font-size:.8125rem}
+.warn{color:var(--warn)}
+.mitte{text-align:center}
+.ic{width:1.2em;height:1.2em;flex:none}
+
+/* ---------- Leiste ---------- */
+.probe{display:flex;flex-wrap:wrap;justify-content:center;gap:.1rem .9rem;background:var(--warn-soft);color:var(--warn);font-size:.8125rem;font-weight:600;text-align:center;padding:.35rem 1rem}
+.probe button{font-weight:600;text-decoration:underline;text-underline-offset:.15em}
+.probe.leise{background:var(--brand-soft);color:var(--ink);font-weight:500}
+.probe .zu{text-decoration:none;font-size:1.1rem;line-height:1;padding:0 .35rem;color:var(--muted)}
+.ohne-js{max-width:30rem;margin:18vh auto;padding:1.5rem;text-align:center;font-size:1.0625rem;line-height:1.5}
+.vergleich{border-collapse:collapse;width:100%}
+.vergleich th{text-align:left;font-weight:600;color:var(--muted);padding:.4rem .9rem .4rem 0;white-space:nowrap;vertical-align:top}
+.vergleich td{padding:.4rem 0}
+.vergleich tr + tr th,.vergleich tr + tr td{border-top:1px solid var(--sep)}
+.kopf{position:sticky;top:0;z-index:20;background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--sep)}
+.kopf1{display:flex;align-items:center;gap:.6rem 1rem;max-width:84rem;margin:0 auto;padding:.6rem 1rem}
+.marke{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.2}
+.marke b{font-family:var(--display);font-size:1.0625rem;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.marke span{color:var(--muted);font-size:.8125rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kopf-r{flex:1;display:flex;align-items:center;justify-content:flex-end;gap:.4rem}
+.rundb{position:relative;width:2.5rem;height:2.5rem;border-radius:50%;display:grid;place-items:center;background:var(--fill);flex:none}
+.seg{display:inline-flex;padding:.2rem;border-radius:.85rem;background:var(--fill)}
+.seg button{height:2.15rem;padding:0 .9rem;border-radius:.65rem;font-weight:600;font-size:.9375rem;color:var(--muted);white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--pill);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.seg.bereich button{height:2.4rem;padding:0 1.3rem;font-size:1rem}
+.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-height:2.75rem;padding:0 1.1rem;border-radius:1.375rem;font-weight:600;background:var(--fill);color:var(--ink);white-space:nowrap}
+.btn.stark{background:var(--accent-fill);color:#fff}
+.btn.rot{color:var(--alarm)}
+.btn.scharf{background:var(--alarm);color:#fff}
+.btn.klein{min-height:2.5rem;padding:0 .9rem}
+.punkt{position:absolute;top:.1rem;right:.1rem;width:.7rem;height:.7rem;border-radius:50%;background:var(--warn);box-shadow:0 0 0 2px var(--bg)}
+
+/* ---------- Bausteine ---------- */
+main{max-width:84rem;margin:0 auto;padding:1.5rem 1rem 4rem}
+.titel{display:flex;flex-wrap:wrap;align-items:flex-end;gap:.75rem 1rem;margin-bottom:1rem}
+.titel > div:first-child{flex:1;min-width:12rem}
+.titel h1{font-size:2rem;line-height:1.1;font-weight:700;letter-spacing:-.022em}
+.titel p{color:var(--muted);font-size:1.0625rem;margin-top:.3rem}
+.titel-r{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem}
+.card{background:var(--card);border-radius:1.25rem;padding:1.15rem 1.25rem;box-shadow:var(--shadow)}
+.leer{color:var(--muted);padding:.4rem 0}
+.schnell{display:flex;gap:.45rem}
+.schnell input,.dreier input{flex:1;min-width:0;height:3rem;padding:0 1rem;border-radius:1rem;border:1px solid var(--sep);background:var(--card);font-size:1.0625rem}
+.rund{width:3rem;height:3rem;border-radius:50%;background:var(--accent-fill);color:#fff;display:grid;place-items:center;flex:none}
+.textlink{color:var(--muted);font-size:.875rem;text-decoration:underline;text-underline-offset:.15em;padding:.4rem 0}
+
+/* ---------- Zahlen: Einfügen und Tabelle ---------- */
+.ablage{display:flex;flex-direction:column;align-items:center;gap:.7rem;text-align:center;padding:2.2rem 1.25rem;max-width:44rem;margin:1rem auto;border:1.5px dashed var(--idle);box-shadow:none;background:transparent}
+.ablage > .ic{width:2.2rem;height:2.2rem;color:var(--accent)}
+.ablage h2{font-size:1.375rem;font-weight:700}
+.ablage p{max-width:32rem}
+.einfuegen{width:100%;max-width:26rem;min-height:3rem;padding:.75rem 1rem;border-radius:1rem;border:1px solid var(--sep);background:var(--card);resize:none;text-align:center;font-size:1rem}
+body.drueber .ablage,body.drueber .tab-rahmen,body.drueber .dg{border-color:var(--brand);background:var(--brand-soft)}
+.tab-rahmen{background:var(--card);border-radius:1.25rem;box-shadow:var(--shadow);overflow:auto;max-height:max(18rem,calc(100vh - 16.5rem));border:1.5px solid transparent}
+.zt{border-collapse:separate;border-spacing:0;width:100%;font-size:.9375rem}
+.zt th,.zt td{padding:.42rem .9rem;white-space:nowrap;border-bottom:1px solid var(--sep)}
+.zt thead th{position:sticky;top:0;z-index:2;background:var(--card);font-weight:600;color:var(--muted);text-align:right;font-size:.875rem;padding-top:.8rem;padding-bottom:.6rem}
+.zt thead th.bez{left:0;z-index:3}
+.zt thead th.bez,.zt tbody th{text-align:left}
+.zt thead th button{font-weight:600;color:inherit;padding:.15rem .4rem;margin:-.15rem -.4rem;border-radius:.4rem}
+.zt thead th button:hover{background:var(--fill)}
+.zt td.bud{background:var(--fill)}
+.zt thead th.bud{background:linear-gradient(var(--fill),var(--fill)) var(--card)}
+.zt tbody th{position:sticky;left:0;background:var(--card);font-weight:400;max-width:22rem;overflow:hidden;text-overflow:ellipsis;z-index:1}
+.zt td{text-align:right;font-variant-numeric:tabular-nums}
+.zt .nr{color:var(--muted);font-size:.8125rem;margin-right:.5rem;font-variant-numeric:tabular-nums}
+.zt tr.s1 th,.zt tr.s1 td{font-weight:600}
+.zt tr.klick{cursor:pointer}
+.zt .aufb{display:inline-flex;align-items:center;gap:.3rem;font-weight:inherit;max-width:100%}
+.zt .aufb span{overflow:hidden;text-overflow:ellipsis}
+.zt .aufb .ic{width:.95em;height:.95em;color:var(--muted);transition:transform .15s}
+.zt tr.offen .aufb .ic{transform:rotate(90deg)}
+.zt tr.kt th{padding-left:2.2rem;color:var(--muted)}
+.zt tr.kt td{color:var(--muted)}
+.zt.pf tbody th,.zt.pf thead th.bez{padding-left:2.2rem}
+.zt.pf tr.klick th{padding-left:.75rem}
+.zt.pf tr.kt th{padding-left:3.4rem}
+.zt tr.s2 th,.zt tr.s2 td{font-weight:700;font-size:1.12em;border-top:1px solid var(--sep);background:var(--brand-soft)}
+.zt tr.s3 th,.zt tr.s3 td{font-weight:700;font-size:1.25em;background:var(--brand-soft);color:var(--accent)}
+/* viele Spalten: enger setzen, damit der Verlauf auf einen Bildschirm passt */
+.zt.dicht{font-size:.8125rem}
+.zt.dicht th,.zt.dicht td{padding-left:.45rem;padding-right:.45rem}
+.zt.dicht thead th{white-space:normal;font-size:.75rem;vertical-align:bottom}
+.zt.dicht tbody th{max-width:14rem}
+.zt.dicht tr.s2 th,.zt.dicht tr.s2 td{font-size:1em}
+.zt.dicht tr.s3 th,.zt.dicht tr.s3 td{font-size:1.1em}
+.zt.dicht td:last-child,.zt.dicht thead th:last-child{padding-right:.9rem}
+.zt tr.abg th,.zt tr.abg td{font-weight:600}
+.zt tr.std th,.zt tr.std td{color:var(--muted)}
+.zt tr.std.s1 th,.zt tr.std.s1 td{color:var(--ink)}
+.zt .neg{color:var(--alarm)}
+.zt tr:last-child th,.zt tr:last-child td{border-bottom:0}
+.unter{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem 1rem;margin-top:.6rem}
+
+/* ---------- Zahlen: Diagramme ---------- */
+.c-blau{background:var(--dz-blau)} .c-orange{background:var(--dz-orange)} .c-aqua{background:var(--dz-aqua)} .c-gelb{background:var(--dz-gelb)} .c-grau{background:var(--dz-grau)} .c-grau2{background:var(--dz-grau2)}
+.dgr{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,30rem),1fr));gap:1rem}
+.dg{background:var(--card);border-radius:1.25rem;box-shadow:var(--shadow);padding:1.1rem 1.25rem 1rem;min-width:0;border:1.5px solid transparent}
+.dg h2{font-size:1.1875rem;font-weight:700}
+.dg-u{color:var(--muted);font-size:.9375rem;margin:.1rem 0 .7rem}
+.dg-leg{display:flex;flex-wrap:wrap;gap:.25rem 1.1rem;font-size:.875rem;color:var(--muted)}
+.dg-leg span{display:inline-flex;align-items:center;gap:.4rem}
+.dg-leg i{width:.75rem;height:.75rem;border-radius:.2rem;flex:none}
+.dg-leg i.halb{opacity:.45}
+.dg-feld{padding:1.9rem 0 0 4.2rem}
+.dg-innen{position:relative;height:13rem;border-bottom:1px solid var(--idle)}
+.dg-g{position:absolute;left:0;right:0;border-top:1px solid var(--sep)}
+.dg-t{position:absolute;left:-4.2rem;width:3.8rem;text-align:right;transform:translateY(50%);font-size:.75rem;line-height:1;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.dg-baender{position:absolute;inset:0;display:flex}
+.dg-band{flex:1;min-width:0;position:relative;border-radius:.5rem .5rem 0 0;outline-offset:-2px}
+.dg-band:hover,.dg-band:focus-visible,.dg-seg i:hover,.dg-seg i:focus-visible{filter:brightness(1.08)}
+.dg-band:hover,.dg-band:focus-visible{background:var(--fill)}
+.dg-paar{display:flex;align-items:flex-end;justify-content:center;gap:2px;height:100%}
+.dg-b{display:block;width:min(1.25rem,32%);min-height:1px;border-radius:.25rem .25rem 0 0}
+.dg-st{display:flex;flex-direction:column-reverse;gap:2px;width:min(1.4rem,40%)}
+.dg-st i{display:block;min-height:1px}
+.dg-st i:last-child{border-radius:.25rem .25rem 0 0}
+.dg-band.bud .dg-b,.dg-band.bud .dg-st{opacity:.45}
+.dg-o{position:absolute;left:50%;transform:translateX(-50%);margin-bottom:.3rem;font-size:.8125rem;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+.dg-feld.eng .dg-o,.dg-feld.eng + .dg-n .dg-on{display:none}
+.dg-x{display:flex;margin-top:.45rem}
+.dg-x span{flex:1;min-width:0;text-align:center;font-size:.8125rem;color:var(--muted);line-height:1.2;overflow-wrap:anywhere}
+.dg-zeilen{display:flex;flex-direction:column;gap:.55rem;margin-top:.8rem}
+.dg-z{display:flex;align-items:center;gap:.6rem}
+.dg-zn{width:5.2rem;flex:none;font-size:.875rem;color:var(--muted);line-height:1.2}
+.dg-seg{position:relative;flex:1;min-width:0;display:flex;gap:2px;height:1.75rem}
+.dg-seg i{display:flex;align-items:center;min-width:0;border-radius:.25rem;font-style:normal;outline-offset:1px}
+.dg-seg b{display:none;padding-left:.4rem;font-size:.875rem;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+.dg-seg i.s9 b{display:block}
+.dg-seg i.c-gelb b{color:var(--dz-gelb-ink)}
+/* Marke bei 100 Franken: nur Striche über und unter dem Balken, damit sie keine Zahl durchkreuzt */
+.dg-seg u{position:absolute;top:-.35rem;bottom:-.35rem;width:2px;margin-left:-1px;background:linear-gradient(var(--ink) 0 .3rem,transparent .3rem calc(100% - .3rem),var(--ink) calc(100% - .3rem) 100%)}
+.dg-ende{width:5.6rem;flex:none;font-size:.875rem;font-weight:600;white-space:nowrap}
+.dg-n{color:var(--muted);font-size:.8125rem;margin-top:.6rem}
+.dg-leer{color:var(--muted);padding:1.2rem 0}
+.dg-werte{margin-top:.7rem;border-top:1px solid var(--sep);padding-top:.5rem}
+.dg-werte summary{cursor:pointer;color:var(--muted);font-size:.8125rem;font-weight:600;width:max-content;border-radius:.3rem}
+.dg-wt{overflow-x:auto;margin-top:.4rem}
+.dg-wt table{border-collapse:collapse;width:100%;font-size:.8125rem}
+.dg-wt th,.dg-wt td{padding:.25rem .6rem .25rem 0;border-bottom:1px solid var(--sep);white-space:nowrap}
+.dg-wt th{text-align:left;font-weight:600}
+.dg-wt thead th{color:var(--muted)}
+.dg-wt td,.dg-wt thead th:not(:first-child){text-align:right;font-variant-numeric:tabular-nums}
+#tip{position:fixed;z-index:70;left:0;top:0;max-width:18rem;padding:.5rem .7rem;border-radius:.7rem;background:var(--ink);color:var(--bg);font-size:.8125rem;line-height:1.35;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+#tip strong{display:block;font-weight:700}
+#tip[hidden]{display:none}
+
+/* ---------- Themen ---------- */
+.themen{display:grid;grid-template-columns:17rem minmax(0,1fr);gap:1.5rem;align-items:start}
+.tliste2{display:flex;flex-direction:column;gap:.2rem;position:sticky;top:5rem}
+.tlink{display:flex;align-items:center;gap:.6rem;min-height:2.9rem;padding:.3rem .8rem .3rem .5rem;border-radius:.9rem;font-weight:600;color:var(--muted)}
+.tlink .nr{width:1.6rem;height:1.6rem;border-radius:50%;display:grid;place-items:center;background:var(--fill);font-size:.8125rem;font-weight:700;flex:none}
+.tlink .tl-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tlink .ok{color:var(--accent);width:1.1rem;height:1.1rem}
+.tlink.on{background:var(--brand-soft);color:var(--accent)}
+.tlink.on .nr{background:var(--accent-fill);color:#fff}
+.tlink.neu{color:var(--accent);padding-left:.8rem}
+.thema .titel{margin-bottom:.7rem}
+.thema .titel h1{font-size:2.25rem}
+.frage{font-size:1.1875rem;line-height:1.35;color:var(--muted);max-width:54rem;margin-bottom:.4rem}
+.bl{font-size:.8125rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:1.5rem 0 .55rem}
+.eintraege{display:flex;flex-direction:column;gap:.5rem;margin-bottom:.6rem}
+.eintraege:empty{display:none}
+.notiz,.besch,.rz{display:flex;align-items:center;gap:.5rem;background:var(--card);border-radius:1rem;box-shadow:var(--shadow);padding:.35rem .5rem .35rem 1.1rem}
+.notiz.gl,.besch.gl{background:var(--brand-soft);box-shadow:inset 0 0 0 1.5px var(--brand)}
+.n-text{flex:1;min-width:0;padding:.55rem 0;font-size:1.1875rem;line-height:1.3;font-weight:500;overflow-wrap:anywhere}
+.n-gl{display:inline-flex;align-items:center;gap:.3rem;height:2.3rem;padding:0 .75rem;border-radius:1.15rem;color:var(--muted);font-weight:700;font-size:.8125rem;flex:none}
+.n-gl[aria-pressed="true"]{background:var(--accent-fill);color:#fff}
+.besch{padding-left:.7rem;gap:.7rem}
+.b-ic{width:1.7rem;height:1.7rem;border-radius:50%;background:var(--accent-fill);color:#fff;display:grid;place-items:center;flex:none}
+.b-ic .ic{width:1rem;height:1rem;stroke-width:2.5}
+.b-text{flex:1;min-width:0;padding:.5rem 0;display:flex;flex-direction:column;gap:.05rem}
+.b-was{font-size:1.1875rem;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+.b-meta{color:var(--muted);font-size:.9375rem}
+.dreier{display:grid;grid-template-columns:minmax(0,1fr) 10rem 10rem auto;gap:.45rem}
+.rz{flex-wrap:wrap;gap:.3rem .8rem;padding:.4rem .6rem .4rem 1.1rem}
+.rz .n-text{min-width:12rem}
+.rz .seg button{height:2.1rem;padding:0 .8rem;font-size:.875rem}
+.rz .seg button.st-erreicht[aria-pressed="true"]{background:var(--accent-fill);color:#fff}
+.rz .seg button.st-teilweise[aria-pressed="true"]{background:var(--warn-soft);color:var(--warn);box-shadow:inset 0 0 0 1.5px var(--warn)}
+.hilfe{display:flex;align-items:center;gap:.4rem;margin-top:1.2rem}
+
+/* Tafel für die Gruppenzuteilung */
+.tafel{display:grid;grid-template-columns:repeat(auto-fit,minmax(11.5rem,1fr));gap:.8rem;align-items:start;margin-top:1rem}
+.spalte{background:var(--card);border-radius:1.1rem;box-shadow:var(--shadow);padding:.7rem;display:flex;flex-direction:column;gap:.45rem;min-height:9.5rem;border:1.5px solid transparent}
+.spalte.pool{background:transparent;box-shadow:none;border:1.5px dashed var(--idle)}
+.spalte.ziel{border-color:var(--brand);border-style:solid;background:var(--brand-soft)}
+.sp-kopf{display:flex;align-items:center;justify-content:space-between;gap:.4rem;font-weight:700;padding:.1rem .25rem .25rem}
+.sp-kopf button{font-weight:700;border-radius:.4rem;padding:.1rem .35rem;margin:-.1rem -.35rem;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.sp-kopf button:hover{background:var(--fill)}
+.sp-kopf .zahl{color:var(--muted);font-weight:600;font-size:.875rem}
+.karte{display:block;width:100%;padding:.55rem .75rem;border-radius:.75rem;background:var(--bg);font-weight:500;font-size:1.0625rem;line-height:1.25;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:manipulation;overflow-wrap:anywhere}
+.spalte.pool .karte{background:var(--card);box-shadow:var(--shadow)}
+.karte.zieht{opacity:.3}
+.geist{position:fixed;z-index:80;left:0;top:0;pointer-events:none;background:var(--card);box-shadow:0 12px 32px rgba(0,0,0,.28);rotate:-2deg}
+body.am-ziehen,body.am-ziehen .karte{cursor:grabbing}
+body.am-ziehen{user-select:none;-webkit-user-select:none}
+.sp-leer{color:var(--muted);font-size:.875rem;line-height:1.3;padding:.3rem .25rem}
+.sp-neu input{width:100%;height:2.6rem;padding:0 .8rem;border-radius:.75rem;border:1px solid var(--sep);background:var(--card);font-size:1rem}
+.tafel-unten{margin-top:.3rem}
+
+/* ---------- Ergebnis ---------- */
+.blatt{max-width:52rem;margin:0 auto;padding:2rem 2.2rem}
+.e-kopf{border-bottom:2px solid var(--accent);padding-bottom:.8rem;margin-bottom:1.2rem}
+.e-kopf h1{font-size:1.875rem;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.e-kopf p{color:var(--muted)}
+.e-teil{margin-bottom:1.4rem}
+.e-teil > h2{font-size:1.1875rem;font-weight:700;color:var(--accent);margin-bottom:.5rem}
+.e-teil h3{font-size:1rem;font-weight:700;margin:.8rem 0 .25rem}
+.e-teil ul{list-style:disc;padding-left:1.2rem;display:flex;flex-direction:column;gap:.2rem}
+.e-gl{background:var(--brand-soft);border-radius:1rem;padding:.9rem 1.1rem}
+.e-gl ul,.e-teil ul.e-rz{list-style:none;padding:0;gap:.45rem}
+.e-gl li b{font-weight:700}
+.e-marke{font-size:.6875rem;font-weight:700;color:var(--accent);margin-left:.4rem;letter-spacing:.03em}
+.e-klein{color:var(--muted);font-size:.875rem;margin:-.3rem 0 .5rem}
+.e-rz li{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;border-bottom:1px solid var(--sep);padding-bottom:.3rem}
+.e-st{font-size:.8125rem;font-weight:700;white-space:nowrap;color:var(--muted)}
+.e-st.erreicht{color:var(--accent)}
+.e-st.teilweise{color:var(--warn)}
+.e-tab-rahmen{overflow-x:auto}
+.e-tab,.e-besch{border-collapse:collapse;width:100%;font-size:.9375rem}
+.e-tab th,.e-tab td{padding:.35rem .6rem .35rem 0;border-bottom:1px solid var(--sep);white-space:nowrap}
+.e-tab th{text-align:left;font-weight:600}
+.e-tab thead th,.e-besch thead th{color:var(--muted);font-size:.8125rem;font-weight:600}
+.e-tab td,.e-tab thead th:not(:first-child){text-align:right;font-variant-numeric:tabular-nums}
+.e-besch th,.e-besch td{text-align:left;vertical-align:top;padding:.35rem .9rem .35rem 0;border-bottom:1px solid var(--sep)}
+.e-besch td.th{font-weight:600}
+.e-besch td.nw{white-space:nowrap}
+.e-fuss{color:var(--muted);font-size:.8125rem}
+.aktionen{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem 1rem;max-width:52rem;margin:1rem auto 0}
+
+/* ---------- Sheets ---------- */
+.sheet-huelle{position:fixed;left:0;right:0;top:var(--vvt,0px);height:var(--vvh,100%);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.scrim{position:absolute;inset:0;background:var(--scrim);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.sheet{position:relative;width:100%;max-width:34rem;max-height:92%;display:flex;flex-direction:column;background:var(--card);border-radius:1.5rem 1.5rem 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.2)}
+.sheet.rein{animation:sheetIn .26s cubic-bezier(.2,.8,.2,1)}
+.scrim.rein{animation:fadeIn .2s ease-out}
+@media (pointer:coarse){.scrim{cursor:pointer}}
+.sheet > header{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:.5rem;padding:.85rem 1rem .7rem;border-bottom:1px solid var(--sep)}
+.sheet > header h2{font-size:1.0625rem;font-weight:700;text-align:center}
+.tbtn{justify-self:start;height:2.25rem;padding:0 .5rem;border-radius:.6rem;color:var(--accent);font-weight:500}
+.tbtn.stark{justify-self:end;font-weight:700}
+.sheet-inhalt{overflow-y:auto;padding:1rem 1rem 1.5rem;display:flex;flex-direction:column;gap:.9rem;overscroll-behavior:contain}
+.sheet .ablage{margin:0;padding:1.4rem 1rem;max-width:none}
+.f{display:flex;flex-direction:column;gap:.3rem;min-width:0}
+.f > span{font-size:.8125rem;font-weight:600;color:var(--muted)}
+.f input,.f textarea{width:100%;min-height:2.9rem;padding:.6rem .8rem;border-radius:.85rem;border:1px solid var(--sep);background:var(--bg);font-size:1rem}
+.f textarea{resize:vertical;min-height:5.5rem;line-height:1.4}
+.f .fehlt{border-color:var(--alarm)}
+.zwei{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.schalter{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.7rem .9rem;border-radius:.9rem;background:var(--bg);font-weight:500}
+.schalter input{width:1.4rem;height:1.4rem;accent-color:var(--accent-fill)}
+.loesch{align-self:flex-start;display:inline-flex;align-items:center;gap:.4rem;color:var(--alarm);font-weight:600;padding:.5rem 0}
+.gr{display:flex;flex-direction:column;gap:.7rem;padding-bottom:1.1rem;border-bottom:1px solid var(--sep)}
+.gr > h3{font-size:1.0625rem;font-weight:700}
+.reihe{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem}
+.reihe.zw{justify-content:space-between}
+.stepper{display:flex;align-items:center;gap:.2rem}
+.stepper button{width:2.25rem;height:2.25rem;border-radius:50%;background:var(--fill);display:grid;place-items:center;color:var(--accent)}
+.stepper b{min-width:4rem;text-align:center}
+.spl{display:flex;flex-direction:column;gap:.5rem}
+.spl li{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:.2rem .7rem;padding:.55rem .8rem;border-radius:.9rem;background:var(--bg)}
+.spl li.spl-datei{display:block;background:none;padding:.5rem .2rem 0;font-size:.8125rem;font-weight:600;color:var(--muted);overflow-wrap:anywhere}
+.spl input[type="checkbox"]{width:1.4rem;height:1.4rem;accent-color:var(--accent-fill)}
+.spl input[type="text"]{min-width:0;height:2.5rem;padding:0 .7rem;border-radius:.7rem;border:1px solid var(--sep);background:var(--card);font-weight:600}
+.spl small{grid-column:2;color:var(--muted);font-size:.8125rem}
+.hinweis{display:flex;align-items:flex-start;gap:.5rem;color:var(--warn);background:var(--warn-soft);padding:.7rem .9rem;border-radius:.9rem;font-size:.9375rem}
+.toast{position:fixed;left:50%;bottom:1.5rem;transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:.9rem;padding:.75rem 1.1rem;border-radius:1.1rem;background:var(--ink);color:var(--bg);font-weight:500;box-shadow:0 8px 30px rgba(0,0,0,.25);animation:toastIn .22s cubic-bezier(.2,.8,.2,1);width:max-content;max-width:calc(100% - 2rem)}
+.toast button{color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:.15em;white-space:nowrap}
+@keyframes sheetIn{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+@media (prefers-reduced-motion: reduce){.sheet.rein,.scrim.rein,.toast{animation:none}}
+
+@media (min-width:40rem){
+  .sheet-huelle{align-items:center;padding:1.5rem}
+  .sheet{border-radius:1.5rem;max-height:100%}
+}
+@media (max-width:52rem){
+  .kopf1{flex-wrap:wrap}
+  .seg.bereich{order:3;width:100%}
+  .seg.bereich button{flex:1;padding:0 .5rem}
+  .themen{grid-template-columns:1fr;gap:.9rem}
+  .tliste2{position:static;flex-direction:row;overflow-x:auto;scrollbar-width:none;gap:.4rem;padding-bottom:.1rem}
+  .tliste2::-webkit-scrollbar{display:none}
+  .tlink{flex:none;background:var(--card);box-shadow:inset 0 0 0 1px var(--sep);min-height:2.5rem}
+  .tlink.on{box-shadow:none}
+  .tlink .tl-t{overflow:visible}
+  .titel h1,.thema .titel h1{font-size:1.75rem}
+  .n-text,.b-was{font-size:1.0625rem}
+  .frage{font-size:1.0625rem}
+  .dreier{grid-template-columns:1fr 1fr auto}
+  .dreier input:first-child{grid-column:1 / -1}
+  .blatt{padding:1.3rem 1.2rem}
+  .e-besch{font-size:.875rem}
+  .e-besch td.nw{white-space:normal}
+  .e-besch th,.e-besch td{padding-right:.6rem;-webkit-hyphens:auto;hyphens:auto;overflow-wrap:break-word}
+  .tab-rahmen{max-height:none}
+  .zt tbody th{max-width:11rem}
+  .dg{padding:1rem 1rem .9rem}
+  .dg-feld{padding-left:3.6rem}
+  .dg-t{left:-3.6rem;width:3.3rem}
+  .dg-innen{height:11rem}
+  .dg-o{font-size:.6875rem}
+  .dg-zn{width:3.6rem}
+  .dg-ende{width:4.4rem;font-size:.75rem}
+  .dg-seg i.s9:not(.s16) b{display:none}
+}
+
+/* ---------- Druck: nur das Ergebnis ---------- */
+#druck{display:none}
+@media print{
+  @page{size:A4;margin:0}
+  html{font-size:16px!important}
+  body{background:#fff;color:#000}
+  #oben,.kopf,main,#sheets,#toasts,#tip{display:none!important}
+  #druck{display:block;font-size:10.5pt;line-height:1.4;color:#000;padding:0 16mm}
+  #druck .d-seite{width:100%;border-collapse:collapse}
+  #druck .d-seite > thead > tr > td,#druck .d-seite > tfoot > tr > td,#druck .d-seite > tbody > tr > td{border:0;padding:0}
+  #druck .d-rand{height:15mm}
+  #druck .e-kopf{border-bottom:1.5pt solid #00767E;padding-bottom:8pt;margin-bottom:12pt}
+  #druck .e-kopf h1{font-size:20pt}
+  #druck .e-kopf p{color:#444}
+  #druck .e-teil{margin-bottom:12pt}
+  #druck .e-teil > h2{font-size:13pt;color:#00767E;margin-bottom:4pt;break-after:avoid}
+  #druck .e-teil h3{font-size:10.5pt;margin:7pt 0 2pt;break-after:avoid}
+  #druck .e-teil li,#druck .e-besch tr{break-inside:avoid}
+  #druck .e-gl{background:#E3F3F4;border-radius:6pt;padding:8pt 10pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #druck .e-marke,#druck .e-st.erreicht{color:#00767E}
+  #druck .e-st{color:#555;font-size:9pt}
+  #druck .e-st.teilweise{color:#8a4b00}
+  #druck .e-klein{color:#555;font-size:9pt}
+  #druck .e-rz li{border-bottom:.5pt solid #ccc}
+  #druck .e-tab{font-size:9pt}
+  #druck .e-besch{font-size:10pt}
+  #druck .e-tab th,#druck .e-tab td{border-bottom:.5pt solid #ccc;padding:3pt 6pt 3pt 0}
+  #druck .e-besch th,#druck .e-besch td{border-bottom:.5pt solid #ccc;padding:3pt 8pt 3pt 0}
+  #druck .e-tab thead th,#druck .e-besch thead th{color:#444;font-size:8pt}
+  #druck .e-fuss{color:#666;font-size:8pt}
+}
+</style>
+</head>
+<body>
+<div id="ohne-js" class="ohne-js">Hier läuft das Tool nicht: Das ist nur eine Vorschau der Datei. Öffne das Tool über seinen Link oder am Rechner per Doppelklick auf die Datei.</div>
+<div id="oben"></div>
+<header class="kopf" id="kopf"></header>
+<main id="haupt"></main>
+<div id="sheets"></div>
+<div id="toasts" aria-live="polite"></div>
+<div id="tip" role="tooltip" hidden></div>
+<input type="file" id="datei-wahl" accept=".xlsx,.xlsm,.csv,.txt,.tsv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,text/plain" multiple hidden>
+<input type="file" id="daten-wahl" accept=".html,.htm,.json,text/html,application/json" hidden>
+<div id="druck"></div>
+<script id="daten" type="application/json">null</script>
+<script>
+(function () {
+'use strict';
+
+/* Werkzeug für den Strategietag einer Abteilung: Zahlen (Verlauf aus dem BAB, mit Diagrammen), Themen mit Notizen
+   und Beschlüssen, Ergebnis als PDF. Eine Datei, kein Netz, keine Bibliothek.
+   «Sichern» schreibt diese Datei samt Inhalt neu: Der Inhalt steht im Skript-Block «daten». Eine neuere Version des
+   Tools liest diesen Block aus der alten Datei («Daten laden») und bringt ihn mit migriere() auf ihren Aufbau.
+   Zusätzlich merkt sich der Browser den Stand je Dateipfad (localStorage).
+   Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
+   (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
+const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+const VERSION = '0.4';         // Version des Tools, steht in den Einstellungen
+const FORMAT = 3;              // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
+const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
+const KEY = 'strategietag-bi:v2:' + location.pathname;
+const KEY_G = KEY + ':gesichert';   // Stand, der zuletzt in eine Datei ging
+const KEY_N = KEY + ':name';        // Name der Datei, aus der der Stand stammt oder in die er zuletzt ging
+const KEY_A = KEY + ':anzeige';     // Schriftgrösse und Farben dieses Geräts
+let IM_RAHMEN = false;
+try { IM_RAHMEN = window.self !== window.top; } catch (e) { IM_RAHMEN = true; }
+const FEIN = window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+const GROB = !!(window.matchMedia && window.matchMedia('(pointer:coarse)').matches);   // Finger statt Maus
+const ALS_DATEI = location.protocol === 'file:';                                        // Datei auf dem Rechner
+const ALS_LINK = !IM_RAHMEN && /^https?:$/.test(location.protocol);                     // über eine Webadresse geöffnet
+// iPad und Handy: «Sichern» gibt die Datei über das Teilen-Fenster weiter; am Rechner schreibt der Browser direkt in die Datei
+const BERUEHRUNG = GROB || (navigator.maxTouchPoints || 0) > 0;                          // auch ein iPad mit Tastatur und Trackpad
+const ANDROID = /Android/i.test(navigator.userAgent);
+const TEILEN_ZUERST = BERUEHRUNG && (ANDROID || !window.showSaveFilePicker);
+function kannTeilen() {
+  try { return !!navigator.share && !!navigator.canShare && navigator.canShare({ files: [new File(['x'], 'x.html', { type: 'text/html' })] }); }
+  catch (e) { return false; }
+}
+{ const weg = document.getElementById('ohne-js'); if (weg) weg.remove(); }   // steht nur da, wo kein Skript läuft
+
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Math.random().toString(36).slice(2, 10);
+
+const IC = {
+  plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+  minus: '<path d="M5 12h14"/>',
+  x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  right: '<path d="m9 18 6-6-6-6"/>',
+  up: '<path d="m18 15-6-6-6 6"/>',
+  down: '<path d="m6 9 6 6 6-6"/>',
+  gear: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+  disk: '<path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>',
+  print: '<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/>',
+  flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/>',
+  trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+  pen: '<path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/>',
+  upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/>',
+  max: '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>',
+  info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>'
+};
+const ic = (n, klasse) => '<svg class="ic' + (klasse ? ' ' + klasse : '') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + (IC[n] || '') + '</svg>';
+
+// Zeichen, die in Zahlen nur gliedern (Apostrophe, Leerzeichen), und Zeilentrenner, die in einem Skript-Block nicht stehen dürfen
+const TRENNER = new RegExp('[' + String.fromCharCode(0x2019, 0x2018, 0x27, 0x60, 0xB4) + '\\s]', 'g');
+const ZEILENTRENNER = new RegExp('[' + String.fromCharCode(0x2028, 0x2029) + ']', 'g');
+const MON = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+const MON_NR = { jan: 1, feb: 2, 'mär': 3, mrz: 3, mar: 3, apr: 4, mai: 5, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, okt: 10, oct: 10, nov: 11, dez: 12, dec: 12 };
+const monatAus = (text) => MON_NR[String(text).trim().slice(0, 3).toLowerCase()] || 0;   // «Nov 26» → 11
+const ARTEN = [['thema', 'Thema'], ['rueckblick', 'Rückblick'], ['gruppen', 'Gruppen'], ['ziele', 'Ziele']];
+const STAND = { erreicht: 'Erreicht', teilweise: 'Teilweise', offen: 'Offen', '': 'Nicht bewertet' };
+
+/* ---------- Aufbau der Daten ---------- */
+function themaNeu(art, titelText, frage) {
+  return { id: uid(), art: art || 'thema', titel: titelText || 'Neues Thema', frage: frage || '', notizen: [], beschluesse: [], ziele: [], gruppen: [], leute: [] };
+}
+function themenStart() {
+  const jahr = new Date().getFullYear() + 1;
+  const g = themaNeu('gruppen', 'Gruppen', 'Wer gehört fest zu welcher Gruppe?');
+  g.gruppen = ['Gruppe 1', 'Gruppe 2', 'Gruppe 3'].map((n) => ({ id: uid(), name: n }));
+  return [
+    themaNeu('rueckblick', 'Rückblick', 'Welche Ziele haben wir uns letztes Jahr gesetzt, und was ist daraus geworden?'),
+    g,
+    themaNeu('thema', 'Thema 1', 'Worum geht es, und was wollen wir entscheiden?'),
+    themaNeu('thema', 'Thema 2', ''),
+    themaNeu('ziele', 'Ziele ' + jahr, 'Was nehmen wir uns für ' + jahr + ' vor? Nächstes Jahr schauen wir darauf zurück.')
+  ];
+}
+function heute() { const d = new Date(), z = (n) => String(n).padStart(2, '0'); return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()); }
+function leer() {
+  return {
+    v: FORMAT, beispiel: false, stand: '',
+    meta: { titel: 'Strategie ' + (new Date().getFullYear() + 1), abteilung: 'Abteilung', datum: heute(), zoom: (window.innerWidth || 0) >= 1500 ? 1.15 : 1, modus: 'auto' },
+    zahlen: { perioden: [], zeilen: [], sicht: 'summen', ansicht: 'diagramme' },
+    themen: themenStart(),
+    ui: { bereich: 'zahlen', thema: '', auf: {} }
+  };
+}
+
+/* Alle Angaben hier sind erfunden. Sie zeigen nur, wie das Tool gefüllt aussieht. */
+function beispiel() {
+  const s = leer();
+  s.beispiel = true;
+  const P = ['2023', '2024', '2025', 'Sep 26', 'Budget 2027'].map((n) => ({ id: uid(), name: n }));
+  const Z = (nr, name, art, stufe, werte) => { const w = {}; werte.forEach((v, i) => { if (v !== null) w[P[i].id] = v; }); return { k: nr ? 'n' + nr : 't' + name.toLowerCase(), nr: nr, name: name, art: art, stufe: stufe, w: w }; };
+  const o = null;
+  s.zahlen.perioden = P;
+  s.zahlen.zeilen = [
+    Z('3000', 'Bauertrag Akkord', 'konto', 0, [3900000, 4350000, 4100000, 3200000, o]),
+    Z('3010', 'Bauertrag Regie', 'konto', 0, [180000, 210000, 240000, 170000, o]),
+    Z('3099', 'Summe Erträge Bau', 'summe', 1, [4080000, 4560000, 4340000, 3370000, o]),
+    Z('3600', 'Uebriger Ertrag', 'konto', 0, [12000, 9000, 15000, 6000, o]),
+    Z('3691', 'Summe andere Erträge', 'summe', 1, [12000, 9000, 15000, 6000, o]),
+    Z('3699', 'Summe Erträge', 'summe', 2, [4092000, 4569000, 4355000, 3376000, 4600000]),
+    Z('4020', 'Beton', 'konto', 0, [310000, 345000, 330000, 250000, o]),
+    Z('4080', 'Uebriges Baumaterial', 'konto', 0, [95000, 110000, 102000, 78000, o]),
+    Z('4091', 'Baumaterial', 'summe', 1, [405000, 455000, 432000, 328000, o]),
+    Z('4400', 'Betriebsmaterial', 'konto', 0, [38000, 41000, 44000, 31000, o]),
+    Z('4591', 'Verbrauchs/Betriebsmaterial', 'summe', 1, [38000, 41000, 44000, 31000, o]),
+    Z('5920', 'Subunternehmer', 'konto', 0, [820000, 960000, 870000, 690000, o]),
+    Z('4610', 'Fremdaufträge', 'konto', 0, [410000, 520000, 480000, 350000, o]),
+    Z('4891', 'Fremdleistung', 'summe', 1, [1230000, 1480000, 1350000, 1040000, o]),
+    Z('5000', 'Monatslöhne Betrieb', 'konto', 0, [980000, 1020000, 1060000, 810000, o]),
+    Z('9101', 'Zuschlag Sozialkosten', 'konto', 0, [720000, 750000, 780000, 596000, o]),
+    Z('5910', 'Personalmiete', 'konto', 0, [90000, 140000, 110000, 85000, o]),
+    Z('5991', 'Personalaufwand', 'summe', 1, [1790000, 1910000, 1950000, 1491000, o]),
+    Z('9150', 'Gerätemiete intern', 'konto', 0, [46000, 52000, 49000, 37000, o]),
+    Z('9250', 'Fahrzeugmiete intern', 'konto', 0, [88000, 96000, 93000, 70000, o]),
+    Z('6195', 'Interne Verrechnung', 'summe', 1, [134000, 148000, 142000, 107000, o]),
+    Z('9800', 'Umlagen Gemeinkosten', 'konto', 0, [300000, 330000, 320000, 245000, o]),
+    Z('9910', 'Total Aufwand', 'summe', 2, [3897000, 4364000, 4238000, 3242000, 4370000]),
+    Z('9990', 'Ergebnis', 'summe', 3, [-195000, -205000, -117000, -134000, -230000]),
+    Z('', 'Prod. Stunden Monatslohn', 'stunden', 0, [15200, 15900, 16300, 12400, o]),
+    Z('', 'Prod. Stunden Temp. Personal', 'stunden', 0, [1300, 2100, 1600, 1250, o]),
+    Z('', 'Total prod. Stunden', 'stunden', 1, [16500, 18000, 17900, 13650, 18500])
+  ];
+  const N = (text, gl) => ({ id: uid(), text: text, gl: !!gl });
+  const B = (was, wer, bis, gl) => ({ id: uid(), was: was, wer: wer || '', bis: bis || '', gl: !!gl });
+  const T = s.themen;
+  T[0].ziele = [['Rapporte am selben Tag im Büro', 'erreicht'], ['Zwei Mitarbeiter weiterbilden', 'teilweise'], ['Lagerplatz aufräumen', 'offen'], ['Unfallfrei durchs Jahr', 'teilweise']].map((z) => ({ id: uid(), text: z[0], stand: z[1] }));
+  T[0].notizen = [N('Weiterbildung: einer hat abgeschlossen, einer startet im Frühling')];
+  const G = T[1].gruppen;
+  T[1].leute = [0, 0, 0, 0, 1, 1, 1, 2, 2, 2, -1].map((g, i) => ({ id: uid(), name: 'Mitarbeiter ' + (i + 1), gruppe: g < 0 ? '' : G[g].id }));
+  T[1].beschluesse = [B('Zuteilung gilt ab 1. Januar, Wechsel nur über die Leitung', 'Leitung', '1. Januar')];
+  T[2].titel = 'Lagerplatz'; T[2].frage = 'Der Lagerplatz ist unübersichtlich. Was räumen wir auf, und wer macht es bis wann?';
+  T[2].notizen = [N('Regale beschriften'), N('Altes Material entsorgen')];
+  T[2].beschluesse = [B('Lagerplatz aufräumen und beschriften', 'Gruppe 2', 'Ende Februar', true)];
+  T[3].titel = 'Weiterbildung'; T[3].frage = 'Wer besucht nächstes Jahr welchen Kurs?';
+  T[3].notizen = [N('Wünsche bis Mitte Dezember sammeln'), N('Kosten mit der Leitung klären')];
+  T[3].beschluesse = [B('Kurswünsche sammeln', 'Alle', '15. Dezember')];
+  T[4].beschluesse = [B('Unfallfrei durchs Jahr', 'Alle', 'Ende Jahr'), B('Gruppen bleiben das ganze Jahr bestehen', 'Leitung', 'Ende Jahr'), B('Lagerplatz ist aufgeräumt', 'Gruppe 2', 'Ende März', true)];
+  return s;
+}
+
+/* Ältere Stände auf den heutigen Aufbau bringen. Was das Tool nicht kennt, bleibt unverändert erhalten. */
+function migriere(d) {
+  if (!d || typeof d !== 'object') return null;
+  if ((d.v || 2) < 3) d.v = 3;   // 0.2: Themen hatten nur Titel und Notizen; normal() ergänzt, was fehlt
+  return d;
+}
+function normal(d) {
+  const l = leer();
+  const s = Object.assign({}, l, d || {});
+  s.v = Math.max(FORMAT, (d && d.v) || 0);
+  s.meta = Object.assign({}, l.meta, (d && d.meta) || {});
+  const z = (d && d.zahlen) || {};
+  s.zahlen = Object.assign({}, z, { perioden: Array.isArray(z.perioden) ? z.perioden : [], zeilen: Array.isArray(z.zeilen) ? z.zeilen : [], sicht: z.sicht === 'alle' ? 'alle' : 'summen', ansicht: z.ansicht === 'tabelle' ? 'tabelle' : 'diagramme' });
+  s.zahlen.zeilen.forEach((x) => { if (!x.w || typeof x.w !== 'object') x.w = {}; });
+  if (!Array.isArray(s.themen)) s.themen = l.themen;
+  s.themen.forEach((t) => {
+    if (!t.id) t.id = uid();
+    if (!ARTEN.some((a) => a[0] === t.art)) t.art = 'thema';
+    if (typeof t.titel !== 'string') t.titel = 'Thema';
+    if (typeof t.frage !== 'string') t.frage = '';
+    ['notizen', 'beschluesse', 'ziele', 'gruppen', 'leute'].forEach((k) => { if (!Array.isArray(t[k])) t[k] = []; });
+  });
+  s.ui = Object.assign({}, l.ui, (d && d.ui) || {});
+  if (!s.ui.auf || typeof s.ui.auf !== 'object') s.ui.auf = {};
+  if (['zahlen', 'themen', 'ergebnis'].indexOf(s.ui.bereich) < 0) s.ui.bereich = 'zahlen';
+  return s;
+}
+/* Einen gespeicherten Stand übernehmen. Ein Beispiel aus einer älteren Version wird durch das heutige Beispiel ersetzt. */
+function vorbereiten(d) {
+  if (d && d.beispiel && (d.v || 2) < FORMAT) {
+    const s = beispiel();
+    if (d.meta) { s.meta.zoom = d.meta.zoom || s.meta.zoom; s.meta.modus = d.meta.modus || s.meta.modus; }
+    return s;
+  }
+  return normal(migriere(d));
+}
+
+/* ---------- Stand: aus der Datei, aus dem Browser, sonst Vorlage ---------- */
+const datei = { handle: null, name: '', vorschlag: '', schmutzig: false, plan: 0 };
+let hinweis = '';        // Leiste beim Start über den Link: 'offen' = etwas ist noch nicht gesichert, 'stand' = Stand dieses Geräts
+let ladeWartet = null;   // Datei, die erst nach einer Rückfrage geladen wird
+let S;
+(function start() {
+  const lies = (f) => { try { return f(); } catch (e) { return null; } };
+  const eing = lies(() => JSON.parse($('#daten').textContent || 'null'));
+  const lokal = lies(() => JSON.parse(localStorage.getItem(KEY) || 'null'));
+  const ausDatei = eing && eing.daten ? eing.daten : null;
+  const gesichert = lies(() => localStorage.getItem(KEY_G)) || '';
+  if (lokal && ausDatei) {
+    if ((lokal.stand || '') > (ausDatei.stand || '')) { S = vorbereiten(lokal); datei.schmutzig = lokal.stand !== gesichert; } else S = vorbereiten(ausDatei);
+  } else if (lokal) { S = vorbereiten(lokal); datei.schmutzig = !!lokal.stand && lokal.stand !== gesichert; }
+  else if (ausDatei) S = vorbereiten(ausDatei);
+  else S = VARIANTE === 'beispiel' ? beispiel() : leer();
+  // Dateiname für «Sichern»: die eigene Datei, sonst die zuletzt geladene oder gesicherte
+  const eigen = ALS_DATEI && ausDatei ? lies(() => decodeURIComponent(location.pathname.split('/').pop() || '')) : '';
+  datei.vorschlag = eigen || lies(() => localStorage.getItem(KEY_N)) || '';
+  if (ALS_LINK && !S.beispiel && S.stand) hinweis = datei.schmutzig ? 'offen' : 'stand';
+  // Schriftgrösse und Farben: was auf diesem Gerät zuletzt galt, nicht was ein anderes Gerät in die Datei schrieb
+  const anz = lies(() => JSON.parse(localStorage.getItem(KEY_A) || 'null'));
+  if (anz && typeof anz === 'object') { if (anz.zoom) S.meta.zoom = anz.zoom; if (anz.modus) S.meta.modus = anz.modus; }
+})();
+
+function speichern(nurAnsicht) {
+  if (!nurAnsicht) S.stand = new Date().toISOString();
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* ohne Zwischenspeicher weiter */ }
+  if (nurAnsicht) return;
+  datei.schmutzig = true; hinweis = '';
+  if (datei.handle) { clearTimeout(datei.plan); datei.plan = setTimeout(() => { sichern(true); }, 1500); }
+}
+function gesichertMerken() { datei.schmutzig = false; hinweis = ''; try { localStorage.setItem(KEY_G, S.stand || ''); } catch (e) { /* ohne Zwischenspeicher weiter */ } }
+function anzeigeMerken() { try { localStorage.setItem(KEY_A, JSON.stringify({ zoom: S.meta.zoom, modus: S.meta.modus })); } catch (e) { /* ohne Zwischenspeicher weiter */ } }
+function nameMerken(name) {
+  if (!name || !/\.html?$/i.test(name)) return;
+  datei.vorschlag = name;
+  try { localStorage.setItem(KEY_N, name); } catch (e) { /* ohne Zwischenspeicher weiter */ }
+}
+const rueckStapel = [];
+function merken() { rueckStapel.push(JSON.stringify(S)); if (rueckStapel.length > 20) rueckStapel.shift(); }
+
+/* ---------- Helfer ---------- */
+const fmt = (n) => new Intl.NumberFormat('de-CH', { maximumFractionDigits: 0 }).format(Math.round(n));
+const fmtN = (n, stellen) => new Intl.NumberFormat('de-CH', { minimumFractionDigits: stellen, maximumFractionDigits: stellen }).format(n);
+const MINUS = String.fromCharCode(0x2212);
+const mitVz = (n, text) => (n < 0 ? MINUS : '+') + text;   // Vorzeichen ausgeschrieben: +195'000
+function kurz(v) {   // Achsen und Beschriftungen: ab einer Million abgekürzt
+  const a = Math.abs(v);
+  return a >= 1e6 ? fmtN(v / 1e6, a >= 1e7 || Math.abs(v / 1e6 - Math.round(v / 1e6)) < 0.005 ? 0 : (Math.abs(v / 1e5 - Math.round(v / 1e5)) < 0.05 ? 1 : 2)) + ' Mio.' : fmt(v);
+}
+function datumLang(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+  return m ? new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString('de-CH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
+}
+const zeitKurz = (iso) => { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); };
+function zahl(s) {
+  if (typeof s === 'number') return isNaN(s) ? null : s;
+  s = String(s == null ? '' : s).trim();
+  if (!s) return null;
+  let neg = false;
+  if (/^\(.*\)$/.test(s)) { neg = true; s = s.slice(1, -1); }
+  s = s.replace(TRENNER, '').replace(/%$/, '');
+  if (/^[-−–]|[-−–]$/.test(s)) { neg = !neg; s = s.replace(/[-−–]/g, ''); }
+  if (!/^[0-9.,]+$/.test(s) || !/[0-9]/.test(s)) return null;
+  const p = s.lastIndexOf('.'), k = s.lastIndexOf(',');
+  if (p >= 0 && k >= 0) s = p > k ? s.replace(/,/g, '') : s.replace(/\./g, '').replace(',', '.');
+  else if (k >= 0) { const t = s.split(','); s = (t.length > 2 || (t[1].length === 3 && t[0].length <= 3 && t[0] !== '0')) ? s.replace(/,/g, '') : s.replace(',', '.'); }
+  else if (p >= 0 && s.split('.').length > 2) s = s.replace(/\./g, '');
+  const n = Number(s);
+  return isNaN(n) ? null : (neg ? -n : n);
+}
+function periodeOrdnung(name) {
+  const bud = /budget/i.test(name) ? 1 : 0;
+  let j = 9999;
+  const y4 = /(19|20)\d{2}/.exec(name);
+  if (y4) j = +y4[0]; else { const y2 = /(?:^|\D)(\d{2})\s*$/.exec(name); if (y2) j = 2000 + (+y2[1]); }
+  return bud * 1e7 + j * 100 + (monatAus(name) || 12);
+}
+/* Monat und Jahr aus «2026-11-18», «18.11.2026», «11.26» oder «Nov 26» */
+function monatJahr(s) {
+  s = String(s || '').trim();
+  const jahr = (x) => (+x < 100 ? 2000 + (+x) : +x);
+  let m = /^(\d{4})-(\d{1,2})(?:-\d{1,2})?/.exec(s);
+  if (m) return [+m[2], +m[1]];
+  m = /^(\d{1,2})\.(\d{1,2})\.(\d{2,4})/.exec(s);
+  if (m) return [+m[2], jahr(m[3])];
+  m = /^(\d{1,2})[.\/](\d{2,4})$/.exec(s);
+  if (m) return [+m[1], jahr(m[2])];
+  const mo = monatAus(s), j = /(\d{2,4})\s*$/.exec(s);
+  return mo && j ? [mo, jahr(j[1])] : null;
+}
+const mehrzeilig = (text) => String(text).split(/[\r\n\t;]+/).map((x) => x.trim()).filter(Boolean);   // Liste aus Excel: ein Eintrag je Zeile
+
+/* ---------- Einlesen: eingefügter Text, CSV, Excel-Datei ---------- */
+function gitterAusText(text) {
+  text = String(text).replace(/\r\n?/g, '\n');
+  const kopf = text.split('\n').slice(0, 40);
+  const anz = (z) => kopf.reduce((a, l) => a + l.split(z).length - 1, 0);
+  const tr = anz('\t') > 0 ? '\t' : (anz(';') >= anz(',') ? ';' : ',');
+  const zeilen = [];
+  let zeile = [], feld = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQ) { if (c === '"') { if (text[i + 1] === '"') { feld += '"'; i++; } else inQ = false; } else feld += c; }
+    else if (c === '"' && feld === '') inQ = true;
+    else if (c === tr) { zeile.push(feld); feld = ''; }
+    else if (c === '\n') { zeile.push(feld); zeilen.push(zeile); zeile = []; feld = ''; }
+    else feld += c;
+  }
+  if (feld !== '' || zeile.length) { zeile.push(feld); zeilen.push(zeile); }
+  return zeilen.map((z) => z.map((f) => f.trim()));
+}
+async function xlsxLesen(buf) {
+  const u8 = new Uint8Array(buf), dv = new DataView(buf), dek = new TextDecoder('utf-8');
+  let e = u8.length - 22;
+  while (e >= 0 && dv.getUint32(e, true) !== 0x06054b50) e--;
+  if (e < 0) throw new Error('kein zip');
+  const anzahl = dv.getUint16(e + 10, true), dir = {};
+  let p = dv.getUint32(e + 16, true);
+  for (let i = 0; i < anzahl && p + 46 <= u8.length; i++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const nl = dv.getUint16(p + 28, true), el = dv.getUint16(p + 30, true), kl = dv.getUint16(p + 32, true);
+    dir[dek.decode(u8.subarray(p + 46, p + 46 + nl))] = { meth: dv.getUint16(p + 10, true), cs: dv.getUint32(p + 20, true), off: dv.getUint32(p + 42, true) };
+    p += 46 + nl + el + kl;
+  }
+  const lies = async (name) => {
+    const d = dir[name];
+    if (!d) return null;
+    const start = d.off + 30 + dv.getUint16(d.off + 26, true) + dv.getUint16(d.off + 28, true);
+    const roh = u8.subarray(start, start + d.cs);
+    if (d.meth === 0) return dek.decode(roh);
+    if (d.meth !== 8 || typeof DecompressionStream === 'undefined') throw new Error('packung');
+    const strom = new Blob([roh]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+    return dek.decode(new Uint8Array(await new Response(strom).arrayBuffer()));
+  };
+  const xml = (t) => new DOMParser().parseFromString(t, 'application/xml');
+  const wbT = await lies('xl/workbook.xml');
+  if (!wbT) throw new Error('kein xlsx');
+  const ziel = {}, ss = [];
+  const relT = await lies('xl/_rels/workbook.xml.rels');
+  if (relT) Array.from(xml(relT).getElementsByTagName('Relationship')).forEach((r) => { ziel[r.getAttribute('Id')] = r.getAttribute('Target'); });
+  const ssT = await lies('xl/sharedStrings.xml');
+  if (ssT) Array.from(xml(ssT).getElementsByTagName('si')).forEach((si) => { ss.push(Array.from(si.getElementsByTagName('t')).filter((t) => t.parentNode.nodeName !== 'rPh').map((t) => t.textContent).join('')); });
+  const datStil = [], stT = await lies('xl/styles.xml');   // Zellformate, die ein Datum zeigen (für Spaltentitel wie «Dez 25»)
+  if (stT) {
+    const d = xml(stT), eigene = {};
+    Array.from(d.getElementsByTagName('numFmt')).forEach((n) => { eigene[n.getAttribute('numFmtId')] = n.getAttribute('formatCode') || ''; });
+    const xfs = d.getElementsByTagName('cellXfs')[0];
+    if (xfs) Array.from(xfs.getElementsByTagName('xf')).forEach((x) => {
+      const id = +x.getAttribute('numFmtId'), code = eigene[id];
+      datStil.push(code !== undefined ? /[dmy]/i.test(code.replace(/"[^"]*"|\[[^\]]*\]|\\./g, '')) : ((id >= 14 && id <= 22) || (id >= 27 && id <= 36) || (id >= 45 && id <= 47) || (id >= 50 && id <= 58)));
+    });
+  }
+  const blaetter = [], sheets = Array.from(xml(wbT).getElementsByTagName('sheet'));
+  for (let i = 0; i < sheets.length; i++) {
+    const rid = sheets[i].getAttribute('r:id') || sheets[i].getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id');
+    const pfad = (ziel[rid] || ('worksheets/sheet' + (i + 1) + '.xml')).replace(/^\/?xl\//, '').replace(/^\//, '');
+    const t = await lies('xl/' + pfad);
+    if (!t) continue;
+    const g = [];
+    let zi = -1;
+    Array.from(xml(t).getElementsByTagName('row')).forEach((row) => {
+      const rr = +row.getAttribute('r');
+      zi = rr > 0 ? rr - 1 : zi + 1;
+      let sp = 0;
+      if (zi > 20000) return;
+      Array.from(row.getElementsByTagName('c')).forEach((c) => {
+        const m = /^([A-Z]+)/.exec(c.getAttribute('r') || '');   // ohne Adresse: die nächste Spalte
+        if (m) { sp = 0; for (let k = 0; k < m[1].length; k++) sp = sp * 26 + (m[1].charCodeAt(k) - 64); } else sp++;
+        if (sp > 400) return;
+        const typ = c.getAttribute('t'), v = c.getElementsByTagName('v')[0];
+        let wert;
+        if (typ === 's') wert = v ? (ss[+v.textContent] || '') : '';
+        else if (typ === 'inlineStr') wert = Array.from(c.getElementsByTagName('t')).map((x) => x.textContent).join('');
+        else if (typ === 'b') wert = v && v.textContent === '1' ? 'WAHR' : 'FALSCH';   // Ja/Nein-Felder sind keine Zahlen
+        else {
+          wert = v ? v.textContent : '';
+          if ((!typ || typ === 'n') && wert !== '' && isFinite(+wert)) {
+            const n = +wert;
+            if (datStil[+c.getAttribute('s')] && n > 20000 && n < 80000) { const tag = new Date(Date.UTC(1899, 11, 30) + Math.round(n) * 864e5); wert = MON[tag.getUTCMonth()] + ' ' + String(tag.getUTCFullYear()).slice(2); }
+            else wert = /e/i.test(String(n)) ? n.toFixed(6) : String(n);
+          }
+        }
+        wert = String(wert).trim();
+        if (wert === '') return;
+        while (g.length <= zi) g.push([]);
+        while (g[zi].length < sp) g[zi].push('');
+        g[zi][sp - 1] = wert;
+      });
+    });
+    blaetter.push({ name: sheets[i].getAttribute('name'), g: g });
+  }
+  return blaetter;
+}
+/* Aus einem Gitter den BAB herauslesen: Zeilen mit Kontonummer oder Stunden, dazu die Spalten mit Zahlen.
+   Kennt beide Exporte: den Bericht (Kopfzeilen mit «Auswertungsmonat: 11.26», Spalte «Nummer») und die Liste
+   (eine Spalte «Auswertungsmonat» mit Datum, Spalte «Anzuzeigende Nummer»). */
+function babLesen(g) {
+  let h = -1, cN = -1, cB = -1;
+  const istNr = (x) => /nummer$|^nr\.?$|^konto$/i.test(x || '');
+  for (let r = 0; r < Math.min(g.length, 60) && h < 0; r++) {
+    const z = g[r] || [], iB = z.findIndex((x) => /^bezeichnung$/i.test(x));
+    if (iB < 0) continue;
+    const iN = iB > 0 && istNr(z[iB - 1]) ? iB - 1 : z.findIndex((x, c) => c !== iB && istNr(x));
+    if (iN >= 0) { h = r; cN = iN; cB = iB; }
+  }
+  const sicher = h >= 0;
+  if (h < 0) {
+    for (let r = 0; r < Math.min(g.length, 80) && cN < 0; r++) {
+      const z = g[r] || [];
+      for (let c = 0; c + 1 < z.length; c++) if (/^\d{4}$/.test(z[c]) && z[c + 1] && zahl(z[c + 1]) === null) { h = r - 1; cN = c; cB = c + 1; break; }
+    }
+    if (cN < 0) return null;
+  }
+  const reihen = [];
+  let breite = 0;
+  for (let r = h + 1; r < g.length; r++) {
+    const z = g[r] || [], roh = (z[cB] || '').trim();
+    if (!roh) continue;
+    const nr = (z[cN] || '').trim().replace(/\.0+$/, ''), hatNr = /^\d{3,5}$/.test(nr);
+    const m = /^(\*+)\s*(.*)$/.exec(roh), stufe = m ? m[1].length : 0, name = m ? m[2] : roh;
+    if (!hatNr && !/stunden|anzahl/i.test(name)) continue;
+    reihen.push({ r: r, nr: hatNr ? nr : '', name: name, stufe: stufe, art: hatNr ? (stufe ? 'summe' : 'konto') : 'stunden' });
+    breite = Math.max(breite, z.length);
+  }
+  if (!reihen.length) return null;
+  let raute = 0;   // «####»: in Excel war die Spalte beim Kopieren zu schmal
+  reihen.forEach((q) => (g[q.r] || []).forEach((x) => { if (/^#{2,}$/.test(x)) raute++; }));
+  let monat = 0, jahr = 0, budgetAb = Infinity;
+  for (let r = 0; r <= h; r++) (g[r] || []).forEach((x, c) => {
+    const m = /Auswertungsmonat:?\s*(\d{1,2})[.\/](\d{2,4})/i.exec(x);
+    if (m) { monat = +m[1]; jahr = +m[2] < 100 ? 2000 + (+m[2]) : +m[2]; }
+    if (c > cB && /^\s*budget/i.test(x)) budgetAb = Math.min(budgetAb, c);
+  });
+  if (!jahr && h >= 0) {   // Liste: der Auswertungsmonat steht als Datum in einer eigenen Spalte
+    const cA = (g[h] || []).findIndex((x) => /^auswertungsmonat$/i.test(x));
+    const erste = cA >= 0 ? reihen.map((q) => ((g[q.r] || [])[cA] || '').trim()).find(Boolean) : '', mj = erste ? monatJahr(erste) : null;
+    if (mj && mj[0] >= 1 && mj[0] <= 12) { monat = mj[0]; jahr = mj[1]; }
+  }
+  const spalten = [];
+  for (let c = Math.max(cN, cB) + 1; c < breite; c++) {   // Beträge stehen rechts der Bezeichnung
+    let n = 0;
+    reihen.forEach((q) => { if (zahl((g[q.r] || [])[c]) !== null) n++; });
+    if (!n) continue;
+    const kopf = [];
+    for (let r = Math.max(0, h - 2); r <= h; r++) { const t = ((g[r] || [])[c] || '').trim(); if (t) kopf.push(t); }
+    spalten.push({ c: c, n: n, kopf: kopf });
+  }
+  const istLfd = (x) => /^lfd\.?\s*jahr$/i.test(x), istProz = (x) => /^in\s*%|^%$/i.test(x);
+  const standard = spalten.some((s) => s.kopf.some(istLfd)) && spalten.some((s) => s.kopf.some((x) => /^periode$/i.test(x)));
+  const gesehen = {};
+  spalten.forEach((s) => {
+    const prozent = s.kopf.some(istProz);
+    let name = '', an = false, info = '';
+    if (standard) {
+      const art = s.kopf[s.kopf.length - 1] || '';
+      info = art;
+      if (istLfd(art)) { name = jahr ? (monat && monat < 12 ? MON[monat - 1] + ' ' + String(jahr).slice(2) : String(jahr)) : 'Laufendes Jahr'; an = true; }
+      else if (/^periode$/i.test(art)) name = jahr && monat ? 'Monat ' + MON[monat - 1] + ' ' + String(jahr).slice(2) : 'Periode';
+      else if (/baubeginn/i.test(art)) name = 'Seit Baubeginn';
+    } else {
+      const zeit = s.kopf.filter((x) => !istLfd(x) && !istProz(x));
+      const mitJahr = zeit.filter((x) => /(19|20)\d{2}|\d{2}$/.test(x));
+      name = mitJahr.length ? mitJahr[mitJahr.length - 1] : (zeit.length ? zeit[zeit.length - 1] : '');
+      if (name && !/budget/i.test(name) && (s.c >= budgetAb || gesehen[name])) name = 'Budget ' + name;
+      an = !!name;
+      info = s.kopf.filter(istLfd)[0] || '';
+    }
+    if (prozent) { an = false; name = ''; }
+    if (name) {
+      const basis = name;
+      for (let n = 2; gesehen[name]; n++) name = basis + ' (' + n + ')';
+      gesehen[name] = 1;
+    }
+    s.name = name; s.an = an; s.info = info;
+  });
+  let brauchbar = spalten.filter((s) => s.name);
+  if (!brauchbar.length) {   // ohne Überschriften: jede Zahlenspalte anbieten
+    spalten.forEach((s, i) => { s.name = 'Spalte ' + (i + 1); s.an = true; });
+    brauchbar = spalten;
+  }
+  return { g: g, reihen: reihen, spalten: brauchbar, sicher: sicher, raute: raute };
+}
+function zahlenUebernehmen(imp, auswahl) {
+  const Z = S.zahlen;
+  auswahl.forEach((a) => {
+    let p = Z.perioden.find((x) => x.name === a.name);
+    if (!p) { p = { id: uid(), name: a.name }; Z.perioden.push(p); }
+    else Z.zeilen.forEach((z) => { delete z.w[p.id]; });
+    a.pid = p.id;
+  });
+  let vor = -1;
+  imp.reihen.forEach((q) => {
+    const k = q.nr ? 'n' + q.nr : 't' + q.name.toLowerCase().replace(/\s+/g, ' ');
+    let i = Z.zeilen.findIndex((z) => z.k === k);
+    if (i < 0) { i = vor + 1; Z.zeilen.splice(i, 0, { k: k, nr: q.nr, name: q.name, art: q.art, stufe: q.stufe, w: {} }); }
+    vor = i;
+    auswahl.forEach((a) => { const v = zahl((imp.g[q.r] || [])[a.c]); if (v !== null) Z.zeilen[i].w[a.pid] = (Z.zeilen[i].w[a.pid] || 0) + v; });
+  });
+  Z.perioden.sort((a, b) => periodeOrdnung(a.name) - periodeOrdnung(b.name));
+}
+let importStand = null;   // { teile: [gelesener BAB je Datei], fehler: Anzahl Dateien ohne BAB }
+function zeigeImport(teile, fehler) {
+  teile = (teile || []).filter(Boolean);
+  if (!teile.length) { toast('Darin finde ich keinen BAB. Es braucht die Spalten «Nummer» und «Bezeichnung».'); return; }
+  const rang = (imp) => { const s = imp.spalten.find((x) => x.an) || imp.spalten[0]; return s ? periodeOrdnung(s.name) : 0; };
+  teile.sort((a, b) => rang(a) - rang(b));
+  importStand = { teile: teile, fehler: fehler || 0 };
+  S.ui.bereich = 'zahlen';
+  auf({ art: 'spalten' });
+  render();
+}
+function importText(text) { zeigeImport([babLesen(gitterAusText(text))]); }
+async function babAusDatei(file) {
+  if (/\.xls[xm]$/i.test(file.name)) {
+    const blaetter = await xlsxLesen(await file.arrayBuffer());
+    let best = null;   // das Blatt, das am ehesten der BAB ist
+    blaetter.forEach((b) => {
+      const imp = babLesen(b.g);
+      if (imp && (!best || (imp.sicher && !best.sicher) || (imp.sicher === best.sicher && imp.reihen.length > best.reihen.length))) best = imp;
+    });
+    return best;
+  }
+  if (/\.xls$/i.test(file.name)) throw new Error('xls');
+  return babLesen(gitterAusText(await file.text()));
+}
+/* Eine oder mehrere Dateien: gesicherte Datei des Tools → Daten laden; sonst je Datei ein BAB (z. B. je Jahr eine). */
+async function importDateien(liste) {
+  const dateien = Array.from(liste || []);
+  if (!dateien.length) return;
+  const daten = dateien.find((f) => /\.(html?|json)$/i.test(f.name));
+  if (daten) { ladeDatei(daten); return; }
+  const teile = [];
+  let fehler = 0, alt = false;
+  for (let i = 0; i < dateien.length; i++) {
+    try { const imp = await babAusDatei(dateien[i]); if (imp) { imp.datei = dateien[i].name; teile.push(imp); } else fehler++; }
+    catch (e) { fehler++; if (e && e.message === 'xls') alt = true; }
+  }
+  if (!teile.length) {
+    toast(alt ? 'Alte Excel-Dateien (.xls) kann ich nicht lesen. Die Tabelle in Excel kopieren und einfügen geht immer.' : (dateien.length > 1 ? 'In diesen Dateien finde ich keinen BAB.' : 'In dieser Datei finde ich keinen BAB. Die Tabelle in Excel kopieren und einfügen geht immer.'));
+    return;
+  }
+  zeigeImport(teile, fehler);
+}
+
+/* ---------- Daten aus einer gesicherten Datei laden (auch aus einer älteren Version) ---------- */
+function datenAusText(text) {
+  const AUF = '<scr' + 'ipt id="daten" type="application/json">';
+  const a = text.indexOf(AUF);
+  const o = JSON.parse(a >= 0 ? text.slice(a + AUF.length, text.indexOf('</scr' + 'ipt>', a)) : text);
+  if (o === null && a >= 0) throw new Error('leer');
+  const d = o && o.daten ? o.daten : o;
+  if (!d || typeof d !== 'object') throw new Error('fremd');
+  if ((o && o.version === 1) || d.swot || d.massnahmen) throw new Error('prototyp');
+  if (!d.zahlen && !d.themen) throw new Error('fremd');
+  return d;
+}
+async function ladeDatei(file) {
+  if (IM_RAHMEN) { toast('In dieser Vorschau ausgeschaltet. Öffne das Tool über seinen Link oder am Rechner per Doppelklick.'); return; }
+  let d;
+  try { d = datenAusText(await file.text()); }
+  catch (e) {
+    const grund = e && e.message;
+    toast(grund === 'leer' ? 'Diese Datei enthält noch keine Daten. In der alten Datei zuerst «Sichern» drücken und dann die gesicherte Datei laden.'
+      : grund === 'prototyp' ? 'Diese Datei stammt vom ersten Prototyp. Ihr Aufbau passt nicht mehr.'
+      : 'In dieser Datei finde ich keine Daten des Tools.');
+    return;
+  }
+  // Rückfrage, wenn dabei etwas verloren ginge: Die Datei ist älter als der Stand hier, oder hier ist etwas noch nicht gesichert
+  const hier = S.beispiel || ohneInhalt() ? '' : (S.stand || '');   // ein Beispiel oder ein leerer Stand geht ohne Rückfrage weg
+  if (hier && d.stand === hier && !datei.schmutzig) { nameMerken(file.name); hinweis = ''; zu(); render(); toast('Diese Datei hat denselben Stand wie dieses Gerät. Es ist alles da.'); return; }
+  if (hier && ((d.stand && d.stand < hier) || (datei.schmutzig && d.stand !== hier))) { ladeWartet = { d: d, name: file.name }; auf({ art: 'aelter' }); return; }
+  uebernehmen(d, file.name);
+}
+function ohneInhalt() {   // nichts eingetragen und die Themen wie am Anfang
+  const vor = themenStart();
+  return !S.zahlen.perioden.length && S.themen.length === vor.length && S.themen.every((x, i) => x.titel === vor[i].titel && x.frage === vor[i].frage && !x.notizen.length && !x.beschluesse.length && !x.ziele.length && !x.leute.length);
+}
+function uebernehmen(d, name) {
+  merken();
+  const zoom = S.meta.zoom, modus = S.meta.modus, neuer = (d.v || 2) > FORMAT;
+  S = vorbereiten(d);
+  S.meta.zoom = zoom; S.meta.modus = modus;   // Schriftgrösse und Farben gehören zum Gerät, nicht zu den Daten
+  nameMerken(name);
+  speichern(true);   // der Stand bleibt der der Datei: So lässt sich später vergleichen, was neuer ist
+  hinweis = '';
+  if (ALS_DATEI || datei.handle) {   // am Rechner: Die geladenen Daten stehen noch nicht in dieser Datei
+    datei.schmutzig = true;
+    if (datei.handle) { clearTimeout(datei.plan); datei.plan = setTimeout(() => { sichern(true); }, 300); }
+  } else gesichertMerken();
+  zu(); render(); window.scrollTo(0, 0);
+  toast('Daten geladen' + (d.stand ? ' (Stand vom ' + zeitKurz(d.stand) + ')' : '') + '.' + (neuer ? ' Die Datei stammt aus einer neueren Version des Tools.' : ''), true);
+}
+
+/* ---------- Zahlen: Aufbau der Tabelle ---------- */
+function zahlenGruppen() {
+  const P = S.zahlen.perioden, aus = [];
+  let offen = [];
+  // Zeilen ohne Betrag bleiben weg. Ist alles null (leere Vorlage), bleibt jede Zeile mit einem Wert stehen.
+  const betrag = S.zahlen.zeilen.some((z) => P.some((p) => !!z.w[p.id]));
+  const zeigen = (z) => P.some((p) => { const v = z.w[p.id]; return betrag ? !!v : (v !== undefined && v !== null); });
+  const sichtbar = S.zahlen.zeilen.filter(zeigen);
+  sichtbar.forEach((z) => {
+    if (z.art === 'konto') offen.push(z);
+    else if (z.art === 'summe' && z.stufe === 1) { aus.push({ z: z, konten: offen }); offen = []; }
+    else { offen.forEach((k) => aus.push({ z: k, lose: true })); offen = []; aus.push({ z: z }); }
+  });
+  offen.forEach((k) => aus.push({ z: k, lose: true }));
+  aus.versteckt = S.zahlen.zeilen.length - sichtbar.length;
+  return aus;
+}
+function kernZeilen() {
+  const zs = S.zahlen.zeilen;
+  const ertrag = zs.find((z) => z.nr === '3699') || zs.find((z) => z.art === 'summe' && z.stufe >= 2 && /ertr/i.test(z.name));
+  const aufwand = zs.find((z) => z.nr === '9910') || zs.find((z) => z.art === 'summe' && z.stufe >= 2 && /aufwand/i.test(z.name));
+  const ergebnis = zs.find((z) => z.nr === '9990') || zs.find((z) => z.art === 'summe' && z.stufe >= 3);
+  const stunden = zs.find((z) => z.art === 'stunden' && z.stufe >= 1) || null;
+  return { ertrag: ertrag, aufwand: aufwand, ergebnis: ergebnis, stunden: stunden };
+}
+function gewinnProzent(pid) {
+  const k = kernZeilen();
+  if (!k.ertrag || !k.aufwand) return null;
+  const e = k.ertrag.w[pid], a = k.aufwand.w[pid];
+  return (e === undefined || a === undefined || !e) ? null : (Math.abs(e) - Math.abs(a)) / Math.abs(e) * 100;
+}
+/* Im BAB steht das Ergebnis als Aufwand minus Ertrag: Ein Minus ist dann ein Gewinn. */
+function minusIstGewinn() {
+  const k = kernZeilen();
+  if (!k.ertrag || !k.aufwand || !k.ergebnis) return false;
+  return S.zahlen.perioden.some((p) => {
+    const e = k.ertrag.w[p.id], a = k.aufwand.w[p.id], r = k.ergebnis.w[p.id];
+    if (e === undefined || a === undefined || r === undefined) return false;
+    const E = Math.abs(e), A = Math.abs(a);
+    return Math.abs(E - A) > 1 && Math.abs(r - (A - E)) < Math.abs(r - (E - A));
+  });
+}
+const istBudget = (p) => /budget/i.test(p.name);
+function zelle(z, p) { const v = z.w[p.id]; return '<td' + (istBudget(p) ? ' class="bud"' : '') + '>' + (v === undefined || v === null ? '' : fmt(v)) + '</td>'; }
+/* Höchstens sechs Spalten für Diagramme und Ergebnis: die zwei letzten Budgets und davor die neusten Jahre */
+function spaltenWahl() {
+  const alle = S.zahlen.perioden, bud = alle.filter(istBudget).slice(-2);
+  return alle.filter((p) => !istBudget(p)).slice(-(6 - bud.length)).concat(bud);
+}
+
+/* ---------- Zahlen: Diagramme ----------
+   Vier Karten, jede mit einer Aussage. Jede Zahl steht auch ohne Zeigen da: als Beschriftung oder unter «Werte». */
+function diagrammDaten() {
+  const k = kernZeilen(), zs = S.zahlen.zeilen, iE = zs.indexOf(k.ertrag), iA = zs.indexOf(k.aufwand);
+  const gruppen = zs.filter((z, i) => z.art === 'summe' && z.stufe === 1 && (iE < 0 || i > iE) && (iA < 0 || i < iA));
+  const std = zs.filter((z) => z.art === 'stunden' && z.stufe === 0);
+  const wert = (z, p) => { const v = z ? z.w[p.id] : undefined; return v === undefined || v === null ? null : Math.abs(v); };
+  const summe = (liste, p, test) => liste.reduce((a, z) => (test(z.name) ? a + (wert(z, p) || 0) : a), 0);
+  return spaltenWahl().map((p) => {
+    const d = { name: p.name, bud: istBudget(p), E: wert(k.ertrag, p), A: wert(k.aufwand, p), h: wert(k.stunden, p) || null };
+    d.G = d.E !== null && d.A !== null ? d.E - d.A : null;
+    d.personal = summe(gruppen, p, (n) => /personal/i.test(n));
+    d.material = summe(gruppen, p, (n) => /material/i.test(n));
+    d.fremd = summe(gruppen, p, (n) => /fremd/i.test(n));
+    d.eigene = summe(std, p, (n) => /monatslohn|stundenlohn|eigen/i.test(n));
+    d.temp = summe(std, p, (n) => /temp/i.test(n));
+    d.weitere = summe(std, p, (n) => !/monatslohn|stundenlohn|eigen|temp/i.test(n));
+    if (!d.h && d.eigene + d.temp + d.weitere > 0) d.h = d.eigene + d.temp + d.weitere;
+    return d;
+  });
+}
+function achse(max) {   // runde Skala mit vier bis sechs Strichen
+  if (!(max > 0)) return { max: 1, ticks: [0, 1] };
+  const roh = max / 5, pot = Math.pow(10, Math.floor(Math.log10(roh)));
+  const schritt = [1, 2, 2.5, 5, 10].map((f) => f * pot).find((s) => s >= roh - 1e-9);
+  const top = Math.ceil(max / schritt - 1e-9) * schritt, ticks = [];
+  for (let v = 0; v <= top + schritt / 2; v += schritt) ticks.push(v);
+  return { max: top, ticks: ticks };
+}
+const legende = (eintraege) => '<div class="dg-leg">' + eintraege.map((e) => '<span><i class="' + e[0] + '"></i>' + esc(e[1]) + '</span>').join('') + '</div>';
+function werteTabelle(namen, zeilen) {
+  return '<details class="dg-werte"><summary>Werte</summary><div class="dg-wt"><table><thead><tr><th></th>' + namen.map((n) => '<th>' + esc(n) + '</th>').join('') + '</tr></thead><tbody>' +
+    zeilen.map((z) => '<tr><th>' + esc(z[0]) + '</th>' + z[1].map((c) => '<td>' + esc(c) + '</td>').join('') + '</tr>').join('') + '</tbody></table></div></details>';
+}
+function karte(titelText, unter, inhalt) { return '<section class="dg"><h2>' + esc(titelText) + '</h2><p class="dg-u">' + esc(unter) + '</p>' + inhalt + '</section>'; }
+/* Säulen je Jahr: nebeneinander (reihen) oder gestapelt (stapel). Die ganze Spalte eines Jahres zeigt auf Zeigen alle Werte. */
+function saeulen(D, o) {
+  const hoehe = (d) => o.stapel ? o.stapel.reduce((a, s) => a + (s.wert(d) || 0), 0) : Math.max.apply(null, o.reihen.map((r) => r.wert(d) || 0));
+  const ax = achse(Math.max.apply(null, D.map(hoehe).concat([0])));
+  const proz = (v) => (Math.max(0, v) / ax.max * 100).toFixed(2) + '%';
+  const gitter = ax.ticks.map((t) => '<i class="dg-g" style="bottom:' + proz(t) + '"></i><span class="dg-t" style="bottom:' + proz(t) + '">' + esc(o.achse ? o.achse(t) : kurz(t)) + '</span>').join('');
+  const baender = D.map((d) => {
+    const text = o.oben(d);
+    const marken = o.stapel
+      ? '<div class="dg-st" style="height:' + proz(hoehe(d)) + '">' + o.stapel.filter((s) => s.wert(d) > 0).map((s) => '<i class="' + s.klasse + '" style="flex:' + s.wert(d) + ' 1 0%"></i>').join('') + '</div>'
+      : o.reihen.map((r) => r.wert(d) === null ? '' : '<i class="dg-b ' + r.klasse + '" style="height:' + proz(r.wert(d)) + '"></i>').join('');
+    return '<div class="dg-band' + (d.bud ? ' bud' : '') + '" tabindex="0" data-tip="' + esc([d.name].concat(o.tip(d)).join('\n')) + '">' +
+      (text ? '<span class="dg-o" style="bottom:' + proz(hoehe(d)) + '">' + esc(text) + '</span>' : '') + '<div class="dg-paar">' + marken + '</div></div>';
+  }).join('');
+  return '<div class="dg-feld"><div class="dg-innen">' + gitter + '<div class="dg-baender">' + baender + '</div></div><div class="dg-x">' + D.map((d) => '<span>' + esc(d.name) + '</span>').join('') + '</div></div>';
+}
+function diagrammeHTML() {
+  const D = diagrammDaten(), namen = D.map((d) => d.name), hatBud = D.some((d) => d.bud);
+  const leerText = (t) => '<p class="dg-leer">' + esc(t) + '</p>';
+  const zwischen = D.filter((d) => !d.bud && monatAus(d.name) && monatAus(d.name) < 12).map((d) => '«' + d.name + '»');
+  const zwischenText = zwischen.length ? zwischen.join(', ') + (zwischen.length > 1 ? ' sind Zwischenstände, keine ganzen Jahre.' : ' ist ein Zwischenstand, kein ganzes Jahr.') : '';
+  const notiz = zwischenText ? '<p class="dg-n">' + esc(zwischenText) + '</p>' : '';
+  const budLeg = hatBud ? [['c-grau halb', 'Budget blass']] : [];
+  const oder = (v, f) => (v === null || v === undefined ? '' : f(v));
+
+  // 1 Ertrag, Aufwand, Gewinn
+  const D1 = D.filter((d) => d.E !== null || d.A !== null);
+  const k1 = karte('Ertrag, Aufwand, Gewinn', 'Was hereinkommt, was es kostet, und was übrig bleibt.', !D1.length ? leerText('Dafür braucht es die Zeilen «Summe Erträge» und «Total Aufwand».') :
+    legende([['c-blau', 'Ertrag'], ['c-grau', 'Aufwand']].concat(budLeg)) +
+    saeulen(D1, { reihen: [{ klasse: 'c-blau', wert: (d) => d.E }, { klasse: 'c-grau', wert: (d) => d.A }], oben: (d) => (d.G === null ? '' : mitVz(d.G, kurz(Math.abs(d.G)))),
+      tip: (d) => ['Ertrag: ' + oder(d.E, fmt), 'Aufwand: ' + oder(d.A, fmt)].concat(d.G === null ? [] : [(d.G < 0 ? 'Verlust: ' : 'Gewinn: ') + fmt(Math.abs(d.G)) + (d.E ? ' (' + fmtN(Math.abs(d.G) / d.E * 100, 1) + ' %)' : '')]) }) +
+    '<p class="dg-n"><span class="dg-on">Über den Säulen: der Gewinn. </span>' + esc(zwischenText) + '</p>' +
+    werteTabelle(D1.map((d) => d.name), [['Ertrag', D1.map((d) => oder(d.E, fmt))], ['Aufwand', D1.map((d) => oder(d.A, fmt))], ['Gewinn', D1.map((d) => oder(d.G, fmt))], ['Gewinn in % des Ertrags', D1.map((d) => (d.G === null || !d.E ? '' : fmtN(d.G / d.E * 100, 1) + ' %'))]]));
+
+  // 2 Von 100 Franken Umsatz
+  const TEILE = [['c-orange', 'Personal'], ['c-aqua', 'Material'], ['c-gelb', 'Fremdleistung'], ['c-grau', 'Übriges'], ['c-blau', 'Bleibt']];
+  const Z2 = D.filter((d) => d.E && d.A !== null && d.personal + d.material + d.fremd > 0).map((d) => {
+    const betraege = [d.personal, d.material, d.fremd, Math.max(0, d.A - d.personal - d.material - d.fremd), Math.max(0, d.E - d.A)];
+    const teile = betraege.map((b, i) => ({ klasse: TEILE[i][0], name: TEILE[i][1], betrag: b, anteil: b / d.E * 100 }));
+    // auf ganze Franken runden, sodass die Summe stimmt (die grössten Reste runden auf)
+    let rest = Math.round(teile.reduce((a, x) => a + x.anteil, 0)) - teile.reduce((a, x) => { x.fr = Math.floor(x.anteil + 1e-9); return a + x.fr; }, 0);
+    teile.slice().sort((a, b) => (b.anteil - b.fr) - (a.anteil - a.fr)).forEach((x) => { if (rest > 0) { x.fr++; rest--; } });
+    return { d: d, teile: teile, gesamt: teile.reduce((a, x) => a + x.anteil, 0), fehlt: d.A > d.E ? (d.A - d.E) / d.E * 100 : 0 };
+  });
+  const skala = Math.max.apply(null, Z2.map((z) => z.gesamt).concat([100])), verlust = Z2.some((z) => z.fehlt > 0);
+  const k2 = karte('Von 100 Franken Umsatz', 'Wohin das Geld geht, und was am Schluss bleibt.', !Z2.length ? leerText('Dafür braucht es die Summen je Gruppe, z. B. «Personalaufwand» und «Fremdleistung».') :
+    legende(TEILE) + '<div class="dg-zeilen">' + Z2.map((z) =>
+      '<div class="dg-z"><span class="dg-zn">' + esc(z.d.name) + '</span><div class="dg-seg">' +
+      z.teile.filter((x) => x.anteil > 0.05).map((x) => '<i class="' + x.klasse + (x.anteil / skala * 100 >= 9 ? ' s9' : '') + (x.anteil / skala * 100 >= 16 ? ' s16' : '') + '" style="flex:' + x.anteil.toFixed(3) + ' 1 0%" tabindex="0" data-tip="' + esc([z.d.name, x.name + ': ' + x.fr + ' von 100 Franken', fmt(x.betrag) + ' Franken'].join('\n')) + '"><b>' + x.fr + '</b></i>').join('') +
+      (skala - z.gesamt > 0.05 ? '<span style="flex:' + (skala - z.gesamt).toFixed(3) + ' 1 0%"></span>' : '') + (verlust ? '<u style="left:' + (100 / skala * 100).toFixed(2) + '%"></u>' : '') + '</div>' +
+      '<span class="dg-ende">' + (z.fehlt > 0 ? 'fehlen ' + Math.max(1, Math.round(z.fehlt)) : 'bleiben ' + z.teile[4].fr) + '</span></div>').join('') + '</div>' +
+    (verlust ? '<p class="dg-n">Der Strich steht bei 100 Franken Umsatz. Was darüber hinausgeht, fehlt.</p>' : '') +
+    werteTabelle(Z2.map((z) => z.d.name), TEILE.map((t, i) => [t[1], Z2.map((z) => fmtN(z.teile[i].anteil, 1))]).concat(verlust ? [['Fehlt', Z2.map((z) => (z.fehlt > 0 ? fmtN(z.fehlt, 1) : ''))]] : [])));
+
+  // 3 Pro Stunde
+  const D3 = D.filter((d) => d.h && d.E !== null && d.A !== null);
+  const k3 = karte('Pro Stunde', 'Ertrag und Aufwand je produktive Stunde.', !D3.length ? leerText('Dafür braucht es im BAB die Zeile «Total prod. Stunden».') :
+    legende([['c-blau', 'Ertrag je Stunde'], ['c-grau', 'Aufwand je Stunde']].concat(budLeg)) +
+    saeulen(D3, { reihen: [{ klasse: 'c-blau', wert: (d) => d.E / d.h }, { klasse: 'c-grau', wert: (d) => d.A / d.h }], oben: (d) => mitVz(d.G, fmtN(Math.abs(d.G / d.h), 2)), achse: (t) => fmt(t),
+      tip: (d) => ['Ertrag je Stunde: ' + fmtN(d.E / d.h, 2), 'Aufwand je Stunde: ' + fmtN(d.A / d.h, 2), (d.G < 0 ? 'Fehlt je Stunde: ' : 'Bleibt je Stunde: ') + fmtN(Math.abs(d.G / d.h), 2)] }) +
+    '<p class="dg-n"><span class="dg-on">Über den Säulen: was je Stunde bleibt, in Franken.</span></p>' +
+    werteTabelle(D3.map((d) => d.name), [['Ertrag je Stunde', D3.map((d) => fmtN(d.E / d.h, 2))], ['Aufwand je Stunde', D3.map((d) => fmtN(d.A / d.h, 2))], ['Bleibt je Stunde', D3.map((d) => fmtN(d.G / d.h, 2))], ['Produktive Stunden', D3.map((d) => fmt(d.h))]]));
+
+  // 4 Stunden
+  const D4 = D.filter((d) => d.h);
+  const mitTeilen = (d) => d.eigene + d.temp + d.weitere > 0, hatWeitere = D4.some((d) => d.weitere > 0), ohneTeile = D4.some((d) => !mitTeilen(d));
+  const k4 = karte('Stunden', 'Produktive Stunden: eigene Leute und Temporäre.', !D4.length ? leerText('Dafür braucht es im BAB die Zeilen «Prod. Stunden».') :
+    legende([['c-orange', 'Eigene Leute'], ['c-grau', 'Temporäre']].concat(hatWeitere ? [['c-grau2', 'Weitere']] : []).concat(hatBud || ohneTeile ? [['c-orange halb', 'Budget oder ohne Aufteilung (blass)']] : [])) +
+    saeulen(D4.map((d) => Object.assign({}, d, { bud: d.bud || !mitTeilen(d) })), { stapel: [{ klasse: 'c-orange', wert: (d) => (mitTeilen(d) ? d.eigene : d.h) }, { klasse: 'c-grau', wert: (d) => d.temp }, { klasse: 'c-grau2', wert: (d) => d.weitere }], oben: (d) => fmt(d.h),
+      tip: (d) => (mitTeilen(d) ? ['Eigene Leute: ' + fmt(d.eigene), 'Temporäre: ' + fmt(d.temp)].concat(d.weitere ? ['Weitere: ' + fmt(d.weitere)] : []) : []).concat(['Total: ' + fmt(d.h)]) }) + notiz +
+    werteTabelle(D4.map((d) => d.name), [['Eigene Leute', D4.map((d) => (mitTeilen(d) ? fmt(d.eigene) : ''))], ['Temporäre', D4.map((d) => (mitTeilen(d) ? fmt(d.temp) : ''))]].concat(hatWeitere ? [['Weitere', D4.map((d) => (d.weitere ? fmt(d.weitere) : ''))]] : []).concat([['Total', D4.map((d) => fmt(d.h))]])));
+
+  return '<div class="dgr">' + k1 + k2 + k3 + k4 + '</div>' + (S.zahlen.perioden.length > D.length ? '<p class="muted klein unter">Gezeigt sind die neusten Jahre; alle stehen unter «Tabelle».</p>' : '');
+}
+
+/* ---------- Ansichten ---------- */
+function titel(h, unter, rechts) {
+  return '<div class="titel"><div><h1>' + esc(h) + '</h1>' + (unter ? '<p>' + esc(unter) + '</p>' : '') + '</div>' + (rechts ? '<div class="titel-r">' + rechts + '</div>' : '') + '</div>';
+}
+function seg(k, opt, akt, klasse) {
+  return '<div class="seg' + (klasse ? ' ' + klasse : '') + '" role="group">' + opt.map((o) => '<button type="button" data-a="seg" data-k="' + k + '" data-v="' + o[0] + '" aria-pressed="' + (akt === o[0]) + '">' + o[1] + '</button>').join('') + '</div>';
+}
+function ablage(imSheet) {
+  return '<section class="card ablage">' + ic('upload') + '<h2>BAB einfügen</h2><p class="muted">' + (FEIN ? 'In Excel die Tabelle markieren und kopieren, dann hier einfügen. Oder die Excel-Dateien auf diese Seite ziehen, auch mehrere Jahre zusammen.' : 'Die Excel-Dateien wählen, auch mehrere Jahre zusammen. Oder in Excel die Tabelle kopieren und hier einfügen.') + '</p>' +
+    '<textarea id="einfuegen" class="einfuegen" rows="1" placeholder="' + (FEIN ? 'Hier klicken und einfügen (Ctrl+V)' : 'Hier antippen und einfügen') + '" aria-label="BAB hier einfügen"></textarea>' +
+    '<button type="button" class="btn" data-a="datei-wahl">Dateien wählen</button>' +
+    (IM_RAHMEN ? '<p class="klein warn">Vorschau: Hier wird nichts gesichert. Nur Beispielzahlen einfügen.</p>'
+      : (imSheet ? '' : '<button type="button" class="textlink" data-a="daten-wahl">Schon mit einer früheren Version gearbeitet? Gesicherte Datei laden</button>')) + '</section>';
+}
+function tabelleHTML() {
+  const Z = S.zahlen, P = Z.perioden;
+  const kopf = '<tr><th class="bez">Bezeichnung</th>' + P.map((p) => '<th' + (istBudget(p) ? ' class="bud"' : '') + '><button type="button" data-a="spalte" data-id="' + p.id + '" title="Umbenennen oder entfernen">' + esc(p.name) + '</button></th>').join('') + '</tr>';
+  const alle = Z.sicht === 'alle', k = kernZeilen();
+  const klasse = (z) => (z.art === 'stunden' ? 'std ' : '') + (z.stufe >= 3 ? 's3' : z.stufe === 2 ? 's2' : z.stufe === 1 ? 's1' : '');
+  let rumpf = '';
+  const prozentZeile = () => (k.ertrag && k.aufwand) ? '<tr class="abg"><th>Gewinn in % des Ertrags</th>' + P.map((p) => { const v = gewinnProzent(p.id); return '<td class="' + (istBudget(p) ? 'bud' : '') + (v !== null && v < 0 ? ' neg' : '') + '">' + (v === null ? '' : v.toFixed(1) + ' %') + '</td>'; }).join('') + '</tr>' : '';
+  const G = zahlenGruppen();
+  let drin = false;
+  G.forEach((gr) => {
+    const z = gr.z, werte = P.map((p) => zelle(z, p)).join('');
+    if (gr.konten) {   // Gruppe: im BAB stehen die Konten vor ihrer Summe
+      const klick = !alle && gr.konten.length > 0, offen = klick && !!S.ui.auf[z.k];
+      const konten = (alle || offen) ? gr.konten.map((kt) => '<tr class="kt"><th><span class="nr">' + esc(kt.nr) + '</span>' + esc(kt.name) + '</th>' + P.map((p) => zelle(kt, p)).join('') + '</tr>').join('') : '';
+      const summe = '<tr class="s1' + (klick ? ' klick' + (offen ? ' offen' : '') + '" data-a="auf" data-k="' + esc(z.k) : '') + '"><th>' +
+        (klick ? '<button type="button" class="aufb" aria-expanded="' + offen + '">' + ic('right') + '<span>' + esc(z.name) + '</span></button>' : esc(z.name)) + '</th>' + werte + '</tr>';
+      rumpf += alle ? konten + summe : summe + konten;
+    } else {
+      rumpf += '<tr class="' + (gr.lose ? (alle ? 'kt' : '') : klasse(z)) + '"><th>' + (gr.lose && alle ? '<span class="nr">' + esc(z.nr) + '</span>' : '') + esc(z.name) + '</th>' + werte + '</tr>';
+      if (z === k.ergebnis) { rumpf += prozentZeile(); drin = true; }
+    }
+  });
+  if (!drin) rumpf += prozentZeile();
+  const fuss = [minusIstGewinn() ? 'Ergebnis wie im BAB: Aufwand minus Ertrag. Ein Minus ist ein Gewinn.' : '', G.versteckt ? 'Zeilen ohne Betrag sind ausgeblendet.' : ''].filter(Boolean).join(' ');
+  return '<div class="tab-rahmen"><table class="zt' + (alle ? '' : ' pf') + (P.length > 7 ? ' dicht' : '') + '"><thead>' + kopf + '</thead><tbody>' + rumpf + '</tbody></table></div>' +
+    '<div class="unter"><p class="muted klein">' + fuss + '</p><button type="button" class="textlink" data-a="zahlen-weg">Alle Zahlen entfernen</button></div>';
+}
+
+/* Themen: Bausteine, aus denen ein Thema je nach Art besteht */
+const fertig = (t) => t.art === 'rueckblick' ? t.ziele.length > 0 && t.ziele.every((z) => z.stand)
+  : (t.beschluesse.length > 0 || (t.art === 'gruppen' && t.leute.length > 0 && t.leute.every((p) => t.gruppen.some((g) => g.id === p.gruppe))));
+const glKnopf = (art, x) => '<button type="button" class="n-gl" data-a="gl" data-art="' + art + '" data-id="' + x.id + '" aria-pressed="' + !!x.gl + '" aria-label="Für die GL vormerken">' + ic('flag') + '<span>GL</span></button>';
+const metaText = (b) => [b.wer, b.bis ? 'bis ' + b.bis : ''].filter(Boolean).join(' · ');
+const TEIL = {
+  frage(t) { return t.frage ? '<p class="frage">' + esc(t.frage) + '</p>' : ''; },
+  notizen(t) {
+    return '<h2 class="bl">Notizen</h2><ul class="eintraege">' + t.notizen.map((n) => '<li class="notiz' + (n.gl ? ' gl' : '') + '"><button type="button" class="n-text" data-a="notiz" data-id="' + n.id + '">' + esc(n.text) + '</button>' + glKnopf('n', n) + '</li>').join('') + '</ul>' +
+      '<form class="schnell" data-form="notiz"><input name="text" id="neu-notiz" placeholder="Notiz hinzufügen …" aria-label="Notiz hinzufügen" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Notiz hinzufügen">' + ic('plus') + '</button></form>';
+  },
+  beschluss(t) {
+    const ziele = t.art === 'ziele';
+    return '<h2 class="bl">' + (ziele ? 'Ziele' : 'Beschluss') + '</h2><ul class="eintraege">' + t.beschluesse.map((b) => '<li class="besch' + (b.gl ? ' gl' : '') + '"><span class="b-ic">' + ic('check') + '</span><button type="button" class="b-text" data-a="beschluss" data-id="' + b.id + '"><span class="b-was">' + esc(b.was) + '</span>' + (metaText(b) ? '<span class="b-meta">' + esc(metaText(b)) + '</span>' : '') + '</button>' + glKnopf('b', b) + '</li>').join('') + '</ul>' +
+      '<form class="dreier" data-form="beschluss"><input name="was" id="neu-was" placeholder="' + (ziele ? 'Ziel hinzufügen …' : 'Beschluss: Was?') + '" aria-label="Was" autocomplete="off"><input name="wer" placeholder="Wer?" aria-label="Wer" autocomplete="off"><input name="bis" placeholder="Bis wann?" aria-label="Bis wann" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Hinzufügen">' + ic('plus') + '</button></form>';
+  },
+  rueckblick(t) {
+    return '<h2 class="bl">Ziele vom letzten Jahr</h2><ul class="eintraege">' + t.ziele.map((z) => '<li class="rz"><button type="button" class="n-text" data-a="ziel" data-id="' + z.id + '">' + esc(z.text) + '</button><div class="seg" role="group" aria-label="Stand">' +
+      ['erreicht', 'teilweise', 'offen'].map((s) => '<button type="button" class="st-' + s + '" data-a="stand" data-id="' + z.id + '" data-v="' + s + '" aria-pressed="' + (z.stand === s) + '">' + STAND[s] + '</button>').join('') + '</div></li>').join('') + '</ul>' +
+      '<form class="schnell" data-form="ziel"><input name="text" id="neu-ziel" placeholder="Ziel vom letzten Jahr hinzufügen …" aria-label="Ziel vom letzten Jahr hinzufügen" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Ziel hinzufügen">' + ic('plus') + '</button></form>';
+  },
+  tafel(t) {
+    const inGruppe = (p) => t.gruppen.some((g) => g.id === p.gruppe);
+    const spalte = (g) => {
+      const leute = t.leute.filter((p) => (g ? p.gruppe === g.id : !inGruppe(p)));
+      return '<section class="spalte' + (g ? '' : ' pool') + '" data-spalte="' + (g ? g.id : '') + '"><header class="sp-kopf">' +
+        (g ? '<button type="button" data-a="gruppe" data-id="' + g.id + '" title="Umbenennen oder entfernen">' + esc(g.name) + '</button>' : '<span>Noch nicht zugeteilt</span>') + '<span class="zahl tnum">' + leute.length + '</span></header>' +
+        leute.map((p) => '<button type="button" class="karte" data-a="person" data-id="' + p.id + '">' + esc(p.name) + '</button>').join('') +
+        (g ? (leute.length ? '' : '<p class="sp-leer">' + (FEIN ? 'Kärtchen hierher ziehen.' : 'Kärtchen antippen und diese Gruppe wählen.') + '</p>')
+          : '<form class="sp-neu" data-form="leute"><input name="text" id="neu-leute" placeholder="Name hinzufügen …" aria-label="Namen hinzufügen" autocomplete="off" enterkeyhint="done"></form>' + (t.leute.length ? '' : '<p class="sp-leer">Einzeln eintippen oder eine Liste aus Excel einfügen.</p>')) + '</section>';
+    };
+    return '<div class="tafel">' + spalte(null) + t.gruppen.map(spalte).join('') + '</div><div class="reihe tafel-unten"><button type="button" class="textlink" data-a="gruppe-neu">Gruppe hinzufügen</button></div>';
+  }
+};
+function themaInhalt(t) {
+  if (t.art === 'rueckblick') return TEIL.frage(t) + TEIL.rueckblick(t) + TEIL.notizen(t);
+  if (t.art === 'gruppen') return TEIL.frage(t) + TEIL.tafel(t) + TEIL.notizen(t) + TEIL.beschluss(t);
+  if (t.art === 'ziele') return TEIL.frage(t) + TEIL.beschluss(t) + TEIL.notizen(t);
+  return TEIL.frage(t) + TEIL.notizen(t) + TEIL.beschluss(t);
+}
+
+const ANSICHT = {
+  zahlen() {
+    const Z = S.zahlen;
+    if (!Z.perioden.length) return titel('Zahlen', 'Verlauf der Jahre') + ablage();
+    const tab = Z.ansicht === 'tabelle';
+    return titel('Zahlen', 'Verlauf der Jahre', seg('ansicht', [['diagramme', 'Diagramme'], ['tabelle', 'Tabelle']], Z.ansicht) + (tab ? seg('sicht', [['summen', 'Nur Summen'], ['alle', 'Alle Konten']], Z.sicht) : '') +
+      '<button type="button" class="btn stark" data-a="sheet" data-s="import">' + ic('plus') + '<span>Zahlen einfügen</span></button>') + (tab ? tabelleHTML() : diagrammeHTML());
+  },
+
+  themen() {
+    const T = S.themen;
+    if (!T.length) return titel('Themen', 'Was besprechen wir?') + '<p class="leer">Noch kein Thema.</p><button type="button" class="btn stark" data-a="thema-neu">' + ic('plus') + '<span>Thema</span></button>';
+    const akt = T.find((t) => t.id === S.ui.thema) || T[0];
+    S.ui.thema = akt.id;   // das gezeigte Thema bleibt das aktive, auch wenn es verschoben wird
+    const liste = T.map((t, i) => '<button type="button" class="tlink' + (t === akt ? ' on' : '') + '" data-a="thema" data-id="' + t.id + '"' + (t === akt ? ' aria-current="true"' : '') + '><span class="nr">' + (i + 1) + '</span><span class="tl-t">' + esc(t.titel) + '</span>' + (fertig(t) ? ic('check', 'ok') : '') + '</button>').join('');
+    return '<div class="themen"><nav class="tliste2" aria-label="Themen">' + liste + '<button type="button" class="tlink neu" data-a="thema-neu">' + ic('plus') + '<span>Thema</span></button></nav>' +
+      '<section class="thema">' + titel(akt.titel, '', '<button type="button" class="rundb" data-a="sheet" data-s="thema" aria-label="Thema bearbeiten, verschieben oder löschen">' + ic('pen') + '</button>') + themaInhalt(akt) +
+      '<p class="muted klein hilfe">' + ic('flag') + '<span>Was die GL wissen oder entscheiden soll, mit «GL» vormerken. Es steht im Ergebnis zuoberst.</span></p></section></div>';
+  },
+
+  ergebnis() {
+    return '<section class="card blatt">' + ergebnisHTML() + '</section>' +
+      '<div class="aktionen"><button type="button" class="btn stark" data-a="drucken"' + (IM_RAHMEN ? ' disabled' : '') + '>' + ic('print') + '<span>Als PDF drucken</span></button>' +
+      (IM_RAHMEN ? '<span class="muted klein">In dieser Vorschau ausgeschaltet.</span>' : '<span class="muted klein">Im Druckfenster «Als PDF speichern» wählen.</span>') + '</div>';
+  }
+};
+function ergebnisHTML() {
+  const m = S.meta, T = S.themen;
+  const marke = (x) => (x.gl ? '<span class="e-marke">GL</span>' : '');
+  let h = '<header class="e-kopf"><h1>' + esc(m.titel) + '</h1><p>' + esc([m.abteilung, datumLang(m.datum) ? 'Strategietag vom ' + datumLang(m.datum) : ''].filter(Boolean).join(' · ')) + '</p></header>', etwas = false;
+  const gl = [];
+  T.forEach((t) => {
+    t.beschluesse.forEach((b) => { if (b.gl) gl.push('<li><b>' + esc(t.titel) + ':</b> ' + esc(b.was) + (metaText(b) ? ' (' + esc(metaText(b)) + ')' : '') + '</li>'); });
+    t.notizen.forEach((n) => { if (n.gl) gl.push('<li><b>' + esc(t.titel) + ':</b> ' + esc(n.text) + '</li>'); });
+  });
+  if (gl.length) h += '<section class="e-teil e-gl"><h2>Für die GL</h2><ul>' + gl.join('') + '</ul></section>';
+  const tabelle = (themen, mitThema) => '<div class="e-tab-rahmen"><table class="e-besch"><thead><tr>' + (mitThema ? '<th>Thema</th>' : '') + '<th>Was</th><th>Wer</th><th>Bis wann</th></tr></thead><tbody>' +
+    themen.map((t) => t.beschluesse.map((b, i) => '<tr>' + (mitThema ? '<td class="th">' + (i ? '' : esc(t.titel)) + '</td>' : '') + '<td>' + esc(b.was) + marke(b) + '</td><td class="nw">' + esc(b.wer) + '</td><td class="nw">' + esc(b.bis) + '</td></tr>').join('')).join('') + '</tbody></table></div>';
+  const mitB = T.filter((t) => t.art !== 'ziele' && t.beschluesse.length);
+  if (mitB.length) { h += '<section class="e-teil"><h2>Beschlüsse</h2>' + tabelle(mitB, true) + '</section>'; etwas = true; }
+  T.filter((t) => t.art === 'ziele' && t.beschluesse.length).forEach((t) => { h += '<section class="e-teil"><h2>' + esc(t.titel) + '</h2>' + tabelle([t], false) + '</section>'; etwas = true; });
+  T.filter((t) => t.art === 'rueckblick' && t.ziele.length).forEach((t) => {
+    h += '<section class="e-teil"><h2>' + esc(t.titel) + '</h2><p class="e-klein">' + t.ziele.filter((z) => z.stand === 'erreicht').length + ' von ' + t.ziele.length + ' Zielen erreicht</p><ul class="e-rz">' +
+      t.ziele.map((z) => '<li><span>' + esc(z.text) + '</span><b class="e-st ' + esc(z.stand || '') + '">' + esc(STAND[z.stand || ''] || '') + '</b></li>').join('') + '</ul></section>';
+    etwas = true;
+  });
+  T.filter((t) => t.art === 'gruppen' && t.leute.length).forEach((t) => {
+    const namen = (liste) => liste.map((p) => esc(p.name)).join(', ');
+    const frei = t.leute.filter((p) => !t.gruppen.some((g) => g.id === p.gruppe));
+    h += '<section class="e-teil"><h2>' + esc(t.titel) + '</h2><div class="e-tab-rahmen"><table class="e-besch"><tbody>' + t.gruppen.map((g) => { const l = t.leute.filter((p) => p.gruppe === g.id); return '<tr><td class="th nw">' + esc(g.name) + ' (' + l.length + ')</td><td>' + namen(l) + '</td></tr>'; }).join('') +
+      (frei.length ? '<tr><td class="th nw">Noch nicht zugeteilt (' + frei.length + ')</td><td>' + namen(frei) + '</td></tr>' : '') + '</tbody></table></div></section>';
+    etwas = true;
+  });
+  const mitN = T.filter((t) => t.notizen.length);
+  if (mitN.length) { h += '<section class="e-teil"><h2>Notizen</h2>' + mitN.map((t) => '<h3>' + esc(t.titel) + '</h3><ul>' + t.notizen.map((n) => '<li>' + esc(n.text) + marke(n) + '</li>').join('') + '</ul>').join('') + '</section>'; etwas = true; }
+  if (!etwas) h += '<section class="e-teil"><p class="muted">Zu den Themen ist noch nichts festgehalten.</p></section>';
+  const alleP = S.zahlen.perioden, P = spaltenWahl(), k = kernZeilen();
+  if (P.length) {
+    const reihe = (z, stark) => z ? '<tr><th>' + esc(z.name) + '</th>' + P.map((p) => { const v = z.w[p.id]; return '<td>' + (v === undefined || v === null ? '' : (stark ? '<b>' + fmt(v) + '</b>' : fmt(v))) + '</td>'; }).join('') + '</tr>' : '';
+    const proz = (k.ertrag && k.aufwand) ? '<tr><th>Gewinn in % des Ertrags</th>' + P.map((p) => { const v = gewinnProzent(p.id); return '<td>' + (v === null ? '' : v.toFixed(1) + ' %') + '</td>'; }).join('') + '</tr>' : '';
+    h += '<section class="e-teil"><h2>Zahlen</h2><div class="e-tab-rahmen"><table class="e-tab"><thead><tr><th></th>' + P.map((p) => '<th>' + esc(p.name) + '</th>').join('') + '</tr></thead><tbody>' +
+      reihe(k.ertrag) + reihe(k.aufwand) + reihe(k.ergebnis, true) + proz + reihe(k.stunden) + '</tbody></table></div>' +
+      '<p class="e-fuss">' + (minusIstGewinn() ? 'Ergebnis wie im BAB: Aufwand minus Ertrag, ein Minus ist ein Gewinn. ' : '') + (alleP.length > P.length ? 'Gezeigt sind die neusten Spalten; alle stehen im Tool unter «Zahlen».' : '') + '</p></section>';
+  }
+  return h;
+}
+
+/* ---------- Leiste ---------- */
+function kopfHTML() {
+  const fest = !!datei.handle, offen = datei.schmutzig && !IM_RAHMEN;   // fest: Änderungen gehen von selbst in die Datei
+  return '<div class="kopf1"><div class="marke"><b>' + esc(S.meta.titel) + '</b><span>' + esc(S.meta.abteilung) + '</span></div>' +
+    seg('bereich', [['zahlen', 'Zahlen'], ['themen', 'Themen'], ['ergebnis', 'Ergebnis']], S.ui.bereich, 'bereich') +
+    '<div class="kopf-r"><button type="button" class="btn klein" data-a="sichern" aria-label="' + (fest ? 'Gesichert in der Datei ' + esc(datei.name) : (offen ? 'Sichern, es gibt ungesicherte Änderungen' : 'Sichern')) + '">' + ic(fest ? 'check' : 'disk') + '<span>' + (fest ? 'Gesichert' : 'Sichern') + '</span>' + (offen ? '<i class="punkt"></i>' : '') + '</button>' +
+    '<button type="button" class="rundb" data-a="sheet" data-s="einstellungen" aria-label="Einstellungen">' + ic('gear') + '</button></div></div>';
+}
+
+/* ---------- Sheets ---------- */
+let sheet = null;
+function huelle(t, inhalt) {
+  return '<div class="sheet-huelle"><div class="scrim" data-a="zu"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="' + esc(t) + '"><header><span></span><h2>' + esc(t) + '</h2><button type="button" class="tbtn stark" data-a="zu">Fertig</button></header><div class="sheet-inhalt">' + inhalt + '</div></div></div>';
+}
+function formHuelle(t, art, inhalt, fertigText) {
+  return '<div class="sheet-huelle"><div class="scrim" data-a="zu"></div><form class="sheet" role="dialog" aria-modal="true" aria-label="' + esc(t) + '" data-form="' + art + '" novalidate><header><button type="button" class="tbtn" data-a="zu">Abbrechen</button><h2>' + esc(t) + '</h2><button type="submit" class="tbtn stark">' + (fertigText || 'Fertig') + '</button></header><div class="sheet-inhalt">' + inhalt + '</div></form></div>';
+}
+const aktThema = () => S.themen.find((t) => t.id === S.ui.thema) || S.themen[0];
+const imThema = (liste) => { const t = aktThema(); return t && sheet ? t[liste].find((x) => x.id === sheet.id) : null; };
+const loeschKnopf = (a, text) => '<button type="button" class="loesch" data-a="' + a + '">' + ic('trash') + '<span>' + text + '</span></button>';
+const SHEET = {
+  import() { return huelle('Zahlen einfügen', ablage(true)); },
+  spalten() {
+    const st = importStand;
+    if (!st) return huelle('Zahlen einfügen', ablage(true));
+    const mehrere = st.teile.length > 1, raute = st.teile.reduce((a, t) => a + t.raute, 0);
+    let fokVergeben = false;
+    const liste = st.teile.map((imp, ti) => {
+      const vorgewaehlt = imp.spalten.some((s) => s.an);
+      return (mehrere ? '<li class="spl-datei">' + esc(imp.datei || 'Eingefügt') + '</li>' : '') + imp.spalten.map((s, i) => {
+        if (mehrere && vorgewaehlt && !s.an) return '';   // bei mehreren Dateien nur die Jahresspalte zeigen
+        const fok = !fokVergeben && s.an && /^(Laufendes Jahr|Spalte \d+)$/.test(s.name);   // Jahr unbekannt: gleich zum Überschreiben anbieten
+        if (fok) fokVergeben = true;
+        const id = mehrere ? ti + '-' + i : i;
+        return '<li><input type="checkbox" id="sp-an-' + id + '" name="an-' + ti + '-' + i + '"' + (s.an ? ' checked' : '') + ' aria-label="Spalte übernehmen"><input type="text" id="sp-name-' + id + '" name="name-' + ti + '-' + i + '" value="' + esc(s.name) + '" aria-label="Name der Spalte" autocomplete="off"' + (fok ? ' data-fokus' : '') + '><small>' + esc([s.info, s.n + ' Werte'].filter(Boolean).join(' · ')) + '</small></li>';
+      }).join('');
+    }).join('');
+    return formHuelle('Zahlen übernehmen', 'spalten',
+      (raute ? '<p class="hinweis">' + ic('info') + '<span>' + raute + ' Zahlen kommen als «####» an, weil die Spalten in Excel zu schmal sind. Spalten verbreitern und nochmals kopieren, oder die Excel-Datei hineinziehen.</span></p>' : '') +
+      (st.fehler ? '<p class="hinweis">' + ic('info') + '<span>' + (st.fehler === 1 ? 'Eine Datei enthält keinen BAB und bleibt weg.' : st.fehler + ' Dateien enthalten keinen BAB und bleiben weg.') + '</span></p>' : '') +
+      '<p class="muted">' + (mehrere ? st.teile.length + ' Dateien gelesen. Je Datei ist die Spalte des laufenden Jahres gewählt.' : 'Gefunden: ' + st.teile[0].reihen.length + ' Zeilen. Welche Spalten übernehmen?') + ' Der Name steht nachher über der Spalte.</p><ul class="spl">' + liste + '</ul>', 'Übernehmen');
+  },
+  spalte() {
+    const p = S.zahlen.perioden.find((x) => x.id === sheet.id);
+    if (!p) return '';
+    return formHuelle('Spalte', 'spalte', '<label class="f" for="sp-n"><span>Name</span><input id="sp-n" name="name" value="' + esc(p.name) + '" autocomplete="off" data-fokus></label><p class="muted klein">Ein Name mit «Budget» wird als Budget-Spalte gezeigt.</p>' + loeschKnopf('spalte-weg', 'Spalte entfernen'));
+  },
+  notiz() {
+    const n = imThema('notizen');
+    if (!n) return '';
+    return formHuelle('Notiz', 'notiz-edit', '<label class="f" for="n-t"><span>Text</span><textarea id="n-t" name="text" rows="3" data-fokus>' + esc(n.text) + '</textarea></label>' +
+      '<label class="schalter" for="n-gl"><span>Für die GL vormerken</span><input type="checkbox" id="n-gl" name="gl"' + (n.gl ? ' checked' : '') + '></label>' + loeschKnopf('notiz-weg', 'Notiz löschen'));
+  },
+  beschluss() {
+    const b = imThema('beschluesse'), ziele = aktThema() && aktThema().art === 'ziele';
+    if (!b) return '';
+    return formHuelle(ziele ? 'Ziel' : 'Beschluss', 'beschluss-edit', '<label class="f" for="b-was"><span>Was</span><textarea id="b-was" name="was" rows="2" data-fokus>' + esc(b.was) + '</textarea></label>' +
+      '<div class="zwei"><label class="f" for="b-wer"><span>Wer</span><input id="b-wer" name="wer" value="' + esc(b.wer) + '" autocomplete="off"></label><label class="f" for="b-bis"><span>Bis wann</span><input id="b-bis" name="bis" value="' + esc(b.bis) + '" autocomplete="off"></label></div>' +
+      '<label class="schalter" for="b-gl"><span>Für die GL vormerken</span><input type="checkbox" id="b-gl" name="gl"' + (b.gl ? ' checked' : '') + '></label>' + loeschKnopf('beschluss-weg', ziele ? 'Ziel löschen' : 'Beschluss löschen'));
+  },
+  ziel() {
+    const z = imThema('ziele');
+    if (!z) return '';
+    return formHuelle('Ziel vom letzten Jahr', 'ziel-edit', '<label class="f" for="z-t"><span>Text</span><textarea id="z-t" name="text" rows="2" data-fokus>' + esc(z.text) + '</textarea></label>' + loeschKnopf('ziel-weg', 'Ziel löschen'));
+  },
+  person() {
+    const t = aktThema(), p = imThema('leute');
+    if (!p) return '';
+    const drin = t.gruppen.some((g) => g.id === p.gruppe);
+    return formHuelle('Mitarbeiter', 'person', '<label class="f" for="p-n"><span>Name</span><input id="p-n" name="name" value="' + esc(p.name) + '" autocomplete="off"></label>' +
+      '<div class="f"><span>Gruppe</span><div class="reihe">' + t.gruppen.map((g) => '<button type="button" class="btn' + (p.gruppe === g.id ? ' stark' : '') + '" data-a="zuteilen" data-g="' + g.id + '">' + esc(g.name) + '</button>').join('') +
+      '<button type="button" class="btn' + (drin ? '' : ' stark') + '" data-a="zuteilen" data-g="">Nicht zugeteilt</button></div></div>' + loeschKnopf('person-weg', 'Mitarbeiter entfernen'));
+  },
+  gruppe() {
+    const g = imThema('gruppen');
+    if (!g) return '';
+    return formHuelle('Gruppe', 'gruppe', '<label class="f" for="g-n"><span>Name der Gruppe</span><input id="g-n" name="name" value="' + esc(g.name) + '" autocomplete="off" data-fokus></label>' +
+      '<p class="muted klein">Beim Entfernen gehen die Mitarbeiter der Gruppe zurück zu «Noch nicht zugeteilt».</p>' + loeschKnopf('gruppe-weg', 'Gruppe entfernen'));
+  },
+  thema() {
+    const t = aktThema();
+    if (!t) return '';
+    const i = S.themen.indexOf(t);
+    return formHuelle('Thema', 'thema-edit', '<label class="f" for="t-t"><span>Titel</span><input id="t-t" name="titel" value="' + esc(t.titel) + '" autocomplete="off" data-fokus></label>' +
+      '<label class="f" for="t-f"><span>Worum geht es? (steht unter dem Titel)</span><textarea id="t-f" name="frage" rows="2">' + esc(t.frage) + '</textarea></label>' +
+      '<div class="f"><span>Art</span><div class="seg" role="group">' + ARTEN.map((a) => '<button type="button" data-a="art" data-v="' + a[0] + '" aria-pressed="' + (t.art === a[0]) + '">' + a[1] + '</button>').join('') + '</div></div>' +
+      '<p class="muted klein">' + ({ thema: 'Notizen und Beschluss.', rueckblick: 'Ziele vom letzten Jahr mit «erreicht», «teilweise» oder «offen».', gruppen: 'Tafel: Mitarbeiter den Gruppen zuteilen.', ziele: 'Ziele mit «wer» und «bis wann».' })[t.art] + '</p>' +
+      '<div class="reihe"><button type="button" class="btn" data-a="thema-hoch"' + (i === 0 ? ' disabled' : '') + '>' + ic('up') + '<span>Nach oben</span></button><button type="button" class="btn" data-a="thema-runter"' + (i === S.themen.length - 1 ? ' disabled' : '') + '>' + ic('down') + '<span>Nach unten</span></button></div>' +
+      loeschKnopf('thema-weg', 'Thema löschen'));
+  },
+  einstellungen() {
+    const m = S.meta;
+    return huelle('Einstellungen',
+      '<section class="gr"><label class="f" for="e-titel"><span>Titel</span><input id="e-titel" data-f="titel" value="' + esc(m.titel) + '" autocomplete="off"></label>' +
+      '<div class="zwei"><label class="f" for="e-abt"><span>Abteilung</span><input id="e-abt" data-f="abteilung" value="' + esc(m.abteilung) + '" autocomplete="off"></label><label class="f" for="e-datum"><span>Datum</span><input id="e-datum" type="date" data-f="datum" value="' + esc(m.datum) + '"></label></div></section>' +
+      '<section class="gr"><h3>Darstellung</h3><div class="reihe zw"><span>Schriftgrösse</span><div class="stepper"><button type="button" data-a="zoom" data-d="-1" aria-label="Schrift kleiner">' + ic('minus') + '</button><b class="tnum">' + Math.round(m.zoom * 100) + ' %</b><button type="button" data-a="zoom" data-d="1" aria-label="Schrift grösser">' + ic('plus') + '</button></div></div>' +
+      '<div class="reihe zw"><span>Farben</span>' + seg('modus', [['auto', 'Automatisch'], ['hell', 'Hell'], ['dunkel', 'Dunkel']], m.modus) + '</div>' +
+      '<div class="reihe"><button type="button" class="btn" data-a="vollbild">' + ic('max') + '<span>Vollbild</span></button></div></section>' +
+      '<section class="gr"><h3>Daten</h3><div class="reihe"><button type="button" class="btn" data-a="daten-wahl"' + (IM_RAHMEN ? ' disabled' : '') + '>' + ic('upload') + '<span>Aus gesicherter Datei laden</span></button>' +
+      (IM_RAHMEN ? '' : '<button type="button" class="btn" data-a="herunter">' + ic('disk') + '<span>Als Datei herunterladen</span></button>' + (TEILEN_ZUERST && window.showSaveFilePicker ? '<button type="button" class="btn" data-a="in-datei">' + ic('pen') + '<span>In eine Datei schreiben</span></button>' : '')) + '</div>' +
+      '<p class="muted klein">' + (IM_RAHMEN ? 'In dieser Vorschau ausgeschaltet.' : standText() + ' Auf mehreren Geräten: zuerst die neuste Datei laden, am Schluss sichern. Eine gesicherte Datei lässt sich auch in einer neueren Version des Tools laden.') + '</p>' +
+      '<div class="reihe"><button type="button" class="btn" data-a="demo">Beispiel laden</button><button type="button" class="btn rot" data-a="leeren">Alles leeren</button></div></section>' +
+      '<p class="muted klein mitte">Version ' + VERSION + '</p>');
+  },
+  sichern() {
+    return huelle('Sichern', '<p class="hinweis">' + ic('info') + '<span>In dieser Vorschau ist das Sichern ausgeschaltet.</span></p><p>Du siehst das Tool eingebettet in einem anderen Programm. Hier kannst du alles ansehen, aber Änderungen gehen verloren.</p><p>Zum Arbeiten öffnest du das Tool über seinen Link oder am Rechner per Doppelklick auf die Datei. Dort gibt «Sichern» eine einzige Datei, die das Tool und alles Eingetragene enthält.</p>');
+  },
+  aelter() {
+    const w = ladeWartet;
+    if (!w) return '';
+    const aelter = !!w.d.stand && w.d.stand < (S.stand || '');
+    // liegen beide Stände in derselben Minute, zeigt die Rückfrage auch die Sekunden
+    const genau = zeitKurz(w.d.stand) === zeitKurz(S.stand);
+    const zeit = (iso) => { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleString('de-CH', genau ? { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' } : { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); };
+    return huelle('Datei laden?',
+      '<p class="hinweis">' + ic('info') + '<span>' + (aelter ? 'Diese Datei ist älter als der Stand auf diesem Gerät.' : 'Auf diesem Gerät ist etwas noch nicht gesichert.') + '</span></p>' +
+      '<table class="vergleich"><tbody><tr><th>Datei</th><td>' + (w.d.stand ? 'Stand ' + zeit(w.d.stand) + ' Uhr' : 'ohne Angabe') + '</td></tr>' +
+      '<tr><th>Dieses Gerät</th><td>Stand ' + zeit(S.stand) + ' Uhr' + (datei.schmutzig ? ', noch nicht gesichert' : '') + '</td></tr></tbody></table>' +
+      '<p>Lädst du die Datei, ersetzt sie alles, was auf diesem Gerät steht.</p>' +
+      '<div class="reihe"><button type="button" class="btn stark" data-a="zu">Nicht laden</button><button type="button" class="btn rot" data-a="laden-ja">Trotzdem laden</button></div>');
+  }
+};
+function auf(s) { sheet = s; renderSheet(true); }
+function zu() { sheet = null; renderSheet(false); }
+function renderSheet(neu) {
+  const host = $('#sheets');
+  const html = sheet ? SHEET[sheet.art]() : '';
+  if (!html) { sheet = null; host.innerHTML = ''; document.body.classList.remove('gesperrt'); return; }
+  const alt = $('.sheet-inhalt', host), sc = alt ? alt.scrollTop : 0;
+  host.innerHTML = html;
+  document.body.classList.add('gesperrt');
+  if (neu) {
+    $('.sheet', host).classList.add('rein'); $('.scrim', host).classList.add('rein');
+    const erst = $('[data-fokus]', host);
+    if (erst && FEIN) { erst.focus(); if (erst.select) erst.select(); }
+  } else { const inh = $('.sheet-inhalt', host); if (inh) inh.scrollTop = sc; }
+}
+
+/* ---------- Zeichnen ---------- */
+const zeitKnapp = (iso) => { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleString('de-CH', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }); };
+function standText() {
+  if (S.beispiel || !S.stand) return '';
+  return 'Stand auf diesem Gerät: ' + zeitKurz(S.stand) + ' Uhr, ' + (datei.schmutzig ? 'noch nicht gesichert.' : 'gesichert.');
+}
+function obenHTML() {
+  if (S.beispiel) return '<div class="probe"><span>Beispiel: alle Angaben sind erfunden</span>' + (IM_RAHMEN ? '' : '<button type="button" data-a="daten-wahl">Eigene gesicherte Datei laden</button>') + '</div>';
+  if (IM_RAHMEN) return '<div class="probe"><span>Nur Ansicht: Änderungen gehen hier verloren.</span></div>';
+  if (hinweis === 'offen') return '<div class="probe"><span>Auf diesem Gerät ist etwas noch nicht gesichert (Stand ' + zeitKnapp(S.stand) + ').</span><button type="button" data-a="sichern">Jetzt sichern</button><button type="button" class="zu" data-a="hinweis-zu" aria-label="Hinweis schliessen">×</button></div>';
+  if (hinweis === 'stand') return '<div class="probe leise"><span>Stand auf diesem Gerät: ' + zeitKnapp(S.stand) + '.</span><button type="button" data-a="daten-wahl">Neuere Datei laden</button><button type="button" class="zu" data-a="hinweis-zu" aria-label="Hinweis schliessen">×</button></div>';
+  return '';
+}
+function render() {
+  document.documentElement.style.fontSize = (16 * (S.meta.zoom || 1)) + 'px';
+  if (S.meta.modus === 'hell' || S.meta.modus === 'dunkel') document.documentElement.setAttribute('data-modus', S.meta.modus);
+  else document.documentElement.removeAttribute('data-modus');
+  $('#oben').innerHTML = obenHTML();
+  $('#kopf').innerHTML = kopfHTML();
+  $('#haupt').innerHTML = ANSICHT[S.ui.bereich]();
+  tipWeg(); diagrammePassen();
+}
+let toastT = 0;
+function toast(text, mitRueck) {
+  $('#toasts').innerHTML = '<div class="toast" role="status"><span>' + esc(text) + '</span>' + (mitRueck ? '<button type="button" data-a="rueck">Rückgängig</button>' : '') + '</div>';
+  clearTimeout(toastT);
+  toastT = setTimeout(() => { $('#toasts').innerHTML = ''; }, mitRueck ? 7000 : 5500);
+}
+let scharf = '';
+function bestaetigt(el, text) {
+  const a = el.dataset.a;
+  if (scharf === a) { scharf = ''; return true; }
+  scharf = a;
+  const alt = el.innerHTML;
+  el.textContent = text; el.classList.add('scharf');
+  setTimeout(() => { if (scharf === a) scharf = ''; if (el.isConnected) { el.innerHTML = alt; el.classList.remove('scharf'); } }, 4000);
+  return false;
+}
+/* Hinweis beim Zeigen oder mit der Tastatur: Text kommt aus data-tip und wird als reiner Text gesetzt */
+function tipZeigen(el) {
+  const t = $('#tip');
+  t.textContent = '';
+  el.dataset.tip.split('\n').forEach((zeile, i) => { const d = document.createElement(i ? 'div' : 'strong'); d.textContent = zeile; t.appendChild(d); });
+  t.hidden = false;
+  const r = el.getBoundingClientRect(), b = t.getBoundingClientRect();
+  const x = Math.max(8, Math.min(r.left + r.width / 2 - b.width / 2, window.innerWidth - b.width - 8));
+  const y = r.top - b.height - 8 < 8 ? Math.min(r.bottom + 8, window.innerHeight - b.height - 8) : r.top - b.height - 8;
+  t.style.transform = 'translate(' + Math.round(x) + 'px,' + Math.round(y) + 'px)';
+}
+function tipWeg() { const t = $('#tip'); if (t) t.hidden = true; }
+/* Stossen die Zahlen über den Säulen aneinander (schmaler Bildschirm, viele Jahre), bleiben sie in diesem Diagramm weg */
+function diagrammePassen() {
+  $$('.dg-feld').forEach((feld) => {
+    feld.classList.remove('eng');
+    const o = $$('.dg-o', feld).map((x) => x.getBoundingClientRect());
+    if (o.some((r, i) => i > 0 && r.left < o[i - 1].right + 2)) feld.classList.add('eng');
+  });
+}
+
+/* ---------- Sichern: die ganze Datei samt Inhalt ---------- */
+function dateiname() { return datei.vorschlag || 'Strategietag_' + (S.meta.datum || 'ohne-Datum') + '.html'; }
+function dateiInhalt() {
+  const AUF = '<scr' + 'ipt id="daten" type="application/json">', ZU = '</scr' + 'ipt>';
+  const a = VORLAGE.indexOf(AUF);
+  if (a < 0) return null;
+  const b = VORLAGE.indexOf(ZU, a);
+  const json = JSON.stringify({ app: 'strategietag-bi', v: FORMAT, version: VERSION, gesichertAm: new Date().toISOString(), daten: S }).replace(/</g, '\\u003c').replace(ZEILENTRENNER, (c) => '\\u' + c.charCodeAt(0).toString(16));
+  return VORLAGE.slice(0, a + AUF.length) + json + VORLAGE.slice(b);
+}
+/* weg: '' = der übliche Weg dieses Geräts, 'datei' = in eine gewählte Datei schreiben, 'herunter' = herunterladen */
+async function sichern(still, weg) {
+  if (IM_RAHMEN) { if (!still) auf({ art: 'sichern' }); return; }
+  const text = dateiInhalt();
+  if (!text) { if (!still) toast('Sichern ist hier nicht möglich.'); return; }
+  const kopfNeu = () => { $('#kopf').innerHTML = kopfHTML(); $('#oben').innerHTML = obenHTML(); if (sheet && sheet.art === 'einstellungen') renderSheet(false); };
+  // 1. Direkt in die Datei: am Rechner (Edge, Chrome). Einmal wählen, danach gehen Änderungen von selbst hinein.
+  const teilen = TEILEN_ZUERST && kannTeilen();
+  if (weg !== 'herunter' && (datei.handle || (window.showSaveFilePicker && (weg === 'datei' || !teilen)))) {
+    try {
+      if (!datei.handle) {
+        if (still) return;
+        datei.handle = await window.showSaveFilePicker({ suggestedName: dateiname(), types: [{ description: 'Strategietag', accept: { 'text/html': ['.html'] } }] });
+      }
+      const w = await datei.handle.createWritable();
+      await w.write(text); await w.close();
+      datei.name = datei.handle.name; nameMerken(datei.name); gesichertMerken();
+      kopfNeu();
+      if (!still) toast('Gesichert als «' + datei.name + '». Diese Datei enthält alles; Änderungen gehen ab jetzt von selbst hinein.');
+      return;
+    } catch (e) {
+      if (e && e.name === 'AbortError') return;
+      datei.handle = null;
+      if (still) { kopfNeu(); toast('Das laufende Sichern klappt nicht mehr. Bitte «Sichern» drücken.'); return; }
+    }
+  }
+  if (still) return;
+  // 2. iPad und Handy: über das Teilen-Fenster in den eigenen Ordner legen
+  if (weg !== 'herunter' && weg !== 'datei' && teilen) {
+    try {
+      await navigator.share({ files: [new File([text], dateiname(), { type: 'text/html' })] });
+      datei.name = dateiname(); gesichertMerken();
+      kopfNeu();
+      toast('Weitergegeben als «' + datei.name + '». Lege die Datei in deinem Ordner ab und ersetze die alte.');
+      return;
+    } catch (e) {
+      if (e && e.name === 'AbortError') return;   // Teilen-Fenster geschlossen: nichts gesichert
+    }
+  }
+  // 3. Sonst als Download
+  const a = document.createElement('a'), url = URL.createObjectURL(new Blob([text], { type: 'text/html' }));
+  a.href = url; a.download = dateiname(); document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => { URL.revokeObjectURL(url); }, 5000);
+  datei.name = dateiname(); gesichertMerken();
+  kopfNeu();
+  toast('Gesichert als «' + datei.name + '» im Ordner «Downloads». Diese Datei enthält alles: zum Weitermachen per Doppelklick öffnen oder im Tool laden.');
+}
+
+/* ---------- Handlungen ---------- */
+function fokus(id) { const el = document.getElementById(id); if (el) el.focus(); }
+function geaendert(schliessen) { speichern(); if (schliessen) zu(); render(); }
+function leuteDazu(text) {
+  const t = aktThema(), namen = mehrzeilig(text);
+  if (!t || !namen.length) return;
+  merken();
+  namen.forEach((n) => { t.leute.push({ id: uid(), name: n, gruppe: '' }); });
+  geaendert(); fokus('neu-leute');
+  if (namen.length > 1) toast(namen.length + ' Namen hinzugefügt', true);
+}
+function zieleDazu(text) {
+  const t = aktThema(), liste = mehrzeilig(text);
+  if (!t || !liste.length) return;
+  merken();
+  liste.forEach((x) => { t.ziele.push({ id: uid(), text: x, stand: '' }); });
+  geaendert(); fokus('neu-ziel');
+  if (liste.length > 1) toast(liste.length + ' Ziele hinzugefügt', true);
+}
+function entfernen(liste, text) {   // Eintrag des offenen Sheets aus einer Liste des Themas nehmen
+  const t = aktThema();
+  if (!t || !sheet) return;
+  merken();
+  t[liste] = t[liste].filter((x) => x.id !== sheet.id);
+  geaendert(true); toast(text, true);
+}
+function themaAusForm() {   // was im offenen Themen-Sheet steht, ins Thema übernehmen
+  const t = aktThema(), tt = $('#t-t'), tf = $('#t-f');
+  if (t && tt && tt.value.trim()) t.titel = tt.value.trim();
+  if (t && tf) t.frage = tf.value.trim();
+  return t;
+}
+function schiebeThema(um) {
+  const t = themaAusForm(), i = S.themen.indexOf(t), j = i + um;
+  if (!t || j < 0 || j >= S.themen.length) return;
+  S.themen.splice(i, 1); S.themen.splice(j, 0, t);
+  speichern(); render(); renderSheet(false);
+}
+const AKT = {
+  seg(el) {
+    const k = el.dataset.k, v = el.dataset.v;
+    if (k === 'bereich') { S.ui.bereich = v; speichern(true); render(); window.scrollTo(0, 0); }
+    else if (k === 'sicht') { S.zahlen.sicht = v; speichern(true); render(); }
+    else if (k === 'ansicht') { S.zahlen.ansicht = v; speichern(true); render(); }
+    else if (k === 'modus') { S.meta.modus = v; speichern(true); anzeigeMerken(); render(); renderSheet(false); }
+  },
+  sheet(el) { auf({ art: el.dataset.s }); },
+  zu() { zu(); },
+  sichern() { sichern(false); },
+  herunter() { sichern(false, 'herunter'); },
+  'in-datei'() { sichern(false, 'datei'); },
+  'hinweis-zu'() { hinweis = ''; $('#oben').innerHTML = obenHTML(); },
+  'laden-ja'() { const w = ladeWartet; ladeWartet = null; if (w) uebernehmen(w.d, w.name); else zu(); },
+  'datei-wahl'() { $('#datei-wahl').click(); },
+  'daten-wahl'() { $('#daten-wahl').click(); },
+  auf(el) { const k = el.dataset.k; S.ui.auf[k] = !S.ui.auf[k]; speichern(true); render(); },
+  spalte(el) { auf({ art: 'spalte', id: el.dataset.id }); },
+  'spalte-weg'() {
+    const id = sheet && sheet.id;
+    merken();
+    S.zahlen.perioden = S.zahlen.perioden.filter((p) => p.id !== id);
+    S.zahlen.zeilen.forEach((z) => { delete z.w[id]; });
+    geaendert(true); toast('Spalte entfernt', true);
+  },
+  'zahlen-weg'(el) { if (!bestaetigt(el, 'Wirklich alle Zahlen entfernen?')) return; merken(); S.zahlen.perioden = []; S.zahlen.zeilen = []; geaendert(); toast('Zahlen entfernt', true); },
+  thema(el) { S.ui.thema = el.dataset.id; speichern(true); render(); },
+  'thema-neu'() { const t = themaNeu(); S.themen.push(t); S.ui.thema = t.id; geaendert(); auf({ art: 'thema' }); },
+  'thema-hoch'() { schiebeThema(-1); },
+  'thema-runter'() { schiebeThema(1); },
+  'thema-weg'() { const t = aktThema(); if (!t) return; merken(); S.themen = S.themen.filter((x) => x !== t); S.ui.thema = ''; geaendert(true); toast('Thema gelöscht', true); },
+  art(el) { const t = themaAusForm(); if (!t) return; t.art = el.dataset.v; if (t.art === 'gruppen' && !t.gruppen.length) t.gruppen = ['Gruppe 1', 'Gruppe 2', 'Gruppe 3'].map((n) => ({ id: uid(), name: n })); speichern(); render(); renderSheet(false); },
+  notiz(el) { auf({ art: 'notiz', id: el.dataset.id }); },
+  beschluss(el) { auf({ art: 'beschluss', id: el.dataset.id }); },
+  ziel(el) { auf({ art: 'ziel', id: el.dataset.id }); },
+  person(el) { auf({ art: 'person', id: el.dataset.id }); },
+  gruppe(el) { auf({ art: 'gruppe', id: el.dataset.id }); },
+  gl(el) { const t = aktThema(), x = t && t[el.dataset.art === 'b' ? 'beschluesse' : 'notizen'].find((y) => y.id === el.dataset.id); if (!x) return; x.gl = !x.gl; geaendert(); },
+  stand(el) { const t = aktThema(), z = t && t.ziele.find((y) => y.id === el.dataset.id); if (!z) return; z.stand = z.stand === el.dataset.v ? '' : el.dataset.v; geaendert(); },
+  'notiz-weg'() { entfernen('notizen', 'Notiz gelöscht'); },
+  'beschluss-weg'() { entfernen('beschluesse', 'Gelöscht'); },
+  'ziel-weg'() { entfernen('ziele', 'Ziel gelöscht'); },
+  'person-weg'() { entfernen('leute', 'Mitarbeiter entfernt'); },
+  'gruppe-neu'() { const t = aktThema(); if (!t) return; const g = { id: uid(), name: 'Neue Gruppe' }; t.gruppen.push(g); geaendert(); auf({ art: 'gruppe', id: g.id }); },
+  'gruppe-weg'() { const t = aktThema(); if (!t || !sheet) return; merken(); t.leute.forEach((p) => { if (p.gruppe === sheet.id) p.gruppe = ''; }); t.gruppen = t.gruppen.filter((g) => g.id !== sheet.id); geaendert(true); toast('Gruppe entfernt', true); },
+  zuteilen(el) { const p = imThema('leute'), f = $('#p-n'); if (!p) return; if (f && f.value.trim()) p.name = f.value.trim(); p.gruppe = el.dataset.g; geaendert(true); },
+  zoom(el) {
+    const stufen = [0.85, 1, 1.15, 1.3, 1.5, 1.75, 2];
+    let i = stufen.indexOf(S.meta.zoom); if (i < 0) i = 1;
+    S.meta.zoom = stufen[Math.min(stufen.length - 1, Math.max(0, i + Number(el.dataset.d)))];
+    speichern(true); anzeigeMerken(); render(); renderSheet(false);
+  },
+  vollbild() {
+    try {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen().catch(() => { toast('Vollbild ist hier nicht möglich.'); });
+    } catch (e) { toast('Vollbild ist hier nicht möglich.'); }
+  },
+  demo(el) { if (!bestaetigt(el, 'Wirklich? Ersetzt alles')) return; merken(); const z = S.meta.zoom, mo = S.meta.modus; S = beispiel(); S.meta.zoom = z; S.meta.modus = mo; geaendert(true); window.scrollTo(0, 0); toast('Beispiel geladen', true); },
+  leeren(el) { if (!bestaetigt(el, 'Wirklich alles leeren?')) return; merken(); const z = S.meta.zoom, mo = S.meta.modus; S = leer(); S.meta.zoom = z; S.meta.modus = mo; geaendert(true); window.scrollTo(0, 0); toast('Alles geleert', true); },
+  rueck() { const s = rueckStapel.pop(); if (!s) return; const ui = S.ui; S = normal(JSON.parse(s)); S.ui = ui; speichern(); render(); renderSheet(false); toast('Wiederhergestellt'); },
+  drucken() {
+    $('#druck').innerHTML = '<table class="d-seite"><thead><tr><td><div class="d-rand"></div></td></tr></thead><tfoot><tr><td><div class="d-rand"></div></td></tr></tfoot><tbody><tr><td>' + ergebnisHTML() + '<p class="e-fuss">Stand: ' + zeitKurz(new Date().toISOString()) + ' Uhr</p></td></tr></tbody></table>';
+    setTimeout(() => { window.print(); }, 60);
+  }
+};
+const pflicht = (feld) => { const text = feld.value.trim(); if (!text) { feld.classList.add('fehlt'); feld.focus(); } return text; };
+const ohneBis = (text) => text.trim().replace(/^bis\s+/i, '');
+const FORMS = {
+  notiz(f) { const t = aktThema(), text = f.elements.text.value.trim(); if (!t || !text) return; t.notizen.push({ id: uid(), text: text, gl: false }); geaendert(); fokus('neu-notiz'); },
+  'notiz-edit'(f) { const n = imThema('notizen'), text = n && pflicht(f.elements.text); if (!text) return; n.text = text; n.gl = f.elements.gl.checked; geaendert(true); },
+  beschluss(f) {
+    const t = aktThema(), was = f.elements.was.value.trim();
+    if (!t) return;
+    if (!was) { f.elements.was.focus(); return; }
+    t.beschluesse.push({ id: uid(), was: was, wer: f.elements.wer.value.trim(), bis: ohneBis(f.elements.bis.value), gl: false });
+    geaendert(); fokus('neu-was');
+  },
+  'beschluss-edit'(f) { const b = imThema('beschluesse'), was = b && pflicht(f.elements.was); if (!was) return; b.was = was; b.wer = f.elements.wer.value.trim(); b.bis = ohneBis(f.elements.bis.value); b.gl = f.elements.gl.checked; geaendert(true); },
+  ziel(f) { zieleDazu(f.elements.text.value); },
+  'ziel-edit'(f) { const z = imThema('ziele'), text = z && pflicht(f.elements.text); if (!text) return; z.text = text; geaendert(true); },
+  leute(f) { leuteDazu(f.elements.text.value); },
+  person(f) { const p = imThema('leute'), name = p && pflicht(f.elements.name); if (!name) return; p.name = name; geaendert(true); },
+  gruppe(f) { const g = imThema('gruppen'), name = g && pflicht(f.elements.name); if (!name) return; g.name = name; geaendert(true); },
+  'thema-edit'(f) { const t = aktThema(), titelNeu = t && pflicht(f.elements.titel); if (!titelNeu) return; t.titel = titelNeu; t.frage = f.elements.frage.value.trim(); geaendert(true); },
+  spalte(f) { const p = S.zahlen.perioden.find((x) => x.id === sheet.id), name = f.elements.name.value.trim(); if (!p || !name) return; p.name = name; S.zahlen.perioden.sort((a, b) => periodeOrdnung(a.name) - periodeOrdnung(b.name)); geaendert(true); },
+  spalten(f) {
+    const st = importStand;
+    if (!st) return;
+    const namen = {}, alle = [];
+    const jeTeil = st.teile.map((imp, ti) => {
+      const auswahl = [];
+      imp.spalten.forEach((s, i) => {
+        const an = f.elements['an-' + ti + '-' + i], feld = f.elements['name-' + ti + '-' + i];
+        let name = feld ? feld.value.trim() : '';
+        if (!an || !an.checked || !name) return;
+        const basis = name;
+        for (let n = 2; namen[name]; n++) name = basis + ' (' + n + ')';   // gleiche Namen würden sonst zusammengezählt
+        namen[name] = 1;
+        auswahl.push({ c: s.c, name: name }); alle.push(name);
+      });
+      return auswahl;
+    });
+    if (!alle.length) { toast('Keine Spalte gewählt.'); return; }
+    merken();
+    const warBeispiel = S.beispiel;
+    if (warBeispiel) {   // eigene Zahlen mischen sich nicht mit dem Beispiel: Beispielzahlen und Beispieleinträge gehen weg, die Themen bleiben
+      S.beispiel = false; S.zahlen.perioden = []; S.zahlen.zeilen = []; S.ui.auf = {};
+      S.themen.forEach((t) => { t.notizen = []; t.beschluesse = []; t.ziele = []; t.leute = []; });
+    }
+    st.teile.forEach((imp, ti) => { if (jeTeil[ti].length) zahlenUebernehmen(imp, jeTeil[ti]); });
+    importStand = null;
+    geaendert(true);
+    toast((warBeispiel ? 'Beispiel entfernt. ' : '') + (alle.length === 1 ? 'Spalte «' + alle[0] + '» übernommen' : alle.length + ' Spalten übernommen'), true);
+  }
+};
+
+/* ---------- Ereignisse ---------- */
+let klickSperre = false;   // nach dem Loslassen eines gezogenen Kärtchens folgt ein Klick, der nichts auslösen soll
+document.addEventListener('click', (e) => {
+  if (klickSperre) { klickSperre = false; return; }
+  const el = e.target.closest('[data-a]');
+  if (!el || el.disabled) return;
+  const fn = AKT[el.dataset.a];
+  if (fn) fn(el, e);
+});
+document.addEventListener('submit', (e) => {
+  const art = e.target.dataset.form;
+  if (!art || !FORMS[art]) return;
+  e.preventDefault();
+  FORMS[art](e.target);
+});
+document.addEventListener('input', (e) => {
+  const el = e.target;
+  if (el.classList && el.classList.contains('fehlt')) el.classList.remove('fehlt');
+  if (el.dataset && el.dataset.f) { S.meta[el.dataset.f] = el.value; speichern(); }
+});
+document.addEventListener('change', (e) => { if (e.target.dataset && e.target.dataset.f) render(); });
+document.addEventListener('keydown', (e) => {
+  if (e.isComposing) return;
+  if (e.key === 'Escape' && sheet) { e.preventDefault(); zu(); }
+});
+document.addEventListener('paste', (e) => {
+  const t = e.target, feld = t && t.matches && t.matches('input,textarea');
+  const text = e.clipboardData ? e.clipboardData.getData('text') : '';
+  if (feld && (t.id === 'neu-leute' || t.id === 'neu-ziel')) {   // eine Liste aus Excel: jede Zeile ein Eintrag
+    if (!/[\r\n\t]/.test(text.trim())) return;
+    e.preventDefault();
+    if (t.id === 'neu-leute') leuteDazu(text); else zieleDazu(text);
+    return;
+  }
+  if (feld && t.id !== 'einfuegen') return;
+  if (!feld && (S.ui.bereich !== 'zahlen' || (sheet && sheet.art !== 'import'))) return;
+  if (!text) return;
+  e.preventDefault();
+  importText(text);
+});
+const mitDatei = (e) => !!(e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types || [], 'Files') >= 0);
+let ziehT = 0;
+window.addEventListener('dragover', (e) => { if (!mitDatei(e)) return; e.preventDefault(); document.body.classList.add('drueber'); clearTimeout(ziehT); ziehT = setTimeout(() => { document.body.classList.remove('drueber'); }, 250); });
+window.addEventListener('drop', (e) => {
+  if (!mitDatei(e)) return;
+  e.preventDefault(); document.body.classList.remove('drueber');
+  importDateien(e.dataTransfer.files);
+});
+$('#datei-wahl').addEventListener('change', (e) => { importDateien(Array.from(e.target.files || [])); e.target.value = ''; });
+$('#daten-wahl').addEventListener('change', (e) => { const file = e.target.files && e.target.files[0]; if (file) ladeDatei(file); e.target.value = ''; });
+window.addEventListener('beforeunload', (e) => { if (IM_RAHMEN || !datei.schmutzig || S.beispiel) return; e.preventDefault(); e.returnValue = ''; });
+
+/* Hinweise an den Diagrammen: beim Zeigen und mit der Tastatur */
+document.addEventListener('pointerover', (e) => { const el = e.target.closest ? e.target.closest('[data-tip]') : null; if (el) tipZeigen(el); else tipWeg(); });
+document.addEventListener('focusin', (e) => { const el = e.target.closest ? e.target.closest('[data-tip]') : null; if (el) tipZeigen(el); });
+document.addEventListener('focusout', tipWeg);
+window.addEventListener('scroll', tipWeg, true);
+let passT = 0;
+window.addEventListener('resize', () => { clearTimeout(passT); passT = setTimeout(diagrammePassen, 120); });
+
+/* Kärtchen der Gruppenzuteilung mit Maus oder Stift ziehen. Mit dem Finger: antippen und Gruppe wählen. */
+let zug = null;
+function zugEnde() {
+  if (!zug) return;
+  if (zug.geist) zug.geist.remove();
+  if (zug.el) zug.el.classList.remove('zieht');
+  $$('.spalte.ziel').forEach((s) => s.classList.remove('ziel'));
+  document.body.classList.remove('am-ziehen');
+  zug = null;
+}
+const spalteUnter = (e) => { const el = document.elementFromPoint(e.clientX, e.clientY); return el && el.closest ? el.closest('[data-spalte]') : null; };
+document.addEventListener('pointerdown', (e) => {
+  const k = e.target.closest ? e.target.closest('.karte') : null;
+  if (!k || e.pointerType === 'touch' || e.button !== 0) return;
+  const r = k.getBoundingClientRect();
+  zug = { id: k.dataset.id, el: k, x: e.clientX, y: e.clientY, dx: e.clientX - r.left, dy: e.clientY - r.top, b: r.width, geist: null };
+});
+document.addEventListener('pointermove', (e) => {
+  if (!zug) return;
+  if (!zug.geist) {
+    if (Math.hypot(e.clientX - zug.x, e.clientY - zug.y) < 6) return;
+    zug.geist = zug.el.cloneNode(true);
+    zug.geist.className = 'karte geist';
+    zug.geist.style.width = zug.b + 'px';
+    document.body.appendChild(zug.geist);
+    zug.el.classList.add('zieht');
+    document.body.classList.add('am-ziehen');
+  }
+  zug.geist.style.transform = 'translate(' + (e.clientX - zug.dx) + 'px,' + (e.clientY - zug.dy) + 'px)';
+  const ziel = spalteUnter(e);
+  $$('.spalte.ziel').forEach((s) => { if (s !== ziel) s.classList.remove('ziel'); });
+  if (ziel) ziel.classList.add('ziel');
+});
+document.addEventListener('pointerup', (e) => {
+  if (!zug) return;
+  const gezogen = !!zug.geist, id = zug.id, ziel = gezogen ? spalteUnter(e) : null;
+  zugEnde();
+  if (!gezogen) return;
+  klickSperre = true; setTimeout(() => { klickSperre = false; }, 80);
+  const t = aktThema(), p = t && t.leute.find((x) => x.id === id);
+  if (!ziel || !p || p.gruppe === ziel.dataset.spalte) return;
+  merken();
+  p.gruppe = ziel.dataset.spalte;
+  geaendert();
+});
+document.addEventListener('pointercancel', zugEnde);
+
+/* Bildschirmtastatur (iPad, Handy): Sheets richten sich nach dem sichtbaren Teil des Bildschirms */
+if (window.visualViewport) {
+  const vv = window.visualViewport, wurzel = document.documentElement;
+  const sichtbar = () => { wurzel.style.setProperty('--vvh', Math.round(vv.height) + 'px'); wurzel.style.setProperty('--vvt', Math.round(vv.offsetTop) + 'px'); };
+  vv.addEventListener('resize', sichtbar); vv.addEventListener('scroll', sichtbar);
+  sichtbar();
+}
+/* Android zeigt Dateien aus der Ablage manchmal ohne erkennbaren Typ: dort ohne Filter wählen lassen */
+if (ANDROID) ['datei-wahl', 'daten-wahl'].forEach((id) => { const el = document.getElementById(id); if (el) el.removeAttribute('accept'); });
+/* Über den Link: Symbol für den Startbildschirm, und die Seite bleibt ohne Netz verfügbar */
+if (ALS_LINK) {
+  try { const l = document.createElement('link'); l.rel = 'apple-touch-icon'; l.href = 'icon.png'; document.head.appendChild(l); } catch (e) { /* ohne Symbol weiter */ }
+  if ('serviceWorker' in navigator) window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { /* ohne Netz-Vorrat weiter */ }); });
+}
+
+render();
+})();
+</script>
+</body>
+</html>
