@@ -286,6 +286,21 @@ body.drueber .ablage,body.drueber .tab-rahmen,body.drueber .dg{border-color:var(
 .bl{font-size:.8125rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:1.5rem 0 .55rem}
 .eintraege{display:flex;flex-direction:column;gap:.5rem;margin-bottom:.6rem}
 .eintraege:empty{display:none}
+.stw{background:var(--card);border-radius:1.1rem;box-shadow:var(--shadow);padding:.15rem 1.1rem;margin-bottom:.6rem}
+.stw li{position:relative}
+.stw li + li{border-top:1px solid var(--sep)}
+.stw li button{display:flex;align-items:flex-start;gap:.8rem;width:100%;padding:.62rem 0;text-align:left;font-size:1.1875rem;line-height:1.35;font-weight:500}
+.stw li button::before{content:"";flex:none;width:.42rem;height:.42rem;margin-top:.5em;border-radius:50%;background:var(--brand)}
+.stw li button span{min-width:0;overflow-wrap:anywhere}
+.stw ul + .stw-neu{border-top:1px solid var(--sep)}
+.stw-neu{display:flex;align-items:center;gap:.7rem}
+.stw-neu button{width:1.6rem;height:1.6rem;border-radius:50%;display:grid;place-items:center;color:var(--accent);flex:none}
+.stw-neu button .ic{width:1.15rem;height:1.15rem}
+.stw-neu input{flex:1;min-width:0;height:2.9rem;padding:0;border:0;background:transparent;font-size:1.0625rem;outline:none}
+.stw-neu input::placeholder{color:var(--muted)}
+.stw li.ein-vor::before{top:-2px}
+.stw li.ein-nach::after{bottom:-2px}
+.stw.geist{padding:.15rem 1.1rem;min-width:12rem}
 .notiz,.besch,.rz{display:flex;align-items:center;gap:.5rem;background:var(--card);border-radius:1rem;box-shadow:var(--shadow);padding:.35rem .5rem .35rem 1.1rem}
 .notiz.gl,.besch.gl{background:var(--brand-soft);box-shadow:inset 0 0 0 1.5px var(--brand)}
 .n-text{flex:1;min-width:0;padding:.55rem 0;font-size:1.1875rem;line-height:1.3;font-weight:500;overflow-wrap:anywhere}
@@ -580,6 +595,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
   .tlink .tl-t{overflow:visible}
   .titel h1,.thema .titel h1{font-size:1.75rem}
   .n-text,.b-was{font-size:1.0625rem}
+  .stw li button{font-size:1.0625rem}
   .frage{font-size:1.0625rem}
   .dreier{grid-template-columns:1fr 1fr auto}
   .dreier input:first-child{grid-column:1 / -1}
@@ -668,7 +684,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '0.8.4';         // Version des Tools, steht in den Einstellungen
+const VERSION = '0.8.5';         // Version des Tools, steht in den Einstellungen
 const FORMAT = 7;              // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
@@ -753,7 +769,7 @@ const ganz = (v) => (typeof v === 'number' && isFinite(v) && v >= 0 ? Math.round
 
 /* ---------- Aufbau der Daten ---------- */
 function themaNeu(art, titelText, frage) {
-  return { id: uid(), art: art || 'thema', eltern: '', titel: titelText || 'Neues Thema', frage: frage || '', notizen: [], beschluesse: [], ziele: [], gruppen: [], leute: [], baustellen: [], bedarf: [], fest: '', anhaenge: [] };
+  return { id: uid(), art: art || 'thema', eltern: '', titel: titelText || 'Neues Thema', frage: frage || '', stichworte: [], notizen: [], beschluesse: [], ziele: [], gruppen: [], leute: [], baustellen: [], bedarf: [], fest: '', anhaenge: [] };
 }
 /* Unterpunkte stehen direkt hinter ihrem Thema («eltern» nennt es). Es gibt zwei Ebenen: Ein Unterpunkt hat selbst keine Unterpunkte. */
 function ordnen(T) {
@@ -851,6 +867,7 @@ function beispiel() {
   T[1].beschluesse = [B('Zuteilung gilt ab 1. Januar, Wechsel nur über die Leitung', 'Leitung', '1. Januar')];
   T[2].titel = 'Lagerplatz'; T[2].frage = 'Der Lagerplatz ist unübersichtlich. Was räumen wir auf, und wer macht es bis wann?';
   T[2].notizen = [N('Regale beschriften'), N('Altes Material entsorgen')];
+  T[2].stichworte = ['Fotos vom heutigen Zustand zeigen', 'Vorschlag: ein Regal je Gruppe', 'Wer übernimmt die Leitung?'].map((x) => ({ id: uid(), text: x }));
   T[2].beschluesse = [B('Lagerplatz aufräumen und beschriften', 'Gruppe 2', 'Ende Februar', true)];
   T[3].titel = 'Weiterbildung'; T[3].frage = 'Wer besucht nächstes Jahr welchen Kurs?';
   T[3].notizen = [N('Wünsche bis Mitte Dezember sammeln'), N('Kosten mit der Leitung klären')];
@@ -924,7 +941,9 @@ function normal(d) {
     if (typeof t.titel !== 'string') t.titel = 'Thema';
     if (typeof t.frage !== 'string') t.frage = '';
     if (typeof t.eltern !== 'string') t.eltern = '';
-    ['notizen', 'beschluesse', 'ziele', 'gruppen', 'leute', 'baustellen', 'bedarf'].forEach((k) => { if (!Array.isArray(t[k])) t[k] = []; });
+    ['stichworte', 'notizen', 'beschluesse', 'ziele', 'gruppen', 'leute', 'baustellen', 'bedarf'].forEach((k) => { if (!Array.isArray(t[k])) t[k] = []; });
+    t.stichworte = t.stichworte.filter((x) => x && typeof x === 'object' && typeof x.text === 'string' && x.text.trim());   // seit 0.8.5: was du sagen willst [{id, text}]
+    t.stichworte.forEach((x) => { if (!x.id) x.id = uid(); });
     if (typeof t.fest !== 'string') t.fest = '';
     if (typeof t.zu !== 'string') t.zu = '';
     if (t.art === 'gruppen' && t.fest && !t.zu) t.zu = t.fest;   // festgehaltene Gruppenzuteilung aus 0.8 bis 0.8.2: gilt als abgeschlossen
@@ -1525,7 +1544,7 @@ function kundenLesen(g) {
 /* Eigene Angaben mischen sich nicht mit dem Beispiel: Beispielzahlen und Beispieleinträge gehen weg, die Themen bleiben */
 function beispielWeg() {
   S.beispiel = false; S.zahlen.perioden = []; S.zahlen.zeilen = []; S.ui.auf = {};
-  S.themen.forEach((x) => { x.notizen = []; x.beschluesse = []; x.ziele = []; x.leute = []; x.baustellen = []; x.bedarf = []; x.fest = ''; x.zu = ''; x.anhaenge = []; });
+  S.themen.forEach((x) => { x.stichworte = []; x.notizen = []; x.beschluesse = []; x.ziele = []; x.leute = []; x.baustellen = []; x.bedarf = []; x.fest = ''; x.zu = ''; x.anhaenge = []; });
   S.parkplatz = []; S.glPunkte = []; S.kunden.offerten = []; S.kunden.auftraege = []; S.budget = { ziel: null, auftraege: [], notiz: '' }; S.mitarbeiter = [];
 }
 /* Gelesene Tabellen übernehmen. Ein Jahr oder ein Auftrag (gleiches Jahr, gleiches Objekt), den es schon gibt, wird ergänzt statt verdoppelt. */
@@ -1653,7 +1672,7 @@ async function ladeDatei(file) {
 }
 function ohneInhalt() {   // nichts eingetragen und die Themen wie am Anfang
   const vor = themenStart();
-  return !S.zahlen.perioden.length && S.themen.length === vor.length && S.themen.every((x, i) => x.titel === vor[i].titel && x.frage === vor[i].frage && !S.parkplatz.length && !S.glPunkte.length && !S.kunden.offerten.length && !S.kunden.auftraege.length && !x.baustellen.length && !x.notizen.length && !x.beschluesse.length && !x.ziele.length && !x.leute.length && !x.bedarf.length && !x.anhaenge.length) && !S.rueckmeldungen.length && S.budget.ziel === null && !S.budget.auftraege.length && !S.mitarbeiter.length;
+  return !S.zahlen.perioden.length && S.themen.length === vor.length && S.themen.every((x, i) => x.titel === vor[i].titel && x.frage === vor[i].frage && !S.parkplatz.length && !S.glPunkte.length && !S.kunden.offerten.length && !S.kunden.auftraege.length && !x.baustellen.length && !x.stichworte.length && !x.notizen.length && !x.beschluesse.length && !x.ziele.length && !x.leute.length && !x.bedarf.length && !x.anhaenge.length) && !S.rueckmeldungen.length && S.budget.ziel === null && !S.budget.auftraege.length && !S.mitarbeiter.length;
 }
 function uebernehmen(d, name) {
   merken();
@@ -2080,6 +2099,12 @@ function bstGruppen(B, nach) {
 }
 const TEIL = {
   frage(t) { return t.frage ? '<p class="frage">' + esc(t.frage) + '</p>' : ''; },
+  stichworte(t) {   // was du sagen willst: vorher vorbereitet, in der Sitzung offen für alle, nie im Ergebnis (seit 0.8.5)
+    const L = t.stichworte || [];
+    if (t.zu && !L.length) return '';
+    return '<h2 class="bl">Stichworte</h2><div class="stw">' + (L.length ? '<ul>' + L.map((x) => '<li data-zieh="stichworte" data-zid="' + x.id + '"><button type="button" data-a="stichwort" data-id="' + x.id + '"><span>' + esc(x.text) + '</span></button></li>').join('') + '</ul>' : '') +
+      '<form class="stw-neu" data-form="stichwort"><button aria-label="Stichwort hinzufügen">' + ic('plus') + '</button><input name="text" id="neu-stw" placeholder="Stichwort hinzufügen …" aria-label="Stichwort hinzufügen" autocomplete="off" enterkeyhint="done"></form></div>';
+  },
   notizen(t) {
     return '<h2 class="bl">Notizen</h2><ul class="eintraege">' + t.notizen.map((n) => '<li class="notiz' + (n.gl ? ' gl' : '') + '" data-zieh="notizen" data-zid="' + n.id + '"><button type="button" class="n-text" data-a="notiz" data-id="' + n.id + '">' + esc(n.text) + '</button>' + glKnopf('n', n) + '</li>').join('') + '</ul>' +
       '<form class="schnell" data-form="notiz"><input name="text" id="neu-notiz" placeholder="Notiz hinzufügen …" aria-label="Notiz hinzufügen" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Notiz hinzufügen">' + ic('plus') + '</button></form>';
@@ -2217,17 +2242,17 @@ function kartenGleich() {
 }
 function themaInhalt(t, nr) {
   const u = TEIL.unter(t, nr || {});
-  if (t.art === 'rueckblick') return TEIL.frage(t) + TEIL.anhaenge(t) + TEIL.baustellen(t) + TEIL.rueckblick(t) + u + TEIL.notizen(t);
-  if (t.art === 'gruppen') return TEIL.frage(t) + TEIL.anhaenge(t) + TEIL.tafel(t) + u + TEIL.notizen(t) + TEIL.beschluss(t);
-  if (t.art === 'ziele') return TEIL.frage(t) + TEIL.anhaenge(t) + TEIL.offen() + TEIL.beschluss(t) + u + TEIL.notizen(t);
+  if (t.art === 'rueckblick') return TEIL.frage(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + TEIL.baustellen(t) + TEIL.rueckblick(t) + u + TEIL.notizen(t);
+  if (t.art === 'gruppen') return TEIL.frage(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + TEIL.tafel(t) + u + TEIL.notizen(t) + TEIL.beschluss(t);
+  if (t.art === 'ziele') return TEIL.frage(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + TEIL.offen() + TEIL.beschluss(t) + u + TEIL.notizen(t);
   if (t.art === 'personal') {
     const k = zeigt(t, 'kader'), b = zeigt(t, 'betrieb');
-    return TEIL.frage(t) + TEIL.anhaenge(t) + (k || b ? '<div class="pr-zwei">' + (k ? TEIL.bestand('kader', true) : '') + (b ? TEIL.bestand('betrieb', !k) : '') + '</div>' : '') +
+    return TEIL.frage(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + (k || b ? '<div class="pr-zwei">' + (k ? TEIL.bestand('kader', true) : '') + (b ? TEIL.bestand('betrieb', !k) : '') + '</div>' : '') +
       (zeigt(t, 'wechsel') ? TEIL.wechsel(nurGruppe(t)) : '') + (zeigt(t, 'bedarf') ? TEIL.bedarf(t) : '') + u + TEIL.notizen(t) + TEIL.beschluss(t);
   }
-  if (t.art === 'auftraege') return TEIL.frage(t) + TEIL.anhaenge(t) + (zeigt(t, 'budget') ? TEIL.budget() : '') + (zeigt(t, 'auslastung') ? TEIL.auslastung(!zeigt(t, 'budget')) : '') +
+  if (t.art === 'auftraege') return TEIL.frage(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + (zeigt(t, 'budget') ? TEIL.budget() : '') + (zeigt(t, 'auslastung') ? TEIL.auslastung(!zeigt(t, 'budget')) : '') +
     (zeigt(t, 'offen') ? TEIL.offene() : '') + u + TEIL.notizen(t) + TEIL.beschluss(t);
-  return TEIL.frage(t) + TEIL.anhaenge(t) + u + TEIL.notizen(t) + TEIL.beschluss(t);
+  return TEIL.frage(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + u + TEIL.notizen(t) + TEIL.beschluss(t);
 }
 
 /* ---------- Zahlen: Ausblick aufs Folgejahr ---------- */
@@ -2625,6 +2650,11 @@ const SHEET = {
     return formHuelle(ziele ? 'Ziel' : 'Beschluss', 'beschluss-edit', '<label class="f" for="b-was"><span>Was</span><textarea id="b-was" name="was" rows="2" data-fokus>' + esc(b.was) + '</textarea></label>' +
       '<div class="zwei"><label class="f" for="b-wer"><span>Wer</span><input id="b-wer" name="wer" value="' + esc(b.wer) + '" autocomplete="off"></label><label class="f" for="b-bis"><span>Bis wann</span><input id="b-bis" name="bis" value="' + esc(b.bis) + '" autocomplete="off"></label></div>' +
       '<label class="schalter" for="b-gl"><span>Für die GL vormerken</span><input type="checkbox" id="b-gl" name="gl"' + (b.gl ? ' checked' : '') + '></label>' + loeschKnopf('beschluss-weg', ziele ? 'Ziel löschen' : 'Beschluss löschen'));
+  },
+  stichwort() {
+    const x = imThema('stichworte');
+    if (!x) return '';
+    return formHuelle('Stichwort', 'stichwort-edit', '<label class="f" for="sw-t"><span>Text</span><textarea id="sw-t" name="text" rows="2" data-fokus>' + esc(x.text) + '</textarea></label>' + loeschKnopf('stichwort-weg', 'Stichwort löschen'));
   },
   ziel() {
     const z = imThema('ziele');
@@ -3120,6 +3150,17 @@ function zieleDazu(text) {
   geaendert(); fokus('neu-ziel');
   if (liste.length > 1) toast(liste.length + ' Ziele hinzugefügt', true);
 }
+/* Stichworte: eine Zeile je Stichwort (auch mehrere Zeilen auf einmal einfügen); ein Aufzählungszeichen am Anfang fällt weg */
+function stichworteDazu(text) {
+  const t = aktThema();
+  if (!t) return;
+  const liste = String(text || '').split(/[\r\n]+/).map((x) => x.replace(/\t+/g, ' ').replace(/^\s*(?:[-–—•·*▪◦]+\s*|\d{1,2}[.)]\s+)/, '').trim()).filter(Boolean);
+  if (!liste.length) { fokus('neu-stw'); return; }
+  merken();
+  liste.forEach((x) => { t.stichworte.push({ id: uid(), text: x }); });
+  geaendert(); fokus('neu-stw');
+  if (liste.length > 1) toast(liste.length + ' Stichworte hinzugefügt', true);
+}
 function entfernen(liste, text) {   // Eintrag des offenen Sheets aus einer Liste des Themas nehmen
   const t = aktThema();
   if (!t || !sheet) return;
@@ -3271,6 +3312,7 @@ const AKT = {
   art(el) { const t = themaAusForm(); if (!t) return; t.art = el.dataset.v; if (t.art === 'personal' && !t.frage) t.frage = PERSONAL_FRAGE; if (t.art === 'auftraege' && !t.frage) t.frage = AUFTRAEGE_FRAGE; if (t.art === 'gruppen' && !t.gruppen.length) t.gruppen = ['Gruppe 1', 'Gruppe 2', 'Gruppe 3'].map((n) => ({ id: uid(), name: n })); speichern(); render(); renderSheet(false); },
   notiz(el) { auf({ art: 'notiz', id: el.dataset.id }); },
   beschluss(el) { auf({ art: 'beschluss', id: el.dataset.id }); },
+  stichwort(el) { auf({ art: 'stichwort', id: el.dataset.id }); },
   ziel(el) { auf({ art: 'ziel', id: el.dataset.id }); },
   person(el) { auf({ art: 'ma', id: el.dataset.id, tafel: true }); },
   gruppe(el) { auf({ art: 'ma', id: el.dataset.id }); },
@@ -3345,6 +3387,7 @@ const AKT = {
   'rm-leeren'(el) { if (!bestaetigt(el, 'Wirklich entfernen?')) return; merken(); S.rueckmeldungen = S.rueckmeldungen.filter((x) => x.status === 'offen'); speichern(); render(); renderSheet(false); toast('Übergebene entfernt', true); },
   'park-weg'(el) { merken(); S.parkplatz = S.parkplatz.filter((x) => x.id !== el.dataset.id); speichern(); render(); renderSheet(false); toast('Entfernt', true); },
   'beschluss-weg'() { entfernen('beschluesse', 'Gelöscht'); },
+  'stichwort-weg'() { entfernen('stichworte', 'Stichwort gelöscht'); },
   'ziel-weg'() { entfernen('ziele', 'Ziel gelöscht'); },
   'person-weg'() { entfernen('leute', 'Mitarbeiter entfernt'); },
   'gruppe-neu'() { auf({ art: 'ma', id: '', position: 'Polier' }); },
@@ -3396,6 +3439,8 @@ const FORMS = {
     geaendert(); fokus('neu-was');
   },
   'beschluss-edit'(f) { const b = imThema('beschluesse'), was = b && pflicht(f.elements.was); if (!was) return; b.was = was; b.wer = f.elements.wer.value.trim(); b.bis = ohneBis(f.elements.bis.value); b.gl = f.elements.gl.checked; geaendert(true); },
+  stichwort(f) { stichworteDazu(f.elements.text.value); },
+  'stichwort-edit'(f) { const x = imThema('stichworte'), text = x && pflicht(f.elements.text); if (!text) return; x.text = text.replace(/\s*[\r\n]+\s*/g, ' '); geaendert(true); },
   ziel(f) { zieleDazu(f.elements.text.value); },
   'ziel-edit'(f) { const z = imThema('ziele'), text = z && pflicht(f.elements.text); if (!text) return; z.text = text; geaendert(true); },
   leute(f) { leuteDazu(f.elements.text.value); },
@@ -3556,6 +3601,10 @@ document.addEventListener('paste', (e) => {
   const text = e.clipboardData ? e.clipboardData.getData('text') : '';
   const bilder = !feld && S.ui.bereich === 'themen' && e.clipboardData && e.clipboardData.files ? Array.from(e.clipboardData.files).filter(istAnhang) : [];
   if (bilder.length) { e.preventDefault(); if (aktThema() && aktThema().zu) toast(ZU_TEXT); else anhDazu(bilder); return; }   // ein Bildschirmfoto im Thema einfügen
+  if (feld && t.id === 'neu-stw') {   // mehrere Zeilen: jede ein Stichwort
+    if (!/[\r\n]/.test(text.trim())) return;
+    e.preventDefault(); stichworteDazu(text); return;
+  }
   if (feld && (t.id === 'neu-leute' || t.id === 'neu-ziel' || t.id === 'neu-bst')) {   // eine Liste aus Excel: jede Zeile ein Eintrag
     if (!/[\r\n\t]/.test(text.trim())) return;
     e.preventDefault();
@@ -3629,10 +3678,10 @@ document.addEventListener('pointermove', (e) => {
   if (!zug.geist) {
     if (Math.hypot(e.clientX - zug.x, e.clientY - zug.y) < 6) return;
     const kopie = zug.el.cloneNode(true);
-    if (zug.art === 'baustellen') {   // die Zeile braucht ihre Karte um sich, sonst verliert sie ihr Aussehen
+    if (zug.art === 'baustellen' || zug.art === 'stichworte') {   // die Zeile braucht ihre Karte um sich, sonst verliert sie ihr Aussehen
       const ul = document.createElement('ul');
       ul.appendChild(kopie);
-      zug.geist = document.createElement('div'); zug.geist.className = 'bg geist'; zug.geist.appendChild(ul);
+      zug.geist = document.createElement('div'); zug.geist.className = (zug.art === 'stichworte' ? 'stw' : 'bg') + ' geist'; zug.geist.appendChild(ul);
     } else { zug.geist = kopie; zug.geist.className = (zug.art === 'karte' ? 'karte' : zug.el.className) + ' geist'; }
     zug.geist.style.width = zug.b + 'px';
     document.body.appendChild(zug.geist);
