@@ -8,7 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2300767E'/%3E%3Cpath d='M17 46V32M32 46V18M47 46V26' stroke='%23fff' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
 /* Ruhige Fläche, Glas-Leiste, Vertiefung in Sheets.
-   Aufbau: drei Bereiche in der Leiste (Zahlen, Themen, Ergebnis), je ein Bildschirm, eine Aufgabe.
+   Aufbau: vier Bereiche in der Leiste (Zahlen, Kunden, Themen, Ergebnis), je ein Bildschirm, eine Aufgabe.
    Diagrammfarben (--dz-*): geprüfter Satz für hell und dunkel; Blau = Ertrag und was bleibt, Grau = Aufwand und Übriges. */
 :root{
   --bg:#F5F5F7; --card:#FFFFFF; --ink:#1D1D1F; --muted:#6E6E73;
@@ -246,6 +246,38 @@ body.drueber .ablage,body.drueber .tab-rahmen,body.drueber .dg{border-color:var(
 .bst tbody tr{cursor:pointer}
 .bst td:first-child{font-weight:500}
 .bst td button{font-weight:inherit;overflow-wrap:anywhere}
+.bst .r{text-align:right}
+.bst td small{display:block;color:var(--muted);font-size:.8125rem;font-weight:400}
+.bl-zeile{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.4rem 1rem;margin:1.5rem 0 .55rem}
+.bl-zeile .bl{margin:0}
+.seg.klein button{height:1.9rem;padding:0 .8rem;font-size:.8125rem}
+/* Baustellen: je Bauführer oder Polier eine Karte, der andere steht grau daneben */
+.bgr{display:grid;grid-template-columns:repeat(auto-fill,minmax(15.5rem,1fr));gap:.8rem;align-items:start;margin-bottom:.7rem}
+.bg{background:var(--card);border-radius:1.1rem;box-shadow:var(--shadow);padding:.8rem 1rem .45rem;min-width:0}
+.bg header{display:flex;align-items:baseline;justify-content:space-between;gap:.5rem;padding-bottom:.4rem;border-bottom:1px solid var(--sep)}
+.bg header b{font-family:var(--display);font-size:1.1875rem;font-weight:700;overflow-wrap:anywhere}
+.bg header .zahl{color:var(--muted);font-weight:600;font-size:.875rem}
+.bg li + li{border-top:1px solid var(--sep)}
+.bg li button{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:0 .7rem;width:100%;padding:.5rem 0;font-size:1.0625rem;font-weight:500;line-height:1.25}
+.bg li button span{min-width:0;overflow-wrap:anywhere}
+.bg li small{color:var(--muted);font-size:.875rem;font-weight:400}
+
+/* ---------- Kunden: Offerten und Aufträge ---------- */
+.wahl{display:inline-flex;align-items:center;gap:.5rem;font-weight:600;font-size:.9375rem;color:var(--muted)}
+.wahl select{height:2.55rem;padding:0 .8rem;border-radius:.85rem;border:0;background:var(--fill);font-weight:600;color:var(--ink)}
+.rg{display:flex;flex-direction:column;gap:.5rem;margin:.2rem 0 .3rem}
+.rg-z{display:grid;grid-template-columns:minmax(0,11rem) minmax(0,1fr) 5.4rem;align-items:center;gap:.7rem;border-radius:.4rem;outline-offset:2px}
+.rg-n{font-size:.9375rem;font-weight:500;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rg-b{display:block;height:1.35rem;border-radius:.25rem;background:var(--fill);overflow:hidden}
+.rg-b i{display:block;height:100%;min-width:2px;border-radius:.25rem}
+.rg-w{display:flex;align-items:baseline;justify-content:flex-end;gap:.4rem;white-space:nowrap}
+.rg-w b{font-size:1rem;font-weight:700}
+.rg-w small{color:var(--muted);font-size:.75rem}
+.k-off{max-width:38rem}
+.bst.at td{font-size:.9375rem}
+.bst.at td:first-child{font-weight:400;color:var(--muted)}
+.bst.at td:nth-child(2){font-weight:500;font-size:1.0625rem;min-width:13rem}
+.zwei.js{grid-template-columns:6.5rem minmax(0,1fr)}
 .glseite{max-width:54rem}
 .thema .titel{margin-bottom:.7rem}
 .thema .titel h1{font-size:2.25rem}
@@ -283,7 +315,14 @@ body.drueber .ablage,body.drueber .tab-rahmen,body.drueber .dg{border-color:var(
 .sp-kopf .zahl{color:var(--muted);font-weight:600;font-size:.875rem}
 .karte{display:block;width:100%;padding:.55rem .75rem;border-radius:.75rem;background:var(--bg);font-weight:500;font-size:1.0625rem;line-height:1.25;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:manipulation;overflow-wrap:anywhere}
 .spalte.pool .karte{background:var(--card);box-shadow:var(--shadow)}
-.karte.zieht{opacity:.3}
+.zieht{opacity:.3}
+.ein-vor,.ein-nach{position:relative}
+.ein-vor::before,.ein-nach::after{content:"";position:absolute;left:.3rem;right:.3rem;height:3px;border-radius:2px;background:var(--brand);pointer-events:none;z-index:1}
+.ein-vor::before{top:-.38rem}
+.ein-nach::after{bottom:-.38rem}
+.bg li.ein-vor::before{top:-2px}
+.bg li.ein-nach::after{bottom:-2px}
+.bg.geist{padding:.2rem 1rem;min-width:12rem}
 .geist{position:fixed;z-index:80;left:0;top:0;pointer-events:none;background:var(--card);box-shadow:0 12px 32px rgba(0,0,0,.28);rotate:-2deg}
 body.am-ziehen,body.am-ziehen .karte{cursor:grabbing}
 body.am-ziehen{user-select:none;-webkit-user-select:none}
@@ -318,6 +357,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
 .e-besch th,.e-besch td{text-align:left;vertical-align:top;padding:.35rem .9rem .35rem 0;border-bottom:1px solid var(--sep)}
 .e-besch td.th{font-weight:600}
 .e-besch td.nw{white-space:nowrap}
+.e-grau{color:var(--muted)}
 .e-fuss{color:var(--muted);font-size:.8125rem}
 .aktionen{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem 1rem;max-width:52rem;margin:1rem auto 0}
 
@@ -371,7 +411,10 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
 @media (max-width:52rem){
   .kopf1{flex-wrap:wrap}
   .seg.bereich{order:3;width:100%}
-  .seg.bereich button{flex:1;padding:0 .5rem}
+  .seg.bereich button{flex:1 1 auto;padding:0 .35rem;font-size:.9375rem}
+  .rg-z{grid-template-columns:minmax(0,1fr) 5rem;gap:.15rem .6rem}
+  .rg-n{grid-column:1 / -1;white-space:normal}
+  .bgr{grid-template-columns:repeat(auto-fill,minmax(13rem,1fr))}
   .themen{grid-template-columns:minmax(0,1fr);gap:.9rem}
   .tliste2{position:static;gap:.4rem;max-height:none;overflow:visible;padding:0;margin:0;min-width:0}
   .tz{display:flex;gap:.4rem;overflow-x:auto;scrollbar-width:none;padding-bottom:.1rem}
@@ -437,6 +480,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
   #druck .e-besch th,#druck .e-besch td{border-bottom:.5pt solid #ccc;padding:3pt 8pt 3pt 0}
   #druck .e-tab thead th,#druck .e-besch thead th{color:#444;font-size:8pt}
   #druck .e-fuss{color:#666;font-size:8pt}
+  #druck .e-grau{color:#555}
 }
 </style>
 </head>
@@ -456,16 +500,16 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
 (function () {
 'use strict';
 
-/* Werkzeug für den Strategietag einer Abteilung: Zahlen (Verlauf aus dem BAB, mit Diagrammen), Themen mit Notizen
-   und Beschlüssen, Ergebnis als PDF. Eine Datei, kein Netz, keine Bibliothek.
+/* Werkzeug für den Strategietag einer Abteilung: Zahlen (Verlauf aus dem BAB, mit Diagrammen), Kunden (Offerten je Jahr
+   und Aufträge mit Ranglisten), Themen mit Notizen und Beschlüssen, Ergebnis als PDF. Eine Datei, kein Netz, keine Bibliothek.
    «Sichern» schreibt diese Datei samt Inhalt neu: Der Inhalt steht im Skript-Block «daten». Eine neuere Version des
    Tools liest diesen Block aus der alten Datei («Daten laden») und bringt ihn mit migriere() auf ihren Aufbau.
    Zusätzlich merkt sich der Browser den Stand je Dateipfad (localStorage).
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '0.6';         // Version des Tools, steht in den Einstellungen
-const FORMAT = 5;              // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
+const VERSION = '0.7';         // Version des Tools, steht in den Einstellungen
+const FORMAT = 6;              // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
 const KEY_G = KEY + ':gesichert';   // Stand, der zuletzt in eine Datei ging
@@ -524,6 +568,12 @@ const MON_NR = { jan: 1, feb: 2, 'mär': 3, mrz: 3, mar: 3, apr: 4, mai: 5, may:
 const monatAus = (text) => MON_NR[String(text).trim().slice(0, 3).toLowerCase()] || 0;   // «Nov 26» → 11
 const ARTEN = [['thema', 'Thema'], ['rueckblick', 'Rückblick'], ['gruppen', 'Gruppen'], ['ziele', 'Ziele']];
 const STAND = { erreicht: 'Erreicht', teilweise: 'Teilweise', offen: 'Offen', '': 'Nicht bewertet' };
+/* Kunden: die Textfelder eines Auftrags, und wonach die Ranglisten zählen (Feld, Titel, Unterzeile) */
+const AF = ['jahr', 'objekt', 'planer', 'bauherr', 'bauherrArt', 'objektArt', 'speziell', 'mitbewerber', 'notiz'];
+const RANG = [['planer', 'Planer', 'Von wem die Aufträge kommen.'], ['bauherrArt', 'Bauherren', 'Für wen wir bauen.'], ['objektArt', 'Objekte', 'An welchen Objekten wir arbeiten.'],
+  ['speziell', 'Speziell', 'Was dabei besonders war.'], ['mitbewerber', 'Mitbewerber', 'Gegen wen wir gewonnen haben.']];
+const NAMENSFELD = { planer: 1, bauherr: 1, mitbewerber: 1 };   // Namen trennt nur der Strichpunkt, Arten auch das Komma
+const ganz = (v) => (typeof v === 'number' && isFinite(v) && v >= 0 ? Math.round(v) : null);
 
 /* ---------- Aufbau der Daten ---------- */
 function themaNeu(art, titelText, frage) {
@@ -564,7 +614,9 @@ function leer() {
     themen: themenStart(),
     parkplatz: [],   // was aufkommt, aber zu keinem Thema gehört: [{id, text}]
     glPunkte: [],    // eigene Punkte für die GL, stehen nie im Ergebnis: [{id, text}]
-    ui: { bereich: 'zahlen', thema: '', auf: {} }
+    // Kunden: Offerten je Jahr [{id, jahr, gerechnet, erhalten}] und Aufträge [{id, jahr, objekt, planer, bauherr, bauherrArt, objektArt, speziell, mitbewerber, eingeladen, betrag, notiz}]
+    kunden: { offerten: [], auftraege: [], ansicht: 'diagramme', jahr: '' },
+    ui: { bereich: 'zahlen', thema: '', auf: {}, bst: 'bf' }
   };
 }
 
@@ -625,6 +677,20 @@ function beispiel() {
   const U = (titelText, frage, notiz) => { const u = themaNeu('thema', titelText, frage); u.eltern = T[3].id; u.notizen = [N(notiz)]; return u; };
   s.themen.splice(4, 0, U('Kurse im Winter', 'Welche Kurse passen in die ruhigen Monate?', 'Erste-Hilfe-Kurs im Januar'), U('Lernende', 'Wie viele Lernende nehmen wir im Sommer?', 'Ab Sommer ein Lernender mehr'));
   s.glPunkte = ['Zusammenarbeit mit den anderen Abteilungen', 'Gemeinsamer Einkauf von Verbrauchsmaterial'].map((x) => ({ id: uid(), text: x }));
+  s.kunden.offerten = [['2021', 18, 5], ['2022', 22, 8], ['2023', 20, 9], ['2024', 16, 7], ['2025', 19, 8]].map((o) => ({ id: uid(), jahr: o[0], gerechnet: o[1], erhalten: o[2] }));
+  s.kunden.auftraege = [
+    ['2023', 'Parkhaus Nord, Decke', 'Ingenieurbüro Nord', 'Gemeinde Musterdorf', 'Gemeinde', 'Parkhaus', '', 'Baufirma A', true, 420000],
+    ['2023', 'Brücke am Dorfbach', 'Planer Süd AG', 'Kanton', 'Kanton', 'Brücke', 'Unter Verkehr', '', false, 310000],
+    ['2023', 'Garage Lindenhof', 'Ingenieurbüro Nord', 'Eigentümer Lindenhof', 'Privat', 'Garage', '', '', true, 95000],
+    ['2024', 'Schulhaus, Fassade', 'Büro Mitte', 'Gemeinde Musterdorf', 'Gemeinde', 'Hochbau', 'Nachtarbeit', 'Baufirma B', true, 180000],
+    ['2024', 'Tiefgarage Zentrum', 'Ingenieurbüro Nord', 'Immobilien Beispiel AG', 'Privat', 'Garage', '', 'Baufirma A', true, 640000],
+    ['2024', 'Stützmauer Hangweg', 'Planer Süd AG', 'Kanton', 'Kanton', 'Stützmauer', '', '', false, 120000],
+    ['2024', 'Garage Seeblick', 'Ingenieurbüro Nord', 'Eigentümer Seeblick', 'Privat', 'Garage', '', '', true, 88000],
+    ['2025', 'Brücke Mühleweg', 'Planer Süd AG', 'Gemeinde Beispielwil', 'Gemeinde', 'Brücke', 'Unter Verkehr', 'Baufirma B', false, 270000],
+    ['2025', 'Parkhaus Bahnhof', 'Büro Mitte', 'Immobilien Beispiel AG', 'Privat', 'Parkhaus', 'Nachtarbeit', 'Baufirma A; Baufirma C', true, 510000],
+    ['2025', 'Garage Sonnenhof', 'Ingenieurbüro Nord', 'Eigentümer Sonnenhof', 'Privat', 'Garage', '', '', true, 76000],
+    ['2025', 'Unterführung Dorfstrasse', 'Planer Süd AG', 'Kanton', 'Kanton', 'Unterführung, Brücke', '', '', false, 230000]
+  ].map((a) => ({ id: uid(), jahr: a[0], objekt: a[1], planer: a[2], bauherr: a[3], bauherrArt: a[4], objektArt: a[5], speziell: a[6], mitbewerber: a[7], eingeladen: a[8], betrag: a[9], notiz: '' }));
   return s;
 }
 
@@ -634,6 +700,7 @@ function migriere(d) {
   if ((d.v || 2) < 3) d.v = 3;   // 0.2: Themen hatten nur Titel und Notizen; normal() ergänzt, was fehlt
   if (d.v < 4) { if (!Array.isArray(d.parkplatz)) d.parkplatz = []; d.v = 4; }   // 0.5: Parkplatz
   if (d.v < 5) { if (!Array.isArray(d.glPunkte)) d.glPunkte = []; d.v = 5; }     // 0.6: Unterpunkte, Baustellen im Rückblick, Punkte für die GL; normal() ergänzt die Felder der Themen
+  if (d.v < 6) { if (!d.kunden || typeof d.kunden !== 'object') d.kunden = { offerten: [], auftraege: [] }; d.v = 6; }   // 0.7: Kunden (Offerten je Jahr, Aufträge)
   return d;
 }
 function normal(d) {
@@ -658,9 +725,24 @@ function normal(d) {
   s.themen = ordnen(s.themen);
   s.glPunkte = (Array.isArray(s.glPunkte) ? s.glPunkte : []).filter((x) => x && typeof x.text === 'string');
   s.glPunkte.forEach((x) => { if (!x.id) x.id = uid(); });
+  const kd = d && d.kunden && typeof d.kunden === 'object' ? d.kunden : {};
+  const alsText = (x) => (x === null || x === undefined ? '' : String(x)).trim();
+  s.kunden = Object.assign({}, kd, {
+    offerten: (Array.isArray(kd.offerten) ? kd.offerten : []).filter((x) => x && typeof x === 'object'),
+    auftraege: (Array.isArray(kd.auftraege) ? kd.auftraege : []).filter((x) => x && typeof x === 'object'),
+    ansicht: kd.ansicht === 'tabelle' ? 'tabelle' : 'diagramme', jahr: alsText(kd.jahr)
+  });
+  s.kunden.offerten.forEach((x) => { if (!x.id) x.id = uid(); x.jahr = alsText(x.jahr); x.gerechnet = ganz(x.gerechnet); x.erhalten = ganz(x.erhalten); });
+  s.kunden.auftraege.forEach((x) => {
+    if (!x.id) x.id = uid();
+    AF.forEach((k) => { x[k] = alsText(x[k]); });
+    x.eingeladen = !!x.eingeladen;
+    x.betrag = typeof x.betrag === 'number' && isFinite(x.betrag) ? x.betrag : null;
+  });
   s.ui = Object.assign({}, l.ui, (d && d.ui) || {});
   if (!s.ui.auf || typeof s.ui.auf !== 'object') s.ui.auf = {};
-  if (['zahlen', 'themen', 'ergebnis', 'gl'].indexOf(s.ui.bereich) < 0) s.ui.bereich = 'zahlen';
+  if (s.ui.bst !== 'po') s.ui.bst = 'bf';
+  if (['zahlen', 'kunden', 'themen', 'ergebnis', 'gl'].indexOf(s.ui.bereich) < 0) s.ui.bereich = 'zahlen';
   return s;
 }
 /* Einen gespeicherten Stand übernehmen. Ein Beispiel aus einer älteren Version wird durch das heutige Beispiel ersetzt. */
@@ -987,19 +1069,114 @@ function zeigeImport(teile, fehler) {
   auf({ art: 'spalten' });
   render();
 }
-function importText(text) { zeigeImport([babLesen(gitterAusText(text))]); }
-async function babAusDatei(file) {
-  if (/\.xls[xm]$/i.test(file.name)) {
-    const blaetter = await xlsxLesen(await file.arrayBuffer());
-    let best = null;   // das Blatt, das am ehesten der BAB ist
-    blaetter.forEach((b) => {
-      const imp = babLesen(b.g);
-      if (imp && (!best || (imp.sicher && !best.sicher) || (imp.sicher === best.sicher && imp.reihen.length > best.reihen.length))) best = imp;
-    });
-    return best;
-  }
+function importText(text) {
+  const g = gitterAusText(text), imp = babLesen(g), k = imp ? null : kundenLesen(g);   // eine Tabelle mit Offerten oder Aufträgen gehört zu «Kunden»
+  if (k) kundenUebernehmen([k]); else zeigeImport([imp]);
+}
+/* Eine Datei als Gitter je Blatt: Excel hat mehrere Blätter, Text und CSV eines */
+async function gitterAusDatei(file) {
+  if (/\.xls[xm]$/i.test(file.name)) return await xlsxLesen(await file.arrayBuffer());
   if (/\.xls$/i.test(file.name)) throw new Error('xls');
-  return babLesen(gitterAusText(await file.text()));
+  return [{ name: file.name, g: gitterAusText(await file.text()) }];
+}
+function babAusGittern(blaetter) {
+  let best = null;   // das Blatt, das am ehesten der BAB ist
+  blaetter.forEach((b) => {
+    const imp = babLesen(b.g);
+    if (imp && (!best || (imp.sicher && !best.sicher) || (imp.sicher === best.sicher && imp.reihen.length > best.reihen.length))) best = imp;
+  });
+  return best;
+}
+
+/* ---------- Kunden: Offerten je Jahr und Aufträge einlesen ----------
+   Gelesen wird jede Tabelle mit Kopfzeile. Offerten: «Jahr», «Gerechnet», «Erhalten». Aufträge: «Jahr» (oder ein Datum),
+   «Objekt» und mindestens eine der Angaben Planer, Bauherr, Bauherr-Art, Objekt-Art, Speziell, Mitbewerber. */
+function jahrAus(text) {   // «2024», «2019/20» (zählt zum zweiten Jahr), «12.03.2024», «Mär 24»
+  const s = String(text == null ? '' : text).trim();
+  let m = /^(\d{2})\d{2}\s*\/\s*(\d{2})$/.exec(s);
+  if (m) return m[1] + m[2];
+  m = /(19|20)\d{2}/.exec(s);
+  if (m) return m[0];
+  const mj = monatJahr(s);
+  return mj ? String(mj[1]) : '';
+}
+const jahrZahl = (j) => +jahrAus(j) || 0;
+const KSPALTEN = [['jahr', /^jahr$/i], ['datum', /datum/i], ['gerechnet', /gerechnet/i], ['erhalten', /^erhalten$/i],
+  ['objekt', /^(objekt|projekt|projektbezeichnung|auftrag|baustelle)$/i], ['planer', /^planer/i], ['bauherrArt', /^bauherr\S*[ -]*(art|typ|gruppe)$/i], ['bauherr', /^bauherr(schaft)?$/i],
+  ['objektArt', /^objekt\S*[ -]*(art|typ)$|^art$/i], ['speziell', /^spezi/i], ['mitbewerber', /mitbewerber|konkurren/i], ['betrag', /betrag|angebot|summe/i],
+  ['eingeladen', /eingeladen|einladung/i], ['notiz', /bemerkung|notiz/i]];
+function kundenLesen(g) {
+  for (let r = 0; r < Math.min(g.length, 30); r++) {
+    const sp = {};
+    (g[r] || []).forEach((x, c) => {
+      const kopf = String(x || '').replace(/\s+/g, ' ').trim();
+      const k = kopf && KSPALTEN.find((s) => s[1].test(kopf));
+      if (k && sp[k[0]] === undefined) sp[k[0]] = c;
+    });
+    const mitJahr = sp.jahr !== undefined || sp.datum !== undefined;
+    const zelle = (z, k) => (sp[k] === undefined ? '' : String(z[sp[k]] == null ? '' : z[sp[k]]).replace(/\s+/g, ' ').trim());
+    const jahr = (z) => jahrAus(zelle(z, 'jahr')) || jahrAus(zelle(z, 'datum'));
+    const rest = g.slice(r + 1), zeilen = [];
+    if (mitJahr && sp.gerechnet !== undefined && sp.erhalten !== undefined) {
+      rest.forEach((z) => {
+        const j = jahr(z), ger = zahl(zelle(z, 'gerechnet'));
+        if (j && ger !== null) zeilen.push({ jahr: j, gerechnet: ganz(ger), erhalten: ganz(zahl(zelle(z, 'erhalten'))) });
+      });
+      if (zeilen.length) return { art: 'offerten', zeilen: zeilen };
+    } else if (mitJahr && sp.objekt !== undefined && ['planer', 'bauherr', 'bauherrArt', 'objektArt', 'speziell', 'mitbewerber'].some((k) => sp[k] !== undefined)) {
+      rest.forEach((z) => {
+        const a = { jahr: jahr(z), eingeladen: /^(ja|j|x|1|wahr|true|yes)$/i.test(zelle(z, 'eingeladen')), betrag: zahl(zelle(z, 'betrag')) };
+        AF.forEach((k) => { if (k !== 'jahr') a[k] = zelle(z, k); });
+        if (a.objekt) zeilen.push(a);
+      });
+      if (zeilen.length) return { art: 'auftraege', zeilen: zeilen };
+    }
+  }
+  return null;
+}
+/* Eigene Angaben mischen sich nicht mit dem Beispiel: Beispielzahlen und Beispieleinträge gehen weg, die Themen bleiben */
+function beispielWeg() {
+  S.beispiel = false; S.zahlen.perioden = []; S.zahlen.zeilen = []; S.ui.auf = {};
+  S.themen.forEach((x) => { x.notizen = []; x.beschluesse = []; x.ziele = []; x.leute = []; x.baustellen = []; });
+  S.parkplatz = []; S.glPunkte = []; S.kunden.offerten = []; S.kunden.auftraege = [];
+}
+/* Gelesene Tabellen übernehmen. Ein Jahr oder ein Auftrag (gleiches Jahr, gleiches Objekt), den es schon gibt, wird ergänzt statt verdoppelt. */
+function kundenUebernehmen(funde) {
+  const anzahl = (art) => funde.filter((f) => f.art === art).reduce((a, f) => a + f.zeilen.length, 0);
+  const nO = anzahl('offerten'), nA = anzahl('auftraege');
+  if (!nO && !nA) return;
+  merken();
+  const warBeispiel = S.beispiel;
+  if (warBeispiel) beispielWeg();
+  const K = S.kunden, schluessel = (a) => a.jahr + '|' + String(a.objekt).toLowerCase().replace(/\s+/g, ' ').trim(), vorher = {};
+  K.auftraege.forEach((a) => { const k = schluessel(a); (vorher[k] = vorher[k] || []).push(a); });
+  let schon = 0;
+  funde.forEach((f) => {
+    if (f.art === 'offerten') f.zeilen.forEach((z) => {
+      const alt = K.offerten.find((o) => o.jahr === z.jahr);
+      if (alt) { alt.gerechnet = z.gerechnet; if (z.erhalten !== null) alt.erhalten = z.erhalten; } else K.offerten.push(Object.assign({ id: uid() }, z));
+    });
+    else f.zeilen.forEach((z) => {
+      const alt = (vorher[schluessel(z)] || []).shift();
+      if (!alt) { K.auftraege.push(Object.assign({ id: uid() }, z)); return; }
+      schon++;   // was in der Tabelle leer ist, lässt den bisherigen Eintrag stehen
+      AF.forEach((k) => { if (z[k]) alt[k] = z[k]; });
+      if (z.betrag !== null) alt.betrag = z.betrag;
+      if (z.eingeladen) alt.eingeladen = true;
+    });
+  });
+  S.ui.bereich = 'kunden';
+  geaendert(true);
+  window.scrollTo(0, 0);
+  const teile = [];
+  if (nO) teile.push('Offerten für ' + mehrzahl(nO, 'Jahr', 'Jahre'));
+  if (nA) teile.push(mehrzahl(nA, 'Auftrag', 'Aufträge'));
+  toast((warBeispiel ? 'Beispiel entfernt. ' : '') + teile.join(' und ') + ' übernommen' + (schon ? ' (' + schon + ' gab es schon)' : ''), true);
+}
+function kundenText(text) {
+  const k = kundenLesen(gitterAusText(text));
+  if (k) kundenUebernehmen([k]);
+  else toast('Darin finde ich keine Tabelle. Es braucht eine Kopfzeile: «Jahr», «Gerechnet», «Erhalten» oder «Jahr», «Objekt», «Planer».');
 }
 /* Eine oder mehrere Dateien: gesicherte Datei des Tools → Daten laden; sonst je Datei ein BAB (z. B. je Jahr eine). */
 async function importDateien(liste) {
@@ -1007,14 +1184,23 @@ async function importDateien(liste) {
   if (!dateien.length) return;
   const daten = dateien.find((f) => /\.(html?|json)$/i.test(f.name));
   if (daten) { ladeDatei(daten); return; }
-  const teile = [];
+  const teile = [], kunden = [];
   let fehler = 0, alt = false;
   for (let i = 0; i < dateien.length; i++) {
-    try { const imp = await babAusDatei(dateien[i]); if (imp) { imp.datei = dateien[i].name; teile.push(imp); } else fehler++; }
-    catch (e) { fehler++; if (e && e.message === 'xls') alt = true; }
+    try {
+      const blaetter = await gitterAusDatei(dateien[i]);
+      const k = blaetter.map((b) => kundenLesen(b.g)).filter(Boolean);   // Offerten und Aufträge gehören zu «Kunden», alles andere ist ein BAB
+      if (k.length) { k.forEach((x) => { kunden.push(x); }); continue; }
+      const imp = babAusGittern(blaetter);
+      if (imp) { imp.datei = dateien[i].name; teile.push(imp); } else fehler++;
+    } catch (e) { fehler++; if (e && e.message === 'xls') alt = true; }
   }
+  if (kunden.length) { kundenUebernehmen(kunden); if (!teile.length) return; }
   if (!teile.length) {
-    toast(alt ? 'Alte Excel-Dateien (.xls) kann ich nicht lesen. Die Tabelle in Excel kopieren und einfügen geht immer.' : (dateien.length > 1 ? 'In diesen Dateien finde ich keinen BAB.' : 'In dieser Datei finde ich keinen BAB. Die Tabelle in Excel kopieren und einfügen geht immer.'));
+    const beiKunden = S.ui.bereich === 'kunden';
+    toast(alt ? 'Alte Excel-Dateien (.xls) kann ich nicht lesen. Die Tabelle in Excel kopieren und einfügen geht immer.'
+      : beiKunden ? 'Darin finde ich keine Tabelle mit Offerten oder Aufträgen. Es braucht eine Kopfzeile: «Jahr», «Gerechnet», «Erhalten» oder «Jahr», «Objekt», «Planer».'
+      : (dateien.length > 1 ? 'In diesen Dateien finde ich keinen BAB.' : 'In dieser Datei finde ich keinen BAB. Die Tabelle in Excel kopieren und einfügen geht immer.'));
     return;
   }
   zeigeImport(teile, fehler);
@@ -1051,7 +1237,7 @@ async function ladeDatei(file) {
 }
 function ohneInhalt() {   // nichts eingetragen und die Themen wie am Anfang
   const vor = themenStart();
-  return !S.zahlen.perioden.length && S.themen.length === vor.length && S.themen.every((x, i) => x.titel === vor[i].titel && x.frage === vor[i].frage && !S.parkplatz.length && !S.glPunkte.length && !x.baustellen.length && !x.notizen.length && !x.beschluesse.length && !x.ziele.length && !x.leute.length);
+  return !S.zahlen.perioden.length && S.themen.length === vor.length && S.themen.every((x, i) => x.titel === vor[i].titel && x.frage === vor[i].frage && !S.parkplatz.length && !S.glPunkte.length && !S.kunden.offerten.length && !S.kunden.auftraege.length && !x.baustellen.length && !x.notizen.length && !x.beschluesse.length && !x.ziele.length && !x.leute.length);
 }
 function uebernehmen(d, name) {
   merken();
@@ -1140,10 +1326,10 @@ function diagrammDaten() {
     return d;
   });
 }
-function achse(max) {   // runde Skala mit vier bis sechs Strichen
+function achse(max, nurGanze) {   // runde Skala mit vier bis sechs Strichen; nurGanze: für Anzahlen, ohne halbe Schritte
   if (!(max > 0)) return { max: 1, ticks: [0, 1] };
-  const roh = max / 5, pot = Math.pow(10, Math.floor(Math.log10(roh)));
-  const schritt = [1, 2, 2.5, 5, 10].map((f) => f * pot).find((s) => s >= roh - 1e-9);
+  const roh = max / 5, pot = Math.max(nurGanze ? 1 : 0, Math.pow(10, Math.floor(Math.log10(roh))));
+  const schritt = (nurGanze ? [1, 2, 5, 10] : [1, 2, 2.5, 5, 10]).map((f) => f * pot).find((s) => s >= roh - 1e-9);
   const top = Math.ceil(max / schritt - 1e-9) * schritt, ticks = [];
   for (let v = 0; v <= top + schritt / 2; v += schritt) ticks.push(v);
   return { max: top, ticks: ticks };
@@ -1157,7 +1343,7 @@ function karte(titelText, unter, inhalt) { return '<section class="dg"><h2>' + e
 /* Säulen je Jahr: nebeneinander (reihen) oder gestapelt (stapel). Die ganze Spalte eines Jahres zeigt auf Zeigen alle Werte. */
 function saeulen(D, o) {
   const hoehe = (d) => o.stapel ? o.stapel.reduce((a, s) => a + (s.wert(d) || 0), 0) : Math.max.apply(null, o.reihen.map((r) => r.wert(d) || 0));
-  const ax = achse(Math.max.apply(null, D.map(hoehe).concat([0])));
+  const ax = achse(Math.max.apply(null, D.map(hoehe).concat([0])), o.ganz);
   const proz = (v) => (Math.max(0, v) / ax.max * 100).toFixed(2) + '%';
   const gitter = ax.ticks.map((t) => '<i class="dg-g" style="bottom:' + proz(t) + '"></i><span class="dg-t" style="bottom:' + proz(t) + '">' + esc(o.achse ? o.achse(t) : kurz(t)) + '</span>').join('');
   const baender = D.map((d) => {
@@ -1296,19 +1482,42 @@ const zaehlText = (t) => {
 };
 const glKnopf = (art, x) => '<button type="button" class="n-gl" data-a="gl" data-art="' + art + '" data-id="' + x.id + '" aria-pressed="' + !!x.gl + '" aria-label="Für die GL vormerken">' + ic('flag') + '<span>GL</span></button>';
 const metaText = (b) => [b.wer, b.bis ? 'bis ' + b.bis : ''].filter(Boolean).join(' · ');
+/* Die Namen in einem Feld: «A / B», «A, B», «A (B)». Ein Zusatz in Klammern zählt als Name, wenn er gross beginnt
+   und keine Ziffer enthält; «(ab Mai)» ist keiner. */
+function namenIn(text) {
+  const s = String(text || ''), aus = [];
+  const dazu = (teil, nurNamen) => { teil.split(/[\/,;+&]+/).forEach((x) => { x = x.trim(); if (x && (!nurNamen || (/^[A-ZÄÖÜ]/.test(x) && !/\d/.test(x))) && aus.indexOf(x) < 0) aus.push(x); }); };
+  dazu(s.replace(/\([^)]*\)/g, ' '), false);
+  (s.match(/\([^)]*\)/g) || []).forEach((k) => { dazu(k.slice(1, -1), true); });
+  return aus;
+}
+/* Baustellen nach Bauführer («bf») oder Polier («po») ordnen: wer am meisten hat, steht zuerst. Stehen in einem Feld
+   mehrere Namen, erscheint die Baustelle bei jedem; «mit» nennt dann die anderen. */
+function bstGruppen(B, nach) {
+  const gruppen = [], platz = {};
+  B.forEach((b) => {
+    const namen = namenIn(b[nach]);
+    (namen.length ? namen : ['']).forEach((n) => {
+      const k = n.toLowerCase();
+      if (platz[k] === undefined) { platz[k] = gruppen.length; gruppen.push({ name: n, liste: [] }); }
+      if (!gruppen[platz[k]].liste.some((e) => e.b === b)) gruppen[platz[k]].liste.push({ b: b, mit: namen.filter((x) => x.toLowerCase() !== k) });
+    });
+  });
+  return gruppen.sort((a, b) => (a.name === '') - (b.name === '') || b.liste.length - a.liste.length || a.name.localeCompare(b.name, 'de'));
+}
 const TEIL = {
   frage(t) { return t.frage ? '<p class="frage">' + esc(t.frage) + '</p>' : ''; },
   notizen(t) {
-    return '<h2 class="bl">Notizen</h2><ul class="eintraege">' + t.notizen.map((n) => '<li class="notiz' + (n.gl ? ' gl' : '') + '"><button type="button" class="n-text" data-a="notiz" data-id="' + n.id + '">' + esc(n.text) + '</button>' + glKnopf('n', n) + '</li>').join('') + '</ul>' +
+    return '<h2 class="bl">Notizen</h2><ul class="eintraege">' + t.notizen.map((n) => '<li class="notiz' + (n.gl ? ' gl' : '') + '" data-zieh="notizen" data-zid="' + n.id + '"><button type="button" class="n-text" data-a="notiz" data-id="' + n.id + '">' + esc(n.text) + '</button>' + glKnopf('n', n) + '</li>').join('') + '</ul>' +
       '<form class="schnell" data-form="notiz"><input name="text" id="neu-notiz" placeholder="Notiz hinzufügen …" aria-label="Notiz hinzufügen" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Notiz hinzufügen">' + ic('plus') + '</button></form>';
   },
   beschluss(t) {
     const ziele = t.art === 'ziele';
-    return '<h2 class="bl">' + (ziele ? 'Ziele' : 'Beschluss') + '</h2><ul class="eintraege">' + t.beschluesse.map((b) => '<li class="besch' + (b.gl ? ' gl' : '') + '"><span class="b-ic">' + ic('check') + '</span><button type="button" class="b-text" data-a="beschluss" data-id="' + b.id + '"><span class="b-was">' + esc(b.was) + '</span>' + (metaText(b) ? '<span class="b-meta">' + esc(metaText(b)) + '</span>' : '') + '</button>' + glKnopf('b', b) + '</li>').join('') + '</ul>' +
+    return '<h2 class="bl">' + (ziele ? 'Ziele' : 'Beschluss') + '</h2><ul class="eintraege">' + t.beschluesse.map((b) => '<li class="besch' + (b.gl ? ' gl' : '') + '" data-zieh="beschluesse" data-zid="' + b.id + '"><span class="b-ic">' + ic('check') + '</span><button type="button" class="b-text" data-a="beschluss" data-id="' + b.id + '"><span class="b-was">' + esc(b.was) + '</span>' + (metaText(b) ? '<span class="b-meta">' + esc(metaText(b)) + '</span>' : '') + '</button>' + glKnopf('b', b) + '</li>').join('') + '</ul>' +
       '<form class="dreier" data-form="beschluss"><input name="was" id="neu-was" placeholder="' + (ziele ? 'Ziel hinzufügen …' : 'Beschluss: Was?') + '" aria-label="Was" autocomplete="off"><input name="wer" placeholder="Wer?" aria-label="Wer" autocomplete="off"><input name="bis" placeholder="Bis wann?" aria-label="Bis wann" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Hinzufügen">' + ic('plus') + '</button></form>';
   },
   rueckblick(t) {
-    return '<h2 class="bl">Ziele vom letzten Jahr</h2><ul class="eintraege">' + t.ziele.map((z) => '<li class="rz"><button type="button" class="n-text" data-a="ziel" data-id="' + z.id + '">' + esc(z.text) + '</button><div class="seg" role="group" aria-label="Stand">' +
+    return '<h2 class="bl">Ziele vom letzten Jahr</h2><ul class="eintraege">' + t.ziele.map((z) => '<li class="rz" data-zieh="ziele" data-zid="' + z.id + '"><button type="button" class="n-text" data-a="ziel" data-id="' + z.id + '">' + esc(z.text) + '</button><div class="seg" role="group" aria-label="Stand">' +
       ['erreicht', 'teilweise', 'offen'].map((s) => '<button type="button" class="st-' + s + '" data-a="stand" data-id="' + z.id + '" data-v="' + s + '" aria-pressed="' + (z.stand === s) + '">' + STAND[s] + '</button>').join('') + '</div></li>').join('') + '</ul>' +
       '<form class="schnell" data-form="ziel"><input name="text" id="neu-ziel" placeholder="Ziel vom letzten Jahr hinzufügen …" aria-label="Ziel vom letzten Jahr hinzufügen" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Ziel hinzufügen">' + ic('plus') + '</button></form>';
   },
@@ -1318,10 +1527,10 @@ const TEIL = {
     return '<h2 class="bl">Unterpunkte</h2><div class="uliste">' + k.map((x) => '<button type="button" class="urow" data-a="thema" data-id="' + x.id + '"><span class="u-nr tnum">' + esc(nr[x.id] || '') + '</span><span class="u-t">' + esc(x.titel) + '</span><span class="u-m">' + esc(zaehlText(x)) + '</span>' + (fertig(x) ? ic('check', 'ok') : '') + ic('right', 'pf') + '</button>').join('') + '</div>';
   },
   baustellen(t) {
-    const B = t.baustellen;
-    return '<h2 class="bl">Baustellen' + (B.length ? ' (' + B.length + ')' : '') + '</h2>' +
-      (B.length ? '<div class="bst-rahmen"><table class="bst"><thead><tr><th>Baustelle</th><th>Bauführer</th><th>Polier</th></tr></thead><tbody>' +
-        B.map((b) => '<tr data-a="baustelle" data-id="' + b.id + '"><td><button type="button" data-a="baustelle" data-id="' + b.id + '">' + esc(b.name) + '</button></td><td>' + esc(b.bf) + '</td><td>' + esc(b.po) + '</td></tr>').join('') + '</tbody></table></div>' : '') +
+    const B = t.baustellen, nach = S.ui.bst === 'po' ? 'po' : 'bf', anderes = nach === 'bf' ? 'po' : 'bf';
+    return '<div class="bl-zeile"><h2 class="bl">Baustellen' + (B.length ? ' (' + B.length + ')' : '') + '</h2>' + (B.length ? seg('bst', [['bf', 'Bauführer'], ['po', 'Polier']], nach, 'klein') : '') + '</div>' +
+      (B.length ? '<div class="bgr">' + bstGruppen(B, nach).map((g) => '<section class="bg"><header><b>' + esc(g.name || (nach === 'bf' ? 'Ohne Bauführer' : 'Ohne Polier')) + '</b><span class="zahl tnum">' + g.liste.length + '</span></header><ul>' +
+        g.liste.map((e) => { const grau = [e.b[anderes], e.mit.length ? 'mit ' + e.mit.join(', ') : ''].filter(Boolean).join(' · '); return '<li data-zieh="baustellen" data-zid="' + e.b.id + '"><button type="button" data-a="baustelle" data-id="' + e.b.id + '"><span>' + esc(e.b.name) + '</span>' + (grau ? '<small>' + esc(grau) + '</small>' : '') + '</button></li>'; }).join('') + '</ul></section>').join('') + '</div>' : '') +
       '<form class="dreier" data-form="baustelle"><input name="name" id="neu-bst" placeholder="Baustelle hinzufügen …" aria-label="Baustelle" autocomplete="off"><input name="bf" placeholder="Bauführer" aria-label="Bauführer" autocomplete="off"><input name="po" placeholder="Polier" aria-label="Polier" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Baustelle hinzufügen">' + ic('plus') + '</button></form>' +
       (B.length ? '' : '<p class="muted klein">Einzeln eintippen oder eine Liste aus Excel einfügen: je Zeile Baustelle, Bauführer, Polier.</p>');
   },
@@ -1346,7 +1555,101 @@ function themaInhalt(t, nr) {
   return TEIL.frage(t) + u + TEIL.notizen(t) + TEIL.beschluss(t);
 }
 
+/* ---------- Kunden: Diagramme und Tabellen ---------- */
+const quoteVon = (o) => (o.gerechnet > 0 && o.erhalten !== null ? o.erhalten / o.gerechnet * 100 : null);
+function offertenSortiert() { return S.kunden.offerten.slice().sort((a, b) => jahrZahl(a.jahr) - jahrZahl(b.jahr) || String(a.jahr).localeCompare(String(b.jahr))); }
+function kundenJahre() { const s = {}; S.kunden.auftraege.forEach((a) => { const j = jahrZahl(a.jahr); if (j) s[j] = 1; }); return Object.keys(s).map(Number).sort((a, b) => b - a); }
+function zeitraum() {   // was die Ranglisten zählen: alle Jahre, die letzten drei oder ein einzelnes
+  const J = kundenJahre(), f = S.kunden.jahr, A = S.kunden.auftraege;
+  if (f === 'l3' && J.length > 3) { const ab = J.slice(0, 3); return { liste: A.filter((a) => ab.indexOf(jahrZahl(a.jahr)) >= 0), text: ab[2] + ' bis ' + ab[0] }; }
+  if (f && J.indexOf(+f) >= 0) return { liste: A.filter((a) => jahrZahl(a.jahr) === +f), text: String(f) };
+  return { liste: A, text: J.length > 1 ? J[J.length - 1] + ' bis ' + J[0] : (J.length ? String(J[0]) : '') };
+}
+const teileVon = (a, feld) => String(a[feld] || '').split(NAMENSFELD[feld] ? /[;\n]+/ : /[,;\n]+/).map((x) => x.trim()).filter(Boolean);
+/* Wie oft jede Angabe vorkommt. Hat ein Auftrag mehrere («Brücke, Garage»), zählt er bei jeder. */
+function rangliste(feld, liste) {
+  const m = {};
+  liste.forEach((a) => {
+    const gesehen = {};
+    teileVon(a, feld).forEach((x) => {
+      const k = x.toLowerCase().replace(/[.\s]+/g, ' ').trim();
+      if (!k || gesehen[k]) return;
+      gesehen[k] = 1;
+      const e = m[k] || (m[k] = { name: x, n: 0, betrag: 0, mitBetrag: 0 });
+      e.n++;
+      if (a.betrag !== null) { e.betrag += a.betrag; e.mitBetrag++; }
+    });
+  });
+  return Object.keys(m).map((k) => m[k]).sort((a, b) => b.n - a.n || b.betrag - a.betrag || a.name.localeCompare(b.name, 'de'));
+}
+function rangKarte(r, liste) {
+  const feld = r[0], R = rangliste(feld, liste), total = liste.length;
+  if (!R.length) return karte(r[1], r[2], '<p class="dg-leer">' + (feld === 'mitbewerber' ? 'Noch keine Angaben. Beim Auftrag eintragen, wer auch offeriert hat.' : 'Noch keine Angaben.') + '</p>');
+  const max = R[0].n, offen = !!S.ui.auf['k-' + feld], zeigen = offen ? R : R.slice(0, 6), ohne = liste.filter((a) => !teileVon(a, feld).length).length;
+  return karte(r[1], r[2], '<div class="rg">' + zeigen.map((e) =>
+    '<div class="rg-z" tabindex="0" data-tip="' + esc([e.name, mehrzahl(e.n, 'Auftrag', 'Aufträge') + ' von ' + total + ' (' + Math.round(e.n / total * 100) + ' %)'].concat(e.mitBetrag ? ['Summe: ' + fmt(e.betrag) + ' Franken' + (e.mitBetrag < e.n ? ' (' + e.mitBetrag + ' mit Betrag)' : '')] : []).join('\n')) + '">' +
+    '<span class="rg-n">' + esc(e.name) + '</span><span class="rg-b"><i class="c-blau" style="width:' + (e.n / max * 100).toFixed(1) + '%"></i></span>' +
+    '<span class="rg-w tnum"><b>' + e.n + '</b>' + (e.mitBetrag ? '<small>' + esc(kurz(e.betrag)) + '</small>' : '') + '</span></div>').join('') + '</div>' +
+    (R.length > 6 ? '<button type="button" class="textlink" data-a="auf" data-k="k-' + feld + '">' + (offen ? 'Weniger zeigen' : 'Alle ' + R.length + ' zeigen') + '</button>' : '') +
+    (ohne ? '<p class="dg-n">' + ohne + ' von ' + total + ' ohne Angabe.</p>' : ''));
+}
+function offertenKarte() {
+  const alle = offertenSortiert(), O = alle.slice(-8);
+  if (!O.length) return karte('Offerten', 'Gerechnet und erhalten je Jahr.', '<p class="dg-leer">Noch kein Jahr erfasst.</p>');
+  const D = O.map((o) => ({ name: o.jahr, bud: false, g: o.gerechnet, e: o.erhalten, q: quoteVon(o) }));
+  const voll = alle.filter((o) => quoteVon(o) !== null), sG = voll.reduce((a, o) => a + o.gerechnet, 0), sE = voll.reduce((a, o) => a + o.erhalten, 0);
+  const leerOder = (v, f) => (v === null || v === undefined ? '' : f(v));
+  return karte('Offerten', 'Gerechnet und erhalten je Jahr.',
+    legende([['c-grau', 'Gerechnet'], ['c-blau', 'Erhalten']]) +
+    saeulen(D, { ganz: true, reihen: [{ klasse: 'c-grau', wert: (d) => d.g }, { klasse: 'c-blau', wert: (d) => d.e }], oben: (d) => (d.q === null ? '' : Math.round(d.q) + ' %'), achse: (v) => fmt(v),
+      tip: (d) => ['Gerechnet: ' + leerOder(d.g, fmt), 'Erhalten: ' + leerOder(d.e, fmt)].concat(d.q === null ? [] : ['Quote: ' + Math.round(d.q) + ' %'].concat(d.e > 0 ? ['Eine von ' + fmtN(d.g / d.e, 1)] : [])) }) +
+    '<p class="dg-n"><span class="dg-on">Über den Säulen: die Quote, erhalten von gerechnet. </span>' + (sG ? esc('Über alle Jahre: ' + fmt(sE) + ' von ' + fmt(sG) + ', das sind ' + Math.round(sE / sG * 100) + ' %.') : '') + '</p>' +
+    werteTabelle(D.map((d) => d.name), [['Gerechnet', D.map((d) => leerOder(d.g, fmt))], ['Erhalten', D.map((d) => leerOder(d.e, fmt))], ['Quote', D.map((d) => (d.q === null ? '' : Math.round(d.q) + ' %'))], ['Eine von', D.map((d) => (d.q === null || !(d.e > 0) ? '' : fmtN(d.g / d.e, 1)))]]) +
+    (alle.length > O.length ? '<p class="dg-n">Gezeigt sind die neusten Jahre; alle stehen unter «Tabelle».</p>' : ''));
+}
+function zeitraumWahl() {
+  const J = kundenJahre(), f = S.kunden.jahr, da = (v) => (f === v ? ' selected' : '');
+  if (J.length < 2) return '';
+  return '<label class="wahl"><span>Zeitraum</span><select data-wahl="kjahr" aria-label="Zeitraum der Ranglisten"><option value="">Alle Jahre</option>' + (J.length > 3 ? '<option value="l3"' + da('l3') + '>Letzte 3 Jahre</option>' : '') +
+    J.map((j) => '<option value="' + j + '"' + da(String(j)) + '>' + j + '</option>').join('') + '</select></label>';
+}
+function kundenDiagramme() {
+  const Z = zeitraum(), L = Z.liste, eing = L.filter((a) => a.eingeladen).length;
+  const karten = [offertenKarte()].concat(S.kunden.auftraege.length ? RANG.map((r) => rangKarte(r, L))
+    : [karte('Aufträge', 'Von wem sie kommen und woran wir arbeiten.', '<p class="dg-leer">Noch kein Auftrag erfasst. Unter «Tabelle» einzeln erfassen oder über «Einfügen» eine Tabelle aus Excel holen.</p>')]);
+  return '<div class="dgr">' + karten.join('') + '</div>' + (S.kunden.auftraege.length ? '<p class="muted klein unter">' + esc((Z.text ? Z.text + ': ' : '') + mehrzahl(L.length, 'Auftrag', 'Aufträge') + (eing ? ', davon ' + eing + ' auf Einladung' : '') + '. Grau daneben: die Summe der Beträge in Franken. Hat ein Auftrag mehrere Angaben, zählt er bei jeder.') + '</p>' : '');
+}
+function kundenTabellen() {
+  const O = offertenSortiert().reverse(), A = S.kunden.auftraege.slice().sort((a, b) => jahrZahl(b.jahr) - jahrZahl(a.jahr));
+  const zt = (v) => (v === null || v === undefined ? '' : fmt(v));
+  const offT = '<div class="k-off"><h2 class="bl">Offerten je Jahr</h2>' +
+    (O.length ? '<div class="bst-rahmen"><table class="bst" id="t-off"><thead><tr><th>Jahr</th><th class="r">Gerechnet</th><th class="r">Erhalten</th><th class="r">Quote</th></tr></thead><tbody>' +
+      O.map((o) => { const q = quoteVon(o); return '<tr data-a="offerte" data-id="' + o.id + '"><td><button type="button" data-a="offerte" data-id="' + o.id + '">' + esc(o.jahr) + '</button></td><td class="r tnum">' + zt(o.gerechnet) + '</td><td class="r tnum">' + zt(o.erhalten) + '</td><td class="r tnum">' + (q === null ? '' : Math.round(q) + ' %') + '</td></tr>'; }).join('') + '</tbody></table></div>' : '') +
+    '<form class="dreier" data-form="offerte"><input name="jahr" id="neu-off" placeholder="Jahr hinzufügen …" aria-label="Jahr" inputmode="numeric" autocomplete="off"><input name="gerechnet" placeholder="Gerechnet" aria-label="Offerten gerechnet" inputmode="numeric" autocomplete="off"><input name="erhalten" placeholder="Erhalten" aria-label="Davon erhalten" inputmode="numeric" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Jahr hinzufügen">' + ic('plus') + '</button></form></div>';
+  const aufT = '<div class="bl-zeile"><h2 class="bl">Aufträge' + (A.length ? ' (' + A.length + ')' : '') + '</h2><button type="button" class="btn klein" data-a="auftrag-neu">' + ic('plus') + '<span>Auftrag</span></button></div>' +
+    (A.length ? '<div class="bst-rahmen"><table class="bst at" id="t-auf"><thead><tr><th>Jahr</th><th>Objekt</th><th>Planer</th><th>Bauherr</th><th>Art</th><th>Speziell</th><th class="r">Betrag</th></tr></thead><tbody>' +
+      A.map((a) => '<tr data-a="auftrag" data-id="' + a.id + '"><td class="tnum">' + esc(a.jahr) + '</td><td><button type="button" data-a="auftrag" data-id="' + a.id + '">' + esc(a.objekt) + '</button></td><td>' + esc(a.planer) + '</td><td>' + esc(a.bauherr) + (a.bauherrArt ? '<small>' + esc(a.bauherrArt) + '</small>' : '') + '</td><td>' + esc(a.objektArt) + '</td><td>' + esc(a.speziell) + '</td><td class="r tnum">' + zt(a.betrag) + '</td></tr>').join('') + '</tbody></table></div>'
+      : '<p class="muted klein">Noch kein Auftrag. Einzeln erfassen oder über «Einfügen» eine Tabelle aus Excel holen.</p>');
+  return offT + aufT + '<div class="unter"><p class="muted klein">Eine Zeile antippen, um sie zu ändern.</p><button type="button" class="textlink" data-a="kunden-weg">Alle Offerten und Aufträge entfernen</button></div>';
+}
+function kundenAblage(imSheet) {
+  return '<section class="card ablage">' + ic('upload') + '<h2>Offerten und Aufträge einfügen</h2><p class="muted">' + (FEIN ? 'Die Excel-Datei auf diese Seite ziehen. Oder in Excel eine Tabelle samt Kopfzeile kopieren und hier einfügen.' : 'Die Excel-Datei wählen. Oder in Excel eine Tabelle samt Kopfzeile kopieren und hier einfügen.') + '</p>' +
+    '<textarea id="k-einfuegen" class="einfuegen" rows="1" placeholder="' + (FEIN ? 'Hier klicken und einfügen (Ctrl+V)' : 'Hier antippen und einfügen') + '" aria-label="Tabelle hier einfügen"></textarea>' +
+    '<button type="button" class="btn" data-a="datei-wahl">Datei wählen</button>' +
+    '<p class="muted klein">Kopfzeile für Offerten: Jahr, Gerechnet, Erhalten. Für Aufträge: Jahr, Objekt, Planer, Bauherr, Bauherr-Art, Objekt-Art, Speziell, Mitbewerber, Betrag.</p>' +
+    (IM_RAHMEN ? '<p class="klein warn">Vorschau: Hier wird nichts gesichert. Nur Beispielangaben einfügen.</p>' : '') +
+    (imSheet ? '' : '<div class="reihe"><button type="button" class="textlink" data-a="offerte-neu">Jahr von Hand erfassen</button><button type="button" class="textlink" data-a="auftrag-neu">Auftrag von Hand erfassen</button></div>') + '</section>';
+}
+
 const ANSICHT = {
+  kunden() {
+    const K = S.kunden;
+    if (!K.offerten.length && !K.auftraege.length) return titel('Kunden', 'Offerten und Aufträge') + kundenAblage();
+    const tab = K.ansicht === 'tabelle';
+    return titel('Kunden', 'Offerten und Aufträge', seg('kansicht', [['diagramme', 'Diagramme'], ['tabelle', 'Tabelle']], K.ansicht) + (tab ? '' : zeitraumWahl()) +
+      '<button type="button" class="btn stark" data-a="sheet" data-s="kimport">' + ic('plus') + '<span>Einfügen</span></button>') + (tab ? kundenTabellen() : kundenDiagramme());
+  },
+
   zahlen() {
     const Z = S.zahlen;
     if (!Z.perioden.length) return titel('Zahlen', 'Verlauf der Jahre') + ablage();
@@ -1376,7 +1679,7 @@ const ANSICHT = {
       '<button type="button" class="tlink neu leise" style="order:100001" data-a="sheet" data-s="themenliste">' + ic('liste') + '<span>Liste einfügen</span></button></div>' +
       '<div class="tz kinder" data-h="' + haupt.id + '">' + kinderVon(haupt).map((k) => link(k, hi * 2 + 1, true)).join('') + '</div></nav>' +
       '<section class="thema">' + kopf + themaInhalt(akt, nr) +
-      '<p class="muted klein hilfe">' + ic('flag') + '<span>Was die GL wissen oder entscheiden soll, mit «GL» vormerken. Es steht im Ergebnis zuoberst.</span></p></section></div>';
+      '<p class="muted klein hilfe">' + ic('flag') + '<span>Was die GL wissen oder entscheiden soll, mit «GL» vormerken. Es steht im Ergebnis zuoberst.' + (FEIN ? ' Einträge lassen sich mit der Maus auf und ab schieben.' : '') + '</span></p></section></div>';
   },
 
   ergebnis() {
@@ -1387,7 +1690,7 @@ const ANSICHT = {
 
   gl() {
     return titel('Meine Punkte für die GL', 'Was du an der GL-Strategie sagen willst, abseits der Abteilung.') +
-      '<section class="glseite"><ul class="eintraege">' + S.glPunkte.map((x) => '<li class="notiz"><button type="button" class="n-text" data-a="glpunkt" data-id="' + x.id + '">' + esc(x.text) + '</button></li>').join('') + '</ul>' +
+      '<section class="glseite"><ul class="eintraege">' + S.glPunkte.map((x) => '<li class="notiz" data-zieh="gl" data-zid="' + x.id + '"><button type="button" class="n-text" data-a="glpunkt" data-id="' + x.id + '">' + esc(x.text) + '</button></li>').join('') + '</ul>' +
       '<form class="schnell" data-form="glpunkt"><input name="text" id="neu-glpunkt" placeholder="Punkt hinzufügen …" aria-label="Punkt hinzufügen" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Punkt hinzufügen">' + ic('plus') + '</button></form>' +
       '<p class="muted klein hilfe">' + ic('info') + '<span>Nur für dich: Diese Punkte stehen nicht im Ergebnis und nicht im PDF. Den Reiter blendest du in den Einstellungen aus, je Gerät.</span></p></section>';
   }
@@ -1411,8 +1714,8 @@ function ergebnisHTML() {
     h += '<section class="e-teil"><h2>' + esc(t.titel) + '</h2>' +
       (t.ziele.length ? '<p class="e-klein">' + t.ziele.filter((z) => z.stand === 'erreicht').length + ' von ' + t.ziele.length + ' Zielen erreicht</p><ul class="e-rz">' +
         t.ziele.map((z) => '<li><span>' + esc(z.text) + '</span><b class="e-st ' + esc(z.stand || '') + '">' + esc(STAND[z.stand || ''] || '') + '</b></li>').join('') + '</ul>' : '') +
-      (t.baustellen.length ? '<h3>Baustellen (' + t.baustellen.length + ')</h3><div class="e-tab-rahmen"><table class="e-besch"><thead><tr><th>Baustelle</th><th>Bauführer</th><th>Polier</th></tr></thead><tbody>' +
-        t.baustellen.map((b) => '<tr><td class="th">' + esc(b.name) + '</td><td>' + esc(b.bf) + '</td><td>' + esc(b.po) + '</td></tr>').join('') + '</tbody></table></div>' : '') + '</section>';
+      (t.baustellen.length ? '<h3>Baustellen (' + t.baustellen.length + ')</h3><div class="e-tab-rahmen"><table class="e-besch"><thead><tr><th>Bauführer</th><th>Baustellen, in Klammern der Polier</th></tr></thead><tbody>' +
+        bstGruppen(t.baustellen, 'bf').map((g) => '<tr><td class="th nw">' + esc(g.name || 'Ohne Bauführer') + ' (' + g.liste.length + ')</td><td>' + g.liste.map((e) => esc(e.b.name) + (e.b.po ? ' <span class="e-grau">(' + esc(e.b.po) + ')</span>' : '')).join(' · ') + '</td></tr>').join('') + '</tbody></table></div>' : '') + '</section>';
     etwas = true;
   });
   T.filter((t) => t.art === 'gruppen' && t.leute.length).forEach((t) => {
@@ -1434,6 +1737,12 @@ function ergebnisHTML() {
       reihe(k.ertrag) + reihe(k.aufwand) + reihe(k.ergebnis, true) + proz + reihe(k.stunden) + '</tbody></table></div>' +
       '<p class="e-fuss">' + (minusIstGewinn() ? 'Ergebnis wie im BAB: Aufwand minus Ertrag, ein Minus ist ein Gewinn. ' : '') + (alleP.length > P.length ? 'Gezeigt sind die neusten Spalten; alle stehen im Tool unter «Zahlen».' : '') + '</p></section>';
   }
+  const O = offertenSortiert().slice(-6);
+  if (O.length) {
+    const zeile = (name, f) => '<tr><th>' + name + '</th>' + O.map((o) => '<td>' + f(o) + '</td>').join('') + '</tr>';
+    h += '<section class="e-teil"><h2>Offerten</h2><div class="e-tab-rahmen"><table class="e-tab"><thead><tr><th></th>' + O.map((o) => '<th>' + esc(o.jahr) + '</th>').join('') + '</tr></thead><tbody>' +
+      zeile('Gerechnet', (o) => (o.gerechnet === null ? '' : fmt(o.gerechnet))) + zeile('Erhalten', (o) => (o.erhalten === null ? '' : fmt(o.erhalten))) + zeile('Quote', (o) => { const q = quoteVon(o); return q === null ? '' : '<b>' + Math.round(q) + ' %</b>'; }) + '</tbody></table></div></section>';
+  }
   return h;
 }
 
@@ -1441,7 +1750,7 @@ function ergebnisHTML() {
 function kopfHTML() {
   const fest = !!datei.handle, offen = datei.schmutzig && !IM_RAHMEN;   // fest: Änderungen gehen von selbst in die Datei
   return '<div class="kopf1"><div class="marke"><b>' + esc(S.meta.titel) + '</b><span>' + esc(S.meta.abteilung) + '</span></div>' +
-    seg('bereich', [['zahlen', 'Zahlen'], ['themen', 'Themen'], ['ergebnis', 'Ergebnis']].concat(glAn ? [['gl', 'GL']] : []), S.ui.bereich, 'bereich') +
+    seg('bereich', [['zahlen', 'Zahlen'], ['kunden', 'Kunden'], ['themen', 'Themen'], ['ergebnis', 'Ergebnis']].concat(glAn ? [['gl', 'GL']] : []), S.ui.bereich, 'bereich') +
     '<div class="kopf-r"><button type="button" class="rundb" data-a="sheet" data-s="parkplatz" aria-label="Parkplatz, ' + S.parkplatz.length + (S.parkplatz.length === 1 ? ' Eintrag' : ' Einträge') + '">' + ic('park') + (S.parkplatz.length ? '<i class="badge tnum">' + S.parkplatz.length + '</i>' : '') + '</button>' +
     '<button type="button" class="btn klein" data-a="sichern" aria-label="' + (fest ? 'Gesichert in der Datei ' + esc(datei.name) : (offen ? 'Sichern, es gibt ungesicherte Änderungen' : 'Sichern')) + '">' + ic(fest ? 'check' : 'disk') + '<span>' + (fest ? 'Gesichert' : 'Sichern') + '</span>' + (offen ? '<i class="punkt"></i>' : '') + '</button>' +
     '<button type="button" class="rundb" data-a="sheet" data-s="einstellungen" aria-label="Einstellungen">' + ic('gear') + '</button></div></div>';
@@ -1535,6 +1844,38 @@ const SHEET = {
       '<p class="muted">Eine Zeile pro Thema. Unterpunkte sind eingerückt oder tragen eine Nummer wie 1.1. Themen, die es schon gibt, behalten ihren Inhalt und werden eingeordnet; alle anderen bleiben am Schluss stehen.</p>' +
       '<label class="f" for="li-t"><span>Liste</span><textarea id="li-t" name="text" rows="12" data-fokus autocomplete="off" spellcheck="false" placeholder="Rückblick&#10;1 Erstes Thema&#10;   1.1 Unterpunkt&#10;   1.2 Unterpunkt&#10;2 Zweites Thema"></textarea></label>' +
       '<p class="muted klein" id="li-info">Noch nichts erkannt.</p>', 'Übernehmen');
+  },
+  kimport() { return huelle('Offerten und Aufträge einfügen', kundenAblage(true)); },
+  offerte() {
+    const o = sheet.id ? S.kunden.offerten.find((x) => x.id === sheet.id) : null, w = (v) => (v === null || v === undefined ? '' : String(v));
+    if (sheet.id && !o) return '';
+    return formHuelle(o ? 'Offerten ' + o.jahr : 'Jahr erfassen', 'offerte-edit',
+      '<label class="f" for="of-j"><span>Jahr</span><input id="of-j" name="jahr" value="' + esc(o ? o.jahr : '') + '" inputmode="numeric" autocomplete="off"' + (o ? '' : ' data-fokus') + '></label>' +
+      '<div class="zwei"><label class="f" for="of-g"><span>Offerten gerechnet</span><input id="of-g" name="gerechnet" value="' + esc(o ? w(o.gerechnet) : '') + '" inputmode="numeric" autocomplete="off"' + (o ? ' data-fokus' : '') + '></label>' +
+      '<label class="f" for="of-e"><span>Davon erhalten</span><input id="of-e" name="erhalten" value="' + esc(o ? w(o.erhalten) : '') + '" inputmode="numeric" autocomplete="off"></label></div>' +
+      (o ? loeschKnopf('offerte-weg', 'Jahr entfernen') : ''));
+  },
+  auftrag() {
+    const a = sheet.id ? S.kunden.auftraege.find((x) => x.id === sheet.id) : null;
+    if (sheet.id && !a) return '';
+    const wert = (k) => esc(a ? a[k] : (k === 'jahr' ? (S.meta.datum || heute()).slice(0, 4) : ''));
+    const vorrat = (k) => {   // was es in dieser Spalte schon gibt, als Vorschlag beim Tippen
+      const s = {};
+      S.kunden.auftraege.forEach((x) => { teileVon(x, k).forEach((y) => { s[y] = 1; }); });
+      return '<datalist id="dl-' + k + '">' + Object.keys(s).sort((p, q) => p.localeCompare(q, 'de')).map((y) => '<option value="' + esc(y) + '"></option>').join('') + '</datalist>';
+    };
+    const feld = (k, name, mehr, mitVorrat) => '<label class="f" for="au-' + k + '"><span>' + name + '</span><input id="au-' + k + '" name="' + k + '" value="' + wert(k) + '" autocomplete="off"' + (mitVorrat ? ' list="dl-' + k + '"' : '') + (mehr || '') + '></label>' + (mitVorrat ? vorrat(k) : '');
+    return formHuelle(a ? 'Auftrag' : 'Auftrag erfassen', 'auftrag-edit',
+      '<div class="zwei js">' + feld('jahr', 'Jahr', ' inputmode="numeric"') + feld('objekt', 'Objekt', a ? '' : ' data-fokus') + '</div>' +
+      feld('planer', 'Planer', '', true) +
+      '<div class="zwei">' + feld('bauherr', 'Bauherr', '', true) + feld('bauherrArt', 'Art des Bauherrn', ' placeholder="z. B. Gemeinde"', true) + '</div>' +
+      '<div class="zwei">' + feld('objektArt', 'Art des Objekts', ' placeholder="z. B. Brücke"', true) + feld('speziell', 'Speziell', '', true) + '</div>' +
+      '<div class="zwei">' + feld('mitbewerber', 'Mitbewerber', ' placeholder="Wer hat auch offeriert?"', true) +
+      '<label class="f" for="au-betrag"><span>Betrag in Franken</span><input id="au-betrag" name="betrag" value="' + (a && a.betrag !== null ? esc(fmt(a.betrag)) : '') + '" inputmode="decimal" autocomplete="off"></label></div>' +
+      '<label class="schalter" for="au-eing"><span>Auf Einladung</span><input type="checkbox" id="au-eing" name="eingeladen"' + (a && a.eingeladen ? ' checked' : '') + '></label>' +
+      '<label class="f" for="au-notiz"><span>Bemerkung</span><textarea id="au-notiz" name="notiz" rows="2">' + esc(a ? a.notiz : '') + '</textarea></label>' +
+      '<p class="muted klein">Mehrere Arten mit Komma trennen, mehrere Mitbewerber mit Strichpunkt.</p>' +
+      (a ? loeschKnopf('auftrag-weg', 'Auftrag entfernen') : ''));
   },
   baustelle() {
     const b = imThema('baustellen');
@@ -1847,6 +2188,8 @@ const AKT = {
     if (k === 'bereich') { S.ui.bereich = v; speichern(true); render(); window.scrollTo(0, 0); }
     else if (k === 'sicht') { S.zahlen.sicht = v; speichern(true); render(); }
     else if (k === 'ansicht') { S.zahlen.ansicht = v; speichern(true); render(); }
+    else if (k === 'kansicht') { S.kunden.ansicht = v; speichern(true); render(); }
+    else if (k === 'bst') { S.ui.bst = v; speichern(true); render(); }
     else if (k === 'modus') { S.meta.modus = v; speichern(true); anzeigeMerken(); render(); renderSheet(false); }
   },
   sheet(el) { auf({ art: el.dataset.s }); },
@@ -1885,6 +2228,13 @@ const AKT = {
   'unter-neu'() { const v = aktThema(); if (!v || v.eltern) return; const t = themaNeu('thema', 'Neuer Unterpunkt'); t.eltern = v.id; S.themen.push(t); S.themen = ordnen(S.themen); S.ui.thema = t.id; geaendert(); auf({ art: 'thema' }); },
   baustelle(el) { auf({ art: 'baustelle', id: el.dataset.id }); },
   'baustelle-weg'() { entfernen('baustellen', 'Baustelle entfernt'); },
+  offerte(el) { auf({ art: 'offerte', id: el.dataset.id }); },
+  'offerte-neu'() { auf({ art: 'offerte', id: '' }); },
+  'offerte-weg'() { if (!sheet) return; merken(); S.kunden.offerten = S.kunden.offerten.filter((x) => x.id !== sheet.id); geaendert(true); toast('Jahr entfernt', true); },
+  auftrag(el) { auf({ art: 'auftrag', id: el.dataset.id }); },
+  'auftrag-neu'() { auf({ art: 'auftrag', id: '' }); },
+  'auftrag-weg'() { if (!sheet) return; merken(); S.kunden.auftraege = S.kunden.auftraege.filter((x) => x.id !== sheet.id); geaendert(true); toast('Auftrag entfernt', true); },
+  'kunden-weg'(el) { if (!bestaetigt(el, 'Wirklich alle entfernen?')) return; merken(); S.kunden.offerten = []; S.kunden.auftraege = []; S.kunden.jahr = ''; geaendert(); toast('Offerten und Aufträge entfernt', true); },
   glpunkt(el) { auf({ art: 'glpunkt', id: el.dataset.id }); },
   'glpunkt-weg'() { if (!sheet) return; merken(); S.glPunkte = S.glPunkte.filter((x) => x.id !== sheet.id); geaendert(true); toast('Punkt gelöscht', true); },
   art(el) { const t = themaAusForm(); if (!t) return; t.art = el.dataset.v; if (t.art === 'gruppen' && !t.gruppen.length) t.gruppen = ['Gruppe 1', 'Gruppe 2', 'Gruppe 3'].map((n) => ({ id: uid(), name: n })); speichern(); render(); renderSheet(false); },
@@ -1924,6 +2274,18 @@ const AKT = {
   }
 };
 const pflicht = (feld) => { const text = feld.value.trim(); if (!text) { feld.classList.add('fehlt'); feld.focus(); } return text; };
+/* Ein Jahr mit Offerten aus einem Formular übernehmen. Gibt es das Jahr schon, werden seine Zahlen ersetzt. */
+function offerteAusForm(f, o) {
+  const jahr = jahrAus(f.elements.jahr.value), ger = ganz(zahl(f.elements.gerechnet.value)), erh = ganz(zahl(f.elements.erhalten.value));
+  if (!jahr) { f.elements.jahr.classList.add('fehlt'); f.elements.jahr.focus(); return false; }
+  if (ger === null) { f.elements.gerechnet.classList.add('fehlt'); f.elements.gerechnet.focus(); return false; }
+  const gleich = S.kunden.offerten.find((x) => x.jahr === jahr && x !== o);
+  if (gleich && o) S.kunden.offerten = S.kunden.offerten.filter((x) => x !== o);   // auf ein Jahr umbenannt, das es schon gibt
+  const ziel = gleich || o || { id: uid() };
+  if (!gleich && !o) S.kunden.offerten.push(ziel);
+  ziel.jahr = jahr; ziel.gerechnet = ger; ziel.erhalten = erh;
+  return true;
+}
 const ohneBis = (text) => text.trim().replace(/^bis\s+/i, '');
 const FORMS = {
   park(f) { const text = f.elements.text.value.trim(); if (!text) return; S.parkplatz.push({ id: uid(), text: text }); speichern(); render(); renderSheet(false); fokus('neu-park'); },
@@ -1959,6 +2321,19 @@ const FORMS = {
   },
   'baustelle-edit'(f) { const b = imThema('baustellen'), name = b && pflicht(f.elements.name); if (!name) return; b.name = name; b.bf = f.elements.bf.value.trim(); b.po = f.elements.po.value.trim(); geaendert(true); },
   glpunkt(f) { const text = f.elements.text.value.trim(); if (!text) return; S.glPunkte.push({ id: uid(), text: text }); geaendert(); fokus('neu-glpunkt'); },
+  offerte(f) { if (offerteAusForm(f, null)) { geaendert(); fokus('neu-off'); } },
+  'offerte-edit'(f) { if (offerteAusForm(f, sheet && sheet.id ? S.kunden.offerten.find((x) => x.id === sheet.id) : null)) geaendert(true); },
+  'auftrag-edit'(f) {
+    const objekt = pflicht(f.elements.objekt);
+    if (!objekt) return;
+    let a = sheet && sheet.id ? S.kunden.auftraege.find((x) => x.id === sheet.id) : null;
+    if (!a) { a = { id: uid() }; S.kunden.auftraege.push(a); }
+    AF.forEach((k) => { a[k] = f.elements[k].value.replace(/\s+/g, ' ').trim(); });
+    a.jahr = jahrAus(a.jahr) || a.jahr;
+    a.betrag = zahl(f.elements.betrag.value);
+    a.eingeladen = f.elements.eingeladen.checked;
+    geaendert(true);
+  },
   'glpunkt-edit'(f) { const x = sheet && S.glPunkte.find((y) => y.id === sheet.id), text = x && pflicht(f.elements.text); if (!text) return; x.text = text; geaendert(true); },
   'thema-edit'(f) { const t = aktThema(), titelNeu = t && pflicht(f.elements.titel); if (!titelNeu) return; t.titel = titelNeu; t.frage = f.elements.frage.value.trim(); geaendert(true); },
   spalte(f) { const p = S.zahlen.perioden.find((x) => x.id === sheet.id), name = f.elements.name.value.trim(); if (!p || !name) return; p.name = name; S.zahlen.perioden.sort((a, b) => periodeOrdnung(a.name) - periodeOrdnung(b.name)); geaendert(true); },
@@ -1982,11 +2357,7 @@ const FORMS = {
     if (!alle.length) { toast('Keine Spalte gewählt.'); return; }
     merken();
     const warBeispiel = S.beispiel;
-    if (warBeispiel) {   // eigene Zahlen mischen sich nicht mit dem Beispiel: Beispielzahlen und Beispieleinträge gehen weg, die Themen bleiben
-      S.beispiel = false; S.zahlen.perioden = []; S.zahlen.zeilen = []; S.ui.auf = {};
-      S.themen.forEach((t) => { t.notizen = []; t.beschluesse = []; t.ziele = []; t.leute = []; t.baustellen = []; });
-      S.parkplatz = []; S.glPunkte = [];
-    }
+    if (warBeispiel) beispielWeg();
     st.teile.forEach((imp, ti) => { if (jeTeil[ti].length) zahlenUebernehmen(imp, jeTeil[ti]); });
     importStand = null;
     geaendert(true);
@@ -2019,6 +2390,7 @@ document.addEventListener('change', (e) => {
   const d = e.target.dataset || {};
   if (d.f) render();
   if (d.wahl === 'eltern') themaZu(e.target.value);
+  if (d.wahl === 'kjahr') { S.kunden.jahr = e.target.value; speichern(true); render(); }
   if (d.wahl === 'glreiter') { glAn = e.target.checked; anzeigeMerken(); if (!glAn && S.ui.bereich === 'gl') { S.ui.bereich = 'zahlen'; speichern(true); } render(); }
 });
 document.addEventListener('keydown', (e) => {
@@ -2034,6 +2406,8 @@ document.addEventListener('paste', (e) => {
     if (t.id === 'neu-leute') leuteDazu(text); else if (t.id === 'neu-ziel') zieleDazu(text); else baustellenDazu(text);
     return;
   }
+  const beiKunden = feld ? t.id === 'k-einfuegen' : (S.ui.bereich === 'kunden' && (!sheet || sheet.art === 'kimport'));
+  if (beiKunden) { if (!text) return; e.preventDefault(); kundenText(text); return; }
   if (feld && t.id !== 'einfuegen') return;
   if (!feld && (S.ui.bereich !== 'zahlen' || (sheet && sheet.art !== 'import'))) return;
   if (!text) return;
@@ -2061,48 +2435,77 @@ let passT = 0;
 window.addEventListener('resize', () => { clearTimeout(passT); passT = setTimeout(diagrammePassen, 120); });
 
 /* Kärtchen der Gruppenzuteilung mit Maus oder Stift ziehen. Mit dem Finger: antippen und Gruppe wählen. */
+/* Ziehen mit der Maus: Kärtchen der Tafel (in eine andere Gruppe und innerhalb der Gruppe auf und ab), dazu die Einträge
+   der Listen (Notizen, Beschlüsse, Ziele, Baustellen, Punkte für die GL) auf und ab. Mit dem Finger wird getippt, nicht gezogen. */
 let zug = null;
+function markenWeg() { $$('.ein-vor,.ein-nach').forEach((x) => { x.classList.remove('ein-vor', 'ein-nach'); }); }
 function zugEnde() {
   if (!zug) return;
   if (zug.geist) zug.geist.remove();
   if (zug.el) zug.el.classList.remove('zieht');
   $$('.spalte.ziel').forEach((s) => s.classList.remove('ziel'));
+  markenWeg();
   document.body.classList.remove('am-ziehen');
   zug = null;
 }
 const spalteUnter = (e) => { const el = document.elementFromPoint(e.clientX, e.clientY); return el && el.closest ? el.closest('[data-spalte]') : null; };
+/* Wohin der gezogene Eintrag käme: vor einen Nachbarn («vor») oder hinter den letzten («nach»). Ein Kärtchen kann in jede
+   Spalte der Tafel, ein Listeneintrag bleibt in seiner Liste. */
+function zugZiel(e) {
+  const karte = zug.art === 'karte', feld = karte ? spalteUnter(e) : zug.el.parentNode;
+  if (!feld) return null;
+  if (!karte) { const r = feld.getBoundingClientRect(); if (e.clientX < r.left - 60 || e.clientX > r.right + 60 || e.clientY < r.top - 60 || e.clientY > r.bottom + 60) return null; }
+  const nachbarn = (karte ? $$('.karte', feld) : Array.from(feld.children).filter((x) => x.dataset && x.dataset.zieh)).filter((x) => x !== zug.el);
+  const vor = nachbarn.find((x) => { const r = x.getBoundingClientRect(); return e.clientY < r.top + r.height / 2; }) || null;
+  return { feld: feld, vor: vor, nach: vor ? null : (nachbarn[nachbarn.length - 1] || null) };
+}
 document.addEventListener('pointerdown', (e) => {
-  const k = e.target.closest ? e.target.closest('.karte') : null;
-  if (!k || e.pointerType === 'touch' || e.button !== 0) return;
-  const r = k.getBoundingClientRect();
-  zug = { id: k.dataset.id, el: k, x: e.clientX, y: e.clientY, dx: e.clientX - r.left, dy: e.clientY - r.top, b: r.width, geist: null };
+  if (e.pointerType === 'touch' || e.button !== 0 || !e.target.closest || e.target.closest('input,textarea,select')) return;
+  const k = e.target.closest('.karte') || e.target.closest('[data-zieh]');
+  if (!k) return;
+  const r = k.getBoundingClientRect(), karte = k.classList.contains('karte');
+  zug = { id: karte ? k.dataset.id : k.dataset.zid, art: karte ? 'karte' : k.dataset.zieh, el: k, x: e.clientX, y: e.clientY, dx: e.clientX - r.left, dy: e.clientY - r.top, b: r.width, geist: null };
 });
 document.addEventListener('pointermove', (e) => {
   if (!zug) return;
   if (!zug.geist) {
     if (Math.hypot(e.clientX - zug.x, e.clientY - zug.y) < 6) return;
-    zug.geist = zug.el.cloneNode(true);
-    zug.geist.className = 'karte geist';
+    const kopie = zug.el.cloneNode(true);
+    if (zug.art === 'baustellen') {   // die Zeile braucht ihre Karte um sich, sonst verliert sie ihr Aussehen
+      const ul = document.createElement('ul');
+      ul.appendChild(kopie);
+      zug.geist = document.createElement('div'); zug.geist.className = 'bg geist'; zug.geist.appendChild(ul);
+    } else { zug.geist = kopie; zug.geist.className = (zug.art === 'karte' ? 'karte' : zug.el.className) + ' geist'; }
     zug.geist.style.width = zug.b + 'px';
     document.body.appendChild(zug.geist);
     zug.el.classList.add('zieht');
     document.body.classList.add('am-ziehen');
   }
   zug.geist.style.transform = 'translate(' + (e.clientX - zug.dx) + 'px,' + (e.clientY - zug.dy) + 'px)';
-  const ziel = spalteUnter(e);
-  $$('.spalte.ziel').forEach((s) => { if (s !== ziel) s.classList.remove('ziel'); });
-  if (ziel) ziel.classList.add('ziel');
+  const z = zugZiel(e), spalte = z && zug.art === 'karte' ? z.feld : null;
+  $$('.spalte.ziel').forEach((s) => { if (s !== spalte) s.classList.remove('ziel'); });
+  if (spalte) spalte.classList.add('ziel');
+  markenWeg();
+  if (z && z.vor) z.vor.classList.add('ein-vor'); else if (z && z.nach) z.nach.classList.add('ein-nach');
 });
 document.addEventListener('pointerup', (e) => {
   if (!zug) return;
-  const gezogen = !!zug.geist, id = zug.id, ziel = gezogen ? spalteUnter(e) : null;
+  const gezogen = !!zug.geist, id = zug.id, art = zug.art, z = gezogen ? zugZiel(e) : null;
   zugEnde();
   if (!gezogen) return;
   klickSperre = true; setTimeout(() => { klickSperre = false; }, 80);
-  const t = aktThema(), p = t && t.leute.find((x) => x.id === id);
-  if (!ziel || !p || p.gruppe === ziel.dataset.spalte) return;
+  const t = aktThema(), liste = art === 'karte' ? (t && t.leute) : (art === 'gl' ? S.glPunkte : (t && t[art]));
+  const x = Array.isArray(liste) ? liste.find((y) => y.id === id) : null;
+  if (!z || !x) return;
+  const kennung = (el) => (el ? (art === 'karte' ? el.dataset.id : el.dataset.zid) : ''), rest = liste.filter((y) => y !== x);
+  let i = rest.length;
+  if (z.vor) { const n = rest.findIndex((y) => y.id === kennung(z.vor)); if (n >= 0) i = n; }
+  else if (z.nach) { const n = rest.findIndex((y) => y.id === kennung(z.nach)); if (n >= 0) i = n + 1; }
+  rest.splice(i, 0, x);
+  const gruppe = art === 'karte' ? z.feld.dataset.spalte : x.gruppe;
+  if (gruppe === x.gruppe && rest.every((y, n) => y === liste[n])) return;   // am alten Platz losgelassen
   merken();
-  p.gruppe = ziel.dataset.spalte;
+  if (art === 'karte') { x.gruppe = gruppe; t.leute = rest; } else if (art === 'gl') S.glPunkte = rest; else t[art] = rest;
   geaendert();
 });
 document.addEventListener('pointercancel', zugEnde);
