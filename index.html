@@ -343,6 +343,41 @@ body.drueber .ablage,body.drueber .tab-rahmen,body.drueber .dg{border-color:var(
 .tlink.geist{width:auto;opacity:.95}
 .fd-geist{padding:.6rem 1rem;border-radius:.9rem;font-weight:600;max-width:24rem}
 
+/* Seit 1.0: Jahr und «Eine Seite» im Ergebnis, Rückblick mit Beschlüssen vom letzten Jahr, GL mit Herkunft, Mitschrift und Vorjahren */
+.e-wahl{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.6rem;max-width:52rem;margin:0 auto .9rem}
+.e-archiv-hinweis{max-width:52rem;margin-left:auto!important;margin-right:auto!important}
+.e-wahl:empty{display:none}
+.e-archiv-hinweis{display:flex;align-items:center;gap:.4rem;margin:-.3rem 0 .7rem}
+.e-zwei{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(15rem,1fr);gap:0 1.6rem;align-items:start}
+.e-zwei .e-tab th,.e-zwei .e-tab td{padding-left:.5rem;padding-right:.5rem}
+.e-mehr{color:var(--muted);font-style:italic;list-style:none}
+.e-grau{color:var(--muted)}
+.blatt.eine-seite{max-width:52rem}
+.bvj-m{display:block;color:var(--muted);font-size:.875rem;font-weight:400;margin-top:.15rem}
+.z-th.st-chip{background:var(--brand-soft);color:var(--accent)}
+.gvj .glp-e{display:block;margin-top:.25rem}
+.glp-weg{display:block;font-size:.8125rem;font-weight:500;color:var(--warn);margin-top:.15rem}
+.gl-mit{display:block;width:100%;text-align:left;margin-top:.55rem;padding:.7rem 1rem;border-radius:1rem;background:var(--fill);color:var(--ink)}
+.gl-mit-k{display:block;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.2rem}
+.gl-mit-t{display:block;white-space:pre-wrap;line-height:1.4}
+.gl-mit-neu{margin:.45rem .2rem 0;font-size:.875rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.35rem}
+.gl-mit-neu .ic{width:.9rem;height:.9rem}
+.gl-vj{margin:0 0 1.2rem;border-radius:1rem;background:var(--card);box-shadow:var(--shadow);padding:.2rem 1rem}
+.gl-vj summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:.45rem;padding:.75rem 0;font-weight:600}
+.gl-vj summary::-webkit-details-marker{display:none}
+.gl-vj summary .pf{width:.95rem;height:.95rem;color:var(--muted);transition:transform .15s}
+.gl-vj[open] summary .pf{transform:rotate(90deg)}
+.gl-vj section{border-top:1px solid var(--sep);padding:.6rem 0 .8rem}
+.gl-vj h3{font-size:1.0625rem;margin:.2rem 0 .3rem}
+.gl-vj h4{font-size:.8125rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:.6rem 0 .2rem}
+.gl-vj ul{margin:0;padding-left:1.1rem}
+.gl-vj li{margin:.15rem 0}
+.gl-vj .glp-e{display:inline}
+.gp-q{margin:.2rem 0 .3rem;font-weight:500}
+.nj-liste{margin:.4rem 0 .8rem;padding-left:1.1rem}
+.nj-liste li{margin:.35rem 0;line-height:1.4}
+@media (max-width:52rem){.e-zwei{grid-template-columns:1fr}}
+
 /* ---------- Kunden: Offerten und Aufträge ---------- */
 .wahl{display:inline-flex;align-items:center;gap:.5rem;font-weight:600;font-size:.9375rem;color:var(--muted)}
 .wahl select{height:2.55rem;padding:0 .8rem;border-radius:.85rem;border:0;background:var(--fill);font-weight:600;color:var(--ink)}
@@ -779,6 +814,12 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
   #druck .e-teil h3{font-size:10.5pt;margin:7pt 0 2pt;break-after:avoid}
   #druck .e-teil li,#druck .e-besch tr{break-inside:avoid}
   #druck .e-gl{background:#E3F3F4;border-radius:6pt;padding:8pt 10pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #druck.eine-seite{font-size:10pt;line-height:1.35}
+  #druck.eine-seite .e-teil{margin-bottom:9pt}
+  #druck.eine-seite .e-zwei{display:grid;grid-template-columns:1fr 1fr;gap:0 14pt}
+  #druck.eine-seite .e-tab th,#druck.eine-seite .e-tab td{padding:2pt 4pt}
+  #druck .e-mehr{color:#555;font-style:italic}
+  #druck .e-grau{color:#555}
   #druck .e-marke,#druck .e-st.erreicht{color:#00767E}
   #druck .e-st{color:#555;font-size:9pt}
   #druck .e-st.teilweise{color:#8a4b00}
@@ -826,7 +867,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '0.9';         // Version des Tools, steht in den Einstellungen
+const VERSION = '1.0';         // Version des Tools, steht in den Einstellungen
 const FORMAT = 7;              // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
@@ -922,7 +963,7 @@ const ganz = (v) => (typeof v === 'number' && isFinite(v) && v >= 0 ? Math.round
 
 /* ---------- Aufbau der Daten ---------- */
 function themaNeu(art, titelText, frage) {
-  return { id: uid(), art: art || 'thema', eltern: '', titel: titelText || 'Neues Thema', frage: frage || '', stichworte: [], notizen: [], beschluesse: [], ziele: [], gruppen: [], leute: [], baustellen: [], bedarf: [], fest: '', anhaenge: [] };
+  return { id: uid(), art: art || 'thema', eltern: '', titel: titelText || 'Neues Thema', frage: frage || '', stichworte: [], notizen: [], beschluesse: [], ziele: [], gruppen: [], leute: [], baustellen: [], bedarf: [], fest: '', anhaenge: [], felder: [], beschluesseVJ: [], glVJ: [] };
 }
 /* Unterpunkte stehen direkt hinter ihrem Thema («eltern» nennt es). Es gibt zwei Ebenen: Ein Unterpunkt hat selbst keine Unterpunkte. */
 function ordnen(T) {
@@ -959,7 +1000,8 @@ function leer() {
     themen: themenStart(),
     parkplatz: [],   // was aufkommt, aber zu keinem Thema gehört: [{id, text}]
     glPunkte: [],    // eigene Punkte für die GL, stehen nie im Ergebnis: [{id, text, gruppe, an (gesagt), ergebnis, thema}]
-    glGruppen: [],   // seit 0.9: Gruppen der GL-Punkte [{id, titel}]
+    glGruppen: [],   // seit 0.9: Gruppen der GL-Punkte [{id, titel, notiz (Mitschrift seit 1.0)}]
+    archiv: [],      // seit 1.0: abgeschlossene Jahre [{id, jahr, titel, abgeschlossen, meta, themen, parkplatz, budget, mitarbeiter, gl: {gruppen, punkte, felder}}]
     glFelder: [],    // seit 0.9: Felder im Reiter «GL» (Checkliste, Auswahl, Tabelle, Gruppen)
     rueckmeldungen: [],   // was am Tool auffällt, zum Weitergeben an Claude: [{id, datum, wo, art, text, version, umgebung, breite, status, uebergeben}]
     budget: { ziel: null, auftraege: [], notiz: '' },   // Ausblick aufs Folgejahr: Umsatz-Ziel und was schon als Auftrag da ist [{id, name, betrag}]
@@ -1097,7 +1139,10 @@ function normal(d) {
     if (typeof t.titel !== 'string') t.titel = 'Thema';
     if (typeof t.frage !== 'string') t.frage = '';
     if (typeof t.eltern !== 'string') t.eltern = '';
-    ['stichworte', 'notizen', 'beschluesse', 'ziele', 'gruppen', 'leute', 'baustellen', 'bedarf', 'felder'].forEach((k) => { if (!Array.isArray(t[k])) t[k] = []; });
+    ['stichworte', 'notizen', 'beschluesse', 'ziele', 'gruppen', 'leute', 'baustellen', 'bedarf', 'felder', 'beschluesseVJ', 'glVJ'].forEach((k) => { if (!Array.isArray(t[k])) t[k] = []; });
+    t.beschluesseVJ = t.beschluesseVJ.filter((b) => b && typeof b === 'object' && typeof b.was === 'string');   // seit 1.0: Beschlüsse vom letzten Jahr im Rückblick
+    t.beschluesseVJ.forEach((b) => { if (!b.id) b.id = uid(); if (['erledigt', 'offen'].indexOf(b.stand) < 0) b.stand = ''; ['wer', 'bis', 'thema'].forEach((k) => { if (typeof b[k] !== 'string') b[k] = ''; }); });
+    t.glVJ = t.glVJ.filter((x) => x && typeof x === 'object' && typeof x.text === 'string');   // seit 1.0: was die GL letztes Jahr entschieden hat
     t.felder = felderNormal(t.felder);
     t.stichworte = t.stichworte.filter((x) => x && typeof x === 'object' && typeof x.text === 'string' && x.text.trim());   // seit 0.8.5: was du sagen willst [{id, text}]
     t.stichworte.forEach((x) => { if (!x.id) x.id = uid(); });
@@ -1118,7 +1163,7 @@ function normal(d) {
   spiegeln(s);
   s.glPunkte = (Array.isArray(s.glPunkte) ? s.glPunkte : []).filter((x) => x && typeof x.text === 'string');
   s.glGruppen = (Array.isArray(s.glGruppen) ? s.glGruppen : []).filter((g) => g && typeof g === 'object' && typeof g.titel === 'string');
-  s.glGruppen.forEach((g) => { if (typeof g.id !== 'string' || !g.id) g.id = uid(); });
+  s.glGruppen.forEach((g) => { if (typeof g.id !== 'string' || !g.id) g.id = uid(); if (typeof g.notiz !== 'string') g.notiz = ''; });
   const glIds = s.glGruppen.map((g) => g.id);
   s.glPunkte.forEach((x) => { if (!x.id) x.id = uid(); if (glIds.indexOf(x.gruppe) < 0) x.gruppe = ''; x.an = !!x.an; ['ergebnis', 'thema'].forEach((k) => { if (typeof x[k] !== 'string') x[k] = ''; }); });
   s.glFelder = felderNormal(s.glFelder);
@@ -1148,6 +1193,15 @@ function normal(d) {
   if (!s.ui.auf || typeof s.ui.auf !== 'object') s.ui.auf = {};
   if (s.ui.bst !== 'po') s.ui.bst = 'bf';
   if (['zahlen', 'kunden', 'themen', 'ergebnis', 'gl'].indexOf(s.ui.bereich) < 0) s.ui.bereich = 'zahlen';
+  // seit 1.0: abgeschlossene Jahre, je gleich aufgeräumt wie der laufende Stand
+  s.archiv = (Array.isArray(s.archiv) ? s.archiv : []).filter((a) => a && typeof a === 'object' && Array.isArray(a.themen)).map((a) => {
+    const g = a.gl && typeof a.gl === 'object' ? a.gl : {};
+    const n = normal({ meta: a.meta, themen: a.themen, parkplatz: a.parkplatz, budget: a.budget, mitarbeiter: a.mitarbeiter, glPunkte: g.punkte, glGruppen: g.gruppen, glFelder: g.felder });
+    return { id: typeof a.id === 'string' && a.id ? a.id : uid(), jahr: Number(a.jahr) || 0, titel: typeof a.titel === 'string' ? a.titel : n.meta.titel, abgeschlossen: typeof a.abgeschlossen === 'string' ? a.abgeschlossen : '',
+      meta: n.meta, themen: n.themen, parkplatz: n.parkplatz, budget: n.budget, mitarbeiter: n.mitarbeiter, gl: { gruppen: n.glGruppen, punkte: n.glPunkte, felder: n.glFelder } };
+  });
+  if (s.ui.ejahr && !s.archiv.some((a) => a.id === s.ui.ejahr)) s.ui.ejahr = '';
+  if (s.ui.eart !== 'seite') s.ui.eart = 'ganz';
   return s;
 }
 /* ---------- Mitarbeiterliste ---------- */
@@ -2446,10 +2500,15 @@ const TEIL = {
     return '<h2 class="bl">' + (ziele ? 'Ziele' : 'Beschluss') + '</h2><ul class="eintraege">' + t.beschluesse.map((b) => '<li class="besch' + (b.gl ? ' gl' : '') + '" data-zieh="beschluesse" data-zid="' + b.id + '"><span class="b-ic">' + ic('check') + '</span><button type="button" class="b-text" data-a="beschluss" data-id="' + b.id + '"><span class="b-was">' + (ziele ? thChip(b) : '') + esc(b.was) + '</span>' + (metaMit(b) ? '<span class="b-meta">' + esc(metaMit(b)) + '</span>' : '') + '</button>' + glKnopf('b', b) + '</li>').join('') + '</ul>' +
       '<form class="dreier' + (ziele ? ' mit-th' : '') + '" data-form="beschluss">' + (ziele ? themaWahl('thema', ZIEL_TH, '', 'th-wahl') : '') + '<input name="was" id="neu-was" placeholder="' + (ziele ? 'Ziel hinzufügen …' : 'Beschluss: Was?') + '" aria-label="Was" autocomplete="off"><input name="wer" placeholder="Wer?" aria-label="Wer" autocomplete="off"><input name="bis" placeholder="Bis wann?" aria-label="Bis wann" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Hinzufügen">' + ic('plus') + '</button></form>';
   },
-  rueckblick(t) {
+  rueckblick(t) {   // seit 1.0 auch die Beschlüsse vom letzten Jahr und, nur mit Reiter GL, was die GL entschieden hat
+    const BV = t.beschluesseVJ || [], GV = glAn ? (t.glVJ || []) : [];
+    const bvj = BV.length ? '<div class="bl-zeile"><h2 class="bl">Beschlüsse vom letzten Jahr</h2><span class="fd-info">' + BV.filter((b) => b.stand === 'erledigt').length + ' von ' + BV.length + ' erledigt</span></div><ul class="eintraege">' +
+      BV.map((b) => '<li class="rz"><span class="n-text">' + (b.thema ? '<span class="z-th">' + esc(b.thema) + '</span>' : '') + esc(b.was) + (b.wer || b.bis ? '<small class="bvj-m">' + esc([b.wer, b.bis].filter(Boolean).join(' · ')) + '</small>' : '') + '</span><div class="seg" role="group" aria-label="Stand">' +
+        [['erledigt', 'Erledigt', 'erreicht'], ['offen', 'Offen', 'offen']].map((s) => '<button type="button" class="st-' + s[2] + '" data-a="bvj-stand" data-id="' + b.id + '" data-v="' + s[0] + '" aria-pressed="' + (b.stand === s[0]) + '">' + s[1] + '</button>').join('') + '</div></li>').join('') + '</ul>' : '';
+    const gvj = GV.length ? '<h2 class="bl">Was die GL entschieden hat</h2><ul class="eintraege gvj">' + GV.map((x) => '<li class="notiz"><span class="n-text">' + (x.gruppe ? '<span class="z-th">' + esc(x.gruppe) + '</span>' : '') + esc(x.text) + '<span class="glp-e">' + esc(x.ergebnis) + '</span></span></li>').join('') + '</ul><p class="muted klein">Nur zu sehen, wenn der Reiter GL eingeschaltet ist; nie im Ergebnis.</p>' : '';
     return '<h2 class="bl">Ziele vom letzten Jahr</h2><ul class="eintraege">' + t.ziele.map((z) => '<li class="rz" data-zieh="ziele" data-zid="' + z.id + '"><button type="button" class="n-text" data-a="ziel" data-id="' + z.id + '">' + thChip(z) + esc(z.text) + '</button><div class="seg" role="group" aria-label="Stand">' +
       ['erreicht', 'teilweise', 'offen'].map((s) => '<button type="button" class="st-' + s + '" data-a="stand" data-id="' + z.id + '" data-v="' + s + '" aria-pressed="' + (z.stand === s) + '">' + STAND[s] + '</button>').join('') + '</div></li>').join('') + '</ul>' +
-      '<form class="schnell mit-th" data-form="ziel">' + themaWahl('thema', ZIEL_TH, '', 'th-wahl') + '<input name="text" id="neu-ziel" placeholder="Ziel vom letzten Jahr hinzufügen …" aria-label="Ziel vom letzten Jahr hinzufügen" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Ziel hinzufügen">' + ic('plus') + '</button></form>';
+      '<form class="schnell mit-th" data-form="ziel">' + themaWahl('thema', ZIEL_TH, '', 'th-wahl') + '<input name="text" id="neu-ziel" placeholder="Ziel vom letzten Jahr hinzufügen …" aria-label="Ziel vom letzten Jahr hinzufügen" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Ziel hinzufügen">' + ic('plus') + '</button></form>' + bvj + gvj;
   },
   unter(t, nr) {
     const k = kinderVon(t);
@@ -2823,27 +2882,36 @@ const ANSICHT = {
       '<p class="muted klein hilfe">' + ic('flag') + '<span>Was die GL wissen oder entscheiden soll, mit «GL» vormerken. Es steht im Ergebnis zuoberst.' + (FEIN ? ' Einträge, Themen und Unterpunkte lassen sich mit der Maus schieben.' : (BERUEHRUNG ? ' Zum Schieben einen Eintrag kurz drücken, bis er sich anhebt.' : '')) + '</span></p></section></div>';
   },
 
-  ergebnis() {
-    return '<section class="card blatt">' + ergebnisHTML() + '</section>' +
+  ergebnis() {   // seit 1.0: Jahr wählen (abgeschlossene Jahre) und «Eine Seite für die GL»
+    const A = archivWahl(), jahre = S.archiv.length ? seg('ejahr', [['', jahrName(S.meta)]].concat(S.archiv.slice().reverse().map((a) => [a.id, a.titel || String(a.jahr)])), A ? A.id : '', 'klein') : '';
+    const art = A ? '' : seg('eart', [['ganz', 'Ganzes Ergebnis'], ['seite', 'Eine Seite für die GL']], S.ui.eart, 'klein');
+    const inhalt = A ? mitArchiv(A, ergebnisHTML) : (S.ui.eart === 'seite' ? einSeiteHTML() : ergebnisHTML());
+    return '<div class="e-wahl">' + art + jahre + '</div>' + (A ? '<p class="muted klein e-archiv-hinweis">' + ic('info') + '<span>Abgeschlossenes Jahr, nur zum Lesen.</span></p>' : '') +
+      '<section class="card blatt' + (!A && S.ui.eart === 'seite' ? ' eine-seite' : '') + '">' + inhalt + '</section>' +
       '<div class="aktionen"><button type="button" class="btn stark" data-a="drucken"' + (IM_RAHMEN ? ' disabled' : '') + '>' + ic('print') + '<span>Als PDF drucken</span></button>' +
       (IM_RAHMEN ? '<span class="muted klein">In dieser Vorschau ausgeschaltet.</span>' : '<span class="muted klein">Im Druckfenster «Als PDF speichern» wählen.</span>') + '</div>';
   },
 
-  gl() {   // seit 0.9: Gruppen, Haken «gesagt», Ergebnis je Punkt, dazu Felder wie in den Themen
+  gl() {   // seit 0.9: Gruppen, Haken «gesagt», Ergebnis je Punkt, dazu Felder; seit 1.0 GL-Themen, Punkte vom Strategietag, Mitschrift, Vorjahre
+    if (glAbgleich()) setTimeout(speichern, 0);
     const G = S.glGruppen, P = S.glPunkte;
     const punkt = (x) => '<li class="glp' + (x.an ? ' an' : '') + '" data-zieh="gl" data-zid="' + x.id + '"><button type="button" class="glp-box" data-a="glhaken" data-id="' + x.id + '" aria-pressed="' + !!x.an + '" aria-label="Gesagt" title="Gesagt">' + ic('check') + '</button>' +
-      '<button type="button" class="n-text" data-a="glpunkt" data-id="' + x.id + '"><span class="glp-t">' + thChip(x) + esc(x.text) + '</span>' + (x.ergebnis ? '<span class="glp-e">' + esc(x.ergebnis) + '</span>' : '') + '</button></li>';
+      '<button type="button" class="n-text" data-a="glpunkt" data-id="' + x.id + '"><span class="glp-t">' + (x.quelle ? '<span class="z-th st-chip">Strategietag · ' + esc(x.thema || '') + '</span>' : thChip(x)) + esc(x.text) + '</span>' + (x.weg ? '<span class="glp-weg">Am Strategietag nicht mehr mit «GL» markiert</span>' : '') + (x.ergebnis ? '<span class="glp-e">' + esc(x.ergebnis) + '</span>' : '') + '</button></li>';
     const block = (g) => {
       const L = P.filter((x) => (g ? x.gruppe === g.id : !x.gruppe)), gesagt = L.filter((x) => x.an).length;
       const info = '<span class="fd-info">' + (L.length ? gesagt + ' von ' + L.length + ' gesagt' : '') + '</span>';
       const kopf = g ? '<header class="gl-kopf"><button type="button" data-a="glgruppe" data-id="' + g.id + '" title="Gruppe umbenennen, verschieben oder löschen"><h2 class="bl">' + esc(g.titel) + '</h2>' + ic('pen') + '</button>' + info + '</header>'
-        : (G.length && L.length ? '<header class="gl-kopf"><h2 class="bl">Ohne Gruppe</h2>' + info + '</header>' : '');
+        : (G.length && L.length ? '<header class="gl-kopf"><h2 class="bl">Noch keinem GL-Thema zugeordnet</h2>' + info + '</header>' : '');
       return '<section class="gl-gr' + (g ? '' : ' ohne') + '" data-spalte="' + (g ? g.id : '') + '">' + kopf + '<div class="gl-karte"><ul class="gl-liste">' + L.map(punkt).join('') + '</ul>' +
-        '<form class="gl-neu" data-form="glpunkt" data-g="' + (g ? g.id : '') + '"><button aria-label="Punkt hinzufügen">' + ic('plus') + '</button><input name="text"' + (g ? '' : ' id="neu-glpunkt"') + ' placeholder="Punkt hinzufügen …" aria-label="Punkt hinzufügen' + (g ? ' zu ' + esc(g.titel) : '') + '" autocomplete="off" enterkeyhint="done"></form></div></section>';
+        '<form class="gl-neu" data-form="glpunkt" data-g="' + (g ? g.id : '') + '"><button aria-label="Punkt hinzufügen">' + ic('plus') + '</button><input name="text"' + (g ? '' : ' id="neu-glpunkt"') + ' placeholder="Punkt hinzufügen …" aria-label="Punkt hinzufügen' + (g ? ' zu ' + esc(g.titel) : '') + '" autocomplete="off" enterkeyhint="done"></form></div>' +
+        (g ? (g.notiz ? '<button type="button" class="gl-mit" data-a="glmitschrift" data-id="' + g.id + '"><span class="gl-mit-k">Mitschrift</span><span class="gl-mit-t">' + esc(g.notiz) + '</span></button>' : '<button type="button" class="textlink gl-mit-neu" data-a="glmitschrift" data-id="' + g.id + '">' + ic('pen') + '<span>Mitschrift</span></button>') : '') + '</section>';
     };
-    return '<div class="glseite">' + titel('Meine Punkte für die GL', 'Was du an der GL-Strategie sagen willst, abseits der Abteilung.', '<button type="button" class="btn" data-a="glgruppe-neu">' + ic('plus') + '<span>Gruppe</span></button>') +
+    const vj = S.archiv.filter((a) => a.gl.punkte.length || a.gl.gruppen.some((g) => g.notiz)).slice().reverse();
+    const vorjahre = vj.length ? '<details class="gl-vj"><summary>' + ic('right', 'pf') + '<span>Vorjahre nachlesen</span></summary>' + vj.map((a) => '<section><h3>' + esc(a.titel || String(a.jahr)) + '</h3>' +
+      [{ id: '', titel: 'Ohne GL-Thema', notiz: '' }].concat(a.gl.gruppen).map((g) => { const L = a.gl.punkte.filter((x) => (x.gruppe || '') === g.id); return L.length || g.notiz ? '<h4>' + esc(g.titel) + '</h4><ul>' + L.map((x) => '<li>' + (x.an ? '✓ ' : '') + esc(x.text) + (x.ergebnis ? ' <span class="glp-e">' + esc(x.ergebnis) + '</span>' : '') + '</li>').join('') + '</ul>' + (g.notiz ? '<p class="e-klein">' + esc(g.notiz) + '</p>' : '') : ''; }).join('') + '</section>').join('') + '</details>' : '';
+    return '<div class="glseite">' + titel('Meine Punkte für die GL', 'Für die GL-Strategietagung: die Themen der GL, was du am Strategietag mit «GL» markiert hast und deine eigenen Punkte.', '<button type="button" class="btn" data-a="glgruppe-neu">' + ic('plus') + '<span>GL-Thema</span></button>') +
       '<div class="gl-brett" data-brett="gl">' + block(null) + G.map(block).join('') + '</div>' + felderHTML(S.glFelder, 'gl', false) +
-      '<p class="muted klein hilfe">' + ic('info') + '<span>Nur für dich: Diese Punkte stehen nicht im Ergebnis und nicht im PDF. Abhaken, was du an der GL gesagt hast; was die GL dazu sagt, hältst du im Punkt unter «Ergebnis» fest. Punkte lassen sich in eine andere Gruppe schieben. Den Reiter blendest du in den Einstellungen aus, je Gerät.</span></p></div>';
+      vorjahre + '<p class="muted klein hilfe">' + ic('info') + '<span>Nur für dich: Diese Punkte stehen nicht im Ergebnis und nicht im PDF. Die Themen der GL legst du mit «+ GL-Thema» an und schiebst die Punkte hinein. An der Tagung abhaken, was du gesagt hast; was die GL dazu sagt, hältst du im Punkt unter «Ergebnis» fest, alles andere in der Mitschrift. Beim neuen Jahr kommen die Entscheide der GL in den Rückblick. Den Reiter blendest du in den Einstellungen aus, je Gerät.</span></p></div>';
   }
 };
 const feldGefuellt = (f) => (f.art === 'tabelle' ? (f.zeilen || []).length > 0 : f.punkte.length > 0);
@@ -2857,6 +2925,125 @@ function feldErgebnis(f) {   // ein Feld im Ergebnis und im PDF
   }
   if (f.art === 'gruppen') return '<ul class="e-fdg">' + f.spalten.map((s) => { const P = f.punkte.filter((x) => x.spalte === s.id); return P.length ? '<li><b>' + esc(s.name) + ':</b> ' + esc(P.map((x) => x.text).join(' · ')) + '</li>' : ''; }).join('') + '</ul>';
   return '<ul class="e-fd">' + f.punkte.map((x) => '<li>' + (x.an ? '☑ ' : '☐ ') + esc(x.text) + '</li>').join('') + '</ul>';
+}
+/* ---------- Neues Jahr (seit 1.0) ----------
+   Das laufende Jahr kommt ins Archiv derselben Datei (nachzulesen unter «Ergebnis», ohne Anhänge), dann beginnt das nächste:
+   Ziele fürs nächste Jahr → Ziele vom letzten Jahr im Rückblick; alle Beschlüsse → «Beschlüsse vom letzten Jahr» zum Abhaken;
+   Entscheide der GL → Rückblick (nur mit eingeschaltetem Reiter GL zu sehen). Bleiben: Themenliste mit Fragen, Unterpunkten und
+   Ansichten, Gruppenzuteilung (wieder offen), Mitarbeiterliste, Zahlen, Kunden, offener Bedarf, GL-Themen und was an der GL noch nicht
+   gesagt ist. Leer: Notizen, Stichworte, Beschlüsse, Baustellen, Felder, Anhänge, Parkplatz, Ausblick. */
+const kopie = (x) => JSON.parse(JSON.stringify(x === undefined ? null : x));
+const jahrPlus = (text) => String(text || '').replace(/\b(20\d\d)\b/g, (j) => String(Number(j) + 1));
+function archivEintrag() {
+  const T = kopie(S.themen);
+  T.forEach((t) => { t.anhaenge = (t.anhaenge || []).map((a) => ({ name: a.name || 'Anhang', typ: a.typ || '' })); });
+  return { id: uid(), jahr: Number(String(S.meta.datum || '').slice(0, 4)) || new Date().getFullYear(), titel: S.meta.titel, abgeschlossen: new Date().toISOString(),
+    meta: kopie(S.meta), themen: T, parkplatz: kopie(S.parkplatz), budget: kopie(S.budget), mitarbeiter: kopie(S.mitarbeiter),
+    gl: { gruppen: kopie(S.glGruppen), punkte: kopie(S.glPunkte.map((x) => Object.assign({}, x, { quelle: undefined, weg: undefined }))), felder: kopie(S.glFelder) } };
+}
+function neuesJahr() {
+  const a = archivEintrag(), T = S.themen, nameVon = (id) => { const t = T.find((x) => x.id === id); return t ? t.titel : ''; };
+  const zieleNeu = [], beschlVJ = [];
+  T.forEach((t) => t.beschluesse.forEach((b) => {
+    if (t.art === 'ziele') zieleNeu.push({ id: uid(), text: b.was, stand: '', thema: b.thema || '' });
+    else beschlVJ.push({ id: uid(), was: b.was, wer: b.wer || '', bis: b.bis || '', thema: t.eltern ? nameVon(t.eltern) + ' · ' + t.titel : t.titel, stand: '' });
+  }));
+  const glVJ = S.glPunkte.filter((x) => x.ergebnis).map((x) => ({ id: uid(), text: x.text, ergebnis: x.ergebnis, gruppe: (S.glGruppen.find((g) => g.id === x.gruppe) || {}).titel || '' }));
+  const rb = T.find((t) => t.art === 'rueckblick');
+  T.forEach((t) => {
+    t.notizen = []; t.stichworte = []; t.beschluesse = []; t.felder = []; t.anhaenge = []; t.zu = '';
+    if (t.art === 'gruppen') t.fest = '';
+    if (t.art === 'personal') t.bedarf = t.bedarf.filter((b) => b.stand !== 'besetzt');
+    if (t.art === 'ziele') t.titel = jahrPlus(t.titel);
+    if (t.art === 'rueckblick') { t.baustellen = []; t.ziele = []; t.beschluesseVJ = []; t.glVJ = []; }
+  });
+  if (rb) { rb.ziele = zieleNeu; rb.beschluesseVJ = beschlVJ; rb.glVJ = glVJ; }
+  S.parkplatz = [];
+  S.budget = { ziel: null, auftraege: [], notiz: '' };
+  S.glPunkte = S.glPunkte.filter((x) => !x.an && !x.ergebnis).map((x) => { const y = Object.assign({}, x); delete y.quelle; delete y.weg; return y; });
+  S.glGruppen.forEach((g) => { g.notiz = ''; });
+  S.glFelder = [];
+  S.archiv = (S.archiv || []).concat([a]);
+  S.meta.titel = jahrPlus(S.meta.titel);
+  S.meta.datum = heute();
+  S.ui.thema = rb ? rb.id : (T[0] || {}).id || '';
+  S.ui.bereich = 'themen'; S.ui.ejahr = ''; S.ui.eart = 'ganz';
+  return { ziele: zieleNeu.length, beschluesse: beschlVJ.length, gl: glVJ.length, titel: a.titel };
+}
+/* Lesen mit dem Stand eines abgeschlossenen Jahrs (nur für Ergebnis und Druck); Zahlen und Kunden sind die heutigen und fehlen dort */
+let ARCHIV = false;
+function mitArchiv(a, fn) {
+  const echt = S;
+  S = Object.assign({}, echt, { meta: a.meta, themen: a.themen, parkplatz: a.parkplatz, budget: a.budget, mitarbeiter: a.mitarbeiter, glPunkte: a.gl.punkte, glGruppen: a.gl.gruppen, glFelder: a.gl.felder });
+  ARCHIV = true;
+  try { return fn(); } finally { S = echt; ARCHIV = false; }
+}
+const jahrName = (m) => m.titel || 'Dieses Jahr';
+const archivWahl = () => (S.ui.ejahr ? S.archiv.find((a) => a.id === S.ui.ejahr) || null : null);
+
+/* ---------- Reiter GL (seit 1.0): was am Strategietag mit «GL» markiert ist, steht dort als Punkt ----------
+   Der Text kommt vom Thema; Gruppe (GL-Thema), «gesagt» und Ergebnis gehören dem GL-Punkt. Wird die Marke entfernt,
+   bleibt der Punkt nur, wenn er schon einem GL-Thema zugeordnet, gesagt oder mit Ergebnis ist (dann mit Hinweis). */
+function glMarkiert() {
+  const L = [];
+  S.themen.forEach((t) => {
+    t.notizen.forEach((n) => { if (n.gl) L.push({ q: 'n:' + n.id, text: n.text, thema: t.titel }); });
+    t.beschluesse.forEach((b) => { if (b.gl) L.push({ q: 'b:' + b.id, text: (t.art === 'ziele' ? 'Ziel: ' : 'Beschluss: ') + b.was + (metaText(b) ? ' (' + metaText(b) + ')' : ''), thema: t.titel }); });
+    t.bedarf.forEach((b) => { if (b.gl) L.push({ q: 'd:' + b.id, text: 'Bedarf: ' + b.was + (bedarfMeta(b) ? ' (' + bedarfMeta(b) + ')' : '') + ', Stand: ' + BSTAND[b.stand], thema: t.titel }); });
+  });
+  return L;
+}
+function glAbgleich() {   // true, wenn sich etwas geändert hat
+  const da = {};
+  let neu = false;
+  glMarkiert().forEach((m) => { da[m.q] = m; });
+  S.glPunkte.forEach((x) => {
+    if (!x.quelle) return;
+    const m = da[x.quelle];
+    if (m) { if (x.text !== m.text || x.thema !== m.thema || x.weg) { x.text = m.text; x.thema = m.thema; x.weg = false; neu = true; } delete da[x.quelle]; }
+    else if (!x.weg) { x.weg = true; neu = true; }
+  });
+  const vorher = S.glPunkte.length;
+  S.glPunkte = S.glPunkte.filter((x) => !(x.quelle && x.weg && !x.gruppe && !x.an && !x.ergebnis));
+  if (S.glPunkte.length !== vorher) neu = true;
+  Object.keys(da).forEach((q) => { S.glPunkte.push({ id: uid(), text: da[q].text, gruppe: '', an: false, ergebnis: '', thema: da[q].thema, quelle: q }); neu = true; });
+  return neu;
+}
+
+/* ---------- Eine Seite für die GL (seit 1.0): Zahlen, Ausblick, Für die GL, Ziele, Personal auf einem A4-Blatt ---------- */
+function einSeiteHTML() {
+  const m = S.meta, T = S.themen, nr = nummern(), nm = (t) => mitNr(t, nr), mehr = (n) => (n > 0 ? '<li class="e-mehr">und ' + n + ' weitere im ganzen Ergebnis</li>' : '');
+  let h = '<header class="e-kopf"><h1>' + esc(m.titel) + '</h1><p>' + esc([m.abteilung, datumLang(m.datum) ? 'Strategietag vom ' + datumLang(m.datum) : ''].filter(Boolean).join(' · ')) + '</p></header>';
+  const gl = [];
+  T.forEach((t) => {
+    t.beschluesse.forEach((b) => { if (b.gl) gl.push('<li><b>' + esc(nm(t)) + ':</b> ' + esc(mitTh(b, b.was)) + (metaText(b) ? ' (' + esc(metaText(b)) + ')' : '') + '</li>'); });
+    t.notizen.forEach((n) => { if (n.gl) gl.push('<li><b>' + esc(nm(t)) + ':</b> ' + esc(n.text) + '</li>'); });
+    t.bedarf.forEach((b) => { if (b.gl) gl.push('<li><b>' + esc(nm(t)) + ':</b> ' + esc(b.was) + ', Stand: ' + BSTAND[b.stand] + '</li>'); });
+  });
+  h += '<section class="e-teil e-gl"><h2>Für die GL</h2>' + (gl.length ? '<ul>' + gl.slice(0, 9).join('') + mehr(gl.length - 9) + '</ul>' : '<p class="e-klein">Nichts mit «GL» markiert.</p>') + '</section>';
+  const P = spaltenWahl().slice(-4), k = kernZeilen();
+  let links = '';
+  if (P.length && (k.ertrag || k.ergebnis)) {
+    const reihe = (z, stark) => (z ? '<tr><th>' + esc(z.name) + '</th>' + P.map((p) => { const v = z.w[p.id]; return '<td>' + (v === undefined || v === null ? '' : (stark ? '<b>' + fmt(v) + '</b>' : fmt(v))) + '</td>'; }).join('') + '</tr>' : '');
+    const proz = k.ertrag && k.aufwand ? '<tr><th>Gewinn in %</th>' + P.map((p) => { const v = gewinnProzent(p.id); return '<td>' + (v === null ? '' : v.toFixed(1) + ' %') + '</td>'; }).join('') + '</tr>' : '';
+    links += '<section class="e-teil"><h2>Zahlen</h2><div class="e-tab-rahmen"><table class="e-tab"><thead><tr><th></th>' + P.map((p) => '<th>' + esc(p.name) + '</th>').join('') + '</tr></thead><tbody>' + reihe(k.ertrag) + reihe(k.ergebnis, true) + proz + reihe(k.stunden) + '</tbody></table></div>' +
+      (minusIstGewinn() ? '<p class="e-fuss">Ergebnis wie im BAB: ein Minus ist ein Gewinn.</p>' : '') + '</section>';
+  }
+  const BZ = budgetZahlen();
+  if (S.budget.ziel !== null || BZ.ja || BZ.offen) links += '<section class="e-teil"><h2>Ausblick ' + folgejahr() + '</h2>' + budgetTabelle() + '</section>';
+  let rechts = '';
+  const Z = [];
+  T.filter((t) => t.art === 'ziele').forEach((t) => t.beschluesse.forEach((b) => Z.push('<li>' + esc(mitTh(b, b.was)) + (metaText(b) ? ' <span class="e-grau">(' + esc(metaText(b)) + ')</span>' : '') + '</li>')));
+  if (Z.length) rechts += '<section class="e-teil"><h2>Ziele ' + folgejahr() + '</h2><ul>' + Z.slice(0, 8).join('') + mehr(Z.length - 8) + '</ul></section>';
+  if (S.mitarbeiter.length) {
+    const w = sitzungWert(), alle = S.mitarbeiter.filter((x) => imBestand(x, w)), K = alle.filter(istKader), W = wechselListe(), D = [];
+    T.filter((t) => t.art === 'personal').forEach((t) => t.bedarf.forEach((b) => { if (b.stand !== 'besetzt') D.push(b); }));
+    rechts += '<section class="e-teil"><h2>Personal</h2><p>' + esc(alle.length + ' Mitarbeitende: ' + kaderTeile(K).map((x) => x[1].length + ' Kader ' + x[0]).concat([(alle.length - K.length) + ' Betrieb']).join(', ')) + '</p>' +
+      (W.length ? '<ul>' + W.slice(0, 5).map((x) => '<li>' + esc(x.m.name) + ': ' + EW_ART[x.art] + ' ' + esc(x.text) + '</li>').join('') + mehr(W.length - 5) + '</ul>' : '') +
+      (D.length ? '<p class="e-klein"><b>Offen:</b> ' + esc(D.slice(0, 5).map((b) => b.was + (b.bis ? ' (bis ' + b.bis + ')' : '')).join(' · ')) + (D.length > 5 ? ' und ' + (D.length - 5) + ' weitere' : '') + '</p>' : '') + '</section>';
+  }
+  if (links || rechts) h += '<div class="e-zwei">' + '<div>' + links + '</div><div>' + rechts + '</div></div>';
+  return h + '<p class="e-fuss">Ausführlich: ganzes Ergebnis des Strategietags.</p>';
 }
 function ergebnisHTML() {
   const m = S.meta, T = S.themen, nr = nummern(), nm = (t) => mitNr(t, nr);
@@ -2882,12 +3069,12 @@ function ergebnisHTML() {
     etwas = true;
   }
   const BU = S.budget;
-  if (BU.ziel !== null || BU.auftraege.length || budgetZahlen().ja || budgetZahlen().offen) {
+  if (!ARCHIV && (BU.ziel !== null || BU.auftraege.length || budgetZahlen().ja || budgetZahlen().offen)) {
     h += '<section class="e-teil"><h2>Ausblick ' + folgejahr() + '</h2>' + budgetTabelle() +
       (BU.auftraege.length ? '<ul>' + BU.auftraege.map((a) => '<li>' + esc(a.name || 'Ohne Namen') + (a.betrag === null ? '' : ': ' + fmt(a.betrag)) + '</li>').join('') + '</ul>' : '') + (BU.notiz ? '<p>' + esc(BU.notiz) + '</p>' : '') + '</section>';
     etwas = true;
   }
-  T.filter((t) => t.art === 'auftraege').forEach((t) => {
+  T.filter((t) => t.art === 'auftraege' && !ARCHIV).forEach((t) => {
     let teil = '';
     if (zeigt(t, 'budget')) teil += '<h3>Budget ' + folgejahr() + '</h3>' + budgetTabelle();
     if (zeigt(t, 'auslastung')) {
@@ -2923,8 +3110,10 @@ function ergebnisHTML() {
         D.map((b) => '<tr><td>' + esc(b.was) + marke(b) + '</td><td>' + esc([b.warum, b.notiz].filter(Boolean).join(' · ')) + '</td><td class="nw">' + esc(b.bis) + '</td><td class="nw">' + BSTAND[b.stand] + '</td></tr>').join('') + '</tbody></table></div>' : '') + '</section>';
     etwas = true;
   });
-  T.filter((t) => t.art === 'rueckblick' && (t.ziele.length || t.baustellen.length)).forEach((t) => {
+  T.filter((t) => t.art === 'rueckblick' && (t.ziele.length || t.baustellen.length || (t.beschluesseVJ || []).length)).forEach((t) => {
+    const BV = t.beschluesseVJ || [];
     h += '<section class="e-teil"><h2>' + esc(t.titel) + '</h2>' +
+      (BV.length ? '<h3>Beschlüsse vom letzten Jahr</h3><p class="e-klein">' + BV.filter((b) => b.stand === 'erledigt').length + ' von ' + BV.length + ' erledigt</p><ul class="e-rz">' + BV.map((b) => '<li><span>' + esc((b.thema ? b.thema + ': ' : '') + b.was) + '</span><b class="e-st ' + (b.stand === 'erledigt' ? 'erreicht' : b.stand) + '">' + ({ erledigt: 'Erledigt', offen: 'Offen', '': 'Nicht bewertet' })[b.stand] + '</b></li>').join('') + '</ul>' : '') +
       (t.ziele.length ? '<p class="e-klein">' + t.ziele.filter((z) => z.stand === 'erreicht').length + ' von ' + t.ziele.length + ' Zielen erreicht</p><ul class="e-rz">' +
         t.ziele.map((z) => '<li><span>' + esc(mitTh(z, z.text)) + '</span><b class="e-st ' + esc(z.stand || '') + '">' + esc(STAND[z.stand || ''] || '') + (z.stand !== 'erreicht' && weiterVon(z) ? (weiterVon(z) === 'ja' ? ' · geht weiter' : ' · fallen gelassen') : '') + '</b></li>').join('') + '</ul>' : '') +
       (t.baustellen.length ? '<h3>Baustellen (' + t.baustellen.length + ')</h3><p class="e-klein">Je Bauführer, in Klammern der Polier.</p><div class="e-gruppen e-bst">' +
@@ -2942,6 +3131,7 @@ function ergebnisHTML() {
   if (mitN.length) { h += '<section class="e-teil"><h2>Notizen</h2>' + mitN.map((t) => '<h3>' + esc(nm(t)) + '</h3><ul>' + t.notizen.map((n) => '<li>' + esc(n.text) + marke(n) + '</li>').join('') + '</ul>').join('') + '</section>'; etwas = true; }
   if (S.parkplatz.length) { h += '<section class="e-teil"><h2>Parkplatz</h2><p class="e-klein">Kam auf, gehört aber zu keinem Thema.</p><ul>' + S.parkplatz.map((x) => '<li>' + esc(x.text) + '</li>').join('') + '</ul></section>'; etwas = true; }
   if (!etwas) h += '<section class="e-teil"><p class="muted">Zu den Themen ist noch nichts festgehalten.</p></section>';
+  if (ARCHIV) return h + '<p class="e-fuss">Abgeschlossen am ' + esc(datumLang(String((archivWahl() || {}).abgeschlossen || '').slice(0, 10)) || '') + '. Zahlen und Kunden stehen mit allen Jahren unter «Zahlen» und «Kunden».</p>';
   const alleP = S.zahlen.perioden, P = spaltenWahl(), k = kernZeilen();
   if (P.length) {
     const reihe = (z, stark) => z ? '<tr><th>' + esc(z.name) + '</th>' + P.map((p) => { const v = z.w[p.id]; return '<td>' + (v === undefined || v === null ? '' : (stark ? '<b>' + fmt(v) + '</b>' : fmt(v))) + '</td>'; }).join('') + '</tr>' : '';
@@ -3212,19 +3402,29 @@ const SHEET = {
   glpunkt() {
     const x = sheet && S.glPunkte.find((y) => y.id === sheet.id);
     if (!x) return '';
-    return formHuelle('Punkt für die GL', 'glpunkt-edit', '<label class="f" for="gp-t"><span>Was du sagen willst</span><textarea id="gp-t" name="text" rows="3" data-fokus>' + esc(x.text) + '</textarea></label>' +
-      '<div class="zwei">' + (S.glGruppen.length ? '<label class="f" for="gp-g"><span>Gruppe</span><select id="gp-g" name="gruppe"><option value="">Ohne Gruppe</option>' + S.glGruppen.map((g) => '<option value="' + g.id + '"' + (g.id === x.gruppe ? ' selected' : '') + '>' + esc(g.titel) + '</option>').join('') + '</select></label>' : '') +
-      '<label class="f" for="gp-th"><span>Thema</span>' + themaWahl('thema', x.thema || '', 'gp-th') + '</label></div>' +
+    const q = !!x.quelle;
+    return formHuelle('Punkt für die GL', 'glpunkt-edit', (q ? '<div class="f"><span>Vom Strategietag · ' + esc(x.thema || '') + '</span><p class="gp-q">' + esc(x.text) + '</p><p class="muted klein">Den Text änderst du beim Thema. Wegnehmen: dort die Marke «GL» entfernen.</p></div>' : '<label class="f" for="gp-t"><span>Was du sagen willst</span><textarea id="gp-t" name="text" rows="3" data-fokus>' + esc(x.text) + '</textarea></label>') +
+      '<div class="zwei">' + (S.glGruppen.length ? '<label class="f" for="gp-g"><span>GL-Thema</span><select id="gp-g" name="gruppe"><option value="">Noch keinem zugeordnet</option>' + S.glGruppen.map((g) => '<option value="' + g.id + '"' + (g.id === x.gruppe ? ' selected' : '') + '>' + esc(g.titel) + '</option>').join('') + '</select></label>' : '') +
+      (q ? '' : '<label class="f" for="gp-th"><span>Thema</span>' + themaWahl('thema', x.thema || '', 'gp-th') + '</label>') + '</div>' +
       '<label class="f" for="gp-e"><span>Ergebnis: was die GL dazu sagt oder entscheidet</span><textarea id="gp-e" name="ergebnis" rows="3">' + esc(x.ergebnis || '') + '</textarea></label>' +
-      '<label class="schalter" for="gp-an"><span>Gesagt</span><input type="checkbox" id="gp-an" name="an"' + (x.an ? ' checked' : '') + '></label>' + loeschKnopf('glpunkt-weg', 'Punkt löschen'));
+      '<label class="schalter" for="gp-an"><span>Gesagt</span><input type="checkbox" id="gp-an" name="an"' + (x.an ? ' checked' : '') + '></label>' + (q && !x.weg ? '' : loeschKnopf('glpunkt-weg', 'Punkt löschen')));
   },
   glgruppe() {
     const g = sheet && S.glGruppen.find((y) => y.id === sheet.id);
     if (!g) return '';
     const i = S.glGruppen.indexOf(g);
-    return formHuelle('Gruppe', 'glgruppe-edit', '<label class="f" for="gg-t"><span>Titel</span><input id="gg-t" name="titel" value="' + esc(g.titel) + '" autocomplete="off" data-fokus></label>' +
+    return formHuelle('GL-Thema', 'glgruppe-edit', '<label class="f" for="gg-t"><span>Titel</span><input id="gg-t" name="titel" value="' + esc(g.titel) + '" autocomplete="off" data-fokus></label>' +
       '<div class="reihe"><button type="button" class="btn klein" data-a="glgruppe-schieben" data-d="-1"' + (i > 0 ? '' : ' disabled') + '>' + ic('up') + '<span>Nach oben</span></button><button type="button" class="btn klein" data-a="glgruppe-schieben" data-d="1"' + (i < S.glGruppen.length - 1 ? '' : ' disabled') + '>' + ic('down') + '<span>Nach unten</span></button></div>' +
-      '<p class="muted klein">Löschen nimmt nur die Gruppe weg; ihre Punkte bleiben, ohne Gruppe.</p>' + loeschKnopf('glgruppe-weg', 'Gruppe löschen'));
+      '<p class="muted klein">Löschen nimmt nur das GL-Thema weg; seine Punkte bleiben, noch keinem zugeordnet.</p>' + loeschKnopf('glgruppe-weg', 'GL-Thema löschen'));
+  },
+  glthemen() {
+    return formHuelle('Themen der GL', 'glthemen', '<label class="f" for="gt-l"><span>Eine Zeile je Thema, so wie die GL sie vorgibt</span><textarea id="gt-l" name="liste" rows="6" data-fokus placeholder="z. B. Personal und Nachwuchs"></textarea></label>' +
+      '<p class="muted klein">Die Themen erscheinen als Karten. Punkte schiebst du hinein, mit der Maus oder am iPad mit dem Finger.</p>', 'Hinzufügen');
+  },
+  glmitschrift() {
+    const g = sheet && S.glGruppen.find((y) => y.id === sheet.id);
+    if (!g) return '';
+    return formHuelle('Mitschrift · ' + g.titel, 'glmitschrift', '<label class="f" for="gm-t"><span>Was an der GL zu diesem Thema gesagt oder entschieden wurde</span><textarea id="gm-t" name="text" rows="8" data-fokus>' + esc(g.notiz || '') + '</textarea></label>');
   },
   einstellungen() {
     const m = S.meta;
@@ -3236,12 +3436,25 @@ const SHEET = {
       '<div class="reihe"><button type="button" class="btn" data-a="vollbild">' + ic('max') + '<span>Vollbild</span></button></div></section>' +
       '<section class="gr"><h3>Für dich</h3><label class="schalter" for="e-gl"><span>Reiter «GL» zeigen</span><input type="checkbox" id="e-gl" data-wahl="glreiter"' + (glAn ? ' checked' : '') + '></label>' +
       '<p class="muted klein">Deine eigenen Punkte für die GL. Der Schalter gilt nur auf diesem Gerät. Im Ergebnis und im PDF stehen die Punkte nie.</p></section>' +
+      '<section class="gr"><h3>Jahr</h3><div class="reihe zw"><span>' + esc(jahrName(m)) + (S.archiv.length ? ' · ' + mehrzahl(S.archiv.length, 'abgeschlossenes Jahr', 'abgeschlossene Jahre') : '') + '</span><button type="button" class="btn" data-a="neujahr"' + (IM_RAHMEN ? ' disabled' : '') + '>' + ic('plus') + '<span>Neues Jahr beginnen</span></button></div>' +
+      '<p class="muted klein">Für den nächsten Strategietag: Dieses Jahr bleibt unter «Ergebnis» nachzulesen.</p></section>' +
       '<section class="gr"><h3>Mitarbeiter</h3><div class="reihe zw"><span>' + mehrzahl(S.mitarbeiter.length, 'Eintrag', 'Einträge') + ' in der Mitarbeiterliste</span><button type="button" class="btn" data-a="sheet" data-s="maliste">' + ic('liste') + '<span>Mitarbeiterliste</span></button></div></section>' +
       '<section class="gr"><h3>Daten</h3><div class="reihe"><button type="button" class="btn" data-a="daten-wahl"' + (IM_RAHMEN ? ' disabled' : '') + '>' + ic('upload') + '<span>Aus gesicherter Datei laden</span></button>' +
       (IM_RAHMEN ? '' : '<button type="button" class="btn" data-a="herunter">' + ic('disk') + '<span>Als Datei herunterladen</span></button>' + (TEILEN_ZUERST && window.showSaveFilePicker ? '<button type="button" class="btn" data-a="in-datei">' + ic('pen') + '<span>In eine Datei schreiben</span></button>' : '')) + '</div>' +
       '<p class="muted klein">' + (IM_RAHMEN ? 'In dieser Vorschau ausgeschaltet.' : standText() + ' Auf mehreren Geräten: zuerst die neuste Datei laden, am Schluss sichern. Eine gesicherte Datei lässt sich auch in einer neueren Version des Tools laden.') + '</p>' +
       '<div class="reihe"><button type="button" class="btn" data-a="demo">Beispiel laden</button><button type="button" class="btn rot" data-a="leeren">Alles leeren</button></div></section>' +
       '<p class="muted klein mitte">Version ' + VERSION + '</p>');
+  },
+  neujahr() {
+    const T = S.themen, z = T.filter((t) => t.art === 'ziele').reduce((n, t) => n + t.beschluesse.length, 0), b = T.filter((t) => t.art !== 'ziele').reduce((n, t) => n + t.beschluesse.length, 0);
+    const neu = jahrPlus(jahrName(S.meta));
+    return huelle('Neues Jahr beginnen', '<p>«' + esc(jahrName(S.meta)) + '» abschliessen und «' + esc(neu) + '» beginnen.</p><ul class="nj-liste">' +
+      '<li><b>Im Rückblick:</b> ' + esc(mehrzahl(z, 'Ziel', 'Ziele')) + ' zum Bewerten, ' + esc(mehrzahl(b, 'Beschluss', 'Beschlüsse')) + ' zum Abhaken' + (S.glPunkte.some((x) => x.ergebnis) ? ', dazu die Entscheide der GL' : '') + '.</li>' +
+      '<li><b>Bleibt:</b> Themenliste, Gruppenzuteilung, Mitarbeiterliste, Zahlen, Kunden, offener Bedarf, deine GL-Themen und was an der GL noch nicht gesagt ist.</li>' +
+      '<li><b>Wird leer:</b> Notizen, Stichworte, Beschlüsse, Baustellen, Felder, Anhänge, Parkplatz und Ausblick.</li>' +
+      '<li><b>Nachzulesen:</b> unter «Ergebnis» mit dem Umschalter «' + esc(jahrName(S.meta)) + '», ohne Anhänge.</li></ul>' +
+      '<p class="muted klein">Danach «Sichern» und einen neuen Namen wählen: Die Datei von heute bleibt, wie sie ist. Rückgängig geht, solange du das Tool nicht schliesst.</p>' +
+      '<div class="reihe"><button type="button" class="btn stark" data-a="neujahr-los">' + ic('plus') + '<span>' + esc(neu) + ' beginnen</span></button></div>');
   },
   sichern() {
     return huelle('Sichern', '<p class="hinweis">' + ic('info') + '<span>In dieser Vorschau ist das Sichern ausgeschaltet.</span></p><p>Du siehst das Tool eingebettet in einem anderen Programm. Hier kannst du alles ansehen, aber Änderungen gehen verloren.</p><p>Zum Arbeiten öffnest du das Tool über seinen Link oder am Rechner per Doppelklick auf die Datei. Dort gibt «Sichern» eine einzige Datei, die das Tool und alles Eingetragene enthält.</p>');
@@ -3788,6 +4001,7 @@ const AKT = {
     else if (k === 'kansicht') { S.kunden.ansicht = v; speichern(true); render(); }
     else if (k === 'kfilter') { S.kunden.filter = v; speichern(true); render(); }
     else if (k === 'bst') { S.ui.bst = v; speichern(true); render(); }
+    else if (k === 'ejahr' || k === 'eart') { S.ui[k] = v; speichern(true); render(); }   // seit 1.0: Ergebnis eines abgeschlossenen Jahrs, eine Seite für die GL
     else if (k === 'modus') { S.meta.modus = v; speichern(true); anzeigeMerken(); render(); renderSheet(false); }
   },
   sheet(el) { auf({ art: el.dataset.s, zurueck: el.dataset.s === 'maimport' && sheet && sheet.art === 'maliste' ? 'maliste' : '' }); },
@@ -3839,7 +4053,8 @@ const AKT = {
   glpunkt(el) { auf({ art: 'glpunkt', id: el.dataset.id }); },
   'glpunkt-weg'() { if (!sheet) return; merken(); S.glPunkte = S.glPunkte.filter((x) => x.id !== sheet.id); geaendert(true); toast('Punkt gelöscht', true); },
   glhaken(el) { const x = S.glPunkte.find((y) => y.id === el.dataset.id); if (!x) return; merken(); x.an = !x.an; geaendert(); },
-  'glgruppe-neu'() { merken(); const g = { id: uid(), titel: 'Neue Gruppe' }; S.glGruppen.push(g); geaendert(); auf({ art: 'glgruppe', id: g.id }); },
+  'glgruppe-neu'() { auf({ art: 'glthemen' }); },
+  glmitschrift(el) { auf({ art: 'glmitschrift', id: el.dataset.id }); },
   glgruppe(el) { auf({ art: 'glgruppe', id: el.dataset.id }); },
   'glgruppe-schieben'(el) {
     const i = sheet ? S.glGruppen.findIndex((g) => g.id === sheet.id) : -1, j = i + Number(el.dataset.d);
@@ -3881,6 +4096,15 @@ const AKT = {
   },
   gl(el) { const t = aktThema(), x = t && t[{ b: 'beschluesse', p: 'bedarf' }[el.dataset.art] || 'notizen'].find((y) => y.id === el.dataset.id); if (!x) return; x.gl = !x.gl; geaendert(); },
   stand(el) { const t = aktThema(), z = t && t.ziele.find((y) => y.id === el.dataset.id); if (!z) return; z.stand = z.stand === el.dataset.v ? '' : el.dataset.v; geaendert(); },
+  'bvj-stand'(el) { const t = aktThema(), b = t && (t.beschluesseVJ || []).find((y) => y.id === el.dataset.id); if (!b) return; b.stand = b.stand === el.dataset.v ? '' : el.dataset.v; geaendert(); },
+  neujahr() { auf({ art: 'neujahr' }); },
+  'neujahr-los'() {
+    merken();
+    const r = neuesJahr();
+    datei.handle = null; datei.vorschlag = ''; datei.schmutzig = true;   // die Datei des alten Jahrs bleibt, wie sie ist
+    zu(); speichern(); render();
+    toast(jahrName(S.meta) + ' begonnen: ' + mehrzahl(r.ziele, 'Ziel', 'Ziele') + ' und ' + mehrzahl(r.beschluesse, 'Beschluss', 'Beschlüsse') + ' im Rückblick. Jetzt «Sichern» und einen neuen Dateinamen wählen.', true);
+  },
   'notiz-weg'() { entfernen('notizen', 'Notiz gelöscht'); },
   bedarf(el) { auf({ art: 'bedarf', id: el.dataset.id }); },
   'bedarf-weg'() { entfernen('bedarf', 'Eintrag gelöscht'); },
@@ -4002,8 +4226,10 @@ const AKT = {
   demo(el) { if (!bestaetigt(el, 'Wirklich? Ersetzt alles')) return; merken(); const z = S.meta.zoom, mo = S.meta.modus; S = beispiel(); S.meta.zoom = z; S.meta.modus = mo; geaendert(true); window.scrollTo(0, 0); toast('Beispiel geladen', true); },
   leeren(el) { if (!bestaetigt(el, 'Wirklich alles leeren?')) return; merken(); const z = S.meta.zoom, mo = S.meta.modus; S = leer(); S.meta.zoom = z; S.meta.modus = mo; geaendert(true); window.scrollTo(0, 0); toast('Alles geleert', true); },
   rueck() { const s = rueckStapel.pop(); if (!s) return; const ui = S.ui; S = normal(JSON.parse(s)); S.ui = ui; speichern(); render(); renderSheet(false); toast('Wiederhergestellt'); },
-  drucken() {
-    $('#druck').innerHTML = '<table class="d-seite"><thead><tr><td><div class="d-rand"></div></td></tr></thead><tfoot><tr><td><div class="d-rand"></div></td></tr></tfoot><tbody><tr><td>' + ergebnisHTML() + '<p class="e-fuss">Stand: ' + zeitKurz(new Date().toISOString()) + ' Uhr</p></td></tr></tbody></table>';
+  drucken() {   // druckt, was unter «Ergebnis» gezeigt ist: ganzes Ergebnis, eine Seite für die GL oder ein abgeschlossenes Jahr
+    const A = archivWahl(), seite = !A && S.ui.eart === 'seite', inhalt = A ? mitArchiv(A, ergebnisHTML) : (seite ? einSeiteHTML() : ergebnisHTML());
+    $('#druck').className = seite ? 'eine-seite' : '';
+    $('#druck').innerHTML = '<table class="d-seite"><thead><tr><td><div class="d-rand"></div></td></tr></thead><tfoot><tr><td><div class="d-rand"></div></td></tr></tfoot><tbody><tr><td>' + inhalt + '<p class="e-fuss">Stand: ' + zeitKurz(new Date().toISOString()) + ' Uhr</p></td></tr></tbody></table>';
     setTimeout(() => { window.print(); }, 60);
   }
 };
@@ -4195,7 +4421,7 @@ const FORMS = {
     geaendert(true);
   },
   'glpunkt-edit'(f) {
-    const x = sheet && S.glPunkte.find((y) => y.id === sheet.id), text = x && pflicht(f.elements.text);
+    const x = sheet && S.glPunkte.find((y) => y.id === sheet.id), text = x && (x.quelle ? x.text : pflicht(f.elements.text));
     if (!text) return;
     merken();
     x.text = text; x.ergebnis = f.elements.ergebnis.value.trim(); x.an = f.elements.an.checked;
@@ -4203,6 +4429,14 @@ const FORMS = {
     if (f.elements.thema) x.thema = f.elements.thema.value;
     geaendert(true);
   },
+  glthemen(f) {
+    const L = zeilenVon(f.elements.liste.value);
+    if (!L.length) { f.elements.liste.classList.add('fehlt'); f.elements.liste.focus(); return; }
+    merken();
+    L.forEach((x) => { if (!S.glGruppen.some((g) => g.titel.toLowerCase() === x.toLowerCase())) S.glGruppen.push({ id: uid(), titel: x, notiz: '' }); });
+    geaendert(true);
+  },
+  glmitschrift(f) { const g = sheet && S.glGruppen.find((y) => y.id === sheet.id); if (!g) return; merken(); g.notiz = f.elements.text.value.trim(); geaendert(true); },
   'glgruppe-edit'(f) { const g = sheet && S.glGruppen.find((y) => y.id === sheet.id), titel = g && pflicht(f.elements.titel); if (!titel) return; g.titel = titel; geaendert(true); },
   'thema-edit'(f) { const t = aktThema(), titelNeu = t && pflicht(f.elements.titel); if (!titelNeu) return; t.titel = titelNeu; t.frage = f.elements.frage.value.trim(); geaendert(true); },
   spalte(f) { const p = S.zahlen.perioden.find((x) => x.id === sheet.id), name = f.elements.name.value.trim(); if (!p || !name) return; p.name = name; S.zahlen.perioden.sort((a, b) => periodeOrdnung(a.name) - periodeOrdnung(b.name)); geaendert(true); },
