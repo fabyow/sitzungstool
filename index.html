@@ -404,9 +404,34 @@ body.drueber .ablage,body.drueber .tab-rahmen,body.drueber .dg{border-color:var(
 .stw{background:var(--card);border-radius:1.1rem;box-shadow:var(--shadow);padding:.15rem 1.1rem;margin-bottom:.6rem}
 .stw li{position:relative}
 .stw li + li{border-top:1px solid var(--sep)}
-.stw li button{display:flex;align-items:flex-start;gap:.8rem;width:100%;padding:.62rem 0;text-align:left;font-size:1.1875rem;line-height:1.35;font-weight:500}
-.stw li button::before{content:"";flex:none;width:.42rem;height:.42rem;margin-top:.5em;border-radius:50%;background:var(--brand)}
-.stw li button span{min-width:0;overflow-wrap:anywhere}
+.stw li .stw-t{display:flex;align-items:flex-start;gap:.8rem;flex:1;min-width:0;padding:.62rem 0;text-align:left;font-size:1.1875rem;line-height:1.35;font-weight:500}
+.stw li .stw-t::before{content:"";flex:none;width:.42rem;height:.42rem;margin-top:.5em;border-radius:50%;background:var(--brand)}
+.stw li .stw-t span{min-width:0;overflow-wrap:anywhere}
+.stw li .stw-t::before{display:none}
+.stw-zeile{display:flex;align-items:flex-start;gap:.7rem}
+.stw-box{flex:none;width:1.6rem;height:1.6rem;margin-top:.62rem;display:grid;place-items:center;border-radius:.5rem;box-shadow:inset 0 0 0 1.5px var(--idle);color:transparent}
+.stw-box .ic{width:1rem;height:1rem}
+.stw-z.an .stw-box{background:var(--accent-fill);box-shadow:none;color:#fff}
+.stw-z.an .stw-t{color:var(--muted)}
+.stw-antw,.glp-antw{display:block;width:calc(100% - 2.3rem);margin:-.1rem 0 .6rem 2.3rem;height:2.5rem;padding:0 .85rem;border-radius:.85rem;border:0;background:var(--fill);font-size:1rem;color:var(--ink);outline:none}
+.glp{flex-wrap:wrap}
+.glp-antw{flex:1 1 100%;width:auto;margin:0 0 .5rem 2.65rem}
+.glp-m{font-size:.875rem;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;margin:.1rem 0 .7rem}
+.chip{height:2.2rem;padding:0 .8rem;border-radius:1.1rem;background:var(--fill);color:var(--ink);font-size:.875rem;font-weight:600}
+.chip[aria-pressed="true"]{background:var(--accent-fill);color:#fff}
+.n-up .ic{width:.95rem;height:.95rem}
+button.b-ic.abh{background:transparent;box-shadow:inset 0 0 0 1.5px var(--idle);color:transparent}
+button.b-ic.abh[aria-pressed="true"]{background:var(--accent-fill);box-shadow:none;color:#fff}
+.besch.erl .b-was{color:var(--muted);text-decoration:line-through}
+.letzt{margin:.2rem 0 .3rem}
+.letzt summary{cursor:pointer;color:var(--muted);font-weight:600;font-size:.9375rem;padding:.25rem 0}
+.letzt ul{list-style:none;margin:0;padding:.25rem 0 0}
+.letzt li{padding:.25rem 0;font-size:1rem;line-height:1.35}
+.l-st{display:inline-block;width:1.1rem;color:var(--accent);font-weight:700}
+.l-m{color:var(--muted);font-size:.875rem}
+.gp-auftrag{margin:.2rem 0 .6rem}
+.gp-auftrag summary{cursor:pointer;color:var(--muted);font-weight:600;font-size:.9375rem;padding:.3rem 0}
 .stw ul + .stw-neu{border-top:1px solid var(--sep)}
 .stw-neu{display:flex;align-items:center;gap:.7rem}
 .stw-neu button{width:1.6rem;height:1.6rem;border-radius:50%;display:grid;place-items:center;color:var(--accent);flex:none}
@@ -764,7 +789,8 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
   .tlink .tl-t{overflow:visible}
   .titel h1,.thema .titel h1{font-size:1.75rem}
   .n-text,.b-was{font-size:1.0625rem}
-  .stw li button{font-size:1.0625rem}
+  .stw li .stw-t{font-size:1.0625rem}
+  .stw-antw{width:calc(100% - 2.3rem)}
   .frage{font-size:1.0625rem}
   .dreier{grid-template-columns:1fr 1fr auto}
   .fd-tab-neu{grid-template-columns:1fr 1fr}
@@ -867,8 +893,8 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '1.0';         // Version des Tools, steht in den Einstellungen
-const FORMAT = 7;              // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
+const VERSION = '1.1';         // Version des Tools, steht in den Einstellungen
+const FORMAT = 8;              // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
 const KEY_G = KEY + ':gesichert';   // Stand, der zuletzt in eine Datei ging
@@ -1120,6 +1146,7 @@ function migriere(d) {
   if (d.v < 5) { if (!Array.isArray(d.glPunkte)) d.glPunkte = []; d.v = 5; }     // 0.6: Unterpunkte, Baustellen im Rückblick, Punkte für die GL; normal() ergänzt die Felder der Themen
   if (d.v < 6) { if (!d.kunden || typeof d.kunden !== 'object') d.kunden = { offerten: [], auftraege: [] }; d.v = 6; }   // 0.7: Kunden (Offerten je Jahr, Aufträge)
   if (d.v < 7) d.v = 7;   // 0.8: Rückmeldungen, Ausblick aufs Folgejahr, Personal, festgehaltene Gruppen, Mitarbeiterliste; normal() ergänzt die Felder und baut die Liste aus der Tafel
+  if (d.v < 8) d.v = 8;   // 1.1: Stichworte mit «gesagt» und Antwort, Beschlüsse mit «Ziel» und «erledigt», GL-Punkte mit Wer und Bis wann; alles zusätzlich, ältere Stände laden unverändert
   return d;
 }
 function normal(d) {
@@ -1145,7 +1172,7 @@ function normal(d) {
     t.glVJ = t.glVJ.filter((x) => x && typeof x === 'object' && typeof x.text === 'string');   // seit 1.0: was die GL letztes Jahr entschieden hat
     t.felder = felderNormal(t.felder);
     t.stichworte = t.stichworte.filter((x) => x && typeof x === 'object' && typeof x.text === 'string' && x.text.trim());   // seit 0.8.5: was du sagen willst [{id, text}]
-    t.stichworte.forEach((x) => { if (!x.id) x.id = uid(); });
+    t.stichworte.forEach((x) => { if (!x.id) x.id = uid(); x.an = !!x.an; if (typeof x.antwort !== 'string') x.antwort = ''; });   // seit 1.1: gesagt und was dazu gesagt wurde
     if (typeof t.fest !== 'string') t.fest = '';
     if (typeof t.zu !== 'string') t.zu = '';
     if (t.art === 'gruppen' && t.fest && !t.zu) t.zu = t.fest;   // festgehaltene Gruppenzuteilung aus 0.8 bis 0.8.2: gilt als abgeschlossen
@@ -1165,7 +1192,7 @@ function normal(d) {
   s.glGruppen = (Array.isArray(s.glGruppen) ? s.glGruppen : []).filter((g) => g && typeof g === 'object' && typeof g.titel === 'string');
   s.glGruppen.forEach((g) => { if (typeof g.id !== 'string' || !g.id) g.id = uid(); if (typeof g.notiz !== 'string') g.notiz = ''; });
   const glIds = s.glGruppen.map((g) => g.id);
-  s.glPunkte.forEach((x) => { if (!x.id) x.id = uid(); if (glIds.indexOf(x.gruppe) < 0) x.gruppe = ''; x.an = !!x.an; ['ergebnis', 'thema'].forEach((k) => { if (typeof x[k] !== 'string') x[k] = ''; }); });
+  s.glPunkte.forEach((x) => { if (!x.id) x.id = uid(); if (glIds.indexOf(x.gruppe) < 0) x.gruppe = ''; x.an = !!x.an; ['ergebnis', 'thema', 'wer', 'bis'].forEach((k) => { if (typeof x[k] !== 'string') x[k] = ''; }); });
   s.glFelder = felderNormal(s.glFelder);
   s.rueckmeldungen = (Array.isArray(s.rueckmeldungen) ? s.rueckmeldungen : []).filter((x) => x && typeof x.text === 'string' && x.text.trim());
   s.rueckmeldungen.forEach((x) => { if (x.bild && typeof x.bild === 'object' && typeof x.bild.id === 'string') { if (typeof x.bild.inhalt === 'string' && x.bild.inhalt) anhMerken(x.bild.id, x.bild.inhalt); delete x.bild.inhalt; } else x.bild = null; });
@@ -2140,6 +2167,15 @@ const zaehlText = (t) => {
   return teile.join(' · ');
 };
 const glKnopf = (art, x) => '<button type="button" class="n-gl" data-a="gl" data-art="' + art + '" data-id="' + x.id + '" aria-pressed="' + !!x.gl + '" aria-label="Für die GL vormerken">' + ic('flag') + '<span>GL</span></button>';
+/* Wer und Bis wann zum Antippen (seit 1.1): Kader aus der Mitarbeiterliste, Fristen ab dem Strategietag */
+const werNamen = () => ['Alle', 'Kader'].concat(S.mitarbeiter.filter((m) => istKader(m) && imFolgejahr(m, sitzungsJahr())).map((m) => m.name));
+const bisListe = () => ['Ende Dezember ' + sitzungsJahr()].concat(['Januar', 'März', 'Juni', 'September'].map((x) => 'Ende ' + x + ' ' + (sitzungsJahr() + 1)), ['laufend']);
+const optionen = (id, L) => '<datalist id="' + id + '">' + L.map((x) => '<option value="' + esc(x) + '">').join('') + '</datalist>';
+const chipsHTML = (fid, L, wert, mehrere) => {
+  const gew = mehrere ? String(wert || '').split(/\s*,\s*/).filter(Boolean) : [String(wert || '').trim()];
+  return '<div class="chips" role="group">' + L.map((x) => '<button type="button" class="chip" data-a="chip" data-f="' + fid + '" data-m="' + (mehrere ? 1 : 0) + '" data-v="' + esc(x) + '" aria-pressed="' + (gew.indexOf(x) >= 0) + '">' + esc(x) + '</button>').join('') + '</div>';
+};
+const themaName = (t) => { const p = t.eltern && S.themen.find((x) => x.id === t.eltern); return p ? p.titel + ' · ' + t.titel : t.titel; };
 const metaText = (b) => [b.wer, b.bis ? 'bis ' + b.bis : ''].filter(Boolean).join(' · ');
 const metaMit = (b) => [metaText(b), b.aus ? 'aus dem Rückblick' : ''].filter(Boolean).join(' · ');
 const bedarfMeta = (b) => [b.warum, b.bis ? 'bis ' + b.bis : '', b.notiz].filter(Boolean).join(' · ');
@@ -2484,21 +2520,32 @@ function spaltenAus(text, alt) {
 }
 const TEIL = {
   frage(t) { return t.frage ? '<p class="frage">' + esc(t.frage) + '</p>' : ''; },
-  stichworte(t) {   // was du sagen willst: vorher vorbereitet, in der Sitzung offen für alle, nie im Ergebnis (seit 0.8.5)
+  stichworte(t) {   // was du sagen willst: vorher vorbereitet, in der Sitzung offen für alle; seit 1.1 mit Haken «gesagt» und der Antwort darunter, die im Ergebnis steht
     const L = t.stichworte || [];
     if (t.zu && !L.length) return '';
-    return '<h2 class="bl">Stichworte</h2><div class="stw">' + (L.length ? '<ul>' + L.map((x) => '<li data-zieh="stichworte" data-zid="' + x.id + '"><button type="button" data-a="stichwort" data-id="' + x.id + '"><span>' + esc(x.text) + '</span></button></li>').join('') + '</ul>' : '') +
+    return '<h2 class="bl">Stichworte</h2><div class="stw">' + (L.length ? '<ul>' + L.map((x) => '<li class="stw-z' + (x.an ? ' an' : '') + '" data-zieh="stichworte" data-zid="' + x.id + '"><div class="stw-zeile"><button type="button" class="stw-box" data-a="stw-an" data-id="' + x.id + '" aria-pressed="' + !!x.an + '" aria-label="Gesagt" title="Gesagt">' + ic('check') + '</button><button type="button" class="stw-t" data-a="stichwort" data-id="' + x.id + '"><span>' + esc(x.text) + '</span></button></div>' +
+      (x.an ? '<input class="stw-antw" id="antw-' + x.id + '" data-antw="' + x.id + '" value="' + esc(x.antwort) + '" placeholder="Was wurde dazu gesagt? …" aria-label="Was wurde dazu gesagt?" autocomplete="off" enterkeyhint="done"' + (t.zu ? ' readonly' : '') + '>' : '') + '</li>').join('') + '</ul>' : '') +
       '<form class="stw-neu" data-form="stichwort"><button aria-label="Stichwort hinzufügen">' + ic('plus') + '</button><input name="text" id="neu-stw" placeholder="Stichwort hinzufügen …" aria-label="Stichwort hinzufügen" autocomplete="off" enterkeyhint="done"></form></div>';
+  },
+  letztes(t) {   // seit 1.1: was zu diesem Thema letztes Jahr beschlossen und angestrebt war, zugeklappt
+    const rb = S.themen.find((x) => x.art === 'rueckblick');
+    if (!rb || t.art === 'rueckblick' || t.art === 'ziele') return '';
+    const name = themaName(t), B = (rb.beschluesseVJ || []).filter((b) => b.thema === name), Z = (rb.ziele || []).filter((z) => z.thema === t.titel);
+    if (!B.length && !Z.length) return '';
+    const zeile = (text, st, meta) => '<li><span class="l-st">' + st + '</span> ' + esc(text) + (meta ? ' <span class="l-m">' + esc(meta) + '</span>' : '') + '</li>';
+    return '<details class="letzt"><summary>Letztes Jahr · ' + (B.length + Z.length) + '</summary><ul>' +
+      Z.map((z) => zeile(z.text, z.stand === 'erreicht' ? '✓' : (z.stand === 'teilweise' ? '◐' : '○'), 'Ziel')).join('') +
+      B.map((b) => zeile(b.was, b.stand === 'erledigt' ? '✓' : '○', [b.wer, b.bis].filter(Boolean).join(' · '))).join('') + '</ul></details>';
   },
   felder(t) { return felderHTML(t.felder || [], 't', !!t.zu); },   // Checkliste, Auswahl, Tabelle, Gruppen (seit 0.9 ein Knopf «Feld hinzufügen»)
   notizen(t) {
-    return '<h2 class="bl">Notizen</h2><ul class="eintraege">' + t.notizen.map((n) => '<li class="notiz' + (n.gl ? ' gl' : '') + '" data-zieh="notizen" data-zid="' + n.id + '"><button type="button" class="n-text" data-a="notiz" data-id="' + n.id + '">' + esc(n.text) + '</button>' + glKnopf('n', n) + '</li>').join('') + '</ul>' +
+    return '<h2 class="bl">Notizen</h2><ul class="eintraege">' + t.notizen.map((n) => '<li class="notiz' + (n.gl ? ' gl' : '') + '" data-zieh="notizen" data-zid="' + n.id + '"><button type="button" class="n-text" data-a="notiz" data-id="' + n.id + '">' + esc(n.text) + '</button><button type="button" class="n-gl n-up" data-a="n-zu-b" data-id="' + n.id + '" aria-label="Zum Beschluss machen" title="Zum Beschluss machen">' + ic('up') + '<span>Beschluss</span></button>' + glKnopf('n', n) + '</li>').join('') + '</ul>' +
       '<form class="schnell" data-form="notiz"><input name="text" id="neu-notiz" placeholder="Notiz hinzufügen …" aria-label="Notiz hinzufügen" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Notiz hinzufügen">' + ic('plus') + '</button></form>';
   },
   beschluss(t) {
     const ziele = t.art === 'ziele';
-    return '<h2 class="bl">' + (ziele ? 'Ziele' : 'Beschluss') + '</h2><ul class="eintraege">' + t.beschluesse.map((b) => '<li class="besch' + (b.gl ? ' gl' : '') + '" data-zieh="beschluesse" data-zid="' + b.id + '"><span class="b-ic">' + ic('check') + '</span><button type="button" class="b-text" data-a="beschluss" data-id="' + b.id + '"><span class="b-was">' + (ziele ? thChip(b) : '') + esc(b.was) + '</span>' + (metaMit(b) ? '<span class="b-meta">' + esc(metaMit(b)) + '</span>' : '') + '</button>' + glKnopf('b', b) + '</li>').join('') + '</ul>' +
-      '<form class="dreier' + (ziele ? ' mit-th' : '') + '" data-form="beschluss">' + (ziele ? themaWahl('thema', ZIEL_TH, '', 'th-wahl') : '') + '<input name="was" id="neu-was" placeholder="' + (ziele ? 'Ziel hinzufügen …' : 'Beschluss: Was?') + '" aria-label="Was" autocomplete="off"><input name="wer" placeholder="Wer?" aria-label="Wer" autocomplete="off"><input name="bis" placeholder="Bis wann?" aria-label="Bis wann" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Hinzufügen">' + ic('plus') + '</button></form>';
+    return '<h2 class="bl">' + (ziele ? 'Ziele' : 'Beschluss') + '</h2><ul class="eintraege">' + t.beschluesse.map((b) => '<li class="besch' + (b.gl ? ' gl' : '') + (S.ui.abh && b.erl ? ' erl' : '') + '" data-zieh="beschluesse" data-zid="' + b.id + '">' + (S.ui.abh ? '<button type="button" class="b-ic abh" data-a="erl" data-id="' + b.id + '" aria-pressed="' + !!b.erl + '" aria-label="Erledigt" title="Erledigt">' + ic('check') + '</button>' : '<span class="b-ic">' + ic('check') + '</span>') + '<button type="button" class="b-text" data-a="beschluss" data-id="' + b.id + '"><span class="b-was">' + (ziele ? thChip(b) : '') + esc(b.was) + '</span>' + (metaMit(b) ? '<span class="b-meta">' + esc(metaMit(b)) + '</span>' : '') + '</button>' + (!ziele && S.themen.some((x) => x.art === 'ziele') ? '<button type="button" class="n-gl n-ziel" data-a="b-ziel" data-id="' + b.id + '" aria-pressed="' + !!b.ziel + '" aria-label="Als Ziel übernehmen" title="Als Ziel ' + folgejahr() + ' übernehmen">' + ic('wahl') + '<span>Ziel</span></button>' : '') + glKnopf('b', b) + '</li>').join('') + '</ul>' +
+      '<form class="dreier' + (ziele ? ' mit-th' : '') + '" data-form="beschluss">' + (ziele ? themaWahl('thema', ZIEL_TH, '', 'th-wahl') : '') + '<input name="was" id="neu-was" placeholder="' + (ziele ? 'Ziel hinzufügen …' : 'Beschluss: Was?') + '" aria-label="Was" autocomplete="off"><input name="wer" placeholder="Wer?" aria-label="Wer" autocomplete="off" list="dl-wer"><input name="bis" placeholder="Bis wann?" aria-label="Bis wann" autocomplete="off" enterkeyhint="done" list="dl-bis"><button class="rund" aria-label="Hinzufügen">' + ic('plus') + '</button></form>' + optionen('dl-wer', werNamen()) + optionen('dl-bis', bisListe());
   },
   rueckblick(t) {   // seit 1.0 auch die Beschlüsse vom letzten Jahr und, nur mit Reiter GL, was die GL entschieden hat
     const BV = t.beschluesseVJ || [], GV = glAn ? (t.glVJ || []) : [];
@@ -2642,17 +2689,17 @@ function kartenGleich() {
 }
 function themaInhalt(t, nr) {
   const u = TEIL.unter(t, nr || {});
-  if (t.art === 'rueckblick') return TEIL.frage(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + TEIL.baustellen(t) + TEIL.rueckblick(t) + u + TEIL.felder(t) + TEIL.notizen(t);
-  if (t.art === 'gruppen') return TEIL.frage(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + TEIL.tafel(t) + u + TEIL.felder(t) + TEIL.notizen(t) + TEIL.beschluss(t);
-  if (t.art === 'ziele') return TEIL.frage(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + TEIL.offen() + TEIL.beschluss(t) + u + TEIL.felder(t) + TEIL.notizen(t);
+  if (t.art === 'rueckblick') return TEIL.frage(t) + TEIL.letztes(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + TEIL.baustellen(t) + TEIL.rueckblick(t) + u + TEIL.felder(t) + TEIL.notizen(t);
+  if (t.art === 'gruppen') return TEIL.frage(t) + TEIL.letztes(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + TEIL.tafel(t) + u + TEIL.felder(t) + TEIL.notizen(t) + TEIL.beschluss(t);
+  if (t.art === 'ziele') return TEIL.frage(t) + TEIL.letztes(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + TEIL.offen() + TEIL.beschluss(t) + u + TEIL.felder(t) + TEIL.notizen(t);
   if (t.art === 'personal') {
     const k = zeigt(t, 'kader'), b = zeigt(t, 'betrieb');
-    return TEIL.frage(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + (k || b ? '<div class="pr-zwei">' + (k ? TEIL.bestand('kader', true) : '') + (b ? TEIL.bestand('betrieb', !k) : '') + '</div>' : '') +
+    return TEIL.frage(t) + TEIL.letztes(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + (k || b ? '<div class="pr-zwei">' + (k ? TEIL.bestand('kader', true) : '') + (b ? TEIL.bestand('betrieb', !k) : '') + '</div>' : '') +
       (zeigt(t, 'wechsel') ? TEIL.wechsel(nurGruppe(t)) : '') + (zeigt(t, 'bedarf') ? TEIL.bedarf(t) : '') + u + TEIL.felder(t) + TEIL.notizen(t) + TEIL.beschluss(t);
   }
-  if (t.art === 'auftraege') return TEIL.frage(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + (zeigt(t, 'budget') ? TEIL.budget() : '') + (zeigt(t, 'auslastung') ? TEIL.auslastung(!zeigt(t, 'budget')) : '') +
+  if (t.art === 'auftraege') return TEIL.frage(t) + TEIL.letztes(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + (zeigt(t, 'budget') ? TEIL.budget() : '') + (zeigt(t, 'auslastung') ? TEIL.auslastung(!zeigt(t, 'budget')) : '') +
     (zeigt(t, 'offen') ? TEIL.offene() : '') + u + TEIL.felder(t) + TEIL.notizen(t) + TEIL.beschluss(t);
-  return TEIL.frage(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + u + TEIL.felder(t) + TEIL.notizen(t) + TEIL.beschluss(t);
+  return TEIL.frage(t) + TEIL.letztes(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + u + TEIL.felder(t) + TEIL.notizen(t) + TEIL.beschluss(t);
 }
 
 /* ---------- Zahlen: Ausblick aufs Folgejahr ---------- */
@@ -2884,8 +2931,9 @@ const ANSICHT = {
 
   ergebnis() {   // seit 1.0: Jahr wählen (abgeschlossene Jahre) und «Eine Seite für die GL»
     const A = archivWahl(), jahre = S.archiv.length ? seg('ejahr', [['', jahrName(S.meta)]].concat(S.archiv.slice().reverse().map((a) => [a.id, a.titel || String(a.jahr)])), A ? A.id : '', 'klein') : '';
-    const art = A ? '' : seg('eart', [['ganz', 'Ganzes Ergebnis'], ['seite', 'Eine Seite für die GL']], S.ui.eart, 'klein');
-    const inhalt = A ? mitArchiv(A, ergebnisHTML) : (S.ui.eart === 'seite' ? einSeiteHTML() : ergebnisHTML());
+    const team = glAn && S.ui.eart === 'team';
+    const art = A ? '' : seg('eart', [['ganz', 'Ganzes Ergebnis'], ['seite', 'Eine Seite für die GL']].concat(glAn ? [['team', 'Nach der GL fürs Team']] : []), team || S.ui.eart !== 'team' ? S.ui.eart : 'ganz', 'klein');
+    const inhalt = A ? mitArchiv(A, ergebnisHTML) : (team ? teamSeiteHTML() : S.ui.eart === 'seite' ? einSeiteHTML() : ergebnisHTML());
     return '<div class="e-wahl">' + art + jahre + '</div>' + (A ? '<p class="muted klein e-archiv-hinweis">' + ic('info') + '<span>Abgeschlossenes Jahr, nur zum Lesen.</span></p>' : '') +
       '<section class="card blatt' + (!A && S.ui.eart === 'seite' ? ' eine-seite' : '') + '">' + inhalt + '</section>' +
       '<div class="aktionen"><button type="button" class="btn stark" data-a="drucken"' + (IM_RAHMEN ? ' disabled' : '') + '>' + ic('print') + '<span>Als PDF drucken</span></button>' +
@@ -2896,7 +2944,8 @@ const ANSICHT = {
     if (glAbgleich()) setTimeout(speichern, 0);
     const G = S.glGruppen, P = S.glPunkte;
     const punkt = (x) => '<li class="glp' + (x.an ? ' an' : '') + '" data-zieh="gl" data-zid="' + x.id + '"><button type="button" class="glp-box" data-a="glhaken" data-id="' + x.id + '" aria-pressed="' + !!x.an + '" aria-label="Gesagt" title="Gesagt">' + ic('check') + '</button>' +
-      '<button type="button" class="n-text" data-a="glpunkt" data-id="' + x.id + '"><span class="glp-t">' + (x.quelle ? '<span class="z-th st-chip">Strategietag · ' + esc(x.thema || '') + '</span>' : thChip(x)) + esc(x.text) + '</span>' + (x.weg ? '<span class="glp-weg">Am Strategietag nicht mehr mit «GL» markiert</span>' : '') + (x.ergebnis ? '<span class="glp-e">' + esc(x.ergebnis) + '</span>' : '') + '</button></li>';
+      '<button type="button" class="n-text" data-a="glpunkt" data-id="' + x.id + '"><span class="glp-t">' + (x.quelle ? '<span class="z-th st-chip">Strategietag · ' + esc(x.thema || '') + '</span>' : thChip(x)) + esc(x.text) + '</span>' + (x.weg ? '<span class="glp-weg">Am Strategietag nicht mehr mit «GL» markiert</span>' : '') + (x.ergebnis && !x.an ? '<span class="glp-e">' + esc(x.ergebnis) + '</span>' : '') + (x.wer || x.bis ? '<span class="glp-m">' + esc(metaText(x)) + '</span>' : '') + '</button>' +
+      (x.an ? '<input class="glp-antw" id="glantw-' + x.id + '" data-glantw="' + x.id + '" value="' + esc(x.ergebnis || '') + '" placeholder="Was sagt die GL dazu? …" aria-label="Was sagt die GL dazu?" autocomplete="off" enterkeyhint="done">' : '') + '</li>';
     const block = (g) => {
       const L = P.filter((x) => (g ? x.gruppe === g.id : !x.gruppe)), gesagt = L.filter((x) => x.an).length;
       const info = '<span class="fd-info">' + (L.length ? gesagt + ' von ' + L.length + ' gesagt' : '') + '</span>';
@@ -2945,8 +2994,8 @@ function neuesJahr() {
   const a = archivEintrag(), T = S.themen, nameVon = (id) => { const t = T.find((x) => x.id === id); return t ? t.titel : ''; };
   const zieleNeu = [], beschlVJ = [];
   T.forEach((t) => t.beschluesse.forEach((b) => {
-    if (t.art === 'ziele') zieleNeu.push({ id: uid(), text: b.was, stand: '', thema: b.thema || '' });
-    else beschlVJ.push({ id: uid(), was: b.was, wer: b.wer || '', bis: b.bis || '', thema: t.eltern ? nameVon(t.eltern) + ' · ' + t.titel : t.titel, stand: '' });
+    if (t.art === 'ziele') zieleNeu.push({ id: uid(), text: b.was, stand: b.erl ? 'erreicht' : '', thema: b.thema || '' });
+    else beschlVJ.push({ id: uid(), was: b.was, wer: b.wer || '', bis: b.bis || '', thema: t.eltern ? nameVon(t.eltern) + ' · ' + t.titel : t.titel, stand: b.erl ? 'erledigt' : '' });
   }));
   const glVJ = S.glPunkte.filter((x) => x.ergebnis).map((x) => ({ id: uid(), text: x.text, ergebnis: x.ergebnis, gruppe: (S.glGruppen.find((g) => g.id === x.gruppe) || {}).titel || '' }));
   const rb = T.find((t) => t.art === 'rueckblick');
@@ -2954,7 +3003,7 @@ function neuesJahr() {
     t.notizen = []; t.stichworte = []; t.beschluesse = []; t.felder = []; t.anhaenge = []; t.zu = '';
     if (t.art === 'gruppen') t.fest = '';
     if (t.art === 'personal') t.bedarf = t.bedarf.filter((b) => b.stand !== 'besetzt');
-    if (t.art === 'ziele') t.titel = jahrPlus(t.titel);
+    if (t.art === 'ziele') { t.titel = jahrPlus(t.titel); t.frage = jahrPlus(t.frage); }
     if (t.art === 'rueckblick') { t.baustellen = []; t.ziele = []; t.beschluesseVJ = []; t.glVJ = []; }
   });
   if (rb) { rb.ziele = zieleNeu; rb.beschluesseVJ = beschlVJ; rb.glVJ = glVJ; }
@@ -3010,6 +3059,19 @@ function glAbgleich() {   // true, wenn sich etwas geändert hat
   return neu;
 }
 
+/* ---------- Nach der GL fürs Team (seit 1.1): nur, was die GL entschieden hat, mit Wer und Bis wann; nie, was ohne Ergebnis bleibt ---------- */
+function teamSeiteHTML() {
+  const m = S.meta, P = S.glPunkte.filter((x) => (x.ergebnis || '').trim());
+  let h = '<header class="e-kopf"><h1>Nach der GL-Strategietagung</h1><p>' + esc([m.abteilung, datumLang(heute())].filter(Boolean).join(' · ')) + '</p></header>';
+  if (!P.length) return h + '<p class="e-klein">Noch nichts von der GL festgehalten. Im Reiter «GL» bei einem Punkt «Gesagt» antippen und das Ergebnis eintragen.</p>';
+  [{ id: '', titel: 'Weiteres' }].concat(S.glGruppen).sort((a, b) => (a.id ? 0 : 1) - (b.id ? 0 : 1)).forEach((g) => {
+    const L = P.filter((x) => (x.gruppe || '') === g.id);
+    if (!L.length) return;
+    h += '<section class="e-teil"><h2>' + esc(g.titel) + '</h2><div class="e-tab-rahmen"><table class="e-besch"><thead><tr><th>Thema</th><th>Entscheid</th><th>Wer</th><th>Bis wann</th></tr></thead><tbody>' +
+      L.map((x) => '<tr><td>' + esc(x.text) + '</td><td>' + esc(x.ergebnis) + '</td><td class="nw">' + esc(x.wer || '') + '</td><td class="nw">' + esc(x.bis || '') + '</td></tr>').join('') + '</tbody></table></div></section>';
+  });
+  return h;
+}
 /* ---------- Eine Seite für die GL (seit 1.0): Zahlen, Ausblick, Für die GL, Ziele, Personal auf einem A4-Blatt ---------- */
 function einSeiteHTML() {
   const m = S.meta, T = S.themen, nr = nummern(), nm = (t) => mitNr(t, nr), mehr = (n) => (n > 0 ? '<li class="e-mehr">und ' + n + ' weitere im ganzen Ergebnis</li>' : '');
@@ -3061,6 +3123,11 @@ function ergebnisHTML() {
   const mitB = T.filter((t) => t.art !== 'ziele' && t.beschluesse.length);
   if (mitB.length) { h += '<section class="e-teil"><h2>Beschlüsse</h2>' + tabelle(mitB, true) + '</section>'; etwas = true; }
   T.filter((t) => t.art === 'ziele' && t.beschluesse.length).forEach((t) => { h += '<section class="e-teil"><h2>' + esc(t.titel) + '</h2>' + tabelle([t], false) + '</section>'; etwas = true; });
+  const mitS = T.filter((t) => (t.stichworte || []).some((x) => x.antwort));
+  if (mitS.length) {   // seit 1.1: was zu den Stichworten gesagt wurde
+    h += '<section class="e-teil"><h2>Zu den Stichworten gesagt</h2>' + mitS.map((t) => '<h3>' + esc(nm(t)) + '</h3><ul>' + t.stichworte.filter((x) => x.antwort).map((x) => '<li><b>' + esc(x.text) + '</b> ' + esc(x.antwort) + '</li>').join('') + '</ul>').join('') + '</section>';
+    etwas = true;
+  }
   const mitF = T.filter((t) => (t.felder || []).some(feldGefuellt));
   if (mitF.length) {
     const arten = FELD_ARTEN.filter((a) => mitF.some((t) => t.felder.some((f) => f.art === a[0] && feldGefuellt(f)))).map((a) => ({ liste: 'Checklisten', wahl: 'Auswahl', tabelle: 'Tabellen', gruppen: 'Gruppen' })[a[0]]);
@@ -3282,13 +3349,16 @@ const SHEET = {
     if (!b) return '';
     return formHuelle(ziele ? 'Ziel' : 'Beschluss', 'beschluss-edit', '<label class="f" for="b-was"><span>Was</span><textarea id="b-was" name="was" rows="2" data-fokus>' + esc(b.was) + '</textarea></label>' +
       (ziele ? '<label class="f" for="b-th"><span>Thema</span>' + themaWahl('thema', b.thema || '', 'b-th') + '</label>' : '') +
-      '<div class="zwei"><label class="f" for="b-wer"><span>Wer</span><input id="b-wer" name="wer" value="' + esc(b.wer) + '" autocomplete="off"></label><label class="f" for="b-bis"><span>Bis wann</span><input id="b-bis" name="bis" value="' + esc(b.bis) + '" autocomplete="off"></label></div>' +
+      '<label class="f" for="b-wer"><span>Wer</span><input id="b-wer" name="wer" value="' + esc(b.wer) + '" autocomplete="off"></label>' + chipsHTML('b-wer', werNamen(), b.wer, true) +
+      '<label class="f" for="b-bis"><span>Bis wann</span><input id="b-bis" name="bis" value="' + esc(b.bis) + '" autocomplete="off"></label>' + chipsHTML('b-bis', bisListe(), b.bis, false) +
       '<label class="schalter" for="b-gl"><span>Für die GL vormerken</span><input type="checkbox" id="b-gl" name="gl"' + (b.gl ? ' checked' : '') + '></label>' + loeschKnopf('beschluss-weg', ziele ? 'Ziel löschen' : 'Beschluss löschen'));
   },
   stichwort() {
     const x = imThema('stichworte');
     if (!x) return '';
-    return formHuelle('Stichwort', 'stichwort-edit', '<label class="f" for="sw-t"><span>Text</span><textarea id="sw-t" name="text" rows="2" data-fokus>' + esc(x.text) + '</textarea></label>' + loeschKnopf('stichwort-weg', 'Stichwort löschen'));
+    return formHuelle('Stichwort', 'stichwort-edit', '<label class="f" for="sw-t"><span>Text</span><textarea id="sw-t" name="text" rows="2" data-fokus>' + esc(x.text) + '</textarea></label>' +
+      '<label class="schalter" for="sw-an"><span>Gesagt</span><input type="checkbox" id="sw-an" name="an"' + (x.an ? ' checked' : '') + '></label>' +
+      '<label class="f" for="sw-a"><span>Was wurde dazu gesagt?</span><textarea id="sw-a" name="antwort" rows="3">' + esc(x.antwort || '') + '</textarea></label>' + loeschKnopf('stichwort-weg', 'Stichwort löschen'));
   },
   ziel() {
     const z = imThema('ziele');
@@ -3407,6 +3477,8 @@ const SHEET = {
       '<div class="zwei">' + (S.glGruppen.length ? '<label class="f" for="gp-g"><span>GL-Thema</span><select id="gp-g" name="gruppe"><option value="">Noch keinem zugeordnet</option>' + S.glGruppen.map((g) => '<option value="' + g.id + '"' + (g.id === x.gruppe ? ' selected' : '') + '>' + esc(g.titel) + '</option>').join('') + '</select></label>' : '') +
       (q ? '' : '<label class="f" for="gp-th"><span>Thema</span>' + themaWahl('thema', x.thema || '', 'gp-th') + '</label>') + '</div>' +
       '<label class="f" for="gp-e"><span>Ergebnis: was die GL dazu sagt oder entscheidet</span><textarea id="gp-e" name="ergebnis" rows="3">' + esc(x.ergebnis || '') + '</textarea></label>' +
+      '<details class="gp-auftrag"' + (x.wer || x.bis ? ' open' : '') + '><summary>Auftrag: wer und bis wann</summary><label class="f" for="gp-wer"><span>Wer</span><input id="gp-wer" name="wer" value="' + esc(x.wer || '') + '" autocomplete="off"></label>' + chipsHTML('gp-wer', werNamen(), x.wer, true) +
+      '<label class="f" for="gp-bis"><span>Bis wann</span><input id="gp-bis" name="bis" value="' + esc(x.bis || '') + '" autocomplete="off"></label>' + chipsHTML('gp-bis', bisListe(), x.bis, false) + '</details>' +
       '<label class="schalter" for="gp-an"><span>Gesagt</span><input type="checkbox" id="gp-an" name="an"' + (x.an ? ' checked' : '') + '></label>' + (q && !x.weg ? '' : loeschKnopf('glpunkt-weg', 'Punkt löschen')));
   },
   glgruppe() {
@@ -3436,6 +3508,8 @@ const SHEET = {
       '<div class="reihe"><button type="button" class="btn" data-a="vollbild">' + ic('max') + '<span>Vollbild</span></button></div></section>' +
       '<section class="gr"><h3>Für dich</h3><label class="schalter" for="e-gl"><span>Reiter «GL» zeigen</span><input type="checkbox" id="e-gl" data-wahl="glreiter"' + (glAn ? ' checked' : '') + '></label>' +
       '<p class="muted klein">Deine eigenen Punkte für die GL. Der Schalter gilt nur auf diesem Gerät. Im Ergebnis und im PDF stehen die Punkte nie.</p></section>' +
+      '<section class="gr"><h3>Unterjährig</h3><label class="schalter" for="e-abh"><span>Beschlüsse und Ziele abhaken</span><input type="checkbox" id="e-abh" data-wahl="abhaken"' + (S.ui.abh ? ' checked' : '') + '></label>' +
+      '<p class="muted klein">Aus: nichts davon ist zu sehen. An: ein Haken je Beschluss und Ziel; beim neuen Jahr stehen sie im Rückblick als erledigt oder offen.</p></section>' +
       '<section class="gr"><h3>Jahr</h3><div class="reihe zw"><span>' + esc(jahrName(m)) + (S.archiv.length ? ' · ' + mehrzahl(S.archiv.length, 'abgeschlossenes Jahr', 'abgeschlossene Jahre') : '') + '</span><button type="button" class="btn" data-a="neujahr"' + (IM_RAHMEN ? ' disabled' : '') + '>' + ic('plus') + '<span>Neues Jahr beginnen</span></button></div>' +
       '<p class="muted klein">Für den nächsten Strategietag: Dieses Jahr bleibt unter «Ergebnis» nachzulesen.</p></section>' +
       '<section class="gr"><h3>Mitarbeiter</h3><div class="reihe zw"><span>' + mehrzahl(S.mitarbeiter.length, 'Eintrag', 'Einträge') + ' in der Mitarbeiterliste</span><button type="button" class="btn" data-a="sheet" data-s="maliste">' + ic('liste') + '<span>Mitarbeiterliste</span></button></div></section>' +
@@ -3483,7 +3557,7 @@ const SHEET = {
     const b = imThema('bedarf');
     if (!b) return '';
     return formHuelle('Bedarf', 'bedarf-edit', '<label class="f" for="bd-was"><span>Wen oder was brauchen wir?</span><input id="bd-was" name="was" value="' + esc(b.was) + '" autocomplete="off" data-fokus></label>' +
-      '<div class="zwei"><label class="f" for="bd-warum"><span>Warum</span><input id="bd-warum" name="warum" value="' + esc(b.warum) + '" autocomplete="off"></label><label class="f" for="bd-bis"><span>Bis wann</span><input id="bd-bis" name="bis" value="' + esc(b.bis) + '" autocomplete="off"></label></div>' +
+      '<div class="zwei"><label class="f" for="bd-warum"><span>Warum</span><input id="bd-warum" name="warum" value="' + esc(b.warum) + '" autocomplete="off"></label><label class="f" for="bd-bis"><span>Bis wann</span><input id="bd-bis" name="bis" value="' + esc(b.bis) + '" autocomplete="off"></label></div>' + chipsHTML('bd-bis', bisListe(), b.bis, false) +
       '<label class="f" for="bd-n"><span>Bemerkung</span><textarea id="bd-n" name="notiz" rows="2">' + esc(b.notiz) + '</textarea></label>' +
       '<label class="schalter" for="bd-gl"><span>Für die GL vormerken</span><input type="checkbox" id="bd-gl" name="gl"' + (b.gl ? ' checked' : '') + '></label>' + loeschKnopf('bedarf-weg', 'Eintrag löschen'));
   },
@@ -4052,7 +4126,39 @@ const AKT = {
   'kunden-weg'(el) { if (!bestaetigt(el, 'Wirklich alle entfernen?')) return; merken(); S.kunden.offerten = []; S.kunden.auftraege = []; S.kunden.jahr = ''; geaendert(); toast('Offerten und Aufträge entfernt', true); },
   glpunkt(el) { auf({ art: 'glpunkt', id: el.dataset.id }); },
   'glpunkt-weg'() { if (!sheet) return; merken(); S.glPunkte = S.glPunkte.filter((x) => x.id !== sheet.id); geaendert(true); toast('Punkt gelöscht', true); },
-  glhaken(el) { const x = S.glPunkte.find((y) => y.id === el.dataset.id); if (!x) return; merken(); x.an = !x.an; geaendert(); },
+  glhaken(el) { const x = S.glPunkte.find((y) => y.id === el.dataset.id); if (!x) return; merken(); x.an = !x.an; geaendert(); if (x.an) fokus('glantw-' + x.id); },
+  'stw-an'(el) { const t = aktThema(), x = t && t.stichworte.find((y) => y.id === el.dataset.id); if (!x) return; x.an = !x.an; geaendert(); if (x.an) fokus('antw-' + x.id); },
+  'n-zu-b'(el) {   // Notiz wird Beschluss: ein Tipp, nichts neu tippen
+    const t = aktThema(), n = t && t.notizen.find((y) => y.id === el.dataset.id);
+    if (!n) return;
+    merken();
+    t.notizen = t.notizen.filter((y) => y !== n);
+    t.beschluesse.push({ id: n.id, was: n.text, wer: '', bis: '', gl: !!n.gl });
+    geaendert(); toast('Als Beschluss übernommen. Wer und bis wann: auf den Beschluss tippen.', true);
+  },
+  'b-ziel'(el) {   // Beschluss wird Ziel fürs Folgejahr: landet im Thema «Ziele»; nochmals tippen nimmt es zurück
+    const t = aktThema(), b = t && t.beschluesse.find((y) => y.id === el.dataset.id), zt = S.themen.find((x) => x.art === 'ziele');
+    if (!b || !zt) return;
+    merken();
+    if (b.ziel) { b.ziel = false; zt.beschluesse = zt.beschluesse.filter((z) => z.von !== b.id); geaendert(); toast('Ziel zurückgenommen', true); return; }
+    const top = t.eltern ? S.themen.find((x) => x.id === t.eltern) : t;
+    b.ziel = true;
+    zt.beschluesse.push(Object.assign({ id: uid(), was: b.was, wer: b.wer || '', bis: b.bis || '', gl: false, von: b.id }, top && zielThemen().indexOf(top.titel) >= 0 ? { thema: top.titel } : {}));
+    geaendert(); toast('Als Ziel ' + folgejahr() + ' übernommen', true);
+  },
+  erl(el) { const t = aktThema(), b = t && t.beschluesse.find((y) => y.id === el.dataset.id); if (!b) return; b.erl = !b.erl; geaendert(); },
+  chip(el) {   // Wer oder Bis wann aus der Auswahl ins Feld; Wer lässt mehrere zu
+    const f = document.getElementById(el.dataset.f);
+    if (!f) return;
+    const v = el.dataset.v, mehr = el.dataset.m === '1';
+    let L = mehr ? f.value.split(/\s*,\s*/).filter(Boolean) : [f.value.trim()].filter(Boolean);
+    const i = L.indexOf(v);
+    if (i >= 0) L.splice(i, 1);
+    else if (mehr) L = v === 'Alle' ? ['Alle'] : L.filter((x) => x !== 'Alle').concat([v]);
+    else L = [v];
+    f.value = L.join(', ');
+    $$('[data-a="chip"]').forEach((b) => { if (b.dataset.f === el.dataset.f) b.setAttribute('aria-pressed', String(L.indexOf(b.dataset.v) >= 0)); });
+  },
   'glgruppe-neu'() { auf({ art: 'glthemen' }); },
   glmitschrift(el) { auf({ art: 'glmitschrift', id: el.dataset.id }); },
   glgruppe(el) { auf({ art: 'glgruppe', id: el.dataset.id }); },
@@ -4262,7 +4368,7 @@ const FORMS = {
   },
   'beschluss-edit'(f) { const b = imThema('beschluesse'), was = b && pflicht(f.elements.was); if (!was) return; b.was = was; b.wer = f.elements.wer.value.trim(); b.bis = ohneBis(f.elements.bis.value); b.gl = f.elements.gl.checked; if (f.elements.thema) b.thema = f.elements.thema.value; geaendert(true); },
   stichwort(f) { stichworteDazu(f.elements.text.value); },
-  'stichwort-edit'(f) { const x = imThema('stichworte'), text = x && pflicht(f.elements.text); if (!text) return; x.text = text.replace(/\s*[\r\n]+\s*/g, ' '); geaendert(true); },
+  'stichwort-edit'(f) { const x = imThema('stichworte'), text = x && pflicht(f.elements.text); if (!text) return; x.text = text.replace(/\s*[\r\n]+\s*/g, ' '); x.an = f.elements.an.checked; x.antwort = f.elements.antwort.value.trim(); geaendert(true); },
   ziel(f) { if (f.elements.thema) ZIEL_TH = f.elements.thema.value; zieleDazu(f.elements.text.value, f.elements.thema ? f.elements.thema.value : ''); },
   fdpunkt(f) {
     const fd = feldAus(f), L = fd ? mehrzeilig(f.elements.text.value) : [];
@@ -4424,7 +4530,7 @@ const FORMS = {
     const x = sheet && S.glPunkte.find((y) => y.id === sheet.id), text = x && (x.quelle ? x.text : pflicht(f.elements.text));
     if (!text) return;
     merken();
-    x.text = text; x.ergebnis = f.elements.ergebnis.value.trim(); x.an = f.elements.an.checked;
+    x.text = text; x.ergebnis = f.elements.ergebnis.value.trim(); x.an = f.elements.an.checked; x.wer = f.elements.wer.value.trim(); x.bis = ohneBis(f.elements.bis.value);
     if (f.elements.gruppe) x.gruppe = f.elements.gruppe.value;
     if (f.elements.thema) x.thema = f.elements.thema.value;
     geaendert(true);
@@ -4489,6 +4595,8 @@ document.addEventListener('input', (e) => {
   const el = e.target;
   if (el.classList && el.classList.contains('fehlt')) el.classList.remove('fehlt');
   if (el.dataset && el.dataset.f) { S.meta[el.dataset.f] = el.value; speichern(); }
+  if (el.dataset && el.dataset.antw) { const t = aktThema(), x = t && t.stichworte.find((y) => y.id === el.dataset.antw); if (x) { x.antwort = el.value; speichern(); } }
+  if (el.dataset && el.dataset.glantw) { const x = S.glPunkte.find((y) => y.id === el.dataset.glantw); if (x) { x.ergebnis = el.value; speichern(); } }
   if (el.id === 'li-t') { const info = $('#li-info'); if (info) info.textContent = listeInfo(el.value); }
   if (el.id === 'ma-t') { const info = $('#ma-info'); if (info) info.textContent = maInfo(el.value); }
   if (el.id === 'ma-p') { const feld = $('#ma-po-feld'); if (feld) feld.hidden = /polier|leiter|führer|fuehrer/i.test(el.value); }
@@ -4498,6 +4606,7 @@ document.addEventListener('change', (e) => {
   if (d.f) render();
   if (d.wahl === 'eltern') themaZu(e.target.value);
   if (d.wahl === 'kjahr') { S.kunden.jahr = e.target.value; speichern(true); render(); }
+  if (d.wahl === 'abhaken') { S.ui.abh = e.target.checked; speichern(true); render(); }
   if (d.wahl === 'glreiter') { glAn = e.target.checked; anzeigeMerken(); if (!glAn && S.ui.bereich === 'gl') { S.ui.bereich = 'zahlen'; speichern(true); } render(); }
 });
 document.addEventListener('keydown', (e) => {
