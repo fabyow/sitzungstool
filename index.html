@@ -3852,6 +3852,7 @@ function buchImportHTML() {
   return formHuelle('Buchungen einlesen', 'buchimport',
     '<p class="muted">Gelesen: ' + fmt(B.n) + ' Buchungen, ' + esc(ymName(B.ymMin) + ' bis ' + ymName(B.ymMax)) + '.</p>' +
     '<table class="vergleich"><tbody>' + (I.neu.length ? zeile('Neu', esc(namen(I.neu))) : '') + (anders ? zeile('Wird ersetzt', esc(anders)) : '') + (I.gleich ? zeile('Unverändert', mon(I.gleich)) : '') + (I.bleibt ? zeile('Bleibt stehen', mon(I.bleibt) + ', die im Auszug fehlen') : '') +
+    (buchDa() && !S.beispiel && !BUCH.hatAe && B.hatAe ? zeile('Änderungsdatum', 'kommt neu dazu, für die Spur im Abgleich') : '') +
     zeile('Abgegrenzt bis', B.ymAbg >= 0 ? esc(ymName(B.ymAbg)) : 'keine Abschlussbuchung gefunden') + (laeuft.length ? zeile('Läuft noch', esc(namen(laeuft)) + ', zählt nicht mit') : '') +
     zeile('Erträge', B.hatE ? 'im Auszug' : 'fehlen') + zeile('Bauführer', bl.length ? String(bl.length) : 'Spalte «Bauleiter» fehlt oder ist leer') + '</tbody></table>' +
     (I.schlecht ? '<p class="hinweis">' + ic('info') + '<span>' + mehrzahl(I.schlecht, 'Zeile', 'Zeilen') + ' ohne Kostenstelle, Kostenart oder Buchungsperiode ' + (I.schlecht === 1 ? 'bleibt' : 'bleiben') + ' weg.</span></p>' : '') +
