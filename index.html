@@ -265,6 +265,8 @@ body.drueber .ablage,body.drueber .tab-rahmen,body.drueber .dg{border-color:var(
 .bu-std li > div:first-child{min-width:0}
 .bu-std b{display:block;font-weight:600;overflow-wrap:anywhere}
 .bu-std small{color:var(--muted);font-size:.8125rem}
+.bu-sel{height:2.5rem;max-width:100%;min-width:0;padding:0 .7rem;border-radius:.7rem;border:1px solid var(--sep);background:var(--card);font-weight:600}
+.kz-hilfe{margin-top:.35rem}
 /* ---------- Themen ---------- */
 .themen{display:grid;grid-template-columns:17rem minmax(0,1fr);gap:1.5rem;align-items:start}
 .tliste2{display:flex;flex-direction:column;gap:.2rem;position:sticky;top:5rem;max-height:calc(100vh - 6rem);overflow-y:auto;scrollbar-width:thin;padding:.2rem;margin:-.2rem}
@@ -1044,7 +1046,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '1.6';         // Version des Tools, steht in den Einstellungen
+const VERSION = '1.7';         // Version des Tools, steht in den Einstellungen
 const FORMAT = 12;             // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
@@ -1332,7 +1334,7 @@ function normal(d) {
   const bu0 = d && d.buch && typeof d.buch === 'object' && typeof d.buch.id === 'string' && d.buch.id ? d.buch : null;
   if (bu0) {
     if (typeof bu0.inhalt === 'string' && bu0.inhalt) anhMerken(bu0.id, bu0.inhalt);
-    s.buch = Object.assign({}, bu0, { typ: BUCH_TYP, groesse: typeof bu0.groesse === 'number' && bu0.groesse > 0 ? bu0.groesse : 0, std: bu0.std && typeof bu0.std === 'object' ? bu0.std : {}, zaehlBis: typeof bu0.zaehlBis === 'number' ? bu0.zaehlBis : null });
+    s.buch = Object.assign({}, bu0, { typ: BUCH_TYP, groesse: typeof bu0.groesse === 'number' && bu0.groesse > 0 ? bu0.groesse : 0, std: bu0.std && typeof bu0.std === 'object' ? bu0.std : {}, blOhne: Array.isArray(bu0.blOhne) ? bu0.blOhne.filter((x) => typeof x === 'string') : [], zaehlBis: typeof bu0.zaehlBis === 'number' ? bu0.zaehlBis : null });
     delete s.buch.inhalt;
   } else s.buch = null;
   if (!Array.isArray(s.themen)) s.themen = l.themen;
@@ -1451,7 +1453,7 @@ function maNormal(roh, themen) {
     if (!m.id || typeof m.id !== 'string' || ids[m.id]) m.id = uid();
     ids[m.id] = 1;
     m.name = m.name.trim();
-    ['position', 'polier', 'eintritt', 'austritt', 'geburt'].forEach((k) => { m[k] = typeof m[k] === 'string' ? m[k].trim() : ''; });
+    ['position', 'polier', 'eintritt', 'austritt', 'geburt', 'kuerzel'].forEach((k) => { m[k] = typeof m[k] === 'string' ? m[k].trim() : ''; });   // kuerzel (seit 1.7): wie die Person im Auszug als Bauleiter steht
   });
   L.forEach((m) => { if (m.polier && (!ids[m.polier] || m.polier === m.id)) m.polier = ''; });
   return L;
@@ -1764,7 +1766,7 @@ function buchUebernehmen() {
   const B = buchVerbinden(alt, w.B);
   const text = JSON.stringify(buchInhalt(B)), id = 'buch-' + uid();
   anhMerken(id, text);
-  S.buch = { id: id, typ: BUCH_TYP, groesse: text.length, n: B.n, von: B.ymMin, bis: B.ymMax, abg: B.ymAbg, am: new Date().toISOString(), std: vor.std && typeof vor.std === 'object' ? vor.std : {}, zaehlBis: null };
+  S.buch = { id: id, typ: BUCH_TYP, groesse: text.length, n: B.n, von: B.ymMin, bis: B.ymMax, abg: B.ymAbg, am: new Date().toISOString(), std: vor.std && typeof vor.std === 'object' ? vor.std : {}, blOhne: Array.isArray(vor.blOhne) ? vor.blOhne : [], zaehlBis: null };
   BUCH = B; BUCH_ID = id; buchWartet = null;
   S.ui.bereich = 'zahlen';
   if (['diagramme', 'bf', 'aw'].indexOf(S.zahlen.ansicht) < 0) S.zahlen.ansicht = 'diagramme';
@@ -1882,14 +1884,14 @@ function buchAkk(von, bis, schluessel) {
   return M;
 }
 const leerD = () => ({ E: BUCH.hatE ? 0 : null, A: 0, G: BUCH.hatE ? 0 : null, personal: 0, material: 0, fremd: 0, eigene: 0, temp: 0, weitere: 0, h: null, n: 0, bud: false });
-/* Welcher Bauführer ist gewählt? null: die ganze Abteilung; '-': Kostenstellen ohne Bauführer */
-const blListe = () => (buchDa() ? Array.from(new Set(BUCH.BL.filter(Boolean))).sort((a, b) => a.localeCompare(b, 'de')) : []);
+/* Welcher Bauführer ist gewählt? null: die ganze Abteilung; '-': Kostenstellen ohne Bauführer. Seit 1.7 mit Namen statt Kürzeln (blNamen). */
+const blListe = () => (buchDa() ? Array.from(new Set(blNamen().filter(Boolean))).sort((a, b) => a.localeCompare(b, 'de')) : []);
 function blWahl() {
   if (!bfAn || !buchDa() || !BUCH.hatBL) return null;
   const w = S.ui.zbl || '';
-  return w === '-' ? (BUCH.BL.some((x) => !x) ? '-' : null) : (w && BUCH.BL.indexOf(w) >= 0 ? w : null);
+  return w === '-' ? (BUCH.BL.some((x) => !x) ? '-' : null) : (w && blListe().indexOf(w) >= 0 ? w : null);
 }
-const blFilter = (bl) => { const B = BUCH; return bl === null ? () => 0 : (bl === '-' ? (i) => (B.BL[B.k[i]] ? null : 0) : (i) => (B.BL[B.k[i]] === bl ? 0 : null)); };
+const blFilter = (bl) => { const B = BUCH, N = bl === null ? null : blNamen(); return bl === null ? () => 0 : (bl === '-' ? (i) => (N[B.k[i]] ? null : 0) : (i) => (N[B.k[i]] === bl ? 0 : null)); };
 /* neutral: die ganze Abteilung in ganzen Jahren, unabhängig von der Wahl in der Ansicht (fürs Ergebnis und fürs Vorrechnen) */
 function buchDiagrammDaten(neutral) {
   const bl = neutral ? null : blWahl(), zeit = neutral ? 'jahr' : S.ui.zzeit;
@@ -1900,7 +1902,7 @@ function buchDiagrammDaten(neutral) {
 /* Eine Spalte, je Bauführer: dieselben Werte wie in den Diagrammen, nebeneinander und nach Namen geordnet. Ab neun fasst «Weitere» die kleinsten
    zusammen. «neben»: Kostenstellen ohne Bauführer mit kaum Ertrag (Werkhof, Abteilung) fehlen bei «Von 100 Franken» und «Pro Stunde». */
 function buchBlDaten(s) {
-  const B = BUCH, M = buchAkk(s.von, s.bis, (i) => B.BL[B.k[i]] || '');
+  const B = BUCH, N = blNamen(), M = buchAkk(s.von, s.bis, (i) => N[B.k[i]] || '');
   let D = [];
   M.forEach((d, name) => { D.push(Object.assign(d, { name: name || 'Ohne Bauführer', ohne: !name })); });
   if (D.length > 8) {
@@ -1911,6 +1913,106 @@ function buchBlDaten(s) {
   }
   D.forEach((d) => { d.neben = !!d.ohne && (d.E || 0) * 3 < d.A; });
   return D.sort((x, y) => (x.ohne ? 2 : (x.rest ? 1 : 0)) - (y.ohne ? 2 : (y.rest ? 1 : 0)) || x.name.localeCompare(y.name, 'de'));
+}
+/* ---------- Bauleiter-Kürzel und Mitarbeiterliste (seit 1.7, Fahrplan 465) ----------
+   Im Auszug steht der Bauleiter als Kürzel. Fest verbunden ist ein Kürzel, das bei einem Mitarbeiter eingetragen ist («kuerzel», mehrere mit Komma).
+   Sonst schlägt das Tool die Person aus dem Büro vor (Abteilungsleiter, Bauführer, Hilfsbauführer), deren Anfangsbuchstaben passen, wenn es genau
+   eine ist. «Kürzel belassen» steht in S.buch.blOhne. Überall unter «Zahlen» steht der Name; zwei Kürzel derselben Person zählen zusammen. */
+const kzForm = (x) => String(x === undefined || x === null ? '' : x).trim().toUpperCase();
+const kzVon = (m) => Array.from(new Set(String((m && m.kuerzel) || '').split(/[,;]+/).map(kzForm).filter(Boolean)));   // mehrere Kürzel einer Person stehen mit Komma getrennt
+const kzGlatt = (s, ae) => {   // klein und ohne Akzente; Umlaute als «a» oder (ae) als «ae»
+  s = String(s || '').toLowerCase();
+  if (ae) s = s.replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue');
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss');
+};
+function kzKandidaten(name) {   // Kürzel, die zu einem Namen passen können: Anfangsbuchstaben in beiden Reihenfolgen, auch mit zwei oder drei Buchstaben eines Teils
+  const aus = new Set();
+  [false, true].forEach((ae) => {
+    const w = kzGlatt(name, ae).split(/[^a-z0-9]+/).filter(Boolean);
+    if (!w.length) return;
+    const f = w[0], l = w[w.length - 1];
+    aus.add(w.map((x) => x.charAt(0)).join(''));
+    aus.add(l.charAt(0) + w.slice(0, -1).map((x) => x.charAt(0)).join(''));
+    if (w.length > 1) [[1, 1], [1, 2], [2, 1], [2, 2], [1, 3], [3, 1]].forEach((n) => { aus.add(f.slice(0, n[0]) + l.slice(0, n[1])); aus.add(l.slice(0, n[1]) + f.slice(0, n[0])); });
+  });
+  return aus;
+}
+/* Je Kürzel aus den Buchungen: { m (wer dahinter steht, oder null), art ('fest' eingetragen, 'vorschlag', 'ohne' = belassen, 'frei' = kein Treffer), v (der Vorschlag) } */
+let blMerk = { sig: null, z: null, n: null };
+function blZuordnung() {
+  const B = BUCH, sig = BUCH_ID + '\n' + JSON.stringify(S.mitarbeiter.map((m) => [m.id, m.name, m.position, m.kuerzel || ''])) + '\n' + JSON.stringify((S.buch && S.buch.blOhne) || []);
+  if (blMerk.sig === sig) return blMerk.z;
+  const Z = new Map(), fest = new Map(), ohne = new Set(((S.buch && S.buch.blOhne) || []).map(kzForm));
+  S.mitarbeiter.forEach((m) => { kzVon(m).forEach((k) => { if (!fest.has(k)) fest.set(k, m); }); });
+  const buero = S.mitarbeiter.filter(imBuero).map((m) => [m, kzKandidaten(m.name)]);
+  Array.from(new Set(B.BL.filter(Boolean))).forEach((roh) => {
+    const k = kzForm(roh), formen = [kzGlatt(roh, false), kzGlatt(roh, true)].map((x) => x.replace(/[^a-z0-9]/g, '')), T = buero.filter((x) => formen.some((f) => f && x[1].has(f)));
+    const v = T.length === 1 ? T[0][0] : null;
+    Z.set(roh, fest.has(k) ? { m: fest.get(k), art: 'fest', v: v } : (ohne.has(k) ? { m: null, art: 'ohne', v: v } : { m: v, art: v ? 'vorschlag' : 'frei', v: v }));
+  });
+  blMerk = { sig: sig, z: Z, n: B.BL.map((roh) => { const z = roh ? Z.get(roh) : null; return roh ? (z && z.m ? z.m.name : roh) : ''; }) };
+  return Z;
+}
+const blNamen = () => { blZuordnung(); return blMerk.n; };   // je Kostenstelle der Name des Bauführers (oder sein Kürzel, solange niemand dahinter steht)
+function kzSetze(m, liste) { m.kuerzel = Array.from(new Set(liste.map(kzForm).filter(Boolean))).join(', '); }
+/* Ein Kürzel einer Person geben (ihre Kennung), es belassen ('-') oder wieder dem Vorschlag überlassen (''). Ein Kürzel gehört immer nur einer Person. */
+function kzZuweisen(kuerzel, wem) {
+  const k = kzForm(kuerzel);
+  if (!k) return;
+  S.mitarbeiter.forEach((m) => { if (kzVon(m).indexOf(k) >= 0) kzSetze(m, kzVon(m).filter((x) => x !== k)); });
+  if (S.buch) { S.buch.blOhne = (Array.isArray(S.buch.blOhne) ? S.buch.blOhne : []).map(kzForm).filter((x) => x && x !== k); if (wem === '-') S.buch.blOhne.push(k); }
+  const m = wem && wem !== '-' ? maVon(wem) : null;
+  if (m) kzSetze(m, kzVon(m).concat([k]));
+}
+/* Kürzel einer Person für die Mitarbeiterliste: die eingetragenen, dazu Vorschläge aus den Buchungen */
+function kzText(m) {
+  const vor = [];
+  if (buchDa() && BUCH.hatBL) blZuordnung().forEach((z, roh) => { if (z.art === 'vorschlag' && z.m === m) vor.push(kzForm(roh) + ' (Vorschlag)'); });
+  return kzVon(m).concat(vor).join(', ');
+}
+/* Feld «Kürzel» im Eintrag der Mitarbeiterliste: mit Buchungen eine Auswahl der Kürzel aus dem Auszug, sonst ein Feld zum Eintippen */
+function kzFeldHTML(x, m) {
+  const eigen = kzVon(x), zeigen = istPolier(x) || imBuero(x) || eigen.length > 0, Z = buchDa() && BUCH.hatBL ? blZuordnung() : null;
+  const kopf = '<div id="ma-kz-feld"' + (eigen.length ? ' data-hat="1"' : '') + (zeigen ? '' : ' hidden') + '><label class="f" for="ma-kz"><span>Kürzel in den Buchungen</span>';
+  const fuss = '<p class="muted klein kz-hilfe">Wie die Person im Auszug in der Spalte «Bauleiter» steht. Unter «Zahlen» stehen ihre Baustellen dann bei ihrem Namen.' + (eigen.length > 1 ? ' Auch verbunden: ' + esc(eigen.slice(1).join(', ')) + '.' : '') + '</p></div>';
+  if (!Z) return kopf + '<input id="ma-kz" name="kuerzel" value="' + esc(eigen.join(', ')) + '" autocomplete="off" autocapitalize="characters" placeholder="z. B. HM"></label>' + fuss;
+  const liste = [], bei = {};
+  let vorschlag = '';
+  Z.forEach((z, roh) => { const k = kzForm(roh); if (liste.indexOf(k) < 0) liste.push(k); if (z.art === 'fest' && z.m !== m) bei[k] = z.m.name; if (m && z.art === 'vorschlag' && z.m === m && !vorschlag) vorschlag = k; });
+  eigen.forEach((k) => { if (liste.indexOf(k) < 0) liste.push(k); });
+  const gew = eigen[0] || vorschlag;
+  return kopf + '<select id="ma-kz" name="kuerzel"' + (vorschlag && !eigen.length ? ' data-vorschlag="' + esc(vorschlag) + '"' : '') + '><option value="">Keines</option>' + liste.sort((a, b) => a.localeCompare(b, 'de')).map((k) => '<option value="' + esc(k) + '"' + (k === gew ? ' selected' : '') + '>' +
+    esc(k + (bei[k] ? ' (bisher bei ' + bei[k] + ')' : (k === vorschlag && !eigen.length ? ' (Vorschlag)' : ''))) + '</option>').join('') + '</select></label>' + fuss;
+}
+/* «Fertig» im Eintrag: das gewählte oder eingetippte Kürzel gehört jetzt dieser Person (und nur ihr) */
+function kzAusFeld(m, feld) {
+  if (!feld) return;
+  const alt = kzVon(m);
+  if (feld.tagName === 'SELECT') {
+    const v = kzForm(feld.value);
+    if (v) kzZuweisen(v, ''); else if (feld.dataset.vorschlag) kzZuweisen(feld.dataset.vorschlag, '-');   // «Keines» statt des Vorschlags: Das Kürzel bleibt Kürzel
+    kzSetze(m, (v ? [v] : []).concat(alt.slice(1).filter((x) => x !== v)));
+    return;
+  }
+  const neu = kzVon({ kuerzel: feld.value });
+  neu.forEach((k) => kzZuweisen(k, ''));
+  kzSetze(m, neu);
+}
+/* Abschnitt «Bauführer» im Fenster «Buchungen»: je Kürzel, wer dahinter steht */
+function blAbschnittHTML() {
+  const B = BUCH;
+  if (!B.hatBL) return '';
+  const Z = blZuordnung(), roh = Array.from(Z.keys()).sort((a, b) => a.localeCompare(b, 'de')), anz = {};
+  B.BL.forEach((x) => { if (x) anz[x] = (anz[x] || 0) + 1; });
+  const buero = S.mitarbeiter.filter(imBuero), rest = S.mitarbeiter.filter((m) => !imBuero(m));
+  const opt = (m, gew) => '<option value="' + m.id + '"' + (gew === m ? ' selected' : '') + '>' + esc(m.name) + '</option>';
+  return '<section class="gr"><h3>Bauführer</h3><p class="muted klein">Im Auszug steht der Bauleiter als Kürzel. Das Tool schlägt die Person aus dem Büro vor, deren Anfangsbuchstaben passen. Hier stellst du um, was nicht stimmt; dasselbe geht im Eintrag der Mitarbeiterliste. Zwei Kürzel derselben Person zählen zusammen.</p><ul class="bu-std">' +
+    roh.map((r) => {
+      const z = Z.get(r), fest = z.art === 'fest' ? z.m : null;
+      return '<li><div><b>' + esc(r) + '</b><small>' + esc(mehrzahl(anz[r], 'Kostenstelle', 'Kostenstellen')) + '</small></div><select class="bu-sel" data-wahl="blzu" data-k="' + esc(r) + '" aria-label="' + esc('Wer hinter ' + r + ' steht') + '">' +
+        '<option value=""' + (z.art === 'vorschlag' || z.art === 'frei' ? ' selected' : '') + '>' + esc(z.v ? 'Vorschlag: ' + z.v.name : 'Kein Vorschlag, Kürzel bleibt') + '</option><option value="-"' + (z.art === 'ohne' ? ' selected' : '') + '>Kürzel belassen</option>' +
+        (buero.length ? '<optgroup label="Büro">' + buero.map((m) => opt(m, fest)).join('') + '</optgroup>' : '') + (rest.length ? '<optgroup label="Weitere">' + rest.map((m) => opt(m, fest)).join('') + '</optgroup>' : '') + '</select></li>';
+    }).join('') + '</ul>' + (S.mitarbeiter.length ? '' : '<p class="muted klein">Noch keine Mitarbeiterliste. Sie steht in den Einstellungen unter «Mitarbeiter».</p>') + '</section>';
 }
 /* ---------- Beispiel: der BAB und dazu passende Buchungen, alles erfunden ---------- */
 const BSP_BAB = [   // Nummer, Bezeichnung, Art, Stufe, Werte für 2023, 2024, 2025, «Sep 26» und «Budget 2027»
@@ -1942,9 +2044,9 @@ const BSP_BAB = [   // Nummer, Bezeichnung, Art, Stufe, Werte für 2023, 2024, 2
   ['', 'Prod. Stunden Temp. Personal', 'stunden', 0, [1300, 2100, 1600, 1250, null]],
   ['', 'Total prod. Stunden', 'stunden', 1, [16500, 18000, 17900, 13650, 18500]]
 ];
-const BSP_KST = [   // Kostenstelle, Name, Bauführer, Gewicht, Kunde
-  ['7001', 'Parkhaus Nord, Decke', 'Bauführer 1', 1.3, 'Gemeinde Musterdorf'], ['7002', 'Brücke am Dorfbach', 'Bauführer 2', 1, 'Kanton'], ['7003', 'Schulhaus, Fassade', 'Bauführer 1', 0.8, 'Gemeinde Musterdorf'],
-  ['7004', 'Tiefgarage Zentrum', 'Bauführer 2', 1.2, 'Immobilien Beispiel AG'], ['7005', 'Kleinaufträge', 'Bauführer 2', 0.5, 'Diverse Kunden'], ['7090', 'Werkhof und Abteilung', '', 0.15, '']
+const BSP_KST = [   // Kostenstelle, Name, Kürzel des Bauleiters («B1» findet über die Anfangsbuchstaben zu «Bauführer 1» in der Mitarbeiterliste), Gewicht, Kunde
+  ['7001', 'Parkhaus Nord, Decke', 'B1', 1.3, 'Gemeinde Musterdorf'], ['7002', 'Brücke am Dorfbach', 'B2', 1, 'Kanton'], ['7003', 'Schulhaus, Fassade', 'B1', 0.8, 'Gemeinde Musterdorf'],
+  ['7004', 'Tiefgarage Zentrum', 'B2', 1.2, 'Immobilien Beispiel AG'], ['7005', 'Kleinaufträge', 'B2', 0.5, 'Diverse Kunden'], ['7090', 'Werkhof und Abteilung', '', 0.15, '']
 ];
 const BSP_KA = {   // je Kostenart: Bedeutung, Art der Buchung und Namen
   '3000': { bed: 'ERLOES', kunde: true }, '3010': { bed: 'ERLOES', kunde: true }, '3600': { bed: 'ERLOES', text: 'Übriger Ertrag' },
@@ -3553,12 +3655,12 @@ function awSchluessel(dim) {
   if (dim === 'lief') return (i) => { const da = B.da[i], nr = B.DK[B.d[i]]; return !nr || da < 0 ? null : (da === B.iKred ? 'K' + nr : (da === B.iDeb ? 'D' + nr : null)); };
   if (dim === 'ger') return (i) => (B.istGer[B.a[i]] ? B.TG[B.t[i]] : null);
   if (dim === 'kst') return (i) => B.KST[B.k[i]];
-  if (dim === 'bl') return (i) => B.BL[B.k[i]] || '';
+  if (dim === 'bl') { const N = blNamen(); return (i) => N[B.k[i]] || ''; }
   return () => '';
 }
 const ohneNull = (x) => String(x || '').replace(/^0+(?=\d)/, '');
 function awNamen() {   // Namen zu den Schlüsseln; die Kostenart heisst wie im Auszug, sonst wie ihre Zeile im BAB
-  const B = BUCH, bab = {};
+  const B = BUCH, bab = {}, BN = blNamen();
   S.zahlen.zeilen.forEach((z) => { if (z.art === 'konto' && z.nr) bab[ohneNull(z.nr)] = z.name; });
   const gruppe = (key) => (key ? (BED_NAME[key] || key.charAt(0) + key.slice(1).toLowerCase()) : 'Ohne Gruppe');
   const art = (a) => (a < 0 ? '' : (B.KAN[a] || bab[ohneNull(B.BAB[a] || B.KA[a])] || ''));
@@ -3575,7 +3677,7 @@ function awNamen() {   // Namen zu den Schlüsseln; die Kostenart heisst wie im 
     klein(dim, key) {
       if (dim === 'art') { const a = B.KA.indexOf(key); return a >= 0 && B.BED[a] ? gruppe(B.BED[a]) : ''; }
       if (dim === 'lief') return (key.charAt(0) === 'D' ? 'Debitor ' : 'Kreditor ') + key.slice(1);
-      if (dim === 'kst') { const k = B.KST.indexOf(key); return k >= 0 ? B.BL[k] : ''; }
+      if (dim === 'kst') { const k = B.KST.indexOf(key); return k >= 0 ? BN[k] : ''; }
       return '';
     },
     art: art
@@ -3744,6 +3846,7 @@ function buchInfoHTML() {
     '<label class="f" for="bu-bis"><span>Gezählt wird bis</span><select id="bu-bis" data-wahl="zaehlbis"><option value="">' + esc(B.ymAbg >= 0 ? 'Letzter abgegrenzter Monat (' + ymName(B.ymAbg) + ')' : 'Letzter Monat (' + ymName(B.ymMax) + ')') + '</option>' +
     monate.map((ym) => '<option value="' + ym + '"' + (m.zaehlBis === ym ? ' selected' : '') + '>' + esc(ymName(ym)) + '</option>').join('') + '</select></label>' +
     '<p class="muted klein">Ein laufender Monat ist erst vollständig, wenn er abgegrenzt ist. Darum zählt das Tool von selbst nur bis zum letzten Monat mit Abschlussbuchung.</p></section>' +
+    blAbschnittHTML() +
     (stdListe.length ? '<section class="gr"><h3>Stunden</h3><p class="muted klein">Welche Kostenarten als produktive Stunden zählen. Der Vorschlag kommt aus den Lohnbuchungen; mit dem Abgleich siehst du, ob er zum BAB passt.</p><ul class="bu-std">' +
       stdListe.map((a) => '<li><div><b>' + esc(N.name('art', B.KA[a])) + '</b><small class="tnum">' + esc(spalteLang(sp) + ': ' + fmt(menge[a]) + ' Std.') + '</small></div>' + stdWahl(a) + '</li>').join('') + '</ul></section>' : '') +
     '<p class="muted klein">Neu einlesen über «Zahlen einfügen»: Jeder Monat, der im Auszug vorkommt, wird ersetzt; die übrigen bleiben stehen.</p>' + loeschKnopf('buch-weg', 'Buchungen entfernen'));
@@ -4844,7 +4947,7 @@ const SHEET = {
   maliste() {
     const L = S.mitarbeiter, w = sitzungWert();
     const weg = L.filter((m) => { const a = austrittVon(m, w); return a.art === 'hand' && a.wert && a.wert < w; }), da = L.filter((m) => weg.indexOf(m) < 0);
-    const zeile = (m) => '<li><button type="button" class="ma-z" data-a="ma" data-id="' + m.id + '"><span class="ma-n">' + esc(m.name) + '</span><span class="ma-m">' + esc(maMeta(m, weg.indexOf(m) >= 0)) + '</span>' + ic('right', 'pf') + '</button></li>';
+    const zeile = (m) => '<li><button type="button" class="ma-z" data-a="ma" data-id="' + m.id + '"><span class="ma-n">' + esc(m.name) + '</span><span class="ma-m">' + esc([maMeta(m, weg.indexOf(m) >= 0), kzText(m) ? 'Kürzel ' + kzText(m) : ''].filter(Boolean).join(' · ')) + '</span>' + ic('right', 'pf') + '</button></li>';
     return huelle('Mitarbeiter' + (L.length ? ' (' + L.length + ')' : ''),
       '<div class="reihe"><button type="button" class="btn stark" data-a="ma-neu">' + ic('plus') + '<span>Mitarbeiter</span></button><button type="button" class="btn" data-a="sheet" data-s="maimport">' + ic('liste') + '<span>Liste einfügen</span></button></div>' +
       (L.length ? posGruppen(da).map((g) => '<h3 class="bl">' + esc(g.name) + ' (' + g.liste.length + ')</h3><ul class="ma-liste">' + g.liste.map(zeile).join('') + '</ul>').join('') +
@@ -4854,7 +4957,7 @@ const SHEET = {
   },
   maimport() {
     return formHuelle('Mitarbeiter als Liste', 'maimport',
-      '<p class="muted">Aus Excel samt Kopfzeile kopieren und hier einfügen: Name, Vorname, Position, Polier, Eintritt, Geburtsdatum (oder Austritt). Wer schon in der Liste steht, wird ergänzt. Aus dem Geburtsdatum rechnet das Tool die Pension: Bauarbeiter bis Polier mit 60, Büro mit 65.</p>' +
+      '<p class="muted">Aus Excel samt Kopfzeile kopieren und hier einfügen: Name, Vorname, Position, Polier, Eintritt, Geburtsdatum (oder Austritt), auf Wunsch auch Kürzel. Wer schon in der Liste steht, wird ergänzt. Aus dem Geburtsdatum rechnet das Tool die Pension: Bauarbeiter bis Polier mit 60, Büro mit 65.</p>' +
       '<label class="f" for="ma-t"><span>Liste</span><textarea id="ma-t" name="text" rows="10" data-fokus autocomplete="off" spellcheck="false" placeholder="Name · Vorname · Position · Polier · Eintritt · Geburtsdatum"></textarea></label>' +
       '<p class="muted klein" id="ma-info">Noch nichts erkannt.</p>', 'Übernehmen');
   },
@@ -4871,6 +4974,7 @@ const SHEET = {
     return formHuelle(m ? 'Mitarbeiter' : (istPolier(x) ? 'Neuer Polier' : 'Neuer Mitarbeiter'), 'ma',
       '<label class="f" for="ma-n"><span>Name</span><input id="ma-n" name="name" value="' + esc(x.name) + '" autocomplete="off" data-fokus></label>' +
       '<label class="f" for="ma-p"><span>Position</span><input id="ma-p" name="position" value="' + esc(x.position) + '" list="ma-pos" autocomplete="off" placeholder="z. B. Bauarbeiter"><datalist id="ma-pos">' + POSITIONEN.map((p) => '<option value="' + p + '">').join('') + '</datalist></label>' +
+      kzFeldHTML(x, m) +
       '<div class="f" id="ma-po-feld"' + (istPolier(x) || imBuero(x) ? ' hidden' : '') + '><span>Polier (Stammgruppe)</span><input type="hidden" name="polier" value="' + esc(drin ? x.polier : '') + '"><div class="reihe">' +
         P.map((p) => '<button type="button" class="btn' + (x.polier === p.id ? ' stark' : '') + '" data-a="ma-polier" data-v="' + p.id + '">' + esc(p.name) + '</button>').join('') +
         '<button type="button" class="btn' + (drin ? '' : ' stark') + '" data-a="ma-polier" data-v="">' + (P.length ? 'Keiner' : 'Noch kein Polier in der Liste') + '</button></div>' +
@@ -5092,14 +5196,14 @@ function maLesen(text) {
   if (!Z.length) return [];
   const SP = [['vorname', /^vorname$/i], ['name', /^(name|nachname|mitarbeiter(in)?|mitarbeitende|person)$/i], ['position', /^(position|funktion|stelle|beruf|rolle)$/i],
     ['polier', /^(polier|gruppe|stammgruppe|zuteilung|team)$/i], ['eintritt', /^(eintritt\S*|seit|ab)$/i], ['austritt', /^(austritt\S*|bis|pensionierung|far)$/i],
-    ['geburt', /^(geburtsdatum|geburtstag|geboren|geb\.?|jahrgang)$/i]];
+    ['geburt', /^(geburtsdatum|geburtstag|geboren|geb\.?|jahrgang)$/i], ['kuerzel', /^(kürzel|kuerzel|kurzzeichen|initialen|kz\.?)$/i]];
   const kopf = {};
   Z[0].forEach((x, i) => { const s = SP.find((p) => p[1].test(x)); if (s && kopf[s[0]] === undefined) kopf[s[0]] = i; });
   if (kopf.name !== undefined && (Object.keys(kopf).length >= 2 || Z[0].length === 1)) Z = Z.slice(1);
   else ['name', 'position', 'polier', 'eintritt', 'austritt'].forEach((k, i) => { kopf[k] = i; delete kopf.vorname; });
   return Z.map((z) => {
     const w = (k) => (kopf[k] === undefined ? '' : z[kopf[k]] || '');
-    return { name: [w('vorname'), w('name')].filter(Boolean).join(' '), position: w('position'), polier: w('polier'), eintritt: w('eintritt'), austritt: w('austritt'), geburt: w('geburt') };
+    return { name: [w('vorname'), w('name')].filter(Boolean).join(' '), position: w('position'), polier: w('polier'), eintritt: w('eintritt'), austritt: w('austritt'), geburt: w('geburt'), kuerzel: w('kuerzel') };
   }).filter((x) => x.name);
 }
 /* Gelesene Zeilen in die Liste: Wer schon drin ist (gleicher Name), wird ergänzt; der Polier wird am Namen gesucht und, wenn er
@@ -5126,6 +5230,7 @@ function maAnwenden(Z, probe) {
     if (z.eintritt) m.eintritt = z.eintritt;
     if (z.austritt) m.austritt = z.austritt;
     if (z.geburt) m.geburt = z.geburt;
+    if (z.kuerzel && !probe) { const neu = kzVon({ kuerzel: z.kuerzel }); neu.forEach((k) => kzZuweisen(k, '')); kzSetze(m, neu); }   // seit 1.7
   });
   Z.forEach((z) => {   // der Polier erst jetzt: Er kann weiter unten in der Liste stehen
     if (!z.polier) return;
@@ -5881,6 +5986,7 @@ const FORMS = {
     m.eintritt = f.elements.eintritt.value.trim();
     m.austritt = f.elements.austritt.value.trim();
     m.geburt = f.elements.geburt.value.trim();
+    kzAusFeld(m, f.elements.kuerzel);   // seit 1.7
     const zur = sheet && sheet.zurueck;
     speichern(); render();
     if (zur) auf({ art: zur }); else zu();
@@ -6006,7 +6112,7 @@ document.addEventListener('input', (e) => {
   if (el.dataset && el.dataset.glmit) { const g = S.glGruppen.find((y) => y.id === el.dataset.glmit); if (g) { g.notiz = el.value; speichern(); } }   // seit 1.4: Mitschrift eines Unterthemas
   if (el.id === 'li-t') { const info = $('#li-info'); if (info) info.textContent = listeInfo(el.value); }
   if (el.id === 'ma-t') { const info = $('#ma-info'); if (info) info.textContent = maInfo(el.value); }
-  if (el.id === 'ma-p') { const feld = $('#ma-po-feld'); if (feld) feld.hidden = /polier|leiter|führer|fuehrer/i.test(el.value); }
+  if (el.id === 'ma-p') { const feld = $('#ma-po-feld'), kz = $('#ma-kz-feld'), kader = /polier|leiter|führer|fuehrer/i.test(el.value); if (feld) feld.hidden = kader; if (kz) kz.hidden = !kader && !kz.dataset.hat; }
 });
 document.addEventListener('change', (e) => {
   const d = e.target.dataset || {};
@@ -6019,6 +6125,7 @@ document.addEventListener('change', (e) => {
   if (d.wahl === 'bfreiter') { bfAn = e.target.checked; anzeigeMerken(); render(); }   // seit 1.6: «Bauführer» und «Auswertung» unter «Zahlen», je Gerät
   if (d.wahl === 'zbl' || d.wahl === 'zsp') { S.ui[d.wahl] = e.target.value; AW_ALLE = false; speichern(true); render(); }
   if (d.wahl === 'zaehlbis' && S.buch) { merken(); S.buch.zaehlBis = e.target.value === '' ? null : +e.target.value; S.ui.zsp = ''; speichern(); render(); renderSheet(false); }
+  if (d.wahl === 'blzu' && S.buch) { merken(); kzZuweisen(d.k, e.target.value); speichern(); render(); renderSheet(false); }   // seit 1.7: wer hinter einem Bauleiter-Kürzel steht
 });
 document.addEventListener('keydown', (e) => {
   if (e.isComposing) return;
