@@ -218,6 +218,53 @@ body.drueber .ablage,body.drueber .tab-rahmen,body.drueber .dg{border-color:var(
 #tip strong{display:block;font-weight:700}
 #tip[hidden]{display:none}
 
+/* ---------- Zahlen aus den Buchungen (seit 1.6) ---------- */
+.bu-leiste{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.45rem 1.2rem;margin:-.25rem 0 .9rem}
+.bu-wahl{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .8rem}
+.bu-wahl:empty{display:none}
+.bu-stand{display:flex;flex-wrap:wrap;align-items:center;gap:0 .9rem;margin-left:auto;color:var(--muted);font-size:.8125rem}
+.bu-stand .reihe{gap:.9rem}
+.bu-stand .textlink{font-size:.8125rem;padding:.3rem 0}
+.aw-dim{margin-bottom:.6rem}
+.aw-dim .seg{display:flex;flex-wrap:wrap;width:max-content;max-width:100%}
+.aw-filter{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.6rem}
+.aw-filter .chip{display:inline-flex;align-items:center;gap:.3rem;max-width:100%}
+.aw-filter .chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.aw-filter .chip .ic{width:.9rem;height:.9rem}
+.bst.aw td{font-size:.9375rem;vertical-align:middle}
+.bst.aw td:first-child{min-width:10rem}
+.bst.aw td b{font-weight:600}
+.bst.aw .nw{white-space:nowrap}
+.bst.aw .neg{color:var(--alarm)}
+.bst.aw.fest tbody tr{cursor:default}
+.bst.aw.fest td:first-child{min-width:0;font-weight:400;color:var(--muted)}
+.bst.aw tfoot td{font-weight:700;padding-top:.65rem;padding-bottom:.65rem}
+.aw-bk{width:20%;min-width:6rem}
+.aw-bk .rg-b{height:.7rem}
+.abg-chips{margin:0}
+.abg-chips .chip{display:inline-flex;align-items:center;gap:.35rem}
+.abg-chips .chip .ic{width:.95rem;height:.95rem;color:var(--accent)}
+.abg-chips .chip i{font-style:normal;min-width:1.15rem;height:1.15rem;padding:0 .3rem;border-radius:.6rem;background:var(--warn-soft);color:var(--warn);font-size:.6875rem;font-weight:700;display:grid;place-items:center}
+.abg-chips .chip[aria-pressed="true"] .ic{color:#fff}
+.abg-chips .chip[aria-pressed="true"] i{background:#fff}
+.abg-chips .chip.leer{color:var(--muted)}
+.abg-urteil{display:flex;align-items:flex-start;gap:.5rem;font-weight:600}
+.abg-urteil.ok{color:var(--accent)}
+.abg-urteil.abw{color:var(--warn)}
+.abg{border-collapse:collapse;width:100%;font-size:.9375rem}
+.abg th,.abg td{padding:.42rem 0 .42rem .9rem;border-top:1px solid var(--sep);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;vertical-align:top}
+.abg th:first-child{text-align:left;padding-left:0;white-space:normal;font-weight:500;overflow-wrap:anywhere}
+.abg thead th{border-top:0;color:var(--muted);font-size:.8125rem;font-weight:600}
+.abg .nr{color:var(--muted);font-size:.8125rem;margin-right:.45rem}
+.abg td.abw{color:var(--warn);font-weight:700}
+.abg td.ok{color:var(--accent)}
+.abg td.ok .ic{width:1rem;height:1rem}
+.abg tr.zw th{padding-top:1.1rem;color:var(--muted);font-size:.8125rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-top:0}
+.bu-std{display:flex;flex-direction:column;gap:.5rem}
+.bu-std li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.4rem .8rem;padding:.6rem .8rem;border-radius:.9rem;background:var(--bg)}
+.bu-std li > div:first-child{min-width:0}
+.bu-std b{display:block;font-weight:600;overflow-wrap:anywhere}
+.bu-std small{color:var(--muted);font-size:.8125rem}
 /* ---------- Themen ---------- */
 .themen{display:grid;grid-template-columns:17rem minmax(0,1fr);gap:1.5rem;align-items:start}
 .tliste2{display:flex;flex-direction:column;gap:.2rem;position:sticky;top:5rem;max-height:calc(100vh - 6rem);overflow-y:auto;scrollbar-width:thin;padding:.2rem;margin:-.2rem}
@@ -868,6 +915,14 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
   .e-dl{grid-template-columns:5.2rem minmax(0,1fr);gap:.25rem .6rem}
   .e-wahl .seg{display:flex;flex-wrap:wrap;max-width:100%}   /* seit 1.4: vier Ansichten im Ergebnis brechen am Handy um, statt die Seite zu verbreitern */
   .e-wahl .seg button{flex:1 1 auto}
+  .seg.viele{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}   /* seit 1.6: drei oder vier Ansichten unter «Zahlen» stehen am Handy in zwei Reihen */
+  .seg.viele button{text-align:center}
+  .bu-wahl .seg{display:flex;flex-wrap:wrap;max-width:100%}
+  .bu-wahl .seg button,.aw-dim .seg button{flex:1 1 auto}
+  .aw-dim .seg{width:auto}
+  .bu-stand{margin-left:0}
+  .bst.aw .alt,.aw-bk{display:none}
+  .bst.aw td:first-child{min-width:0}
   .stw li .stw-t{font-size:1.0625rem}
   .stw-antw{width:calc(100% - 2.3rem)}
   .frage{font-size:1.0625rem}
@@ -981,7 +1036,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
 (function () {
 'use strict';
 
-/* Werkzeug für den Strategietag einer Abteilung: Zahlen (Verlauf aus dem BAB, mit Diagrammen), Kunden (Offerten je Jahr
+/* Werkzeug für den Strategietag einer Abteilung: Zahlen (Verlauf aus den Buchungen oder aus dem BAB, mit Diagrammen), Kunden (Offerten je Jahr
    und Aufträge mit Ranglisten), Themen mit Notizen und Beschlüssen, Ergebnis als PDF. Eine Datei, kein Netz, keine Bibliothek.
    «Sichern» schreibt diese Datei samt Inhalt neu: Der Inhalt steht im Skript-Block «daten». Eine neuere Version des
    Tools liest diesen Block aus der alten Datei («Daten laden») und bringt ihn mit migriere() auf ihren Aufbau.
@@ -989,8 +1044,8 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '1.5';         // Version des Tools, steht in den Einstellungen
-const FORMAT = 11;             // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
+const VERSION = '1.6';         // Version des Tools, steht in den Einstellungen
+const FORMAT = 12;             // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
 const KEY_G = KEY + ':gesichert';   // Stand, der zuletzt in eine Datei ging
@@ -1127,6 +1182,7 @@ function leer() {
     v: FORMAT, beispiel: false, stand: '',
     meta: { titel: 'Strategie ' + (new Date().getFullYear() + 1), abteilung: 'Abteilung', datum: heute(), zoom: (window.innerWidth || 0) >= 1500 ? 1.15 : 1, modus: 'auto' },
     zahlen: { perioden: [], zeilen: [], sicht: 'summen', ansicht: 'diagramme' },
+    buch: null,   // seit 1.6: Buchungen als Quelle der Zahlen {id, typ, groesse, n, von, bis, abg, am, std (eigene Wahl je Kostenart), zaehlBis}; der Inhalt liegt wie ein Anhang daneben
     themen: themenStart(),
     parkplatz: [],   // bis 1.2 die Punkte des Parkplatzes; seit 1.3 stehen sie in «park». Das Feld bleibt leer und nimmt nur noch Stände älterer Fassungen auf
     park: parkNeu(), // seit 1.3: der Parkplatz als letztes Traktandum; notizen = parkiert [{id, text, gl, vj (aus welchem Jahr)}], beschluesse wie in jedem Thema
@@ -1139,7 +1195,7 @@ function leer() {
     mitarbeiter: [],   // Mitarbeiterliste: [{id, name, position, polier (Kennung des Poliers), eintritt, austritt, geburt}]
     // Kunden: Offerten je Jahr [{id, jahr, gerechnet, erhalten}] und Aufträge [{id, jahr, objekt, planer, bauherr, bauherrArt, objektArt, speziell, mitbewerber, eingeladen, betrag, notiz}]
     kunden: { offerten: [], auftraege: [], ansicht: 'diagramme', jahr: '', filter: '' },
-    ui: { bereich: 'zahlen', thema: '', auf: {}, bst: 'bf', eart: 'um', uart: 'schluss', beil: {} }   // eart: Ansicht im Ergebnis (seit 1.4 zuerst «Umsetzung»); uart: Ansicht der Umsetzung (seit 1.5: «Am Schluss» oder «Unterm Jahr»); beil: zugeschaltete Beilagen des Protokolls
+    ui: { bereich: 'zahlen', thema: '', auf: {}, bst: 'bf', eart: 'um', uart: 'schluss', beil: {}, zbl: '', zzeit: 'jahr', zsp: '', aw: { dim: 'gruppe', f: {}, mass: 'k' } }   // zbl, zzeit, zsp, aw (seit 1.6): Wahl unter «Zahlen» aus den Buchungen; eart: Ansicht im Ergebnis (seit 1.4 zuerst «Umsetzung»); uart: Ansicht der Umsetzung (seit 1.5: «Am Schluss» oder «Unterm Jahr»); beil: zugeschaltete Beilagen des Protokolls
   };
 }
 
@@ -1149,37 +1205,9 @@ function beispiel() {
   s.beispiel = true;
   const P = ['2023', '2024', '2025', 'Sep 26', 'Budget 2027'].map((n) => ({ id: uid(), name: n }));
   const Z = (nr, name, art, stufe, werte) => { const w = {}; werte.forEach((v, i) => { if (v !== null) w[P[i].id] = v; }); return { k: nr ? 'n' + nr : 't' + name.toLowerCase(), nr: nr, name: name, art: art, stufe: stufe, w: w }; };
-  const o = null;
   s.zahlen.perioden = P;
-  s.zahlen.zeilen = [
-    Z('3000', 'Bauertrag Akkord', 'konto', 0, [3900000, 4350000, 4100000, 3200000, o]),
-    Z('3010', 'Bauertrag Regie', 'konto', 0, [180000, 210000, 240000, 170000, o]),
-    Z('3099', 'Summe Erträge Bau', 'summe', 1, [4080000, 4560000, 4340000, 3370000, o]),
-    Z('3600', 'Uebriger Ertrag', 'konto', 0, [12000, 9000, 15000, 6000, o]),
-    Z('3691', 'Summe andere Erträge', 'summe', 1, [12000, 9000, 15000, 6000, o]),
-    Z('3699', 'Summe Erträge', 'summe', 2, [4092000, 4569000, 4355000, 3376000, 4600000]),
-    Z('4020', 'Beton', 'konto', 0, [310000, 345000, 330000, 250000, o]),
-    Z('4080', 'Uebriges Baumaterial', 'konto', 0, [95000, 110000, 102000, 78000, o]),
-    Z('4091', 'Baumaterial', 'summe', 1, [405000, 455000, 432000, 328000, o]),
-    Z('4400', 'Betriebsmaterial', 'konto', 0, [38000, 41000, 44000, 31000, o]),
-    Z('4591', 'Verbrauchs/Betriebsmaterial', 'summe', 1, [38000, 41000, 44000, 31000, o]),
-    Z('5920', 'Subunternehmer', 'konto', 0, [820000, 960000, 870000, 690000, o]),
-    Z('4610', 'Fremdaufträge', 'konto', 0, [410000, 520000, 480000, 350000, o]),
-    Z('4891', 'Fremdleistung', 'summe', 1, [1230000, 1480000, 1350000, 1040000, o]),
-    Z('5000', 'Monatslöhne Betrieb', 'konto', 0, [980000, 1020000, 1060000, 810000, o]),
-    Z('9101', 'Zuschlag Sozialkosten', 'konto', 0, [720000, 750000, 780000, 596000, o]),
-    Z('5910', 'Personalmiete', 'konto', 0, [90000, 140000, 110000, 85000, o]),
-    Z('5991', 'Personalaufwand', 'summe', 1, [1790000, 1910000, 1950000, 1491000, o]),
-    Z('9150', 'Gerätemiete intern', 'konto', 0, [46000, 52000, 49000, 37000, o]),
-    Z('9250', 'Fahrzeugmiete intern', 'konto', 0, [88000, 96000, 93000, 70000, o]),
-    Z('6195', 'Interne Verrechnung', 'summe', 1, [134000, 148000, 142000, 107000, o]),
-    Z('9800', 'Umlagen Gemeinkosten', 'konto', 0, [300000, 330000, 320000, 245000, o]),
-    Z('9910', 'Total Aufwand', 'summe', 2, [3897000, 4364000, 4238000, 3242000, 4370000]),
-    Z('9990', 'Ergebnis', 'summe', 3, [-195000, -205000, -117000, -134000, -230000]),
-    Z('', 'Prod. Stunden Monatslohn', 'stunden', 0, [15200, 15900, 16300, 12400, o]),
-    Z('', 'Prod. Stunden Temp. Personal', 'stunden', 0, [1300, 2100, 1600, 1250, o]),
-    Z('', 'Total prod. Stunden', 'stunden', 1, [16500, 18000, 17900, 13650, 18500])
-  ];
+  s.zahlen.zeilen = BSP_BAB.map((z) => Z(z[0], z[1], z[2], z[3], z[4]));
+  s.buch = { id: 'buch-beispiel', typ: BUCH_TYP, groesse: 0, n: 0, von: 0, bis: 0, abg: -1, am: '', std: {}, zaehlBis: null };   // seit 1.6: die Buchungen dazu entstehen in buchBeispiel()
   const N = (text, gl) => ({ id: uid(), text: text, gl: !!gl });
   const B = (was, wer, bis, gl) => ({ id: uid(), was: was, wer: wer || '', bis: bis || '', gl: !!gl });
   const T = s.themen;
@@ -1262,6 +1290,7 @@ function migriere(d) {
     if (d.ui && typeof d.ui === 'object') d.ui.eart = 'um';   // die neue erste Ansicht im Ergebnis
     d.v = 11;
   }
+  if (d.v < 12) d.v = 12;   // 1.6: Buchungen als Quelle der Zahlen («buch»; der Inhalt liegt wie ein Anhang daneben), Wahl unter «Zahlen» in «ui»; alles zusätzlich, ältere Stände laden unverändert
   return d;
 }
 function themaNormal(t) {
@@ -1297,8 +1326,15 @@ function normal(d) {
   s.v = Math.max(FORMAT, (d && d.v) || 0);
   s.meta = Object.assign({}, l.meta, (d && d.meta) || {});
   const z = (d && d.zahlen) || {};
-  s.zahlen = Object.assign({}, z, { perioden: Array.isArray(z.perioden) ? z.perioden : [], zeilen: Array.isArray(z.zeilen) ? z.zeilen : [], sicht: z.sicht === 'alle' ? 'alle' : 'summen', ansicht: z.ansicht === 'tabelle' ? 'tabelle' : 'diagramme' });
+  s.zahlen = Object.assign({}, z, { perioden: Array.isArray(z.perioden) ? z.perioden : [], zeilen: Array.isArray(z.zeilen) ? z.zeilen : [], sicht: z.sicht === 'alle' ? 'alle' : 'summen', ansicht: ['tabelle', 'bf', 'aw'].indexOf(z.ansicht) >= 0 ? z.ansicht : 'diagramme' });
   s.zahlen.zeilen.forEach((x) => { if (!x.w || typeof x.w !== 'object') x.w = {}; });
+  // seit 1.6: Buchungen. Der Inhalt kommt aus der Datei in die Ablage; im Stand bleibt nur, was ihn beschreibt
+  const bu0 = d && d.buch && typeof d.buch === 'object' && typeof d.buch.id === 'string' && d.buch.id ? d.buch : null;
+  if (bu0) {
+    if (typeof bu0.inhalt === 'string' && bu0.inhalt) anhMerken(bu0.id, bu0.inhalt);
+    s.buch = Object.assign({}, bu0, { typ: BUCH_TYP, groesse: typeof bu0.groesse === 'number' && bu0.groesse > 0 ? bu0.groesse : 0, std: bu0.std && typeof bu0.std === 'object' ? bu0.std : {}, zaehlBis: typeof bu0.zaehlBis === 'number' ? bu0.zaehlBis : null });
+    delete s.buch.inhalt;
+  } else s.buch = null;
   if (!Array.isArray(s.themen)) s.themen = l.themen;
   s.parkplatz = (Array.isArray(s.parkplatz) ? s.parkplatz : []).filter((x) => x && typeof x.text === 'string');
   s.parkplatz.forEach((x) => { if (!x.id) x.id = uid(); x.an = !!x.an; x.gl = !!x.gl; ['antwort', 'wer', 'bis', 'vj'].forEach((k) => { if (typeof x[k] !== 'string') x[k] = ''; }); });   // seit 1.2
@@ -1368,6 +1404,10 @@ function normal(d) {
     s.ui.uart = s.themen.concat([s.park]).some((t) => t.beschluesse.some((b) => b.erl) || t.aufgaben.some((a) => a.erl)) ? 'jahr' : 'schluss';
   }
   if (!s.ui.beil || typeof s.ui.beil !== 'object') s.ui.beil = {};
+  if (!s.ui.aw || typeof s.ui.aw !== 'object') s.ui.aw = { dim: 'gruppe', f: {}, mass: 'k' };   // seit 1.6: Wahl unter «Zahlen» aus den Buchungen
+  if (!s.ui.aw.f || typeof s.ui.aw.f !== 'object') s.ui.aw.f = {};
+  ['zbl', 'zsp'].forEach((k) => { if (typeof s.ui[k] !== 'string') s.ui[k] = ''; });
+  if (s.ui.zzeit !== 'bis') s.ui.zzeit = 'jahr';
   return s;
 }
 /* GL-Themen (seit 1.4 mit Unterthemen): zwei Ebenen wie bei den Themen; ein Unterthema steht direkt hinter seinem GL-Thema */
@@ -1501,6 +1541,7 @@ function anhHolen(id) {
 }
 /* Inhalte aus einem Stand übernehmen, auch wenn ein neuerer Stand aus dem Zwischenspeicher gezeigt wird */
 function anhSammeln(d) {
+  try { const b = d && d.buch; if (b && typeof b === 'object' && typeof b.id === 'string' && typeof b.inhalt === 'string' && b.inhalt) anhMerken(b.id, b.inhalt); } catch (e) { /* weiter */ }
   try { (d && Array.isArray(d.rueckmeldungen) ? d.rueckmeldungen : []).forEach((x) => { const a = x && x.bild; if (a && typeof a.id === 'string' && typeof a.inhalt === 'string' && a.inhalt) anhMerken(a.id, a.inhalt); }); } catch (e) { /* weiter */ }
   try { (d && Array.isArray(d.themen) ? d.themen : []).forEach((t) => { (t && Array.isArray(t.anhaenge) ? t.anhaenge : []).forEach((a) => { if (a && typeof a.id === 'string' && typeof a.inhalt === 'string' && a.inhalt) anhMerken(a.id, a.inhalt); }); }); } catch (e) { /* weiter */ }
 }
@@ -1516,6 +1557,451 @@ function vorbereiten(d) {
     return s;
   }
   return normal(migriere(d));
+}
+
+/* ====================================================================================================
+   Buchungen (seit 1.6, Fahrplan 460): der Auszug «KSt-Istwerte» als Quelle der Zahlen
+   ----------------------------------------------------------------------------------------------------
+   Jede Buchung bleibt erhalten: Monat, Kostenstelle, Kostenart, Betrag, Menge, Einheit, Herkunft, Text, Kreditor, Beleg.
+   Der Inhalt liegt wie ein Anhang neben dem Stand (Ablage des Browsers; beim Sichern in der Datei). Im Stand steht nur
+   S.buch mit Kennung und Eckdaten, damit Zwischenspeicher und «Rückgängig» klein bleiben.
+   Einlesen ersetzt jeden Monat, der im Auszug vorkommt; Monate, die fehlen, bleiben stehen.
+   Gezählt wird bis und mit dem letzten Monat mit Abschlussbuchung («abgegrenzt bis»); was danach läuft, zählt nicht mit.
+   Unter «Buchungen» lässt sich ein anderer letzter Monat wählen (S.buch.zaehlBis).
+   ==================================================================================================== */
+let BUCH = null;       // die Buchungen im Arbeitsspeicher (je Spalte ein Zahlenfeld) oder null
+let BUCH_ID = '';      // zu welcher Kennung BUCH gehört
+let buchWartet = null; // gelesener Auszug, der auf «Übernehmen» wartet
+let buchLaedt = '';     // Kennung, deren Inhalt gerade aus der Ablage des Browsers geholt wird
+let bfAn = IM_RAHMEN;  // «Bauführer» und «Auswertung»: je Gerät ein- oder ausgeblendet, am Anfang aus (wie der Reiter «GL»)
+const BUCH_TYP = 'application/x-buchungen+json';
+const BED_NAME = { ERLOES: 'Ertrag', ERTRAG: 'Ertrag', LOHN: 'Lohn', MATERIAL: 'Material', FREMDL: 'Fremdleistung', GERVRR: 'Geräte', UMLAGEN: 'Umlagen', ENERGIE: 'Energie', BETRMAT: 'Betriebsmaterial', SCHALUNG: 'Schalung',
+  WERBUNG: 'Werbung', VERS: 'Versicherung', SONST: 'Sonstiges', UNTERHALT: 'Unterhalt', SKONTI: 'Skonti', VERWALTUNG: 'Verwaltung' };
+/* Spalten des Auszugs, erkannt an ihrem Titel. Pflicht: Kostenstelle, Kostenart, Betrag, Buchungsperiode. */
+const BSPALTEN = [['kst', /^kostenstelle$|^kst\.?$/i], ['ka', /^kostenart$/i], ['b', /^ist-?\s?betrag$|^betrag$/i], ['m', /^menge$/i], ['e', /^einheit$/i], ['p', /^buchungsperiode$|^periode$/i],
+  ['da', /^debitor\s*\/\s*kreditor$/i], ['d', /^debitor\s*\/\s*kreditor\W*nr\.?$/i], ['bn', /^belegn/i], ['bd', /^belegdatum$/i], ['t', /^buchungstext$/i], ['bab', /bab\W*zeile/i], ['bed', /^bedeutung/i],
+  ['h', /^herkunft$/i], ['bl', /^bauleiter|^bauf(ü|ue)hrer/i], ['ksn', /kostenstelle.*(bez|name)|bez.*kostenstelle/i], ['kan', /kostenart.*(bez|name|text)|bez.*kostenart/i]];
+function buchSpalten(kopf) {   // Titelzeile → je Feld die Spalte (−1: fehlt); null, wenn es kein Auszug mit Buchungen ist
+  const sp = BSPALTEN.map((s) => kopf.findIndex((x) => s[1].test(String(x === undefined || x === null ? '' : x).trim())));
+  const hat = (k) => sp[BSPALTEN.findIndex((s) => s[0] === k)] >= 0;
+  return hat('kst') && hat('ka') && hat('b') && hat('p') ? sp : null;
+}
+const BF = {}; BSPALTEN.forEach((s, i) => { BF[s[0]] = i; });   // Feld → Platz in der gelesenen Zeile
+/* Excel zählt Tage seit dem 30.12.1899; 25569 ist der 1.1.1970 */
+function buchYm(v) {   // Buchungsperiode → Jahr × 12 + Monat (0 bis 11); −1: nicht lesbar
+  const ausTag = (n) => { const d = new Date((Math.round(n) - 25569) * 864e5); return d.getUTCFullYear() * 12 + d.getUTCMonth(); };
+  if (v && typeof v === 'object' && typeof v.tag === 'number') return ausTag(v.tag);
+  if (typeof v === 'number') return v > 20000 && v < 80000 ? ausTag(v) : -1;
+  const mj = monatJahr(v);
+  return mj && mj[0] >= 1 && mj[0] <= 12 && mj[1] > 1990 && mj[1] < 2100 ? mj[1] * 12 + mj[0] - 1 : -1;
+}
+function buchTag(v) {   // Belegdatum → Tage seit dem 1.1.1970; 0: unbekannt
+  if (v && typeof v === 'object' && typeof v.tag === 'number') return Math.round(v.tag) - 25569;
+  if (typeof v === 'number') return v > 20000 && v < 80000 ? Math.round(v) - 25569 : 0;
+  const s = String(v === undefined || v === null ? '' : v).trim();
+  let m = /^(\d{1,2})\.(\d{1,2})\.(\d{2,4})/.exec(s);
+  if (m) return Math.round(Date.UTC(+m[3] < 100 ? 2000 + (+m[3]) : +m[3], +m[2] - 1, +m[1]) / 864e5);
+  m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s);
+  return m ? Math.round(Date.UTC(+m[1], +m[2] - 1, +m[3]) / 864e5) : 0;
+}
+const ymName = (ym) => MONATE[ym % 12] + ' ' + Math.floor(ym / 12);          // «September 2026»
+const ymKurz = (ym) => MON[ym % 12] + ' ' + String(Math.floor(ym / 12)).slice(2);   // «Sep 26»
+/* Sammelt Buchungen und baut dabei die Listen der Kostenstellen, Kostenarten, Texte usw. auf */
+function buchSammler() {
+  const T = {}, I = {};
+  ['KST', 'KA', 'EIN', 'HER', 'TXT', 'DK', 'DKA', 'BEL'].forEach((k) => { T[k] = []; I[k] = new Map(); });
+  const ix = (k, v) => { let i = I[k].get(v); if (i === undefined) { i = T[k].length; T[k].push(v); I[k].set(v, i); } return i; };
+  const z = { ym: [], k: [], a: [], b: [], m: [], e: [], h: [], t: [], d: [], da: [], bd: [], bn: [] };
+  const BL = [], KSN = [], BAB = [], BED = [], KAN = [];
+  const merk = (L, i, v) => { if (v) L[i] = v; else if (L[i] === undefined) L[i] = ''; };   // der letzte Wert gilt; ein leerer überschreibt nichts
+  return {
+    dazu(o) {
+      const k = ix('KST', o.kst), a = ix('KA', o.ka);
+      merk(BL, k, o.bl); merk(KSN, k, o.ksn); merk(BAB, a, o.bab); merk(BED, a, o.bed); merk(KAN, a, o.kan);
+      z.ym.push(o.ym); z.k.push(k); z.a.push(a); z.b.push(Math.round(o.b * 100) / 100); z.m.push(Math.round(o.m * 1000) / 1000);
+      z.e.push(ix('EIN', o.e)); z.h.push(ix('HER', o.h)); z.t.push(ix('TXT', o.t)); z.d.push(ix('DK', o.d)); z.da.push(ix('DKA', o.da)); z.bd.push(o.bd); z.bn.push(ix('BEL', o.bn));
+    },
+    fertig() { return Object.assign({ v: 1, z: z, BL: BL, KSN: KSN, BAB: BAB, BED: BED, KAN: KAN }, T); }
+  };
+}
+/* Gelesene Zeilen (Felder in der Reihenfolge von BSPALTEN) → Sammler. Gibt zurück, wie viele Zeilen nicht lesbar waren. */
+function buchZeilenDazu(sammler, zeilen) {
+  const txt = (v) => (v === undefined || v === null || typeof v === 'object' ? '' : String(v)).trim();
+  const nr = (v) => (typeof v === 'number' ? String(v) : txt(v)).replace(/\.0+$/, '');
+  const num = (v) => { if (typeof v === 'number') return isFinite(v) ? v : 0; const n = zahl(v); return n === null ? 0 : n; };
+  let schlecht = 0;
+  zeilen.forEach((z) => {
+    const kst = nr(z[BF.kst]), ka = nr(z[BF.ka]), ym = buchYm(z[BF.p]);
+    if (!kst && !ka && (z[BF.b] === undefined || z[BF.b] === '')) return;   // leere Zeile
+    if (!kst || !ka || ym < 0) { schlecht++; return; }
+    sammler.dazu({ ym: ym, kst: kst, ka: ka, b: num(z[BF.b]), m: num(z[BF.m]), e: txt(z[BF.e]), h: txt(z[BF.h]), t: txt(z[BF.t]), d: nr(z[BF.d]), da: txt(z[BF.da]), bd: buchTag(z[BF.bd]), bn: txt(z[BF.bn]),
+      bl: txt(z[BF.bl]), ksn: txt(z[BF.ksn]), bab: nr(z[BF.bab]), bed: txt(z[BF.bed]).toUpperCase(), kan: txt(z[BF.kan]) });
+  });
+  return schlecht;
+}
+/* Abgelegter Inhalt (oder frisch gesammelt) → Arbeitsform mit Zahlenfeldern und allem, was sich daraus ableitet */
+function buchFest(P) {
+  if (!P || !P.z || !Array.isArray(P.z.ym)) return null;
+  const z = P.z, n = z.ym.length;
+  const B = { n: n, ym: Int32Array.from(z.ym), k: Int32Array.from(z.k), a: Int32Array.from(z.a), b: Float64Array.from(z.b), m: Float64Array.from(z.m), e: Int32Array.from(z.e), h: Int32Array.from(z.h),
+    t: Int32Array.from(z.t), d: Int32Array.from(z.d), da: Int32Array.from(z.da), bd: Int32Array.from(z.bd), bn: Int32Array.from(z.bn) };
+  const liste = (k, laenge) => { const L = Array.isArray(P[k]) ? P[k] : [], aus = []; for (let i = 0; i < Math.max(L.length, laenge || 0); i++) aus.push(L[i] === null || L[i] === undefined ? '' : String(L[i])); return aus; };
+  ['KST', 'KA', 'EIN', 'HER', 'TXT', 'DK', 'DKA', 'BEL'].forEach((k) => { B[k] = liste(k); });
+  ['BL', 'KSN'].forEach((k) => { B[k] = liste(k, B.KST.length); });
+  ['BAB', 'BED', 'KAN'].forEach((k) => { B[k] = liste(k, B.KA.length); });
+  // Erträge: Kostenarten unter 4000 oder mit einer Bedeutung wie «Erlös»
+  B.istE = B.KA.map((x, i) => (/^\d{4}$/.test(x) && +x < 4000) || /erl(ö|oe?)s|ertr|umsatz/i.test(B.BED[i]));
+  let sE = 0, sA = 0, nE = 0, lo = Infinity, hi = -Infinity, abg = -1;
+  const iKred = B.DKA.findIndex((x) => /^kreditor$/i.test(x)), iDeb = B.DKA.findIndex((x) => /^debitor$/i.test(x));
+  /* Abschlussbuchung: Text mit «Abgrenz…» (ohne Storno) oder Beleg «ABSCHLUSS <Monat>». Nennt der Beleg einen anderen Monat als die
+     Buchungsperiode (eine Auflösung im Folgemonat), zeigt die Zeile nicht, dass dieser Monat abgegrenzt ist. */
+  const monKurz = (x) => String(x).toLowerCase().replace(/ä|ae/g, 'a').slice(0, 3), MK = MONATE.map(monKurz);
+  const istAbgT = B.TXT.map((x) => /abgrenz/i.test(x) && !/storno/i.test(x));
+  const belMonat = B.BEL.map((x) => { const m = /^abschluss\s+(\S+)/i.exec(x); return m ? MK.indexOf(monKurz(m[1])) : (/^abschluss\b/i.test(x) ? -1 : -2); });   // 0 bis 11: Monat; -1: Abschluss ohne Monat; -2: kein Abschluss-Beleg
+  for (let i = 0; i < n; i++) {
+    const ym = B.ym[i];
+    if (ym < lo) lo = ym;
+    if (ym > hi) hi = ym;
+    if (B.istE[B.a[i]]) { sE += B.b[i]; nE++; } else sA += B.b[i];
+    if (ym > abg) { const bm = belMonat[B.bn[i]]; if (bm >= 0 ? bm === ym % 12 : (bm === -1 || istAbgT[B.t[i]])) abg = ym; }
+  }
+  B.vzE = sE < 0 ? -1 : 1; B.vzA = sA < 0 ? -1 : 1;   // Erträge sind oft als Minus gebucht; gezeigt wird beides positiv
+  B.hatE = nE > 0; B.ymMin = n ? lo : 0; B.ymMax = n ? hi : 0; B.ymAbg = abg;
+  B.hatBL = B.BL.some(Boolean);
+  B.iKred = iKred; B.iDeb = iDeb;
+  // Lieferant und Kunde: je Kreditor- oder Debitor-Nummer der häufigste Text (ohne «Storno»); Gerät: der Text ohne «AuV», «Reparatur», «Sonstiges»
+  B.TL = B.TXT.map((x) => x.replace(/\s*\bstorno\b\s*/i, ' ').trim());
+  B.TG = B.TXT.map((x) => x.replace(/\s+(AuV|Reparatur|Sonstiges)\s*$/i, '').trim());
+  const partner = (iArt, wort) => {
+    const zaehl = B.DK.map(() => null);
+    if (iArt >= 0) for (let i = 0; i < n; i++) if (B.da[i] === iArt && B.DK[B.d[i]]) { const c = zaehl[B.d[i]] || (zaehl[B.d[i]] = new Map()), t = B.t[i]; c.set(t, (c.get(t) || 0) + 1); }
+    return zaehl.map((c, d) => { if (!c) return ''; let best = -1, bn = 0; c.forEach((v, t) => { if (v > bn || (v === bn && B.TL[t].length < B.TL[best].length)) { best = t; bn = v; } }); return B.TL[best] || (wort + ' ' + B.DK[d]); });
+  };
+  B.LIEF = partner(iKred, 'Kreditor'); B.KUND = partner(iDeb, 'Debitor');
+  B.istGer = B.KA.map((x, i) => B.BED[i] === 'GERVRR');
+  // je Kostenart: Buchungen mit Kreditor oder Debitor (für den nächsten Schritt in der Auswertung)
+  const mitP = B.KA.map(() => 0), alleP = B.KA.map(() => 0);
+  for (let i = 0; i < n; i++) { alleP[B.a[i]]++; if ((B.da[i] === iKred && iKred >= 0) || (B.da[i] === iDeb && iDeb >= 0)) mitP[B.a[i]]++; }
+  B.hatPartner = mitP.map((x, a) => x * 2 > alleP[a]);
+  // Stunden: je Kostenart, was die Lohnbuchungen und die Temporär-Rechnungen nahelegen (lässt sich unter «Stunden» ändern)
+  const st = B.KA.map(() => ({ menge: 0, kred: 0, betrieb: 0, kader: 0, n: 0 }));
+  B.stdEin = B.EIN.map((x) => x === '' || /^std\.?$|^h$|^stunden$/i.test(x));   // Mengen in Stunden: Einheit «STD» oder keine (Lohnbuchungen)
+  const tagBetrieb = B.TXT.map((x) => /\$L-(ML|SL|PL)\$/i.test(x)), tagKader = B.TXT.map((x) => /\$L-[A-Z]+\$/i.test(x) && !/\$L-(ML|SL|PL)\$/i.test(x));
+  for (let i = 0; i < n; i++) {
+    const a = B.a[i];
+    if (B.BED[a] !== 'LOHN' || !B.m[i] || !B.stdEin[B.e[i]]) continue;
+    const s = st[a]; s.n++; s.menge += Math.abs(B.m[i]);
+    if (B.da[i] === iKred && iKred >= 0) s.kred++;
+    if (tagBetrieb[B.t[i]]) s.betrieb++; else if (tagKader[B.t[i]]) s.kader++;
+  }
+  B.stdStat = st;
+  B.stdVor = st.map((s) => (!s.n ? '' : (s.kred * 2 > s.n ? 't' : (s.kader > s.betrieb ? '-' : (s.kred === 0 ? 'e' : '-')))));   // 'e' eigene Leute, 't' Temporäre, '-' zählt nicht, '' keine Stunden
+  return B;
+}
+/* Arbeitsform → Inhalt zum Ablegen (gewöhnliche Listen) */
+function buchInhalt(B) {
+  const z = {};
+  ['ym', 'k', 'a', 'b', 'm', 'e', 'h', 't', 'd', 'da', 'bd', 'bn'].forEach((k) => { z[k] = Array.from(B[k]); });
+  const P = { v: 1, z: z };
+  ['KST', 'KA', 'EIN', 'HER', 'TXT', 'DK', 'DKA', 'BEL', 'BL', 'KSN', 'BAB', 'BED', 'KAN'].forEach((k) => { P[k] = B[k]; });
+  return P;
+}
+/* Bestehende Buchungen und ein neuer Auszug: Jeder Monat, der im neuen vorkommt, wird ganz ersetzt */
+function buchVerbinden(alt, neu) {
+  const S0 = buchSammler(), drin = new Set(neu.ym);
+  const zeile = (B, i) => ({ ym: B.ym[i], kst: B.KST[B.k[i]], ka: B.KA[B.a[i]], b: B.b[i], m: B.m[i], e: B.EIN[B.e[i]], h: B.HER[B.h[i]], t: B.TXT[B.t[i]], d: B.DK[B.d[i]], da: B.DKA[B.da[i]], bd: B.bd[i], bn: B.BEL[B.bn[i]],
+    bl: B.BL[B.k[i]], ksn: B.KSN[B.k[i]], bab: B.BAB[B.a[i]], bed: B.BED[B.a[i]], kan: B.KAN[B.a[i]] });
+  if (alt) for (let i = 0; i < alt.n; i++) if (!drin.has(alt.ym[i])) S0.dazu(zeile(alt, i));
+  for (let i = 0; i < neu.n; i++) S0.dazu(zeile(neu, i));
+  return buchFest(S0.fertig());
+}
+/* Je Monat: Anzahl und Summen, zum Vergleich vor dem Übernehmen */
+function buchMonate(B) {
+  const M = new Map();
+  if (B) for (let i = 0; i < B.n; i++) { let x = M.get(B.ym[i]); if (!x) { x = { n: 0, b: 0, m: 0 }; M.set(B.ym[i], x); } x.n++; x.b += B.b[i]; x.m += B.m[i]; }
+  return M;
+}
+const buchDa = () => !!(BUCH && BUCH.n && S.buch && S.buch.id === BUCH_ID);
+/* Bis zu welchem Monat gezählt wird: die eigene Wahl, sonst der letzte Monat mit Abschlussbuchung, sonst der letzte Monat überhaupt */
+function buchBis() {
+  const B = BUCH, w = S.buch ? S.buch.zaehlBis : null;
+  return typeof w === 'number' && w >= B.ymMin && w <= B.ymMax ? w : (B.ymAbg >= 0 ? B.ymAbg : B.ymMax);
+}
+/* Die Buchungen sind die Quelle der Diagramme, sobald sie Erträge enthalten (oder es keinen BAB gibt) */
+const buchAktiv = () => buchDa() && (BUCH.hatE || !S.zahlen.perioden.some((p) => !istBudget(p)));
+/* Passt BUCH noch zum Stand? Nach «Rückgängig», Laden oder Start den Inhalt holen: aus dem Arbeitsspeicher, sonst aus der Ablage des Browsers.
+   Das Beispiel entsteht jedes Mal neu aus dem Beispiel-BAB und wird nirgends abgelegt. */
+const buchVersucht = {};
+function buchPruefen() {
+  const id = S.buch && S.buch.id ? S.buch.id : '';
+  if (id === BUCH_ID) return;
+  if (buchLaedt !== id) buchLaedt = '';
+  if (!id) { BUCH = null; BUCH_ID = ''; return; }
+  if (id === 'buch-beispiel' && !ANH[id]) { BUCH = buchFest(buchBeispiel()); BUCH_ID = id; return; }
+  const aus = (text) => { try { const B = buchFest(JSON.parse(text)); if (B) { BUCH = B; BUCH_ID = id; return true; } } catch (e) { /* unlesbar */ } return false; };
+  if (ANH[id]) { if (!aus(ANH[id])) { BUCH = null; BUCH_ID = id; } return; }
+  BUCH = null; BUCH_ID = '';
+  if (buchVersucht[id]) return;
+  buchVersucht[id] = 1; buchLaedt = id;
+  anhHolen(id).then((x) => { if (buchLaedt === id) buchLaedt = ''; if (x && !ANH[id]) ANH[id] = x; if (S.buch && S.buch.id === id) { render(); if (sheet) renderSheet(false); } });
+}
+/* Alte Auszüge aus der Ablage des Browsers räumen (beim Start). Im laufenden Betrieb bleiben sie stehen, damit «Rückgängig» sie wiederfindet. */
+function buchAufraeumen() {
+  const id = S.buch && S.buch.id ? S.buch.id : '';
+  anhDb().then((db) => {
+    const st = db.transaction('a', 'readwrite').objectStore('a'), r = st.getAllKeys();
+    r.onsuccess = () => { (r.result || []).forEach((k) => { if (typeof k === 'string' && /^buch-/.test(k) && k !== id) st.delete(k); }); };
+  }).catch(() => { /* ohne Ablage */ });
+}
+/* Den gelesenen Auszug übernehmen */
+function buchUebernehmen() {
+  const w = buchWartet;
+  if (!w) return;
+  merken();
+  const warBeispiel = S.beispiel;
+  if (warBeispiel) beispielWeg();
+  const alt = buchDa() ? BUCH : null, vor = S.buch || {};
+  const B = buchVerbinden(alt, w.B);
+  const text = JSON.stringify(buchInhalt(B)), id = 'buch-' + uid();
+  anhMerken(id, text);
+  S.buch = { id: id, typ: BUCH_TYP, groesse: text.length, n: B.n, von: B.ymMin, bis: B.ymMax, abg: B.ymAbg, am: new Date().toISOString(), std: vor.std && typeof vor.std === 'object' ? vor.std : {}, zaehlBis: null };
+  BUCH = B; BUCH_ID = id; buchWartet = null;
+  S.ui.bereich = 'zahlen';
+  if (['diagramme', 'bf', 'aw'].indexOf(S.zahlen.ansicht) < 0) S.zahlen.ansicht = 'diagramme';
+  geaendert(true);
+  window.scrollTo(0, 0);
+  toast((warBeispiel ? 'Beispiel entfernt. ' : '') + fmt(w.B.n) + ' Buchungen übernommen' + (B.ymAbg >= 0 ? ', abgegrenzt bis ' + ymName(B.ymAbg) : ''), true);
+  if (w.danach) zeigeImport(w.danach.teile, w.danach.fehler);
+}
+function buchWeg() {
+  if (!S.buch) return;
+  merken();
+  S.buch = null; BUCH = null; BUCH_ID = '';
+  if (S.zahlen.ansicht !== 'tabelle') S.zahlen.ansicht = 'diagramme';
+  geaendert(true);
+  toast('Buchungen entfernt', true);
+}
+/* Eine Datei auf Buchungen prüfen: Excel ohne Umweg über ein Gitter (zehntausende Zeilen), Text und CSV über das Gitter */
+async function buchAusDatei(file) {
+  let zeilen = null;
+  if (/\.xls[xm]$/i.test(file.name)) {
+    const r = await xlsxListe(await file.arrayBuffer(), buchSpalten);
+    if (r) zeilen = r.zeilen;
+  } else if (!/\.xls$/i.test(file.name)) {
+    const kopfzeile = (await file.slice(0, 4096).text()).split(/\r?\n/)[0] || '';
+    if (!/kostenstelle/i.test(kopfzeile) || !/kostenart/i.test(kopfzeile)) return null;
+    zeilen = buchAusGitter(gitterAusText(await file.text()));
+  }
+  return zeilen;
+}
+function buchAusGitter(g) {   // Gitter mit Titelzeile → Zeilen in der Reihenfolge von BSPALTEN; null: keine Buchungen
+  for (let r = 0; r < Math.min(g.length, 30); r++) {
+    const sp = buchSpalten(g[r] || []);
+    if (sp) return g.slice(r + 1).map((z) => sp.map((c) => (c < 0 ? undefined : z[c])));
+  }
+  return null;
+}
+/* Gelesene Zeilen (aus einer oder mehreren Dateien) zur Übernahme vorschlagen. danach: ein BAB aus derselben Auswahl, der nach dem Übernehmen an die Reihe kommt. */
+function buchVorschlag(teile, danach) {
+  let B = null, schlecht = 0;
+  teile.forEach((zeilen) => {   // mehrere Dateien: Überschneiden sie sich, gilt je Monat die spätere, damit nichts doppelt zählt
+    const S0 = buchSammler();
+    schlecht += buchZeilenDazu(S0, zeilen);
+    const X = buchFest(S0.fertig());
+    if (X && X.n) B = B ? buchVerbinden(B, X) : X;
+  });
+  if (!B || !B.n) { toast('In dieser Liste finde ich keine lesbaren Buchungen. Es braucht die Spalten «Kostenstelle», «Kostenart», «Istbetrag» und «Buchungsperiode».'); return; }
+  const alt = buchDa() && !S.beispiel ? buchMonate(BUCH) : new Map(), neu = buchMonate(B);
+  const info = { neu: [], anders: [], gleich: 0, bleibt: 0, schlecht: schlecht };
+  neu.forEach((x, ym) => { const a = alt.get(ym); if (!a) info.neu.push(ym); else if (a.n !== x.n || Math.abs(a.b - x.b) > 0.005 || Math.abs(a.m - x.m) > 0.0005) info.anders.push({ ym: ym, vor: a.n, nach: x.n, db: x.b - a.b }); else info.gleich++; });
+  alt.forEach((x, ym) => { if (!neu.has(ym)) info.bleibt++; });
+  info.neu.sort((a, b) => a - b); info.anders.sort((a, b) => a.ym - b.ym);
+  buchWartet = { B: B, info: info, danach: danach || null };
+  S.ui.bereich = 'zahlen';
+  auf({ art: 'buchimport' });
+  render();
+}
+/* Stunden: was eine Kostenart zählt. Eigene Wahl aus S.buch.std, sonst der Vorschlag aus den Buchungen. */
+function buchStd() {
+  const B = BUCH, eigen = (S.buch && S.buch.std) || {};
+  return B.KA.map((nr, a) => { const w = eigen[nr] || B.stdVor[a]; return w === 'e' ? 1 : (w === 't' ? 2 : 0); });
+}
+/* Kostengruppe einer Kostenart für die Diagramme: 0 Ertrag, 1 Personal, 2 Material, 3 Fremdleistung, 4 Übriges.
+   Gibt es einen BAB, gilt seine Gliederung (die Summe, unter der das Konto steht), damit beide dasselbe zeigen. */
+function babGruppen() {
+  const zs = S.zahlen.zeilen, k = kernZeilen(), iE = zs.indexOf(k.ertrag), iA = zs.indexOf(k.aufwand), map = {};
+  let offen = [];
+  zs.forEach((z, i) => {
+    if (z.art === 'konto') offen.push(z.nr);
+    else if (z.art === 'summe') {
+      if (z.stufe === 1 && (iE < 0 || i > iE) && (iA < 0 || i < iA)) { const g = /personal/i.test(z.name) ? 1 : (/material/i.test(z.name) ? 2 : (/fremd/i.test(z.name) ? 3 : 4)); offen.forEach((nr) => { map[nr] = g; }); }
+      else if (z.stufe >= 2) offen.forEach((nr) => { if (map[nr] === undefined) map[nr] = 4; });
+      offen = [];
+    }
+  });
+  return map;
+}
+function buchGruppen() {
+  const B = BUCH, bab = babGruppen();
+  return B.KA.map((nr, a) => {
+    if (B.istE[a]) return 0;
+    const g = bab[String(B.BAB[a] || nr).replace(/^0+(?=\d)/, '')];
+    if (g !== undefined) return g;
+    const bed = B.BED[a];
+    return bed === 'LOHN' ? 1 : (bed === 'MATERIAL' || bed === 'SCHALUNG' || bed === 'BETRMAT' ? 2 : (bed === 'FREMDL' ? 3 : 4));
+  });
+}
+/* Spalten aus den Buchungen: ganze Jahre und das laufende bis zum letzten abgegrenzten Monat («Sep 26»);
+   mit «gleicher Zeitraum» jedes Jahr bis zu diesem Monat. */
+const buchTeiljahr = () => buchBis() % 12 < 11;
+function buchSpaltenListe(zeit) {
+  const B = BUCH, bis = buchBis(), jE = Math.floor(bis / 12), mE = bis % 12, gleich = (zeit || S.ui.zzeit) === 'bis' && mE < 11, L = [];
+  for (let j = Math.floor(B.ymMin / 12); j <= jE; j++) {
+    const teil = gleich || (j === jE && mE < 11);
+    L.push({ name: teil ? MON[mE] + ' ' + String(j).slice(2) : String(j), von: j * 12, bis: teil ? j * 12 + mE : j * 12 + 11, jahr: j, teil: teil });
+  }
+  return L;
+}
+/* Summen je Schlüssel für einen Zeitraum: Ertrag, Aufwand, Gruppen und Stunden. schluessel(i) → Schlüssel oder null (zählt nicht). */
+function buchAkk(von, bis, schluessel) {
+  const B = BUCH, gr = buchGruppen(), std = buchStd(), M = new Map(), ende = Math.min(bis, buchBis());
+  for (let i = 0; i < B.n; i++) {
+    const ym = B.ym[i];
+    if (ym < von || ym > ende) continue;
+    const key = schluessel(i);
+    if (key === null) continue;
+    let d = M.get(key);
+    if (!d) { d = { E: 0, A: 0, personal: 0, material: 0, fremd: 0, eigene: 0, temp: 0, weitere: 0, n: 0 }; M.set(key, d); }
+    const a = B.a[i], g = gr[a];
+    d.n++;
+    if (g === 0) d.E += B.b[i] * B.vzE;
+    else { const v = B.b[i] * B.vzA; d.A += v; if (g === 1) d.personal += v; else if (g === 2) d.material += v; else if (g === 3) d.fremd += v; }
+    if (std[a] && B.stdEin[B.e[i]]) { if (std[a] === 1) d.eigene += B.m[i]; else d.temp += B.m[i]; }
+  }
+  M.forEach((d) => { d.G = d.E - d.A; d.h = d.eigene + d.temp > 0 ? d.eigene + d.temp : null; d.bud = false; if (!B.hatE) { d.E = null; d.G = null; } });
+  return M;
+}
+const leerD = () => ({ E: BUCH.hatE ? 0 : null, A: 0, G: BUCH.hatE ? 0 : null, personal: 0, material: 0, fremd: 0, eigene: 0, temp: 0, weitere: 0, h: null, n: 0, bud: false });
+/* Welcher Bauführer ist gewählt? null: die ganze Abteilung; '-': Kostenstellen ohne Bauführer */
+const blListe = () => (buchDa() ? Array.from(new Set(BUCH.BL.filter(Boolean))).sort((a, b) => a.localeCompare(b, 'de')) : []);
+function blWahl() {
+  if (!bfAn || !buchDa() || !BUCH.hatBL) return null;
+  const w = S.ui.zbl || '';
+  return w === '-' ? (BUCH.BL.some((x) => !x) ? '-' : null) : (w && BUCH.BL.indexOf(w) >= 0 ? w : null);
+}
+const blFilter = (bl) => { const B = BUCH; return bl === null ? () => 0 : (bl === '-' ? (i) => (B.BL[B.k[i]] ? null : 0) : (i) => (B.BL[B.k[i]] === bl ? 0 : null)); };
+/* neutral: die ganze Abteilung in ganzen Jahren, unabhängig von der Wahl in der Ansicht (fürs Ergebnis und fürs Vorrechnen) */
+function buchDiagrammDaten(neutral) {
+  const bl = neutral ? null : blWahl(), zeit = neutral ? 'jahr' : S.ui.zzeit;
+  const bud = bl === null && zeit !== 'bis' ? babDiagrammDaten(S.zahlen.perioden.filter(istBudget).slice(-2)) : [];
+  const L = buchSpaltenListe(zeit).slice(-(6 - bud.length)), f = blFilter(bl);
+  return L.map((s) => Object.assign(buchAkk(s.von, s.bis, f).get(0) || leerD(), { name: s.name })).concat(bud);
+}
+/* Eine Spalte, je Bauführer: dieselben Werte wie in den Diagrammen, nebeneinander und nach Namen geordnet. Ab neun fasst «Weitere» die kleinsten
+   zusammen. «neben»: Kostenstellen ohne Bauführer mit kaum Ertrag (Werkhof, Abteilung) fehlen bei «Von 100 Franken» und «Pro Stunde». */
+function buchBlDaten(s) {
+  const B = BUCH, M = buchAkk(s.von, s.bis, (i) => B.BL[B.k[i]] || '');
+  let D = [];
+  M.forEach((d, name) => { D.push(Object.assign(d, { name: name || 'Ohne Bauführer', ohne: !name })); });
+  if (D.length > 8) {
+    const klein = new Set(D.filter((d) => !d.ohne).sort((x, y) => ((y.E || 0) + y.A) - ((x.E || 0) + x.A)).slice(6)), w = leerD();
+    klein.forEach((d) => { ['E', 'A', 'personal', 'material', 'fremd', 'eigene', 'temp', 'n'].forEach((k) => { if (d[k] !== null) w[k] = (w[k] || 0) + d[k]; }); });
+    w.G = w.E === null ? null : w.E - w.A; w.h = w.eigene + w.temp > 0 ? w.eigene + w.temp : null; w.name = 'Weitere'; w.rest = true;
+    D = D.filter((d) => !klein.has(d)).concat([w]);
+  }
+  D.forEach((d) => { d.neben = !!d.ohne && (d.E || 0) * 3 < d.A; });
+  return D.sort((x, y) => (x.ohne ? 2 : (x.rest ? 1 : 0)) - (y.ohne ? 2 : (y.rest ? 1 : 0)) || x.name.localeCompare(y.name, 'de'));
+}
+/* ---------- Beispiel: der BAB und dazu passende Buchungen, alles erfunden ---------- */
+const BSP_BAB = [   // Nummer, Bezeichnung, Art, Stufe, Werte für 2023, 2024, 2025, «Sep 26» und «Budget 2027»
+  ['3000', 'Bauertrag Akkord', 'konto', 0, [3900000, 4350000, 4100000, 3200000, null]],
+  ['3010', 'Bauertrag Regie', 'konto', 0, [180000, 210000, 240000, 170000, null]],
+  ['3099', 'Summe Erträge Bau', 'summe', 1, [4080000, 4560000, 4340000, 3370000, null]],
+  ['3600', 'Uebriger Ertrag', 'konto', 0, [12000, 9000, 15000, 6000, null]],
+  ['3691', 'Summe andere Erträge', 'summe', 1, [12000, 9000, 15000, 6000, null]],
+  ['3699', 'Summe Erträge', 'summe', 2, [4092000, 4569000, 4355000, 3376000, 4600000]],
+  ['4020', 'Beton', 'konto', 0, [310000, 345000, 330000, 250000, null]],
+  ['4080', 'Uebriges Baumaterial', 'konto', 0, [95000, 110000, 102000, 78000, null]],
+  ['4091', 'Baumaterial', 'summe', 1, [405000, 455000, 432000, 328000, null]],
+  ['4400', 'Betriebsmaterial', 'konto', 0, [38000, 41000, 44000, 31000, null]],
+  ['4591', 'Verbrauchs/Betriebsmaterial', 'summe', 1, [38000, 41000, 44000, 31000, null]],
+  ['5920', 'Subunternehmer', 'konto', 0, [820000, 960000, 870000, 690000, null]],
+  ['4610', 'Fremdaufträge', 'konto', 0, [410000, 520000, 480000, 350000, null]],
+  ['4891', 'Fremdleistung', 'summe', 1, [1230000, 1480000, 1350000, 1040000, null]],
+  ['5000', 'Monatslöhne Betrieb', 'konto', 0, [980000, 1020000, 1060000, 810000, null]],
+  ['9101', 'Zuschlag Sozialkosten', 'konto', 0, [720000, 750000, 780000, 596000, null]],
+  ['5910', 'Personalmiete', 'konto', 0, [90000, 140000, 110000, 85000, null]],
+  ['5991', 'Personalaufwand', 'summe', 1, [1790000, 1910000, 1950000, 1491000, null]],
+  ['9150', 'Gerätemiete intern', 'konto', 0, [46000, 52000, 49000, 37000, null]],
+  ['9250', 'Fahrzeugmiete intern', 'konto', 0, [88000, 96000, 93000, 70000, null]],
+  ['6195', 'Interne Verrechnung', 'summe', 1, [134000, 148000, 142000, 107000, null]],
+  ['9800', 'Umlagen Gemeinkosten', 'konto', 0, [300000, 330000, 320000, 245000, null]],
+  ['9910', 'Total Aufwand', 'summe', 2, [3897000, 4364000, 4238000, 3242000, 4370000]],
+  ['9990', 'Ergebnis', 'summe', 3, [-195000, -205000, -117000, -134000, -230000]],
+  ['', 'Prod. Stunden Monatslohn', 'stunden', 0, [15200, 15900, 16300, 12400, null]],
+  ['', 'Prod. Stunden Temp. Personal', 'stunden', 0, [1300, 2100, 1600, 1250, null]],
+  ['', 'Total prod. Stunden', 'stunden', 1, [16500, 18000, 17900, 13650, 18500]]
+];
+const BSP_KST = [   // Kostenstelle, Name, Bauführer, Gewicht, Kunde
+  ['7001', 'Parkhaus Nord, Decke', 'Bauführer 1', 1.3, 'Gemeinde Musterdorf'], ['7002', 'Brücke am Dorfbach', 'Bauführer 2', 1, 'Kanton'], ['7003', 'Schulhaus, Fassade', 'Bauführer 1', 0.8, 'Gemeinde Musterdorf'],
+  ['7004', 'Tiefgarage Zentrum', 'Bauführer 2', 1.2, 'Immobilien Beispiel AG'], ['7005', 'Kleinaufträge', 'Bauführer 2', 0.5, 'Diverse Kunden'], ['7090', 'Werkhof und Abteilung', '', 0.15, '']
+];
+const BSP_KA = {   // je Kostenart: Bedeutung, Art der Buchung und Namen
+  '3000': { bed: 'ERLOES', kunde: true }, '3010': { bed: 'ERLOES', kunde: true }, '3600': { bed: 'ERLOES', text: 'Übriger Ertrag' },
+  '4020': { bed: 'MATERIAL', namen: ['Betonwerk Beispiel AG', 'Kieswerk Muster AG'] },
+  '4080': { bed: 'MATERIAL', namen: ['Baustoffe Muster AG', 'Bauchemie Beispiel AG', 'Eisenhandel Nord AG'] },
+  '4400': { bed: 'BETRMAT', namen: ['Werkzeug Beispiel AG', 'Tankstelle Muster'] },
+  '5920': { bed: 'FREMDL', namen: ['Subunternehmer A', 'Subunternehmer B', 'Subunternehmer C'] },
+  '4610': { bed: 'FREMDL', namen: ['Wasserstrahl Beispiel AG', 'Gerüstbau Muster AG', 'Transporte Süd AG'], abg: true },
+  '5000': { bed: 'LOHN', text: 'Lohn Betrieb', std: 'Prod. Stunden Monatslohn' },
+  '9101': { bed: 'UMLAGEN', text: 'Zuschlag Sozialkosten' },
+  '5910': { bed: 'LOHN', namen: ['Temporärbüro Beispiel AG', 'Personal Muster AG'], std: 'Prod. Stunden Temp. Personal', ein: 'STD' },
+  '9150': { bed: 'GERVRR', geraete: ['Kompressor A', 'Kompressor B', 'Hochdruckanlage A', 'Betonfräse A'], satz: 55 },
+  '9250': { bed: 'GERVRR', geraete: ['Kastenwagen A', 'Kastenwagen B', 'Pritschenwagen A'], satz: 95 },
+  '9800': { bed: 'UMLAGEN', text: 'Anteil Gemeinkosten' }
+};
+/* Jede Kontozeile des Beispiel-BAB wird auf Monate, Baustellen und Lieferanten verteilt; die Summen je Jahr stimmen auf den Rappen.
+   Der Oktober 2026 hat schon Buchungen, aber noch keinen Abschluss: Er zeigt, was «läuft noch» heisst. */
+function buchBeispiel() {
+  const S0 = buchSammler(), nrVon = {}, SAISON = [0.6, 0.7, 1, 1.1, 1.15, 1.15, 0.9, 1, 1.15, 1.15, 1.1, 0.7];
+  let saat = 20261124, beleg = 1000;
+  const zuf = () => { saat = (saat * 1664525 + 1013904223) % 4294967296; return saat / 4294967296; };
+  const rund = (x) => Math.round(x * 100) / 100;
+  const teile = (summe, gew, schritt) => {   // nach Gewichten verteilt und gerundet; der letzte Teil nimmt den Rest, damit die Summe stimmt
+    const g = gew.reduce((a, x) => a + x, 0);
+    let rest = summe;
+    return gew.map((w, i) => { if (i === gew.length - 1) return rund(rest); const v = g ? rund(Math.round(summe * w / g / schritt) * schritt) : 0; rest = rund(rest - v); return v; });
+  };
+  const partner = (name, basis) => nrVon[name] || (nrVon[name] = String(basis + Object.keys(nrVon).length + 1));
+  const dazu = (ym, k, nr, name, K, betrag, o) => {
+    S0.dazu(Object.assign({ ym: ym, kst: k[0], ka: nr, b: betrag, m: 0, e: '', h: '', t: '', d: '', da: '', bd: Math.round(Date.UTC(Math.floor(ym / 12), ym % 12, 1 + Math.floor(zuf() * 27)) / 864e5), bn: 'B-' + (beleg++),
+      bl: k[2], ksn: k[1], bab: nr, bed: K.bed, kan: name }, o));
+  };
+  const buche = (ym, k, ki, nr, name, K, b, std) => {
+    const m = ym % 12;
+    if (K.kunde) dazu(ym, k, nr, name, K, -b, { t: k[4], da: 'Debitor', d: partner(k[4], 10000) });
+    else if (K.geraete) { const g = K.geraete[(ki * 2 + m) % K.geraete.length], rep = zuf() < 0.12; dazu(ym, k, nr, name, K, b, { t: g + (rep ? ' Reparatur' : ' AuV'), da: 'Kostenstelle', d: '9500', m: rep ? 0 : Math.max(1, Math.round(b / K.satz)), e: rep ? '' : 'TAGE' }); }
+    else if (K.abg && ki === m % 5) dazu(ym, k, nr, name, K, b, { t: 'Abgrenzung Monatsabschluss', bn: 'ABSCHLUSS ' + MONATE[m].toUpperCase() });
+    else if (K.namen) { const n = K.namen[Math.floor(zuf() * K.namen.length)]; dazu(ym, k, nr, name, K, b, { t: n, da: 'Kreditor', d: partner(n, 20000), m: std || 0, e: std ? (K.ein || '') : '' }); }
+    else dazu(ym, k, nr, name, K, K.bed === 'ERLOES' ? -b : b, { t: K.text || name, m: std || 0 });
+  };
+  BSP_BAB.forEach((z) => {
+    const nr = z[0], K = BSP_KA[nr];
+    if (z[2] !== 'konto' || !K) return;
+    const stdZ = K.std ? BSP_BAB.find((x) => x[1] === K.std) : null, kst = BSP_KST.filter((k) => !K.kunde || k[2]);
+    [[2023, 12], [2024, 12], [2025, 12], [2026, 9]].forEach((J, ji) => {
+      const wert = z[4][ji];
+      if (!wert) return;
+      const mg = SAISON.slice(0, J[1]).map((x) => x * (0.85 + zuf() * 0.3));
+      const jeMonat = teile(wert, mg, 5), stdMonat = stdZ && stdZ[4][ji] ? teile(stdZ[4][ji], mg, 1) : null;
+      jeMonat.forEach((bm, m) => {
+        const kg = kst.map((k) => k[3] * (0.6 + zuf() * 0.8)), jeKst = teile(bm, kg, 0.05), stdKst = stdMonat ? teile(stdMonat[m], kg, 0.5) : null;
+        jeKst.forEach((b, ki) => { if (b || (stdKst && stdKst[ki])) buche(J[0] * 12 + m, kst[ki], ki, nr, z[1], K, b, stdKst ? stdKst[ki] : 0); });
+      });
+    });
+    if (['3000', '4020', '5920', '5000'].indexOf(nr) >= 0) kst.slice(0, 4).forEach((k, ki) => { buche(2026 * 12 + 9, k, ki, nr, z[1], Object.assign({}, K, { abg: false }), rund(z[4][3] / 9 / 6 * (0.5 + zuf())), stdZ ? Math.round(stdZ[4][3] / 9 / 6) : 0); });
+  });
+  return S0.fertig();
 }
 
 /* ---------- Stand: aus der Datei, aus dem Browser, sonst Vorlage ---------- */
@@ -1542,7 +2028,7 @@ let glAn = IM_RAHMEN;    // Reiter «GL» mit den eigenen Punkten: je Gerät ein
   if (ALS_LINK && !S.beispiel && S.stand) hinweis = datei.schmutzig ? 'offen' : 'stand';
   // Schriftgrösse und Farben: was auf diesem Gerät zuletzt galt, nicht was ein anderes Gerät in die Datei schrieb
   const anz = lies(() => JSON.parse(localStorage.getItem(KEY_A) || 'null'));
-  if (anz && typeof anz === 'object') { if (anz.zoom) S.meta.zoom = anz.zoom; if (anz.modus) S.meta.modus = anz.modus; if (typeof anz.gl === 'boolean') glAn = anz.gl; }
+  if (anz && typeof anz === 'object') { if (anz.zoom) S.meta.zoom = anz.zoom; if (anz.modus) S.meta.modus = anz.modus; if (typeof anz.gl === 'boolean') glAn = anz.gl; if (typeof anz.bf === 'boolean') bfAn = anz.bf; }
 })();
 
 function speichern(nurAnsicht) {
@@ -1554,7 +2040,7 @@ function speichern(nurAnsicht) {
   if (datei.handle) { clearTimeout(datei.plan); datei.plan = setTimeout(() => { sichern(true); }, 1500); }
 }
 function gesichertMerken() { datei.schmutzig = false; hinweis = ''; try { localStorage.setItem(KEY_G, S.stand || ''); } catch (e) { /* ohne Zwischenspeicher weiter */ } }
-function anzeigeMerken() { try { localStorage.setItem(KEY_A, JSON.stringify({ zoom: S.meta.zoom, modus: S.meta.modus, gl: glAn })); } catch (e) { /* ohne Zwischenspeicher weiter */ } }
+function anzeigeMerken() { try { localStorage.setItem(KEY_A, JSON.stringify({ zoom: S.meta.zoom, modus: S.meta.modus, gl: glAn, bf: bfAn })); } catch (e) { /* ohne Zwischenspeicher weiter */ } }
 function nameMerken(name) {
   if (!name || !/\.html?$/i.test(name)) return;
   datei.vorschlag = name;
@@ -1635,7 +2121,8 @@ function gitterAusText(text) {
   if (feld !== '' || zeile.length) { zeile.push(feld); zeilen.push(zeile); }
   return zeilen.map((z) => z.map((f) => f.trim()));
 }
-async function xlsxLesen(buf) {
+/* Eine Excel-Datei ist ein Zip-Archiv: Verzeichnis lesen, einzelne Teile auspacken */
+function zipAuf(buf) {
   const u8 = new Uint8Array(buf), dv = new DataView(buf), dek = new TextDecoder('utf-8');
   let e = u8.length - 22;
   while (e >= 0 && dv.getUint32(e, true) !== 0x06054b50) e--;
@@ -1648,7 +2135,7 @@ async function xlsxLesen(buf) {
     dir[dek.decode(u8.subarray(p + 46, p + 46 + nl))] = { meth: dv.getUint16(p + 10, true), cs: dv.getUint32(p + 20, true), off: dv.getUint32(p + 42, true) };
     p += 46 + nl + el + kl;
   }
-  const lies = async (name) => {
+  return async (name) => {
     const d = dir[name];
     if (!d) return null;
     const start = d.off + 30 + dv.getUint16(d.off + 26, true) + dv.getUint16(d.off + 28, true);
@@ -1658,7 +2145,111 @@ async function xlsxLesen(buf) {
     const strom = new Blob([roh]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
     return dek.decode(new Uint8Array(await new Response(strom).arrayBuffer()));
   };
-  const xml = (t) => new DOMParser().parseFromString(t, 'application/xml');
+}
+/* Zellformate, die ein Datum zeigen (für Spaltentitel wie «Dez 25» und für die Buchungsperiode) */
+function xlsxDatStil(stT) {
+  const datStil = [];
+  if (!stT) return datStil;
+  const d = new DOMParser().parseFromString(stT, 'application/xml'), eigene = {};
+  Array.from(d.getElementsByTagName('numFmt')).forEach((n) => { eigene[n.getAttribute('numFmtId')] = n.getAttribute('formatCode') || ''; });
+  const xfs = d.getElementsByTagName('cellXfs')[0];
+  if (xfs) Array.from(xfs.getElementsByTagName('xf')).forEach((x) => {
+    const id = +x.getAttribute('numFmtId'), code = eigene[id];
+    datStil.push(code !== undefined ? /[dmy]/i.test(code.replace(/"[^"]*"|\[[^\]]*\]|\\./g, '')) : ((id >= 14 && id <= 22) || (id >= 27 && id <= 36) || (id >= 45 && id <= 47) || (id >= 50 && id <= 58)));
+  });
+  return datStil;
+}
+/* ---------- Grosse Listen (seit 1.6): zehntausende Zeilen ohne DOM, Zeile um Zeile aus dem Text des Blatts ---------- */
+const xmlText = (s) => (s.indexOf('&') < 0 ? s : s.replace(/&(#x[0-9a-fA-F]+|#\d+|amp|lt|gt|quot|apos);/g, (m, c) => (c === 'amp' ? '&' : c === 'lt' ? '<' : c === 'gt' ? '>' : c === 'quot' ? '"' : c === 'apos' ? "'" : String.fromCodePoint(c.charAt(1) === 'x' ? parseInt(c.slice(2), 16) : parseInt(c.slice(1), 10)))));
+function xlsxTexte(ssT) {   // die gemeinsamen Texte der Mappe, in ihrer Reihenfolge
+  const ss = [];
+  if (!ssT) return ss;
+  const reSi = /<si(?:\s[^>]*)?(?:\/>|>([\s\S]*?)<\/si>)/g, reT = /<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/g;
+  let m;
+  while ((m = reSi.exec(ssT))) {
+    let innen = m[1] || '', t = '', mt;
+    if (innen.indexOf('<rPh') >= 0) innen = innen.replace(/<rPh[\s\S]*?<\/rPh>/g, '');
+    reT.lastIndex = 0;
+    while ((mt = reT.exec(innen))) t += mt[1];
+    ss.push(xmlText(t));
+  }
+  return ss;
+}
+/* Ruft je Zeile proZeile(zellen, zeilennummer) auf; zellen[spalte] ist Text, Zahl oder { tag: n } für ein Datum. Gibt proZeile false zurück, hört das Lesen auf. */
+function xlsxZeilen(t, ss, datStil, proZeile) {
+  const reC = /<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g, reV = /<v(?:\s[^>]*)?>([\s\S]*?)<\/v>/, reT = /<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/g;
+  let p = t.indexOf('<sheetData'), zi = -1;
+  if (p < 0) return;
+  for (;;) {
+    const a = t.indexOf('<row', p);
+    if (a < 0) break;
+    const nach = t.charCodeAt(a + 4);
+    if (nach !== 32 && nach !== 62 && nach !== 47) { p = a + 4; continue; }   // «<rowBreaks» und Ähnliches
+    const e = t.indexOf('>', a);
+    if (e < 0) break;
+    const kopf = t.slice(a, e), rr = /\br="(\d+)"/.exec(kopf);
+    zi = rr ? +rr[1] - 1 : zi + 1;
+    if (t.charCodeAt(e - 1) === 47) { p = e + 1; continue; }   // leere Zeile
+    const z = t.indexOf('</row>', e);
+    if (z < 0) break;
+    const innen = t.slice(e + 1, z), zellen = [];
+    p = z + 6;
+    let mc, sp = 0;
+    reC.lastIndex = 0;
+    while ((mc = reC.exec(innen))) {
+      const at = mc[1], ar = /\br="([A-Z]+)/.exec(at);
+      if (ar) { sp = 0; for (let k = 0; k < ar[1].length; k++) sp = sp * 26 + (ar[1].charCodeAt(k) - 64); } else sp++;
+      const inhalt = mc[2];
+      if (inhalt === undefined || sp > 400) continue;
+      const mt = /\bt="([^"]+)"/.exec(at), typ = mt ? mt[1] : '', mv = reV.exec(inhalt);
+      let wert;
+      if (typ === 's') wert = mv ? (ss[+mv[1]] || '') : '';
+      else if (typ === 'inlineStr') { wert = ''; let x; reT.lastIndex = 0; while ((x = reT.exec(inhalt))) wert += x[1]; wert = xmlText(wert); }
+      else if (typ === 'str' || typ === 'e') wert = mv ? xmlText(mv[1]) : '';
+      else if (typ === 'b') wert = mv && mv[1] === '1' ? 'WAHR' : 'FALSCH';
+      else if (mv && mv[1] !== '' && isFinite(+mv[1])) { const n = +mv[1], ms = /\bs="(\d+)"/.exec(at); wert = ms && datStil[+ms[1]] && n > 20000 && n < 80000 ? { tag: n } : n; }
+      else wert = mv ? xmlText(mv[1]) : '';
+      if (wert !== '') zellen[sp - 1] = wert;
+    }
+    if (proZeile(zellen, zi) === false) break;
+  }
+}
+/* Das erste Blatt, dessen Titelzeile waehle(kopf) annimmt: { kopf, zeilen } mit den gewählten Spalten; sonst null */
+async function xlsxListe(buf, waehle) {
+  const lies = zipAuf(buf), wbT = await lies('xl/workbook.xml');
+  if (!wbT) return null;
+  const ziel = {}, relT = await lies('xl/_rels/workbook.xml.rels'), pfade = [];
+  let m, i = 0;
+  if (relT) { const re = /<Relationship\b[^>]*>/g; while ((m = re.exec(relT))) { const id = /\bId="([^"]+)"/.exec(m[0]), zl = /\bTarget="([^"]+)"/.exec(m[0]); if (id && zl) ziel[id[1]] = zl[1]; } }
+  const reS = /<sheet\b[^>]*>/g;
+  while ((m = reS.exec(wbT))) { const rid = /\br:id="([^"]+)"/.exec(m[0]); i++; pfade.push(((rid && ziel[rid[1]]) || ('worksheets/sheet' + i + '.xml')).replace(/^\/?xl\//, '').replace(/^\//, '')); }
+  let ss = null, datStil = null;
+  for (let b = 0; b < pfade.length; b++) {
+    const t = await lies('xl/' + pfade[b]);
+    if (!t) continue;
+    if (!ss) { ss = xlsxTexte(await lies('xl/sharedStrings.xml')); datStil = xlsxDatStil(await lies('xl/styles.xml')); }
+    let kopf = null, spalten = null;
+    const zeilen = [];
+    xlsxZeilen(t, ss, datStil, (z, nr) => {
+      if (!spalten) {   // die Titelzeile steht in den ersten 30 Zeilen
+        if (nr > 30) return false;
+        const k = [];
+        for (let c = 0; c < z.length; c++) k.push(z[c] === undefined || typeof z[c] === 'object' ? '' : String(z[c]).trim());
+        const sp = waehle(k);
+        if (sp) { kopf = k; spalten = sp; }
+        return true;
+      }
+      const aus = new Array(spalten.length);
+      for (let c = 0; c < spalten.length; c++) aus[c] = spalten[c] < 0 ? undefined : z[spalten[c]];
+      zeilen.push(aus);
+      return true;
+    });
+    if (spalten) return { kopf: kopf, zeilen: zeilen };
+  }
+  return null;
+}
+async function xlsxLesen(buf) {
+  const lies = zipAuf(buf), xml = (t) => new DOMParser().parseFromString(t, 'application/xml');
   const wbT = await lies('xl/workbook.xml');
   if (!wbT) throw new Error('kein xlsx');
   const ziel = {}, ss = [];
@@ -1666,16 +2257,7 @@ async function xlsxLesen(buf) {
   if (relT) Array.from(xml(relT).getElementsByTagName('Relationship')).forEach((r) => { ziel[r.getAttribute('Id')] = r.getAttribute('Target'); });
   const ssT = await lies('xl/sharedStrings.xml');
   if (ssT) Array.from(xml(ssT).getElementsByTagName('si')).forEach((si) => { ss.push(Array.from(si.getElementsByTagName('t')).filter((t) => t.parentNode.nodeName !== 'rPh').map((t) => t.textContent).join('')); });
-  const datStil = [], stT = await lies('xl/styles.xml');   // Zellformate, die ein Datum zeigen (für Spaltentitel wie «Dez 25»)
-  if (stT) {
-    const d = xml(stT), eigene = {};
-    Array.from(d.getElementsByTagName('numFmt')).forEach((n) => { eigene[n.getAttribute('numFmtId')] = n.getAttribute('formatCode') || ''; });
-    const xfs = d.getElementsByTagName('cellXfs')[0];
-    if (xfs) Array.from(xfs.getElementsByTagName('xf')).forEach((x) => {
-      const id = +x.getAttribute('numFmtId'), code = eigene[id];
-      datStil.push(code !== undefined ? /[dmy]/i.test(code.replace(/"[^"]*"|\[[^\]]*\]|\\./g, '')) : ((id >= 14 && id <= 22) || (id >= 27 && id <= 36) || (id >= 45 && id <= 47) || (id >= 50 && id <= 58)));
-    });
-  }
+  const datStil = xlsxDatStil(await lies('xl/styles.xml'));
   const blaetter = [], sheets = Array.from(xml(wbT).getElementsByTagName('sheet'));
   for (let i = 0; i < sheets.length; i++) {
     const rid = sheets[i].getAttribute('r:id') || sheets[i].getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id');
@@ -1836,7 +2418,9 @@ function zeigeImport(teile, fehler) {
   render();
 }
 function importText(text) {
-  const g = gitterAusText(text), imp = babLesen(g), k = imp ? null : kundenLesen(g);   // eine Tabelle mit Offerten oder Aufträgen gehört zu «Kunden»
+  const g = gitterAusText(text), buch = buchAusGitter(g);
+  if (buch) { buchVorschlag([buch]); return; }   // seit 1.6: eine Liste mit Buchungen (Auszug «KSt-Istwerte»)
+  const imp = babLesen(g), k = imp ? null : kundenLesen(g);   // eine Tabelle mit Offerten oder Aufträgen gehört zu «Kunden»
   if (k) kundenUebernehmen([k]); else zeigeImport([imp]);
 }
 /* Eine Datei als Gitter je Blatt: Excel hat mehrere Blätter, Text und CSV eines */
@@ -1936,7 +2520,7 @@ function kundenLesen(g) {
 }
 /* Eigene Angaben mischen sich nicht mit dem Beispiel: Beispielzahlen und Beispieleinträge gehen weg, die Themen bleiben */
 function beispielWeg() {
-  S.beispiel = false; S.zahlen.perioden = []; S.zahlen.zeilen = []; S.ui.auf = {};
+  S.beispiel = false; S.zahlen.perioden = []; S.zahlen.zeilen = []; S.buch = null; S.ui.auf = {};
   S.themen.forEach((x) => { x.felder = []; x.stichworte = []; x.notizen = []; x.beschluesse = []; x.aufgaben = []; x.ziele = []; x.leute = []; x.baustellen = []; x.bedarf = []; x.fest = ''; x.zu = ''; x.anhaenge = []; });
   S.parkplatz = []; S.park.notizen = []; S.park.beschluesse = []; S.park.aufgaben = []; S.park.zu = ''; S.glPunkte = []; S.glGruppen = []; S.glFelder = []; S.kunden.offerten = []; S.kunden.auftraege = []; S.budget = { ziel: null, auftraege: [], notiz: '' }; S.mitarbeiter = [];
 }
@@ -2006,16 +2590,20 @@ function kundenText(text) {
   if (k) kundenUebernehmen([k]);
   else toast('Darin finde ich keine Tabelle. Es braucht eine Kopfzeile wie in eurer Offertliste (Datum, Projektbezeichnung, Planer, Bauherr, Angebot) oder «Jahr», «Gerechnet», «Erhalten».');
 }
-/* Eine oder mehrere Dateien: gesicherte Datei des Tools → Daten laden; sonst je Datei ein BAB (z. B. je Jahr eine). */
+/* Eine oder mehrere Dateien: gesicherte Datei des Tools → Daten laden; ein Auszug mit Buchungen → Buchungen einlesen; sonst je Datei ein BAB (z. B. je Jahr eine). */
 async function importDateien(liste) {
   const dateien = Array.from(liste || []);
   if (!dateien.length) return;
   const daten = dateien.find((f) => /\.(html?|json)$/i.test(f.name));
   if (daten) { ladeDatei(daten); return; }
-  const teile = [], kunden = [];
+  const teile = [], kunden = [], buch = [];
   let fehler = 0, alt = false;
+  const gross = dateien.some((f) => f.size > 1500000);
+  if (gross) { toast('Die Datei wird gelesen …'); await new Promise((ok) => setTimeout(ok, 30)); }
   for (let i = 0; i < dateien.length; i++) {
     try {
+      const b = await buchAusDatei(dateien[i]);   // seit 1.6: der Auszug «KSt-Istwerte» mit allen Buchungen
+      if (b) { buch.push(b); continue; }
       const blaetter = await gitterAusDatei(dateien[i]);
       const k = blaetter.map((b) => kundenLesen(b.g)).filter(Boolean);   // Offerten und Aufträge gehören zu «Kunden», alles andere ist ein BAB
       if (k.length) { k.forEach((x) => { kunden.push(x); }); continue; }
@@ -2023,7 +2611,9 @@ async function importDateien(liste) {
       if (imp) { imp.datei = dateien[i].name; teile.push(imp); } else fehler++;
     } catch (e) { fehler++; if (e && e.message === 'xls') alt = true; }
   }
-  if (kunden.length) { kundenUebernehmen(kunden); if (!teile.length) return; }
+  if (gross) $('#toasts').innerHTML = '';
+  if (kunden.length) { kundenUebernehmen(kunden); if (!teile.length && !buch.length) return; }
+  if (buch.length) { buchVorschlag(buch, teile.length ? { teile: teile, fehler: fehler } : null); return; }   // ein BAB aus derselben Auswahl folgt nach dem Übernehmen
   if (!teile.length) {
     const beiKunden = S.ui.bereich === 'kunden';
     toast(alt ? 'Alte Excel-Dateien (.xls) kann ich nicht lesen. Die Tabelle in Excel kopieren und einfügen geht immer.'
@@ -2065,7 +2655,7 @@ async function ladeDatei(file) {
 }
 function ohneInhalt() {   // nichts eingetragen und die Themen wie am Anfang
   const vor = themenStart();
-  return !S.zahlen.perioden.length && S.themen.length === vor.length && S.themen.every((x, i) => x.titel === vor[i].titel && x.frage === vor[i].frage && !S.park.notizen.length && !S.park.beschluesse.length && !S.park.aufgaben.length && !S.glPunkte.length && !S.glFelder.length && !S.kunden.offerten.length && !S.kunden.auftraege.length && !x.baustellen.length && !x.stichworte.length && !x.notizen.length && !x.beschluesse.length && !x.aufgaben.length && !x.ziele.length && !x.leute.length && !x.bedarf.length && !x.anhaenge.length) && !S.rueckmeldungen.length && S.budget.ziel === null && !S.budget.auftraege.length && !S.mitarbeiter.length;
+  return !S.zahlen.perioden.length && !S.buch && S.themen.length === vor.length && S.themen.every((x, i) => x.titel === vor[i].titel && x.frage === vor[i].frage && !S.park.notizen.length && !S.park.beschluesse.length && !S.park.aufgaben.length && !S.glPunkte.length && !S.glFelder.length && !S.kunden.offerten.length && !S.kunden.auftraege.length && !x.baustellen.length && !x.stichworte.length && !x.notizen.length && !x.beschluesse.length && !x.aufgaben.length && !x.ziele.length && !x.leute.length && !x.bedarf.length && !x.anhaenge.length) && !S.rueckmeldungen.length && S.budget.ziel === null && !S.budget.auftraege.length && !S.mitarbeiter.length;
 }
 function uebernehmen(d, name) {
   merken();
@@ -2135,13 +2725,15 @@ function spaltenWahl() {
 
 /* ---------- Zahlen: Diagramme ----------
    Vier Karten, jede mit einer Aussage. Jede Zahl steht auch ohne Zeigen da: als Beschriftung oder unter «Werte». */
-function diagrammDaten() {
+/* Seit 1.6: aus den Buchungen, sobald sie die Quelle sind; sonst aus dem BAB. neutral: die ganze Abteilung in ganzen Jahren (fürs Ergebnis und fürs Vorrechnen). */
+function diagrammDaten(neutral) { return buchAktiv() ? buchDiagrammDaten(neutral) : babDiagrammDaten(spaltenWahl()); }
+function babDiagrammDaten(P) {
   const k = kernZeilen(), zs = S.zahlen.zeilen, iE = zs.indexOf(k.ertrag), iA = zs.indexOf(k.aufwand);
   const gruppen = zs.filter((z, i) => z.art === 'summe' && z.stufe === 1 && (iE < 0 || i > iE) && (iA < 0 || i < iA));
   const std = zs.filter((z) => z.art === 'stunden' && z.stufe === 0);
   const wert = (z, p) => { const v = z ? z.w[p.id] : undefined; return v === undefined || v === null ? null : Math.abs(v); };
   const summe = (liste, p, test) => liste.reduce((a, z) => (test(z.name) ? a + (wert(z, p) || 0) : a), 0);
-  return spaltenWahl().map((p) => {
+  return P.map((p) => {
     const d = { name: p.name, bud: istBudget(p), E: wert(k.ertrag, p), A: wert(k.aufwand, p), h: wert(k.stunden, p) || null };
     d.G = d.E !== null && d.A !== null ? d.E - d.A : null;
     d.personal = summe(gruppen, p, (n) => /personal/i.test(n));
@@ -2184,18 +2776,20 @@ function saeulen(D, o) {
   }).join('');
   return '<div class="dg-feld"><div class="dg-innen">' + gitter + '<div class="dg-baender">' + baender + '</div></div><div class="dg-x">' + D.map((d) => '<span>' + esc(d.name) + '</span>').join('') + '</div></div>';
 }
-function diagrammeHTML() {
-  const D = diagrammDaten(), namen = D.map((d) => d.name), hatBud = D.some((d) => d.bud);
-  const leerText = (t) => '<p class="dg-leer">' + esc(t) + '</p>';
+/* D und opt seit 1.6: dieselben vier Karten für Jahre oder für Bauführer nebeneinander. opt: { buch (Quelle sind die Buchungen), zwischenText, fuss } */
+function diagrammeHTML(D, opt) {
+  D = D || diagrammDaten(); opt = opt || {};
+  const hatBud = D.some((d) => d.bud);
+  const leerText = (t, ausBuch) => '<p class="dg-leer">' + esc(opt.buch ? ausBuch : t) + '</p>';
   const zwischen = D.filter((d) => !d.bud && monatAus(d.name) && monatAus(d.name) < 12).map((d) => '«' + d.name + '»');
-  const zwischenText = zwischen.length ? zwischen.join(', ') + (zwischen.length > 1 ? ' sind Zwischenstände, keine ganzen Jahre.' : ' ist ein Zwischenstand, kein ganzes Jahr.') : '';
+  const zwischenText = opt.zwischenText !== undefined ? opt.zwischenText : (zwischen.length ? zwischen.join(', ') + (zwischen.length > 1 ? ' sind Zwischenstände, keine ganzen Jahre.' : ' ist ein Zwischenstand, kein ganzes Jahr.') : '');
   const notiz = zwischenText ? '<p class="dg-n">' + esc(zwischenText) + '</p>' : '';
   const budLeg = hatBud ? [['c-grau halb', 'Budget blass']] : [];
   const oder = (v, f) => (v === null || v === undefined ? '' : f(v));
 
   // 1 Ertrag, Aufwand, Gewinn
   const D1 = D.filter((d) => d.E !== null || d.A !== null);
-  const k1 = karte('Ertrag, Aufwand, Gewinn', 'Was hereinkommt, was es kostet, und was übrig bleibt.', !D1.length ? leerText('Dafür braucht es die Zeilen «Summe Erträge» und «Total Aufwand».') :
+  const k1 = karte('Ertrag, Aufwand, Gewinn', 'Was hereinkommt, was es kostet, und was übrig bleibt.', !D1.length ? leerText('Dafür braucht es die Zeilen «Summe Erträge» und «Total Aufwand».', 'In diesem Zeitraum gibt es keine Buchungen.') :
     legende([['c-blau', 'Ertrag'], ['c-grau', 'Aufwand']].concat(budLeg)) +
     saeulen(D1, { reihen: [{ klasse: 'c-blau', wert: (d) => d.E }, { klasse: 'c-grau', wert: (d) => d.A }], oben: (d) => (d.G === null ? '' : mitVz(d.G, kurz(Math.abs(d.G)))),
       tip: (d) => ['Ertrag: ' + oder(d.E, fmt), 'Aufwand: ' + oder(d.A, fmt)].concat(d.G === null ? [] : [(d.G < 0 ? 'Verlust: ' : 'Gewinn: ') + fmt(Math.abs(d.G)) + (d.E ? ' (' + fmtN(Math.abs(d.G) / d.E * 100, 1) + ' %)' : '')]) }) +
@@ -2204,7 +2798,8 @@ function diagrammeHTML() {
 
   // 2 Von 100 Franken Umsatz
   const TEILE = [['c-orange', 'Personal'], ['c-aqua', 'Material'], ['c-gelb', 'Fremdleistung'], ['c-grau', 'Übriges'], ['c-blau', 'Bleibt']];
-  const Z2 = D.filter((d) => d.E && d.A !== null && d.personal + d.material + d.fremd > 0).map((d) => {
+  const neben = D.filter((d) => d.neben).map((d) => '«' + d.name + '»'), nebenText = neben.length ? neben.join(', ') + (neben.length > 1 ? ' haben' : ' hat') + ' kaum Ertrag und ' + (neben.length > 1 ? 'fehlen' : 'fehlt') + ' hier.' : '';
+  const Z2 = D.filter((d) => !d.neben && d.E && d.A !== null && d.personal + d.material + d.fremd > 0).map((d) => {
     const betraege = [d.personal, d.material, d.fremd, Math.max(0, d.A - d.personal - d.material - d.fremd), Math.max(0, d.E - d.A)];
     const teile = betraege.map((b, i) => ({ klasse: TEILE[i][0], name: TEILE[i][1], betrag: b, anteil: b / d.E * 100 }));
     // auf ganze Franken runden, sodass die Summe stimmt (die grössten Reste runden auf)
@@ -2213,34 +2808,34 @@ function diagrammeHTML() {
     return { d: d, teile: teile, gesamt: teile.reduce((a, x) => a + x.anteil, 0), fehlt: d.A > d.E ? (d.A - d.E) / d.E * 100 : 0 };
   });
   const skala = Math.max.apply(null, Z2.map((z) => z.gesamt).concat([100])), verlust = Z2.some((z) => z.fehlt > 0);
-  const k2 = karte('Von 100 Franken Umsatz', 'Wohin das Geld geht, und was am Schluss bleibt.', !Z2.length ? leerText('Dafür braucht es die Summen je Gruppe, z. B. «Personalaufwand» und «Fremdleistung».') :
+  const k2 = karte('Von 100 Franken Umsatz', 'Wohin das Geld geht, und was am Schluss bleibt.', !Z2.length ? leerText('Dafür braucht es die Summen je Gruppe, z. B. «Personalaufwand» und «Fremdleistung».', 'Dafür braucht es die Erträge in den Buchungen.') :
     legende(TEILE) + '<div class="dg-zeilen">' + Z2.map((z) =>
       '<div class="dg-z"><span class="dg-zn">' + esc(z.d.name) + '</span><div class="dg-seg">' +
       z.teile.filter((x) => x.anteil > 0.05).map((x) => '<i class="' + x.klasse + (x.anteil / skala * 100 >= 9 ? ' s9' : '') + (x.anteil / skala * 100 >= 16 ? ' s16' : '') + '" style="flex:' + x.anteil.toFixed(3) + ' 1 0%" tabindex="0" data-tip="' + esc([z.d.name, x.name + ': ' + x.fr + ' von 100 Franken', fmt(x.betrag) + ' Franken'].join('\n')) + '"><b>' + x.fr + '</b></i>').join('') +
       (skala - z.gesamt > 0.05 ? '<span style="flex:' + (skala - z.gesamt).toFixed(3) + ' 1 0%"></span>' : '') + (verlust ? '<u style="left:' + (100 / skala * 100).toFixed(2) + '%"></u>' : '') + '</div>' +
       '<span class="dg-ende">' + (z.fehlt > 0 ? 'fehlen ' + Math.max(1, Math.round(z.fehlt)) : 'bleiben ' + z.teile[4].fr) + '</span></div>').join('') + '</div>' +
-    (verlust ? '<p class="dg-n">Der Strich steht bei 100 Franken Umsatz. Was darüber hinausgeht, fehlt.</p>' : '') +
+    (verlust ? '<p class="dg-n">Der Strich steht bei 100 Franken Umsatz. Was darüber hinausgeht, fehlt.</p>' : '') + (nebenText ? '<p class="dg-n">' + esc(nebenText) + '</p>' : '') +
     werteTabelle(Z2.map((z) => z.d.name), TEILE.map((t, i) => [t[1], Z2.map((z) => fmtN(z.teile[i].anteil, 1))]).concat(verlust ? [['Fehlt', Z2.map((z) => (z.fehlt > 0 ? fmtN(z.fehlt, 1) : ''))]] : [])));
 
   // 3 Pro Stunde
-  const D3 = D.filter((d) => d.h && d.E !== null && d.A !== null);
-  const k3 = karte('Pro Stunde', 'Ertrag und Aufwand je produktive Stunde.', !D3.length ? leerText('Dafür braucht es im BAB die Zeile «Total prod. Stunden».') :
+  const D3 = D.filter((d) => !d.neben && d.h && d.E !== null && d.A !== null);
+  const k3 = karte('Pro Stunde', 'Ertrag und Aufwand je produktive Stunde.', !D3.length ? leerText('Dafür braucht es im BAB die Zeile «Total prod. Stunden».', 'Dafür braucht es Erträge und Stunden in den Buchungen.') :
     legende([['c-blau', 'Ertrag je Stunde'], ['c-grau', 'Aufwand je Stunde']].concat(budLeg)) +
     saeulen(D3, { reihen: [{ klasse: 'c-blau', wert: (d) => d.E / d.h }, { klasse: 'c-grau', wert: (d) => d.A / d.h }], oben: (d) => mitVz(d.G, fmtN(Math.abs(d.G / d.h), 2)), achse: (t) => fmt(t),
       tip: (d) => ['Ertrag je Stunde: ' + fmtN(d.E / d.h, 2), 'Aufwand je Stunde: ' + fmtN(d.A / d.h, 2), (d.G < 0 ? 'Fehlt je Stunde: ' : 'Bleibt je Stunde: ') + fmtN(Math.abs(d.G / d.h), 2)] }) +
-    '<p class="dg-n"><span class="dg-on">Über den Säulen: was je Stunde bleibt, in Franken.</span></p>' +
+    '<p class="dg-n"><span class="dg-on">Über den Säulen: was je Stunde bleibt, in Franken. </span>' + esc(nebenText) + '</p>' +
     werteTabelle(D3.map((d) => d.name), [['Ertrag je Stunde', D3.map((d) => fmtN(d.E / d.h, 2))], ['Aufwand je Stunde', D3.map((d) => fmtN(d.A / d.h, 2))], ['Bleibt je Stunde', D3.map((d) => fmtN(d.G / d.h, 2))], ['Produktive Stunden', D3.map((d) => fmt(d.h))]]));
 
   // 4 Stunden
   const D4 = D.filter((d) => d.h);
   const mitTeilen = (d) => d.eigene + d.temp + d.weitere > 0, hatWeitere = D4.some((d) => d.weitere > 0), ohneTeile = D4.some((d) => !mitTeilen(d));
-  const k4 = karte('Stunden', 'Produktive Stunden: eigene Leute und Temporäre.', !D4.length ? leerText('Dafür braucht es im BAB die Zeilen «Prod. Stunden».') :
+  const k4 = karte('Stunden', 'Produktive Stunden: eigene Leute und Temporäre.', !D4.length ? leerText('Dafür braucht es im BAB die Zeilen «Prod. Stunden».', 'Dafür braucht es Lohnbuchungen mit Stunden. Was zählt, steht unter «Buchungen».') :
     legende([['c-orange', 'Eigene Leute'], ['c-grau', 'Temporäre']].concat(hatWeitere ? [['c-grau2', 'Weitere']] : []).concat(hatBud || ohneTeile ? [['c-orange halb', 'Budget oder ohne Aufteilung (blass)']] : [])) +
     saeulen(D4.map((d) => Object.assign({}, d, { bud: d.bud || !mitTeilen(d) })), { stapel: [{ klasse: 'c-orange', wert: (d) => (mitTeilen(d) ? d.eigene : d.h) }, { klasse: 'c-grau', wert: (d) => d.temp }, { klasse: 'c-grau2', wert: (d) => d.weitere }], oben: (d) => fmt(d.h),
       tip: (d) => (mitTeilen(d) ? ['Eigene Leute: ' + fmt(d.eigene), 'Temporäre: ' + fmt(d.temp)].concat(d.weitere ? ['Weitere: ' + fmt(d.weitere)] : []) : []).concat(['Total: ' + fmt(d.h)]) }) + notiz +
     werteTabelle(D4.map((d) => d.name), [['Eigene Leute', D4.map((d) => (mitTeilen(d) ? fmt(d.eigene) : ''))], ['Temporäre', D4.map((d) => (mitTeilen(d) ? fmt(d.temp) : ''))]].concat(hatWeitere ? [['Weitere', D4.map((d) => (d.weitere ? fmt(d.weitere) : ''))]] : []).concat([['Total', D4.map((d) => fmt(d.h))]])));
 
-  return '<div class="dgr">' + k1 + k2 + k3 + k4 + '</div>' + (S.zahlen.perioden.length > D.length ? '<p class="muted klein unter">Gezeigt sind die neusten Jahre; alle stehen unter «Tabelle».</p>' : '');
+  return '<div class="dgr">' + k1 + k2 + k3 + k4 + '</div>' + (opt.fuss !== undefined ? opt.fuss : (S.zahlen.perioden.length > D.length ? '<p class="muted klein unter">Gezeigt sind die neusten Jahre; alle stehen unter «Tabelle».</p>' : ''));
 }
 
 /* ---------- Ansichten ---------- */
@@ -2251,8 +2846,9 @@ function seg(k, opt, akt, klasse) {
   return '<div class="seg' + (klasse ? ' ' + klasse : '') + '" role="group">' + opt.map((o) => '<button type="button" data-a="seg" data-k="' + k + '" data-v="' + o[0] + '" aria-pressed="' + (akt === o[0]) + '">' + o[1] + '</button>').join('') + '</div>';
 }
 function ablage(imSheet) {
-  return '<section class="card ablage">' + ic('upload') + '<h2>BAB einfügen</h2><p class="muted">' + (FEIN ? 'In Excel die Tabelle markieren und kopieren, dann hier einfügen. Oder die Excel-Dateien auf diese Seite ziehen, auch mehrere Jahre zusammen.' : 'Die Excel-Dateien wählen, auch mehrere Jahre zusammen. Oder in Excel die Tabelle kopieren und hier einfügen.') + '</p>' +
-    '<textarea id="einfuegen" class="einfuegen" rows="1" placeholder="' + (FEIN ? 'Hier klicken und einfügen (Ctrl+V)' : 'Hier antippen und einfügen') + '" aria-label="BAB hier einfügen"></textarea>' +
+  return '<section class="card ablage">' + ic('upload') + '<h2>BAB oder Buchungen einfügen</h2><p class="muted">' + (FEIN ? 'In Excel die Tabelle markieren und kopieren, dann hier einfügen. Oder die Excel-Dateien auf diese Seite ziehen, auch mehrere Jahre zusammen.' : 'Die Excel-Dateien wählen, auch mehrere Jahre zusammen. Oder in Excel die Tabelle kopieren und hier einfügen.') + '</p>' +
+    '<p class="muted klein">Der BAB bringt je Jahr eine Spalte. Der Auszug «KSt-Istwerte» bringt alle Buchungen: Er lässt sich jederzeit neu einlesen, auch mit dem ganzen Verlauf.</p>' +
+    '<textarea id="einfuegen" class="einfuegen" rows="1" placeholder="' + (FEIN ? 'Hier klicken und einfügen (Ctrl+V)' : 'Hier antippen und einfügen') + '" aria-label="BAB oder Buchungen hier einfügen"></textarea>' +
     '<button type="button" class="btn" data-a="datei-wahl">Dateien wählen</button>' +
     (IM_RAHMEN ? '<p class="klein warn">Vorschau: Hier wird nichts gesichert. Nur Beispielzahlen einfügen.</p>'
       : (imSheet ? '' : '<button type="button" class="textlink" data-a="daten-wahl">Schon mit einer früheren Version gearbeitet? Gesicherte Datei laden</button>')) + '</section>';
@@ -2884,6 +3480,303 @@ function themaInhalt(t, nr) {
   return TEIL.frage(t) + TEIL.letztes(t) + TEIL.stichworte(t) + TEIL.anhaenge(t) + u + TEIL.felder(t) + TEIL.notizen(t) + TEIL.beschluss(t) + TEIL.aufgaben(t);
 }
 
+/* ====================================================================================================
+   Zahlen aus den Buchungen (seit 1.6): Stand und Wahl, Bauführer nebeneinander, Auswertung, Abgleich mit dem BAB
+   ==================================================================================================== */
+/* Welche Ansicht unter «Zahlen» gilt. «Bauführer» und «Auswertung» gibt es nur mit Buchungen und nur, wenn sie auf diesem Gerät eingeschaltet sind. */
+function zAnsicht() {
+  const a = S.zahlen.ansicht;
+  if (a === 'bf') return bfAn && buchDa() && BUCH.hatBL ? 'bf' : 'diagramme';
+  if (a === 'aw') return bfAn && buchDa() ? 'aw' : 'diagramme';
+  return a === 'tabelle' ? 'tabelle' : 'diagramme';
+}
+/* Monate nach dem letzten gezählten: Sie stehen in den Buchungen, zählen aber noch nicht mit */
+function buchLaufend() {
+  const B = BUCH, bis = buchBis(), M = new Set();
+  let n = 0;
+  if (B.ymMax > bis) for (let i = 0; i < B.n; i++) if (B.ym[i] > bis) { n++; M.add(B.ym[i]); }
+  return { n: n, monate: Array.from(M).sort((a, b) => a - b) };
+}
+function buchStandHTML() {
+  if (!S.buch) return '';
+  if (!buchDa()) return buchLaedt ? '' : '<div class="bu-stand"><p class="warn">Die Buchungen fehlen auf diesem Gerät. Die gesicherte Datei laden oder den Auszug nochmals einlesen.</p></div>';
+  const B = BUCH, bis = buchBis(), L = buchLaufend(), teile = [];
+  teile.push('Buchungen bis ' + ymName(bis) + (B.ymAbg === bis ? ', abgegrenzt' : (B.ymAbg >= 0 && bis > B.ymAbg ? ', abgegrenzt erst bis ' + ymName(B.ymAbg) : '')));
+  if (L.n) teile.push(L.monate.length === 1 ? ymName(L.monate[0]) + ' läuft noch und zählt nicht mit' : ymName(L.monate[0]) + ' bis ' + ymName(L.monate[L.monate.length - 1]) + ' laufen noch und zählen nicht mit');
+  if (!B.hatE) teile.push(buchAktiv() ? 'Erträge fehlen im Auszug' : 'Erträge fehlen im Auszug: Die Diagramme kommen aus dem BAB');
+  const hatBab = S.zahlen.perioden.some((p) => !istBudget(p));
+  return '<div class="bu-stand"><p>' + esc(teile.join('. ') + '.') + '</p><span class="reihe">' + (hatBab ? '<button type="button" class="textlink" data-a="sheet" data-s="abgleich">Abgleich mit dem BAB</button>' : '') +
+    '<button type="button" class="textlink" data-a="sheet" data-s="buchinfo">Buchungen</button></span></div>';
+}
+/* Wahl über den Diagrammen: Abteilung oder ein Bauführer; ganze Jahre oder jedes Jahr bis zum selben Monat */
+const zeitSeg = () => { const mE = buchBis() % 12; return mE < 11 ? seg('zzeit', [['jahr', 'Ganze Jahre'], ['bis', 'Januar bis ' + MONATE[mE]]], S.ui.zzeit === 'bis' ? 'bis' : 'jahr', 'klein') : ''; };
+function blWahlHTML() {
+  const B = BUCH, bl = blWahl();
+  if (!bfAn || !B.hatBL) return '';
+  return '<label class="wahl"><span>Für</span><select data-wahl="zbl" aria-label="Abteilung oder Bauführer"><option value="">Ganze Abteilung</option>' +
+    blListe().map((x) => '<option value="' + esc(x) + '"' + (bl === x ? ' selected' : '') + '>' + esc(x) + '</option>').join('') + (B.BL.some((x) => !x) ? '<option value="-"' + (bl === '-' ? ' selected' : '') + '>Ohne Bauführer</option>' : '') + '</select></label>';
+}
+const buLeiste = (wahl) => '<div class="bu-leiste"><div class="bu-wahl">' + wahl + '</div>' + buchStandHTML() + '</div>';
+/* Zeitraum für «Bauführer» und «Auswertung»: eine Spalte aus den Buchungen (S.ui.zsp nennt sie; ohne Wahl die neuste) */
+const zspIndex = (L) => { const i = L.findIndex((s) => s.name === S.ui.zsp); return i < 0 ? L.length - 1 : i; };
+const spalteLang = (s) => (s.teil ? 'Januar bis ' + ymName(s.bis) : s.name);
+function zeitWahlHTML(L, r) {
+  return '<label class="wahl"><span>Zeitraum</span><select data-wahl="zsp" aria-label="Zeitraum">' + L.slice().reverse().map((s) => '<option value="' + esc(s.name) + '"' + (s === L[r] ? ' selected' : '') + '>' + esc(spalteLang(s)) + '</option>').join('') + '</select></label>';
+}
+function ueberblickHTML() {   // Diagramme: aus den Buchungen, sobald sie die Quelle sind; sonst wie bisher aus dem BAB
+  if (!buchAktiv()) return (S.buch ? buLeiste('') : '') + diagrammeHTML();
+  const bis = buchBis(), gleich = S.ui.zzeit === 'bis' && bis % 12 < 11, D = diagrammDaten(), jahre = buchSpaltenListe().length, gezeigt = D.filter((d) => !d.bud).length;
+  return buLeiste(blWahlHTML() + zeitSeg()) + diagrammeHTML(D, { buch: true, zwischenText: gleich ? 'Jede Spalte zeigt Januar bis ' + MONATE[bis % 12] + '.' : undefined,
+    fuss: jahre > gezeigt ? '<p class="muted klein unter">Gezeigt sind die neusten Jahre.</p>' : '' });
+}
+function bfHTML() {   // die Bauführer nebeneinander, für einen Zeitraum
+  const L = buchSpaltenListe(), r = zspIndex(L), s = L[r];
+  return buLeiste(zeitWahlHTML(L, r) + zeitSeg()) + diagrammeHTML(buchBlDaten(s), { buch: true, zwischenText: s.teil ? 'Gezeigt ist ' + spalteLang(s) + ', kein ganzes Jahr.' : '', fuss: '' });
+}
+
+/* ---------- Auswertung: Rangliste nach Kostengruppe, Kostenart, Lieferant, Gerät, Baustelle oder Bauführer; eine Zeile antippen grenzt ein ---------- */
+let AWSUCHE = '', AW_ALLE = false;
+const AW_DIM = [['gruppe', 'Kostengruppe'], ['art', 'Kostenart'], ['lief', 'Lieferant'], ['ger', 'Gerät'], ['kst', 'Baustelle'], ['bl', 'Bauführer'], ['buch', 'Buchungen']];
+function awStand() {   // S.ui.aw: { dim (Rangliste), f (gewählte Eingrenzungen je Dimension), mass ('k' Kosten, 'e' Ertrag, 'g' Ergebnis) }
+  let a = S.ui.aw;
+  if (!a || typeof a !== 'object') a = S.ui.aw = {};
+  if (!a.f || typeof a.f !== 'object') a.f = {};
+  if (!AW_DIM.some((d) => d[0] === a.dim)) a.dim = 'gruppe';
+  if (['k', 'e', 'g'].indexOf(a.mass) < 0) a.mass = 'k';
+  return a;
+}
+/* Schlüssel einer Buchung je Dimension; null: Die Buchung gehört nicht in diese Rangliste */
+function awSchluessel(dim) {
+  const B = BUCH;
+  if (dim === 'gruppe') return (i) => B.BED[B.a[i]] || '';
+  if (dim === 'art') return (i) => B.KA[B.a[i]];
+  if (dim === 'lief') return (i) => { const da = B.da[i], nr = B.DK[B.d[i]]; return !nr || da < 0 ? null : (da === B.iKred ? 'K' + nr : (da === B.iDeb ? 'D' + nr : null)); };
+  if (dim === 'ger') return (i) => (B.istGer[B.a[i]] ? B.TG[B.t[i]] : null);
+  if (dim === 'kst') return (i) => B.KST[B.k[i]];
+  if (dim === 'bl') return (i) => B.BL[B.k[i]] || '';
+  return () => '';
+}
+const ohneNull = (x) => String(x || '').replace(/^0+(?=\d)/, '');
+function awNamen() {   // Namen zu den Schlüsseln; die Kostenart heisst wie im Auszug, sonst wie ihre Zeile im BAB
+  const B = BUCH, bab = {};
+  S.zahlen.zeilen.forEach((z) => { if (z.art === 'konto' && z.nr) bab[ohneNull(z.nr)] = z.name; });
+  const gruppe = (key) => (key ? (BED_NAME[key] || key.charAt(0) + key.slice(1).toLowerCase()) : 'Ohne Gruppe');
+  const art = (a) => (a < 0 ? '' : (B.KAN[a] || bab[ohneNull(B.BAB[a] || B.KA[a])] || ''));
+  return {
+    name(dim, key) {
+      if (dim === 'gruppe') return gruppe(key);
+      if (dim === 'art') { const n = art(B.KA.indexOf(key)); return key + (n ? ' ' + n : ''); }
+      if (dim === 'lief') { const d = B.DK.indexOf(key.slice(1)); return (d < 0 ? '' : (key.charAt(0) === 'D' ? B.KUND[d] : B.LIEF[d])) || key.slice(1); }
+      if (dim === 'ger') return key || 'Ohne Text';
+      if (dim === 'kst') { const k = B.KST.indexOf(key); return key + (k >= 0 && B.KSN[k] ? ' ' + B.KSN[k] : ''); }
+      if (dim === 'bl') return key || 'Ohne Bauführer';
+      return key;
+    },
+    klein(dim, key) {
+      if (dim === 'art') { const a = B.KA.indexOf(key); return a >= 0 && B.BED[a] ? gruppe(B.BED[a]) : ''; }
+      if (dim === 'lief') return (key.charAt(0) === 'D' ? 'Debitor ' : 'Kreditor ') + key.slice(1);
+      if (dim === 'kst') { const k = B.KST.indexOf(key); return k >= 0 ? B.BL[k] : ''; }
+      return '';
+    },
+    art: art
+  };
+}
+const einheitText = (e) => (/^tage?$/i.test(e) ? 'Tage' : (/^std\.?$|^stunden$|^h$/i.test(e) ? 'Std.' : e));
+/* Wohin es nach dem Antippen einer Zeile geht: die nächste sinnvolle Rangliste, zuletzt die einzelnen Buchungen */
+function awWeiter(a) {
+  const B = BUCH, frei = (d) => a.f[d] === undefined;
+  if (a.dim === 'art') { const i = B.KA.indexOf(a.f.art); return i >= 0 && B.istGer[i] && frei('ger') ? 'ger' : (i >= 0 && B.hatPartner[i] && frei('lief') ? 'lief' : (frei('kst') ? 'kst' : 'buch')); }
+  return (({ bl: ['kst', 'gruppe', 'art'], kst: ['gruppe', 'art'], gruppe: ['art'], lief: ['kst', 'art'], ger: ['kst'] })[a.dim] || []).find(frei) || 'buch';
+}
+function awDaten() {
+  const B = BUCH, a = awStand(), L = buchSpaltenListe(), r = zspIndex(L), cols = L.slice(Math.max(0, r - 3), r + 1), nc = cols.length, bis = buchBis();
+  const mass = !B.hatE || a.dim === 'ger' ? 'k' : a.mass;
+  const filter = Object.keys(a.f).filter((d) => d !== a.dim && d !== 'buch' && AW_DIM.some((x) => x[0] === d)).map((d) => { const f = awSchluessel(d), w = a.f[d]; return (i) => f(i) === w; });
+  const key = awSchluessel(a.dim), M = new Map(), tot = new Float64Array(nc), einzel = [];
+  for (let i = 0; i < B.n; i++) {
+    const ym = B.ym[i];
+    if (ym > bis) continue;
+    let c = -1;
+    for (let x = 0; x < nc; x++) if (ym >= cols[x].von && ym <= cols[x].bis) { c = x; break; }
+    if (c < 0) continue;
+    const istE = B.istE[B.a[i]];
+    if ((mass === 'k' && istE) || (mass === 'e' && !istE)) continue;
+    let ok = true;
+    for (let f = 0; f < filter.length && ok; f++) ok = filter[f](i);
+    if (!ok) continue;
+    const v = istE ? B.b[i] * B.vzE : (mass === 'g' ? -B.b[i] * B.vzA : B.b[i] * B.vzA);
+    if (a.dim === 'buch') { if (c === nc - 1) { einzel.push([i, v]); tot[c] += v; } continue; }
+    const k = key(i);
+    if (k === null) continue;
+    let x = M.get(k);
+    if (!x) { x = { k: k, v: new Float64Array(nc), m: 0, e: -1 }; M.set(k, x); }
+    x.v[c] += v; tot[c] += v;
+    if (c === nc - 1 && B.m[i]) { x.m += B.m[i]; x.e = x.e === -1 ? B.e[i] : (x.e === B.e[i] ? x.e : -2); }
+  }
+  return { a: a, L: L, r: r, cols: cols, nc: nc, mass: mass, M: M, tot: tot, einzel: einzel };
+}
+function awHTML() {
+  const B = BUCH, D = awDaten(), a = D.a, nc = D.nc, last = nc - 1, N = awNamen(), q = AWSUCHE.trim().toLowerCase();
+  const dimName = (d) => (d === 'lief' && D.mass === 'e' ? 'Kunde' : (AW_DIM.find((x) => x[0] === d) || ['', d])[1]);
+  // angeboten wird, was mit den Eingrenzungen noch etwas zeigen kann: Geräte nur innerhalb der Gerätekosten, Lieferanten nur ausserhalb
+  const iA = a.f.art === undefined ? -1 : B.KA.indexOf(a.f.art), nurGer = a.f.gruppe === 'GERVRR' || (iA >= 0 && B.istGer[iA]) || a.f.ger !== undefined, nieGer = (a.f.gruppe !== undefined && a.f.gruppe !== 'GERVRR') || (iA >= 0 && !B.istGer[iA]) || a.f.lief !== undefined;
+  const dims = AW_DIM.filter((d) => d[0] === a.dim || (a.f[d[0]] === undefined && (d[0] !== 'bl' || B.hatBL) && (d[0] !== 'ger' || (B.istGer.some(Boolean) && !nieGer)) && (d[0] !== 'lief' || ((B.iKred >= 0 || B.iDeb >= 0) && !nurGer))));
+  const filter = Object.keys(a.f).filter((d) => d !== a.dim && AW_DIM.some((x) => x[0] === d));
+  let h = buLeiste(zeitWahlHTML(D.L, D.r) + zeitSeg() + (B.hatE && a.dim !== 'ger' ? seg('awmass', [['k', 'Kosten'], ['e', 'Ertrag'], ['g', 'Ergebnis']], D.mass, 'klein') : '')) +
+    '<div class="aw-dim">' + seg('awdim', dims.map((d) => [d[0], dimName(d[0])]), a.dim, 'klein') + '</div>' +
+    (filter.length ? '<div class="aw-filter">' + filter.map((d) => '<button type="button" class="chip" data-a="aw-filter-weg" data-d="' + d + '" aria-pressed="true" aria-label="' + esc(dimName(d) + ': ' + N.name(d, a.f[d])) + ', Eingrenzung aufheben"><span>' + esc(dimName(d) + ': ' + N.name(d, a.f[d])) + '</span>' + ic('x') + '</button>').join('') + '</div>' : '');
+  const betragZ = (v, stark) => (Math.abs(v) < 0.005 ? '' : (stark ? '<b>' + fmt(v) + '</b>' : fmt(v)));
+  const kopfZ = D.cols.map((c, ci) => '<th class="r' + (ci < last ? ' alt' : '') + '">' + esc(c.name) + '</th>').join('');
+  const such = (n) => '<div class="k-such"><input type="search" id="aw-suche" value="' + esc(AWSUCHE) + '" placeholder="Suchen …" aria-label="' + esc(n) + ' durchsuchen" autocomplete="off"></div>';
+  if (a.dim === 'buch') {   // die einzelnen Buchungen des gewählten Zeitraums, die grössten zuerst
+    const E = D.einzel.sort((x, y) => Math.abs(y[1]) - Math.abs(x[1])), zeigen = E.slice(0, AW_ALLE ? 2000 : 200);
+    if (!E.length) return h + '<p class="leer">Keine Buchungen mit dieser Auswahl.</p>';
+    const datum = (i) => { if (!B.bd[i]) return ymKurz(B.ym[i]); const d = new Date(B.bd[i] * 864e5); return String(d.getUTCDate()).padStart(2, '0') + '.' + String(d.getUTCMonth() + 1).padStart(2, '0') + '.' + String(d.getUTCFullYear()).slice(2); };
+    const mitMenge = zeigen.some((e) => B.m[e[0]]);
+    return h + (E.length > 10 ? such('Buchungen') : '') + '<div class="bst-rahmen"><table class="bst aw fest" id="t-aw"><thead><tr><th>Datum</th><th>Buchung</th>' + (mitMenge ? '<th class="r">Menge</th>' : '') + '<th class="r">' + esc(D.cols[last].name) + '</th></tr></thead><tbody>' +
+      zeigen.map((e) => {
+        const i = e[0], text = B.TXT[B.t[i]] || '(ohne Text)', kst = N.name('kst', B.KST[B.k[i]]), art = N.name('art', B.KA[B.a[i]]), bel = B.BEL[B.bn[i]];
+        const s = (text + ' ' + kst + ' ' + art + ' ' + bel).toLowerCase(), ein = einheitText(B.EIN[B.e[i]]);
+        return '<tr data-such="' + esc(s) + '"' + (q && s.indexOf(q) < 0 ? ' hidden' : '') + '><td class="nw tnum">' + datum(i) + '</td><td>' + esc(text) + '<small>' + esc([kst, art, bel ? 'Beleg ' + bel : ''].filter(Boolean).join(' · ')) + '</small></td>' +
+          (mitMenge ? '<td class="r tnum nw">' + (B.m[i] ? fmtN(B.m[i], B.m[i] % 1 ? 1 : 0) + (ein ? ' ' + esc(ein) : '') : '') + '</td>' : '') + '<td class="r tnum' + (e[1] < 0 ? ' neg' : '') + '"><b>' + fmtN(e[1], 2) + '</b></td></tr>';
+      }).join('') + '</tbody><tfoot><tr><td></td><td>Total, ' + mehrzahl(E.length, 'Buchung', 'Buchungen') + '</td>' + (mitMenge ? '<td></td>' : '') + '<td class="r tnum">' + fmt(D.tot[last]) + '</td></tr></tfoot></table></div>' +
+      '<div class="unter"><p class="muted klein">Die grössten zuerst, gezählt bis ' + esc(ymName(buchBis())) + '.</p>' + (E.length > zeigen.length ? '<button type="button" class="textlink" data-a="aw-alle">Mehr zeigen (' + fmt(E.length) + ')</button>' : '') + '</div>';
+  }
+  const Z = Array.from(D.M.values()).filter((x) => x.v.some((v) => Math.abs(v) >= 0.005)).sort((x, y) => { for (let c = last; c >= 0; c--) { const d = y.v[c] - x.v[c]; if (Math.abs(d) >= 0.005) return d; } return 0; });
+  if (!Z.length) return h + '<p class="leer">Keine Buchungen mit dieser Auswahl.</p>';
+  const max = Math.max.apply(null, Z.map((x) => x.v[last]).concat([0])), zeigen = AW_ALLE ? Z : Z.slice(0, 50);
+  h += (Z.length > 10 ? such(dimName(a.dim)) : '') + '<div class="bst-rahmen"><table class="bst aw" id="t-aw"><thead><tr><th>' + esc(dimName(a.dim)) + '</th>' + kopfZ + '<th class="aw-bk"></th></tr></thead><tbody>' +
+    zeigen.map((x) => {
+      const name = N.name(a.dim, x.k), klein = N.klein(a.dim, x.k), v = x.v[last], ein = x.e >= 0 ? einheitText(B.EIN[x.e]) : '';
+      const zusatz = [D.mass !== 'g' && v > 0 && D.tot[last] > 0 ? (v / D.tot[last] < 0.005 ? 'unter 1 %' : Math.round(v / D.tot[last] * 100) + ' %') : '', ein && Math.abs(x.m) >= 0.05 ? fmtN(x.m, x.m % 1 ? 1 : 0) + ' ' + ein : ''].filter(Boolean).join(' · ');
+      const s = (name + ' ' + klein).toLowerCase();
+      return '<tr data-a="aw-zeile" data-k="=' + esc(x.k) + '" data-such="' + esc(s) + '"' + (q && s.indexOf(q) < 0 ? ' hidden' : '') + '><td><button type="button" data-a="aw-zeile" data-k="=' + esc(x.k) + '">' + esc(name) + '</button>' + (klein ? '<small>' + esc(klein) + '</small>' : '') + '</td>' +
+        D.cols.map((c, ci) => '<td class="r tnum' + (ci < last ? ' alt' : '') + (x.v[ci] < -0.005 ? ' neg' : '') + '">' + betragZ(x.v[ci], ci === last) + (ci === last && zusatz ? '<small>' + esc(zusatz) + '</small>' : '') + '</td>').join('') +
+        '<td class="aw-bk"><span class="rg-b"><i class="c-blau" style="width:' + (v > 0 && max > 0 ? (v / max * 100).toFixed(1) : 0) + '%"></i></span></td></tr>';
+    }).join('') + '</tbody><tfoot><tr><td>Total' + (Z.length > 1 ? ', ' + Z.length + ' Zeilen' : '') + '</td>' + D.cols.map((c, ci) => '<td class="r tnum' + (ci < last ? ' alt' : '') + '">' + fmt(D.tot[ci]) + '</td>').join('') + '<td class="aw-bk"></td></tr></tfoot></table></div>';
+  const hinweis = a.dim === 'lief' ? (D.mass === 'e' ? 'Nur Buchungen mit Debitor. ' : (D.mass === 'g' ? 'Nur Buchungen mit Kreditor oder Debitor. ' : 'Nur Buchungen mit Kreditor. ')) : (a.dim === 'ger' ? 'Nur Buchungen der Kostengruppe Geräte; der Name kommt aus dem Buchungstext. ' : '');
+  return h + '<div class="unter"><p class="muted klein">' + esc(hinweis + 'Eine Zeile antippen grenzt ein. Gezählt bis ' + ymName(buchBis()) + '.') + '</p>' + (Z.length > zeigen.length ? '<button type="button" class="textlink" data-a="aw-alle">Alle ' + Z.length + ' zeigen</button>' : '') + '</div>';
+}
+
+/* ---------- Abgleich: die Buchungen gegen den BAB, je Spalte des BAB ---------- */
+/* «2025» → das ganze Jahr; «Sep 26» → Januar bis September; «Monat Sep 26» → nur dieser Monat; ohne Jahr: null */
+function periodeBereich(name) {
+  const n = String(name || '').trim(), einzeln = /^monat\s+/i.test(n), kern = n.replace(/^monat\s+/i, ''), y4 = /(19|20)\d{2}/.exec(kern), y2 = y4 ? null : /(?:^|\D)(\d{2})\s*$/.exec(kern);
+  const j = y4 ? +y4[0] : (y2 ? 2000 + (+y2[1]) : 0), mo = monatAus(kern);
+  if (!j || /budget/i.test(n)) return null;
+  return einzeln && mo ? { von: j * 12 + mo - 1, bis: j * 12 + mo - 1 } : { von: j * 12, bis: j * 12 + (mo ? mo - 1 : 11) };
+}
+function abgleichDaten() {
+  const B = BUCH, zs = S.zahlen.zeilen, k = kernZeilen(), iE = zs.indexOf(k.ertrag), bis = buchBis(), std = buchStd();
+  const konten = zs.filter((z) => z.art === 'konto' && z.nr), stdZ = zs.filter((z) => z.art === 'stunden' && z.stufe === 0);
+  const istEZ = (z) => (iE >= 0 ? zs.indexOf(z) < iE : +z.nr < 4000), babVon = B.KA.map((nr, a) => ohneNull(B.BAB[a] || nr));
+  return S.zahlen.perioden.filter((p) => !istBudget(p)).map((p) => {
+    const r = periodeBereich(p.name);
+    if (!r) return { p: p, grund: 'Aus dem Namen der Spalte lässt sich kein Zeitraum lesen.' };
+    if (r.bis < B.ymMin || r.von > Math.min(B.ymMax, bis)) return { p: p, grund: 'Für diesen Zeitraum gibt es keine gezählten Buchungen.' };
+    const sum = new Map();
+    let sE = 0, sA = 0, eig = 0, tmp = 0;
+    for (let i = 0; i < B.n; i++) {
+      const ym = B.ym[i];
+      if (ym < r.von || ym > r.bis || ym > bis) continue;
+      const a = B.a[i];
+      sum.set(babVon[a], (sum.get(babVon[a]) || 0) + B.b[i]);
+      if (B.istE[a]) sE += B.b[i] * B.vzE; else sA += B.b[i] * B.vzA;
+      if (std[a] && B.stdEin[B.e[i]]) { if (std[a] === 1) eig += B.m[i]; else tmp += B.m[i]; }
+    }
+    // Vorzeichen: Der BAB zeigt Erträge und Aufwand oft beide positiv, gebucht ist der Ertrag als Minus. Je Block gilt die Richtung, die zur Mehrheit passt.
+    let oE = 0, oA = 0;
+    konten.forEach((z) => { const v = z.w[p.id], s = sum.get(ohneNull(z.nr)); if (v && s) { if (istEZ(z)) oE += v * s; else oA += v * s; } });
+    const zeilen = [], gesehen = new Set();
+    konten.forEach((z) => {
+      const key = ohneNull(z.nr), v = z.w[p.id] || 0, s = (sum.get(key) || 0) * ((istEZ(z) ? oE : oA) < 0 ? -1 : 1);
+      gesehen.add(key);
+      if (v || Math.abs(s) >= 0.005) zeilen.push({ nr: z.nr, name: z.name, bab: v, buch: s, diff: s - v });
+    });
+    sum.forEach((s, key) => { if (!gesehen.has(key) && Math.abs(s) >= 0.005) zeilen.push({ nr: key, name: 'Nur in den Buchungen (Kostenart ' + B.KA.filter((nr, a) => babVon[a] === key).join(', ') + ')', bab: null, buch: s, diff: s }); });
+    const wert = (z) => { const v = z ? z.w[p.id] : undefined; return v === undefined || v === null ? null : Math.abs(v); };
+    const stdSumme = (test) => { let s = 0, hat = false; stdZ.forEach((z) => { if (test(z.name) && wert(z) !== null) { s += wert(z); hat = true; } }); return hat ? s : null; };
+    const bE = wert(k.ertrag), bA = wert(k.aufwand);
+    const kopf = [['Ertrag', bE, B.hatE ? sE : null, 1], ['Aufwand', bA, sA, 1], ['Ergebnis', bE !== null && bA !== null ? bE - bA : null, B.hatE ? sE - sA : null, 1],
+      ['Stunden eigene Leute', stdSumme((n) => /monatslohn|stundenlohn|eigen/i.test(n)), eig, 0.5], ['Stunden Temporäre', stdSumme((n) => /temp/i.test(n)), tmp, 0.5]]
+      .map((x) => ({ name: x[0], bab: x[1], buch: x[2], diff: x[1] === null || x[2] === null ? null : x[2] - x[1], tol: x[3] }));
+    const abw = zeilen.filter((z) => Math.abs(z.diff) >= 1);
+    return { p: p, r: r, kopf: kopf, zeilen: zeilen, abw: abw, stimmt: !abw.length && kopf.every((x) => x.diff === null || Math.abs(x.diff) < x.tol),
+      knapp: r.bis > bis ? 'Die Buchungen zählen erst bis ' + ymName(bis) + '; diese Spalte des BAB reicht weiter.' : (r.von < B.ymMin ? 'Die Buchungen beginnen erst im ' + ymName(B.ymMin) + '.' : '') };
+  });
+}
+function abgleichHTML() {
+  if (!buchDa()) return '';
+  const A = abgleichDaten();
+  if (!A.length) return huelle('Abgleich mit dem BAB', '<p class="muted">Es ist noch kein BAB da. Füge ihn über «Zahlen einfügen» ein; dann steht hier, ob die Buchungen dieselben Zahlen ergeben.</p>');
+  const brauchbar = A.filter((x) => !x.grund), wahl = A.find((x) => x.p.id === sheet.pid) || brauchbar.filter((x) => !x.stimmt).pop() || brauchbar[brauchbar.length - 1] || A[A.length - 1];
+  const chips = '<div class="chips abg-chips" role="group" aria-label="Spalte des BAB">' + A.map((x) => '<button type="button" class="chip' + (x.grund ? ' leer' : (x.stimmt ? ' ok' : ' abw')) + '" data-a="abg-periode" data-id="' + x.p.id + '" aria-pressed="' + (x === wahl) + '">' +
+    esc(x.p.name) + (x.grund ? '' : (x.stimmt ? ic('check') : '<i class="tnum">' + (x.abw.length || '!') + '</i>')) + '</button>').join('') + '</div>';
+  if (wahl.grund) return huelle('Abgleich mit dem BAB', chips + '<p class="muted">' + esc(wahl.grund) + '</p>');
+  const z = (v, stellen) => (v === null || v === undefined ? '' : (stellen ? fmtN(v, stellen) : fmt(v)));
+  const diffZ = (d, tol) => (d === null ? '<td></td>' : (Math.abs(d) < tol ? '<td class="ok">' + ic('check') + '</td>' : '<td class="abw">' + mitVz(d, fmt(Math.abs(d))) + '</td>'));
+  const reihe = (x, tol) => '<tr><th>' + (x.nr ? '<span class="nr tnum">' + esc(x.nr) + '</span>' : '') + esc(x.name) + '</th><td>' + z(x.bab) + '</td><td>' + z(x.buch) + '</td>' + diffZ(x.diff, tol) + '</tr>';
+  const liste = sheet.alle ? wahl.zeilen : wahl.abw;
+  return huelle('Abgleich mit dem BAB', chips +
+    '<p class="' + (wahl.stimmt ? 'abg-urteil ok' : 'abg-urteil abw') + '">' + ic(wahl.stimmt ? 'check' : 'info') + '<span>' + esc('«' + wahl.p.name + '»: ' + (wahl.stimmt ? 'Die Buchungen ergeben dieselben Zahlen wie der BAB.' : (wahl.abw.length ? mehrzahl(wahl.abw.length, 'Zeile weicht', 'Zeilen weichen') + ' um mehr als einen Franken ab.' : 'Die Summen weichen ab.'))) + '</span></p>' +
+    (wahl.knapp ? '<p class="hinweis">' + ic('info') + '<span>' + esc(wahl.knapp) + '</span></p>' : '') +
+    '<table class="abg"><thead><tr><th></th><th>BAB</th><th>Buchungen</th><th>Differenz</th></tr></thead><tbody>' + wahl.kopf.map((x) => reihe(x, x.tol)).join('') + '</tbody>' +
+    (liste.length ? '<tbody><tr class="zw"><th colspan="4">' + (sheet.alle ? 'Alle Zeilen' : 'Abweichungen je Zeile') + '</th></tr>' + liste.map((x) => reihe(x, 1)).join('') + '</tbody>' : '') + '</table>' +
+    '<div class="unter"><p class="muted klein">Verglichen wird je Zeile des BAB mit den Buchungen derselben BAB-Zeile, gezählt bis ' + esc(ymName(buchBis())) + '.</p>' +
+    (wahl.zeilen.length > wahl.abw.length || sheet.alle ? '<button type="button" class="textlink" data-a="abg-alle">' + (sheet.alle ? 'Nur Abweichungen' : 'Alle ' + wahl.zeilen.length + ' Zeilen zeigen') + '</button>' : '') + '</div>');
+}
+
+/* ---------- Fenster «Buchungen»: Eckdaten, bis wann gezählt wird, was als Stunde zählt ---------- */
+function buchInfoHTML() {
+  if (!buchDa()) return '';
+  const B = BUCH, m = S.buch, bis = buchBis(), N = awNamen(), eigen = m.std || {}, L = buchSpaltenListe('jahr'), sp = L[L.length - 1];
+  const zeile = (k, v) => '<tr><th>' + k + '</th><td>' + v + '</td></tr>';
+  const menge = B.KA.map(() => 0);
+  for (let i = 0; i < B.n; i++) if (B.ym[i] >= sp.von && B.ym[i] <= sp.bis && B.ym[i] <= bis && B.stdStat[B.a[i]].n && B.stdEin[B.e[i]]) menge[B.a[i]] += B.m[i];
+  const monate = [];
+  for (let ym = B.ymMax; ym >= Math.max(B.ymMin, B.ymMax - 17); ym--) monate.push(ym);
+  const stdListe = B.KA.map((nr, a) => a).filter((a) => B.stdStat[a].n > 0).sort((x, y) => B.KA[x].localeCompare(B.KA[y]));
+  const stdWahl = (a) => { const nr = B.KA[a], w = eigen[nr] || B.stdVor[a] || '-'; return '<div class="seg klein" role="group">' + [['e', 'Eigene Leute'], ['t', 'Temporäre'], ['-', 'Zählt nicht']].map((o) => '<button type="button" data-a="buch-std" data-nr="' + esc(nr) + '" data-v="' + o[0] + '" aria-pressed="' + (w === o[0]) + '">' + o[1] + '</button>').join('') + '</div>'; };
+  return huelle('Buchungen',
+    '<section class="gr"><table class="vergleich"><tbody>' + zeile('Buchungen', fmt(B.n)) + zeile('Zeitraum', esc(ymName(B.ymMin) + ' bis ' + ymName(B.ymMax))) +
+    zeile('Abgegrenzt bis', B.ymAbg >= 0 ? esc(ymName(B.ymAbg)) : 'keine Abschlussbuchung gefunden') + zeile('Erträge', B.hatE ? 'im Auszug' : 'fehlen im Auszug') +
+    zeile('Bauführer', B.hatBL ? esc(blListe().join(', ')) : 'Spalte «Bauleiter» fehlt oder ist leer') + (m.am ? zeile('Eingelesen', esc(zeitKurz(m.am)) + ' Uhr') : '') + '</tbody></table>' +
+    '<label class="f" for="bu-bis"><span>Gezählt wird bis</span><select id="bu-bis" data-wahl="zaehlbis"><option value="">' + esc(B.ymAbg >= 0 ? 'Letzter abgegrenzter Monat (' + ymName(B.ymAbg) + ')' : 'Letzter Monat (' + ymName(B.ymMax) + ')') + '</option>' +
+    monate.map((ym) => '<option value="' + ym + '"' + (m.zaehlBis === ym ? ' selected' : '') + '>' + esc(ymName(ym)) + '</option>').join('') + '</select></label>' +
+    '<p class="muted klein">Ein laufender Monat ist erst vollständig, wenn er abgegrenzt ist. Darum zählt das Tool von selbst nur bis zum letzten Monat mit Abschlussbuchung.</p></section>' +
+    (stdListe.length ? '<section class="gr"><h3>Stunden</h3><p class="muted klein">Welche Kostenarten als produktive Stunden zählen. Der Vorschlag kommt aus den Lohnbuchungen; mit dem Abgleich siehst du, ob er zum BAB passt.</p><ul class="bu-std">' +
+      stdListe.map((a) => '<li><div><b>' + esc(N.name('art', B.KA[a])) + '</b><small class="tnum">' + esc(spalteLang(sp) + ': ' + fmt(menge[a]) + ' Std.') + '</small></div>' + stdWahl(a) + '</li>').join('') + '</ul></section>' : '') +
+    '<p class="muted klein">Neu einlesen über «Zahlen einfügen»: Jeder Monat, der im Auszug vorkommt, wird ersetzt; die übrigen bleiben stehen.</p>' + loeschKnopf('buch-weg', 'Buchungen entfernen'));
+}
+/* ---------- Fenster «Buchungen einlesen»: was der Auszug enthält und was er ändert ---------- */
+function buchImportHTML() {
+  const w = buchWartet;
+  if (!w) return '';
+  const B = w.B, I = w.info, zeile = (k, v) => '<tr><th>' + k + '</th><td>' + v + '</td></tr>', mon = (n) => mehrzahl(n, 'Monat', 'Monate');
+  const namen = (L) => (L.length <= 3 ? L.map(ymName).join(', ') : mon(L.length) + ', ' + ymName(L[0]) + ' bis ' + ymName(L[L.length - 1]));
+  const bl = Array.from(new Set(B.BL.filter(Boolean))), laeuft = B.ymAbg >= 0 ? Array.from(new Set(B.ym)).filter((ym) => ym > B.ymAbg).sort((a, b) => a - b) : [];
+  const anders = I.anders.length ? (I.anders.length <= 3 ? I.anders.map((x) => ymName(x.ym) + ' (' + (x.nach === x.vor ? 'andere Beträge' : mitVz(x.nach - x.vor, String(Math.abs(x.nach - x.vor))) + ' Buchungen') + ')').join(', ') : mon(I.anders.length) + ' mit Änderungen') : '';
+  return formHuelle('Buchungen einlesen', 'buchimport',
+    '<p class="muted">Gelesen: ' + fmt(B.n) + ' Buchungen, ' + esc(ymName(B.ymMin) + ' bis ' + ymName(B.ymMax)) + '.</p>' +
+    '<table class="vergleich"><tbody>' + (I.neu.length ? zeile('Neu', esc(namen(I.neu))) : '') + (anders ? zeile('Wird ersetzt', esc(anders)) : '') + (I.gleich ? zeile('Unverändert', mon(I.gleich)) : '') + (I.bleibt ? zeile('Bleibt stehen', mon(I.bleibt) + ', die im Auszug fehlen') : '') +
+    zeile('Abgegrenzt bis', B.ymAbg >= 0 ? esc(ymName(B.ymAbg)) : 'keine Abschlussbuchung gefunden') + (laeuft.length ? zeile('Läuft noch', esc(namen(laeuft)) + ', zählt nicht mit') : '') +
+    zeile('Erträge', B.hatE ? 'im Auszug' : 'fehlen') + zeile('Bauführer', bl.length ? String(bl.length) : 'Spalte «Bauleiter» fehlt oder ist leer') + '</tbody></table>' +
+    (I.schlecht ? '<p class="hinweis">' + ic('info') + '<span>' + mehrzahl(I.schlecht, 'Zeile', 'Zeilen') + ' ohne Kostenstelle, Kostenart oder Buchungsperiode ' + (I.schlecht === 1 ? 'bleibt' : 'bleiben') + ' weg.</span></p>' : '') +
+    (!B.hatE ? '<p class="hinweis">' + ic('info') + '<span>Im Auszug stehen nur Kosten. ' + (S.zahlen.perioden.some((p) => !istBudget(p)) && !S.beispiel ? 'Die Diagramme kommen weiter aus dem BAB, bis ein Auszug mit Erträgen da ist.' : 'Ertrag und Gewinn fehlen, bis ein Auszug mit Erträgen da ist.') + '</span></p>' : '') +
+    (S.beispiel ? '<p class="hinweis">' + ic('info') + '<span>Das Beispiel wird dabei entfernt.</span></p>' : '') +
+    (IM_RAHMEN ? '<p class="klein warn">Vorschau: Hier wird nichts gesichert.</p>' : '') +
+    '<p class="muted klein">Jeder Monat, der im Auszug vorkommt, wird ganz ersetzt. Monate, die fehlen, bleiben stehen. Gezählt wird bis zum letzten abgegrenzten Monat.</p>', 'Übernehmen');
+}
+/* ---------- Zahlen fürs Ergebnis aus den Buchungen: Ertrag, Aufwand, Ergebnis, Gewinn in %, Stunden; Budget-Spalten kommen aus dem BAB ---------- */
+function buchErgebnisTabelle(n, mitAufwand) {
+  const D = diagrammDaten(true).slice(-n), oder = (v) => (v === null || v === undefined ? '' : fmt(v));
+  const zeile = (name, f, stark) => '<tr><th>' + name + '</th>' + D.map((d) => { const t = f(d); return '<td>' + (stark && t ? '<b>' + t + '</b>' : t) + '</td>'; }).join('') + '</tr>';
+  return '<div class="e-tab-rahmen"><table class="e-tab"><thead><tr><th></th>' + D.map((d) => '<th>' + esc(d.name) + '</th>').join('') + '</tr></thead><tbody>' +
+    zeile('Ertrag', (d) => oder(d.E)) + (mitAufwand ? zeile('Aufwand', (d) => oder(d.A)) : '') + zeile('Ergebnis', (d) => oder(d.G), true) +
+    zeile('Gewinn in % des Ertrags', (d) => (d.G === null || !d.E ? '' : fmtN(d.G / d.E * 100, 1) + ' %')) + (D.some((d) => d.h) ? zeile('Produktive Stunden', (d) => oder(d.h)) : '') + '</tbody></table></div>' +
+    '<p class="e-fuss">Aus den Buchungen, gezählt bis ' + esc(ymName(buchBis())) + '. Ergebnis: Ertrag minus Aufwand.</p>';
+}
+
 /* ---------- Zahlen: Ausblick aufs Folgejahr ---------- */
 function ausblickHTML() {
   const B = S.budget, j = folgejahr(), hat = B.ziel !== null && B.ziel > 0;
@@ -2916,7 +3809,7 @@ function monateIm(m, J) {
 const koepfeIm = (J) => S.mitarbeiter.filter((m) => !imBuero(m)).reduce((x, m) => x + monateIm(m, J), 0) / 12;
 const rund1 = (x) => Math.round(x * 10) / 10;
 function vrBasis() {
-  const Dj = diagrammDaten().filter((d) => !d.bud && /^\s*\d{4}\s*$/.test(d.name) && d.E && d.h), letzt = Dj[Dj.length - 1] || null, jl = letzt ? parseInt(letzt.name, 10) : 0;
+  const Dj = diagrammDaten(true).filter((d) => !d.bud && /^\s*\d{4}\s*$/.test(d.name) && d.E && d.h), letzt = Dj[Dj.length - 1] || null, jl = letzt ? parseInt(letzt.name, 10) : 0;
   const sE = Dj.reduce((x, d) => x + d.E, 0), sH = Dj.reduce((x, d) => x + d.h, 0), sG = Dj.reduce((x, d) => x + (d.G || 0), 0);
   const kl = jl ? koepfeIm(jl) : 0, eigene = letzt ? (letzt.eigene || Math.max(0, letzt.h - (letzt.temp || 0))) : 0;
   return { J: folgejahr(), jahre: Dj.map((d) => d.name.trim()), jl: jl, koepfe: rund1(koepfeIm(folgejahr())), koepfeL: rund1(kl), proKopf: kl > 0 && eigene ? Math.round(eigene / kl / 10) * 10 : 0,
@@ -3076,12 +3969,15 @@ const ANSICHT = {
       '<button type="button" class="btn stark" data-a="sheet" data-s="kimport">' + ic('plus') + '<span>Einfügen</span></button>') + (tab ? kundenTabellen() : kundenDiagramme());
   },
 
-  zahlen() {
-    const Z = S.zahlen;
-    if (!Z.perioden.length) return titel('Zahlen', 'Verlauf der Jahre') + ablage() + ausblickHTML();
-    const tab = Z.ansicht === 'tabelle';
-    return titel('Zahlen', 'Verlauf der Jahre', seg('ansicht', [['diagramme', 'Diagramme'], ['tabelle', 'Tabelle']], Z.ansicht) + (tab ? seg('sicht', [['summen', 'Nur Summen'], ['alle', 'Alle Konten']], Z.sicht) : '') +
-      '<button type="button" class="btn stark" data-a="sheet" data-s="import">' + ic('plus') + '<span>Zahlen einfügen</span></button>') + (tab ? tabelleHTML() : diagrammeHTML()) + ausblickHTML();
+  zahlen() {   // seit 1.6: mit Buchungen kommen «Bauführer» und «Auswertung» dazu (je Gerät einzuschalten); die Tabelle ist der BAB
+    const Z = S.zahlen, hatBuch = buchDa();
+    if (!Z.perioden.length && !S.buch) return titel('Zahlen', 'Verlauf der Jahre') + ablage() + ausblickHTML();
+    const an = zAnsicht(), tab = an === 'tabelle', bl = an === 'diagramme' && buchAktiv() ? blWahl() : null;
+    const wahl = [['diagramme', 'Diagramme']].concat(bfAn && hatBuch && BUCH.hatBL ? [['bf', 'Bauführer']] : [], bfAn && hatBuch ? [['aw', 'Auswertung']] : [], [['tabelle', hatBuch ? 'BAB' : 'Tabelle']]);
+    const unter = an === 'bf' ? 'Bauführer nebeneinander' : (an === 'aw' ? 'Auswertung der Buchungen' : (bl ? 'Verlauf der Jahre, ' + (bl === '-' ? 'ohne Bauführer' : bl) : 'Verlauf der Jahre'));
+    return titel('Zahlen', unter, seg('ansicht', wahl, an, wahl.length > 2 ? 'viele' : '') + (tab && Z.perioden.length ? seg('sicht', [['summen', 'Nur Summen'], ['alle', 'Alle Konten']], Z.sicht) : '') +
+      '<button type="button" class="btn stark" data-a="sheet" data-s="import">' + ic('plus') + '<span>Zahlen einfügen</span></button>') +
+      (an === 'bf' ? bfHTML() : an === 'aw' ? awHTML() : tab ? (S.buch ? buLeiste('') : '') + (Z.perioden.length ? tabelleHTML() : '<p class="leer">Noch kein BAB. Er bringt das Budget und den Abgleich mit den Buchungen: über «Zahlen einfügen».</p>') + ausblickHTML() : ueberblickHTML() + ausblickHTML());
   },
 
   themen() {
@@ -3309,7 +4205,8 @@ function einSeiteHTML() {
   h += '<section class="e-teil e-gl"><h2>Für die GL</h2>' + (gl.length ? '<ul>' + gl.slice(0, 9).join('') + mehr(gl.length - 9) + '</ul>' : '<p class="e-klein">Nichts mit «GL» markiert.</p>') + '</section>';
   const P = spaltenWahl().slice(-4), k = kernZeilen();
   let links = '';
-  if (P.length && (k.ertrag || k.ergebnis)) {
+  if (buchAktiv()) links += '<section class="e-teil"><h2>Zahlen</h2>' + buchErgebnisTabelle(4, false) + '</section>';   // seit 1.6
+  else if (P.length && (k.ertrag || k.ergebnis)) {
     const reihe = (z, stark) => (z ? '<tr><th>' + esc(z.name) + '</th>' + P.map((p) => { const v = z.w[p.id]; return '<td>' + (v === undefined || v === null ? '' : (stark ? '<b>' + fmt(v) + '</b>' : fmt(v))) + '</td>'; }).join('') + '</tr>' : '');
     const proz = k.ertrag && k.aufwand ? '<tr><th>Gewinn in %</th>' + P.map((p) => { const v = gewinnProzent(p.id); return '<td>' + (v === null ? '' : v.toFixed(1) + ' %') + '</td>'; }).join('') + '</tr>' : '';
     links += '<section class="e-teil"><h2>Zahlen</h2><div class="e-tab-rahmen"><table class="e-tab"><thead><tr><th></th>' + P.map((p) => '<th>' + esc(p.name) + '</th>').join('') + '</tr></thead><tbody>' + reihe(k.ertrag) + reihe(k.ergebnis, true) + proz + reihe(k.stunden) + '</tbody></table></div>' +
@@ -3421,7 +4318,7 @@ function beilageDa(k) {   // gibt es zu dieser Beilage etwas zu zeigen?
   if (k === 'personal') return T.some((t) => t.art === 'personal' && (S.mitarbeiter.length || t.bedarf.length));
   if (k === 'gruppen') return T.some((t) => t.art === 'gruppen' && t.leute.length);
   if (k === 'baustellen') return T.some((t) => t.art === 'rueckblick' && t.baustellen.length);
-  if (k === 'zahlen') { const BZ = budgetZahlen(); return !ARCHIV && !!(S.zahlen.perioden.length || S.kunden.offerten.length || S.budget.ziel !== null || S.budget.auftraege.length || BZ.ja || BZ.offen); }
+  if (k === 'zahlen') { const BZ = budgetZahlen(); return !ARCHIV && !!(S.zahlen.perioden.length || buchAktiv() || S.kunden.offerten.length || S.budget.ziel !== null || S.budget.auftraege.length || BZ.ja || BZ.offen); }
   return false;
 }
 function beilagenHTML() {
@@ -3530,7 +4427,8 @@ function protokollHTML() {
       (BU.auftraege.length ? '<ul>' + BU.auftraege.map((a) => '<li>' + esc(a.name || 'Ohne Namen') + (a.betrag === null ? '' : ': ' + fmt(a.betrag)) + '</li>').join('') + '</ul>' : '') + (BU.notiz ? '<p>' + esc(BU.notiz) + '</p>' : '') + '</section>';
   }
   const alleP = S.zahlen.perioden, P = spaltenWahl(), k = kernZeilen();
-  if (P.length) {
+  if (buchAktiv()) h += '<section class="e-teil"><h2>Zahlen</h2>' + buchErgebnisTabelle(6, true) + '</section>';   // seit 1.6
+  else if (P.length) {
     const reihe = (z, stark) => z ? '<tr><th>' + esc(z.name) + '</th>' + P.map((p) => { const v = z.w[p.id]; return '<td>' + (v === undefined || v === null ? '' : (stark ? '<b>' + fmt(v) + '</b>' : fmt(v))) + '</td>'; }).join('') + '</tr>' : '';
     const proz = (k.ertrag && k.aufwand) ? '<tr><th>Gewinn in % des Ertrags</th>' + P.map((p) => { const v = gewinnProzent(p.id); return '<td>' + (v === null ? '' : v.toFixed(1) + ' %') + '</td>'; }).join('') + '</tr>' : '';
     h += '<section class="e-teil"><h2>Zahlen</h2><div class="e-tab-rahmen"><table class="e-tab"><thead><tr><th></th>' + P.map((p) => '<th>' + esc(p.name) + '</th>').join('') + '</tr></thead><tbody>' +
@@ -3551,7 +4449,7 @@ let rmText = '';   // steht im Sheet, wenn der Browser das Kopieren nicht zuläs
 function woText() {
   const b = S.ui.bereich, t = S.themen.find((x) => x.id === S.ui.thema) || S.themen[0];
   if (b === 'themen') return 'Themen' + (S.ui.thema === PK ? ' › Parkplatz' : (t ? ' › ' + mitNr(t, nummern()) : ''));
-  if (b === 'zahlen') return 'Zahlen › ' + (S.zahlen.ansicht === 'tabelle' ? 'Tabelle' : 'Diagramme');
+  if (b === 'zahlen') return 'Zahlen › ' + (({ tabelle: buchDa() ? 'BAB' : 'Tabelle', bf: 'Bauführer', aw: 'Auswertung' })[zAnsicht()] || 'Diagramme');   // seit 1.6 mit «Bauführer» und «Auswertung»
   if (b === 'kunden') return 'Kunden › ' + (S.kunden.ansicht === 'tabelle' ? 'Tabelle' : 'Diagramme');
   if (b === 'ergebnis') return 'Ergebnis › ' + (archivWahl() ? 'Protokoll (abgeschlossenes Jahr)' : ({ um: 'Umsetzung › ' + (uArt() === 'jahr' ? 'Unterm Jahr' : 'Am Schluss'), ganz: 'Protokoll', seite: 'Eine Seite für die GL', team: 'Nach der GL fürs Team' })[eArt()]);   // seit 1.4 mit der Ansicht, seit 1.5 mit der Ansicht der Umsetzung
   return ({ gl: 'GL' })[b] || b;
@@ -3646,6 +4544,9 @@ const imThema = (liste) => { const t = sheetThema(); return t && sheet ? t[liste
 const loeschKnopf = (a, text) => '<button type="button" class="loesch" data-a="' + a + '">' + ic('trash') + '<span>' + text + '</span></button>';
 const SHEET = {
   import() { return huelle('Zahlen einfügen', ablage(true)); },
+  buchimport() { return buchImportHTML(); },   // seit 1.6: Buchungen einlesen, ansehen, mit dem BAB abgleichen
+  buchinfo() { return buchInfoHTML(); },
+  abgleich() { return abgleichHTML(); },
   spalten() {
     const st = importStand;
     if (!st) return huelle('Zahlen einfügen', ablage(true));
@@ -3859,7 +4760,9 @@ const SHEET = {
       '<div class="reihe zw"><span>Farben</span>' + seg('modus', [['auto', 'Automatisch'], ['hell', 'Hell'], ['dunkel', 'Dunkel']], m.modus) + '</div>' +
       '<div class="reihe"><button type="button" class="btn" data-a="vollbild">' + ic('max') + '<span>Vollbild</span></button></div></section>' +
       '<section class="gr"><h3>Für dich</h3><label class="schalter" for="e-gl"><span>Reiter «GL» zeigen</span><input type="checkbox" id="e-gl" data-wahl="glreiter"' + (glAn ? ' checked' : '') + '></label>' +
-      '<p class="muted klein">Deine eigenen Punkte für die GL. Der Schalter gilt nur auf diesem Gerät. Im Ergebnis und im PDF stehen die Punkte nie.</p></section>' +
+      '<p class="muted klein">Deine eigenen Punkte für die GL. Der Schalter gilt nur auf diesem Gerät. Im Ergebnis und im PDF stehen die Punkte nie.</p>' +
+      '<label class="schalter" for="e-bf"><span>«Bauführer» und «Auswertung» zeigen</span><input type="checkbox" id="e-bf" data-wahl="bfreiter"' + (bfAn ? ' checked' : '') + '></label>' +
+      '<p class="muted klein">Unter «Zahlen», sobald Buchungen eingelesen sind: die Bauführer nebeneinander und die Auswertung nach Kostenart, Lieferant, Gerät und Baustelle. Auch dieser Schalter gilt nur auf diesem Gerät.</p></section>' +
       '<section class="gr"><h3>Jahr</h3><div class="reihe zw"><span>' + esc(jahrName(m)) + (S.archiv.length ? ' · ' + mehrzahl(S.archiv.length, 'abgeschlossenes Jahr', 'abgeschlossene Jahre') : '') + '</span><button type="button" class="btn" data-a="neujahr"' + (IM_RAHMEN ? ' disabled' : '') + '>' + ic('plus') + '<span>Neues Jahr beginnen</span></button></div>' +
       '<p class="muted klein">Für den nächsten Strategietag: Dieses Jahr bleibt unter «Ergebnis» nachzulesen.</p></section>' +
       '<section class="gr"><h3>Mitarbeiter</h3><div class="reihe zw"><span>' + mehrzahl(S.mitarbeiter.length, 'Eintrag', 'Einträge') + ' in der Mitarbeiterliste</span><button type="button" class="btn" data-a="sheet" data-s="maliste">' + ic('liste') + '<span>Mitarbeiterliste</span></button></div></section>' +
@@ -4067,6 +4970,7 @@ function render() {
   if (S.meta.modus === 'hell' || S.meta.modus === 'dunkel') document.documentElement.setAttribute('data-modus', S.meta.modus);
   else document.documentElement.removeAttribute('data-modus');
   if (S.ui.bereich === 'gl' && !glAn) S.ui.bereich = 'zahlen';   // der Reiter «GL» ist auf diesem Gerät ausgeblendet
+  buchPruefen();   // seit 1.6: nach Laden oder «Rückgängig» die passenden Buchungen holen
   spiegeln(S);
   const rollen = {};
   $$('.tz').forEach((z) => { rollen[z.dataset.h || '0'] = z.scrollLeft; });
@@ -4465,7 +5369,9 @@ const AKT = {
     const k = el.dataset.k, v = el.dataset.v;
     if (k === 'bereich') { S.ui.bereich = v; speichern(true); render(); window.scrollTo(0, 0); }
     else if (k === 'sicht') { S.zahlen.sicht = v; speichern(true); render(); }
-    else if (k === 'ansicht') { S.zahlen.ansicht = v; speichern(true); render(); }
+    else if (k === 'ansicht') { S.zahlen.ansicht = v; AWSUCHE = ''; AW_ALLE = false; speichern(true); render(); }
+    else if (k === 'zzeit') { S.ui.zzeit = v; S.ui.zsp = ''; AW_ALLE = false; speichern(true); render(); }   // seit 1.6: ganze Jahre oder jedes Jahr bis zum selben Monat
+    else if (k === 'awdim' || k === 'awmass') { awStand()[k === 'awdim' ? 'dim' : 'mass'] = v; AWSUCHE = ''; AW_ALLE = false; speichern(true); render(); }
     else if (k === 'kansicht') { S.kunden.ansicht = v; speichern(true); render(); }
     else if (k === 'kfilter') { S.kunden.filter = v; speichern(true); render(); }
     else if (k === 'bst') { S.ui.bst = v; speichern(true); render(); }
@@ -4482,6 +5388,14 @@ const AKT = {
   'datei-wahl'() { $('#datei-wahl').click(); },
   'daten-wahl'() { $('#daten-wahl').click(); },
   auf(el) { const k = el.dataset.k; S.ui.auf[k] = !S.ui.auf[k]; speichern(true); render(); },
+  /* seit 1.6: Auswertung der Buchungen, Abgleich, Stunden */
+  'aw-zeile'(el) { const a = awStand(); if (a.dim === 'buch') return; a.f[a.dim] = String(el.dataset.k || '=').slice(1); a.dim = awWeiter(a); AWSUCHE = ''; AW_ALLE = false; speichern(true); render(); },
+  'aw-filter-weg'(el) { delete awStand().f[el.dataset.d]; AW_ALLE = false; speichern(true); render(); },
+  'aw-alle'() { AW_ALLE = true; render(); },
+  'abg-periode'(el) { if (!sheet) return; sheet.pid = el.dataset.id; sheet.alle = false; renderSheet(false); },
+  'abg-alle'() { if (!sheet) return; sheet.alle = !sheet.alle; renderSheet(false); },
+  'buch-std'(el) { if (!S.buch) return; merken(); if (!S.buch.std || typeof S.buch.std !== 'object') S.buch.std = {}; S.buch.std[el.dataset.nr] = el.dataset.v; speichern(); render(); renderSheet(false); },
+  'buch-weg'(el) { if (!bestaetigt(el, 'Wirklich alle Buchungen entfernen?')) return; buchWeg(); },
   spalte(el) { auf({ art: 'spalte', id: el.dataset.id }); },
   'spalte-weg'() {
     const id = sheet && sheet.id;
@@ -5036,6 +5950,7 @@ const FORMS = {
   glmitschrift(f) { const g = sheet && S.glGruppen.find((y) => y.id === sheet.id); if (!g) return; merken(); g.notiz = f.elements.text.value.trim(); geaendert(true); },
   'glgruppe-edit'(f) { const g = sheet && S.glGruppen.find((y) => y.id === sheet.id), titel = g && pflicht(f.elements.titel); if (!titel) return; merken(); g.titel = titel; if (f.elements.notiz) g.notiz = f.elements.notiz.value.trim(); geaendert(true); },
   'thema-edit'(f) { const t = aktThema(), titelNeu = t && pflicht(f.elements.titel); if (!titelNeu) return; t.titel = titelNeu; t.frage = f.elements.frage.value.trim(); geaendert(true); },
+  buchimport() { buchUebernehmen(); },   // seit 1.6
   spalte(f) { const p = S.zahlen.perioden.find((x) => x.id === sheet.id), name = f.elements.name.value.trim(); if (!p || !name) return; p.name = name; S.zahlen.perioden.sort((a, b) => periodeOrdnung(a.name) - periodeOrdnung(b.name)); geaendert(true); },
   spalten(f) {
     const st = importStand;
@@ -5101,6 +6016,9 @@ document.addEventListener('change', (e) => {
   if (d.wahl === 'pkthema' && e.target.value) pkZuThema(e.target.value);
   if (d.wahl === 'gleltern') glZu(e.target.value);   // seit 1.4: ein GL-Thema einem anderen als Unterthema zuweisen
   if (d.wahl === 'glreiter') { glAn = e.target.checked; anzeigeMerken(); if (!glAn && S.ui.bereich === 'gl') { S.ui.bereich = 'zahlen'; speichern(true); } render(); }
+  if (d.wahl === 'bfreiter') { bfAn = e.target.checked; anzeigeMerken(); render(); }   // seit 1.6: «Bauführer» und «Auswertung» unter «Zahlen», je Gerät
+  if (d.wahl === 'zbl' || d.wahl === 'zsp') { S.ui[d.wahl] = e.target.value; AW_ALLE = false; speichern(true); render(); }
+  if (d.wahl === 'zaehlbis' && S.buch) { merken(); S.buch.zaehlBis = e.target.value === '' ? null : +e.target.value; S.ui.zsp = ''; speichern(); render(); renderSheet(false); }
 });
 document.addEventListener('keydown', (e) => {
   if (e.isComposing) return;
@@ -5380,6 +6298,12 @@ if (ALS_LINK) {
 document.addEventListener('input', (e) => {   // Suche in der Kunden-Tabelle (247.2); Vorrechnen (242.5) rechnet beim Tippen neu
   const el = e.target, vf = el && el.closest ? el.closest('form[data-form="vorrechnen"]') : null;
   if (vf) { const o = document.getElementById('vr-aus'); if (o) o.innerHTML = vrAus(vrLesen(vf)); return; }
+  if (el && el.id === 'aw-suche') {   // seit 1.6: Suche in der Auswertung, blendet wie bei den Kunden nur Zeilen aus
+    AWSUCHE = el.value;
+    const qa = AWSUCHE.trim().toLowerCase();
+    document.querySelectorAll('#t-aw tbody tr').forEach((tr) => { tr.hidden = !!qa && (tr.dataset.such || '').indexOf(qa) < 0; });
+    return;
+  }
   if (!el || el.id !== 'k-suche') return;
   KSUCHE = el.value;
   const q = KSUCHE.trim().toLowerCase();
@@ -5387,6 +6311,7 @@ document.addEventListener('input', (e) => {   // Suche in der Kunden-Tabelle (24
 });
 
 render();
+buchAufraeumen();   // seit 1.6: alte Auszüge aus der Ablage des Browsers räumen
 })();
 </script>
 </body>
