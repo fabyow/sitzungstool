@@ -453,6 +453,15 @@ button.b-ic.abh[aria-pressed="true"]{background:var(--accent-fill);box-shadow:no
 .um-erl .eintraege{margin-top:.3rem}
 .um-leer{max-width:52rem;margin:0 auto;padding:1.4rem 1.3rem}
 .um-leer p + p{margin-top:.5rem}
+/* Seit 1.5: zwei Ansichten der Umsetzung. «Am Schluss» ohne Haken, bei den Aufgaben fällt auf, wo «Wer» oder «Bis wann» fehlt; «Unterm Jahr» mit Haken */
+.um-wahl{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem .9rem;margin:.1rem 0 0}
+.um-wahl .muted{flex:1 1 14rem;min-width:0}
+.um-wahl + .bl-zeile{margin-top:1.1rem}
+.um-s{padding-left:1.1rem}
+.um-s .b-meta{display:flex;flex-wrap:wrap;align-items:center;gap:.2rem .5rem}
+.um-fehlt{padding:.05rem .5rem;border-radius:.6rem;background:var(--warn-soft);color:var(--warn);font-size:.8125rem;font-weight:700;white-space:nowrap}
+.um-stand{color:var(--accent);font-size:.8125rem;font-weight:700;white-space:nowrap}
+.fd-info.um-warn{color:var(--warn)}
 /* Seit 1.4 (444): Protokoll nach Traktanden; Beilagen zum Zuschalten */
 .e-beil{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;max-width:52rem;margin:0 auto .9rem}
 .e-beil > span{color:var(--muted);font-size:.8125rem;font-weight:600;margin-right:.2rem}
@@ -897,7 +906,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
   .notiz .n-text + .n-gl{margin-left:auto}
   .umsetzung .besch,.umsetzung .rz{flex-wrap:wrap}
   .um-th{max-width:100%;flex:1 1 100%;text-align:left;padding:0 0 .35rem 2.4rem}
-  .umsetzung .rz .um-th{padding-left:0}
+  .umsetzung .rz .um-th,.um-s .um-th{padding-left:0}
 }
 
 /* ---------- Druck: nur das Ergebnis ---------- */
@@ -980,7 +989,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '1.4';         // Version des Tools, steht in den Einstellungen
+const VERSION = '1.5';         // Version des Tools, steht in den Einstellungen
 const FORMAT = 11;             // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
@@ -1130,7 +1139,7 @@ function leer() {
     mitarbeiter: [],   // Mitarbeiterliste: [{id, name, position, polier (Kennung des Poliers), eintritt, austritt, geburt}]
     // Kunden: Offerten je Jahr [{id, jahr, gerechnet, erhalten}] und Aufträge [{id, jahr, objekt, planer, bauherr, bauherrArt, objektArt, speziell, mitbewerber, eingeladen, betrag, notiz}]
     kunden: { offerten: [], auftraege: [], ansicht: 'diagramme', jahr: '', filter: '' },
-    ui: { bereich: 'zahlen', thema: '', auf: {}, bst: 'bf', eart: 'um', beil: {} }   // eart: Ansicht im Ergebnis (seit 1.4 zuerst «Umsetzung»); beil: zugeschaltete Beilagen des Protokolls
+    ui: { bereich: 'zahlen', thema: '', auf: {}, bst: 'bf', eart: 'um', uart: 'schluss', beil: {} }   // eart: Ansicht im Ergebnis (seit 1.4 zuerst «Umsetzung»); uart: Ansicht der Umsetzung (seit 1.5: «Am Schluss» oder «Unterm Jahr»); beil: zugeschaltete Beilagen des Protokolls
   };
 }
 
@@ -1355,6 +1364,9 @@ function normal(d) {
   });
   if (s.ui.ejahr && !s.archiv.some((a) => a.id === s.ui.ejahr)) s.ui.ejahr = '';
   if (['um', 'ganz', 'seite', 'team'].indexOf(s.ui.eart) < 0) s.ui.eart = 'um';   // seit 1.4: «Umsetzung» zuerst, «ganz» ist das Protokoll
+  if (!(d && d.ui && (d.ui.uart === 'schluss' || d.ui.uart === 'jahr'))) {   // seit 1.5: ohne eigene Wahl «Am Schluss»; ist schon etwas abgehakt (Stand aus 1.3 oder 1.4), «Unterm Jahr»
+    s.ui.uart = s.themen.concat([s.park]).some((t) => t.beschluesse.some((b) => b.erl) || t.aufgaben.some((a) => a.erl)) ? 'jahr' : 'schluss';
+  }
   if (!s.ui.beil || typeof s.ui.beil !== 'object') s.ui.beil = {};
   return s;
 }
@@ -3210,7 +3222,7 @@ function neuesJahr() {
   S.meta.titel = jahrPlus(S.meta.titel);
   S.meta.datum = heute();
   S.ui.thema = rb ? rb.id : (T[0] || {}).id || '';
-  S.ui.bereich = 'themen'; S.ui.ejahr = ''; S.ui.eart = 'um';
+  S.ui.bereich = 'themen'; S.ui.ejahr = ''; S.ui.eart = 'um'; S.ui.uart = 'schluss';
   return { ziele: zieleNeu.length, beschluesse: beschlVJ.filter((b) => !b.aufg).length, aufgaben: beschlVJ.filter((b) => b.aufg).length, gl: glVJ.length, titel: a.titel, park: S.park.notizen.length };
 }
 /* Lesen mit dem Stand eines abgeschlossenen Jahrs (nur für Ergebnis und Druck); Zahlen und Kunden sind die heutigen und fehlen dort */
@@ -3319,7 +3331,7 @@ function einSeiteHTML() {
   if (links || rechts) h += '<div class="e-zwei">' + '<div>' + links + '</div><div>' + rechts + '</div></div>';
   return h + '<p class="e-fuss">Ausführlich: Protokoll des Strategietags.</p>';
 }
-/* ---------- Umsetzung (seit 1.4, 446): alle Aufgaben, Beschlüsse, Ziele und «Bedarf und Nachfolge» an einem Ort ----------
+/* ---------- Umsetzung (seit 1.4, 446; seit 1.5 mit zwei Ansichten): alle Aufgaben, Beschlüsse, Ziele und «Bedarf und Nachfolge» an einem Ort ----------
    Erste Ansicht im Reiter «Ergebnis». Abhaken und ändern geht hier auch, wenn das Thema abgeschlossen ist: Die Einträge öffnen
    dieselben Fenster wie im Thema (sheet.tid nennt das Thema). Offenes steht oben, Erledigtes zugeklappt darunter.
    Ersetzt die Einstellung «Unterjährig» aus 1.1. Neue Aufgaben entstehen im Thema. */
@@ -3334,39 +3346,64 @@ function umsetzungTeile() {
   });
   return { A: A, B: B, Z: Z, D: D };
 }
+/* Seit 1.5: Die Umsetzung hat zwei Ansichten, weil es zwei verschiedene Arbeiten sind (Chef, 23.11.2026).
+   «Am Schluss»: aufarbeiten, verteilen, zusammenfassen. Dieselbe Liste ohne Haken; bei den Aufgaben zeigt sich, wo «Wer» oder «Bis wann» noch fehlt.
+   «Unterm Jahr»: als erledigt melden. Beim neuen Jahr fliesst alles als erledigt oder offen in den Rückblick (neuesJahr). */
+const uArt = () => (S.ui.uart === 'jahr' ? 'jahr' : 'schluss');
 function umsetzungHTML() {
-  const U = umsetzungTeile(), zj = S.themen.find((t) => t.art === 'ziele');
-  if (!U.A.length && !U.B.length && !U.Z.length && !U.D.length) return '<section class="card um-leer"><p><b>Noch nichts festgehalten.</b></p><p class="muted">Beschlüsse, Aufgaben und Ziele entstehen in den Themen. Hier stehen sie danach alle an einem Ort, zum Abhaken und Nachführen.</p></section>';
+  const U = umsetzungTeile(), zj = S.themen.find((t) => t.art === 'ziele'), jahr = uArt() === 'jahr';
+  if (!U.A.length && !U.B.length && !U.Z.length && !U.D.length) return '<section class="card um-leer"><p><b>Noch nichts festgehalten.</b></p><p class="muted">Beschlüsse, Aufgaben und Ziele entstehen in den Themen. Hier stehen sie danach alle an einem Ort: am Schluss zum Verteilen und Zusammenfassen, unterm Jahr zum Abhaken.</p></section>';
+  const wahl = '<div class="um-wahl">' + seg('uart', [['schluss', 'Am Schluss'], ['jahr', 'Unterm Jahr']], uArt(), 'klein') +
+    '<span class="muted klein">' + (jahr ? 'Erledigtes abhaken. Beim neuen Jahr kommt alles als erledigt oder offen in den Rückblick.' : 'Wer macht was bis wann: ergänzen, zusammenfassen, drucken.') + '</span></div>';
   const zumThema = (e) => (e.th ? '<button type="button" class="um-th" data-a="zum-thema" data-id="' + e.t.id + '" title="Zum Thema">' + esc(e.th) + '</button>' : '');
-  const aufg = (e) => '<li class="besch aufg' + (e.x.erl ? ' erl' : '') + '"><button type="button" class="b-ic abh" data-a="a-erl" data-t="' + e.t.id + '" data-id="' + e.x.id + '" aria-pressed="' + !!e.x.erl + '" aria-label="Erledigt" title="Erledigt">' + ic('check') + '</button>' +
-    '<button type="button" class="b-text" data-a="aufgabe" data-t="' + e.t.id + '" data-id="' + e.x.id + '"><span class="b-was">' + esc(e.x.was) + '</span>' + (aufgMeta(e.x) ? '<span class="b-meta">' + esc(aufgMeta(e.x)) + '</span>' : '') + '</button>' + zumThema(e) + '</li>';
-  const besch = (ziel) => (e) => '<li class="besch' + (e.x.erl ? ' erl' : '') + '"><button type="button" class="b-ic abh" data-a="erl" data-t="' + e.t.id + '" data-id="' + e.x.id + '" aria-pressed="' + !!e.x.erl + '" aria-label="' + (ziel ? 'Erreicht' : 'Umgesetzt') + '" title="' + (ziel ? 'Erreicht' : 'Umgesetzt') + '">' + ic('check') + '</button>' +
-    '<button type="button" class="b-text" data-a="beschluss" data-t="' + e.t.id + '" data-id="' + e.x.id + '"><span class="b-was">' + esc(e.x.was) + '</span>' + (metaMit(e.x) ? '<span class="b-meta">' + esc(metaMit(e.x)) + '</span>' : '') + '</button>' +
-    (ziel ? (e.th ? '<span class="um-th">' + esc(e.th) + '</span>' : '') : zumThema(e)) + '</li>';
-  const bed = (e) => '<li class="rz bd"><button type="button" class="b-text" data-a="bedarf" data-t="' + e.t.id + '" data-id="' + e.x.id + '"><span class="b-was">' + esc(e.x.was) + '</span>' + (bedarfMeta(e.x) ? '<span class="b-meta">' + esc(bedarfMeta(e.x)) + '</span>' : '') + '</button><div class="seg" role="group" aria-label="Stand">' +
-    Object.keys(BSTAND).map((s) => '<button type="button" class="st-' + s + '" data-a="bstand" data-t="' + e.t.id + '" data-id="' + e.x.id + '" data-v="' + s + '" aria-pressed="' + (e.x.stand === s) + '">' + BSTAND[s] + '</button>').join('') + '</div></li>';
-  const block = (titelText, L, zeile, fertig, wort, k) => {
-    if (!L.length) return '';
-    const offen = L.filter((e) => !fertig(e)), zu = L.filter(fertig);
-    return '<div class="bl-zeile"><h2 class="bl">' + esc(titelText) + '</h2><span class="fd-info">' + (offen.length ? offen.length + ' offen' : 'nichts mehr offen') + '</span></div>' +
-      (offen.length ? '<ul class="eintraege">' + offen.map(zeile).join('') + '</ul>' : '') +
-      (zu.length ? '<details class="um-erl"' + (S.ui.auf['um-' + k] ? ' open' : '') + '><summary data-a="um-auf" data-k="' + k + '">' + ic('right', 'pf') + '<span>' + wort + ' (' + zu.length + ')</span></summary><ul class="eintraege">' + zu.map(zeile).join('') + '</ul></details>' : '');
-  };
-  return '<div class="umsetzung">' +
-    block('Aufgaben', U.A, aufg, (e) => !!e.x.erl, 'Erledigt', 'a') +
-    block('Beschlüsse', U.B, besch(false), (e) => !!e.x.erl, 'Umgesetzt', 'b') +
-    block(zj ? zj.titel : 'Ziele', U.Z, besch(true), (e) => !!e.x.erl, 'Erreicht', 'z') +
-    block('Bedarf und Nachfolge', U.D, bed, (e) => e.x.stand === 'besetzt', 'Besetzt', 'd') +
-    '<p class="muted klein hilfe">' + ic('info') + '<span>Abhaken und antippen geht hier auch, wenn das Thema abgeschlossen ist. Neues entsteht im Thema; ein Tipp auf das Thema rechts führt dorthin.</span></p></div>';
+  const zielTh = (e) => (e.th ? '<span class="um-th">' + esc(e.th) + '</span>' : '');
+  let teile;
+  if (jahr) {   // Unterm Jahr: der Kreis meldet erledigt; Offenes oben, Erledigtes zugeklappt
+    const aufg = (e) => '<li class="besch aufg' + (e.x.erl ? ' erl' : '') + '"><button type="button" class="b-ic abh" data-a="a-erl" data-t="' + e.t.id + '" data-id="' + e.x.id + '" aria-pressed="' + !!e.x.erl + '" aria-label="Erledigt" title="Erledigt">' + ic('check') + '</button>' +
+      '<button type="button" class="b-text" data-a="aufgabe" data-t="' + e.t.id + '" data-id="' + e.x.id + '"><span class="b-was">' + esc(e.x.was) + '</span>' + (aufgMeta(e.x) ? '<span class="b-meta">' + esc(aufgMeta(e.x)) + '</span>' : '') + '</button>' + zumThema(e) + '</li>';
+    const besch = (ziel) => (e) => '<li class="besch' + (e.x.erl ? ' erl' : '') + '"><button type="button" class="b-ic abh" data-a="erl" data-t="' + e.t.id + '" data-id="' + e.x.id + '" aria-pressed="' + !!e.x.erl + '" aria-label="' + (ziel ? 'Erreicht' : 'Umgesetzt') + '" title="' + (ziel ? 'Erreicht' : 'Umgesetzt') + '">' + ic('check') + '</button>' +
+      '<button type="button" class="b-text" data-a="beschluss" data-t="' + e.t.id + '" data-id="' + e.x.id + '"><span class="b-was">' + esc(e.x.was) + '</span>' + (metaMit(e.x) ? '<span class="b-meta">' + esc(metaMit(e.x)) + '</span>' : '') + '</button>' +
+      (ziel ? zielTh(e) : zumThema(e)) + '</li>';
+    const bed = (e) => '<li class="rz bd"><button type="button" class="b-text" data-a="bedarf" data-t="' + e.t.id + '" data-id="' + e.x.id + '"><span class="b-was">' + esc(e.x.was) + '</span>' + (bedarfMeta(e.x) ? '<span class="b-meta">' + esc(bedarfMeta(e.x)) + '</span>' : '') + '</button><div class="seg" role="group" aria-label="Stand">' +
+      Object.keys(BSTAND).map((s) => '<button type="button" class="st-' + s + '" data-a="bstand" data-t="' + e.t.id + '" data-id="' + e.x.id + '" data-v="' + s + '" aria-pressed="' + (e.x.stand === s) + '">' + BSTAND[s] + '</button>').join('') + '</div></li>';
+    const block = (titelText, L, zeile, fertig, wort, k) => {
+      if (!L.length) return '';
+      const offen = L.filter((e) => !fertig(e)), zu = L.filter(fertig);
+      return '<div class="bl-zeile"><h2 class="bl">' + esc(titelText) + '</h2><span class="fd-info">' + (offen.length ? offen.length + ' offen' : 'nichts mehr offen') + '</span></div>' +
+        (offen.length ? '<ul class="eintraege">' + offen.map(zeile).join('') + '</ul>' : '') +
+        (zu.length ? '<details class="um-erl"' + (S.ui.auf['um-' + k] ? ' open' : '') + '><summary data-a="um-auf" data-k="' + k + '">' + ic('right', 'pf') + '<span>' + wort + ' (' + zu.length + ')</span></summary><ul class="eintraege">' + zu.map(zeile).join('') + '</ul></details>' : '');
+    };
+    teile = block('Aufgaben', U.A, aufg, (e) => !!e.x.erl, 'Erledigt', 'a') +
+      block('Beschlüsse', U.B, besch(false), (e) => !!e.x.erl, 'Umgesetzt', 'b') +
+      block(zj ? zj.titel : 'Ziele', U.Z, besch(true), (e) => !!e.x.erl, 'Erreicht', 'z') +
+      block('Bedarf und Nachfolge', U.D, bed, (e) => e.x.stand === 'besetzt', 'Besetzt', 'd');
+  } else {   // Am Schluss: ohne Haken, in der Reihenfolge der Themen; antippen öffnet den Eintrag zum Verteilen
+    const meta = (text, marken) => (text || marken ? '<span class="b-meta">' + (text ? '<span>' + esc(text) + '</span>' : '') + marken + '</span>' : '');
+    const stand = (ja, wort) => (ja ? '<span class="um-stand">' + wort + '</span>' : '');
+    const fehlt = (x) => (x.erl ? '' : (x.wer ? '' : '<span class="um-fehlt">Wer?</span>') + (x.bis ? '' : '<span class="um-fehlt">Bis wann?</span>'));
+    const aufg = (e) => '<li class="besch aufg um-s' + (e.x.erl ? ' erl' : '') + '"><button type="button" class="b-text" data-a="aufgabe" data-t="' + e.t.id + '" data-id="' + e.x.id + '"><span class="b-was">' + esc(e.x.was) + '</span>' + meta(aufgMeta(e.x), fehlt(e.x) + stand(e.x.erl, 'erledigt')) + '</button>' + zumThema(e) + '</li>';
+    const besch = (ziel) => (e) => '<li class="besch um-s' + (e.x.erl ? ' erl' : '') + '"><button type="button" class="b-text" data-a="beschluss" data-t="' + e.t.id + '" data-id="' + e.x.id + '"><span class="b-was">' + esc(e.x.was) + '</span>' + meta(metaMit(e.x), stand(e.x.erl, ziel ? 'erreicht' : 'umgesetzt')) + '</button>' +
+      (ziel ? zielTh(e) : zumThema(e)) + '</li>';
+    const bed = (e) => '<li class="besch um-s"><button type="button" class="b-text" data-a="bedarf" data-t="' + e.t.id + '" data-id="' + e.x.id + '"><span class="b-was">' + esc(e.x.was) + '</span>' + meta(bedarfMeta(e.x), stand(e.x.stand !== 'offen', BSTAND[e.x.stand])) + '</button></li>';
+    const block = (titelText, L, zeile, info, warn) => (L.length ? '<div class="bl-zeile"><h2 class="bl">' + esc(titelText) + '</h2><span class="fd-info' + (warn ? ' um-warn' : '') + '">' + info + '</span></div><ul class="eintraege">' + L.map(zeile).join('') + '</ul>' : '');
+    const ohneWer = U.A.filter((e) => !e.x.erl && !e.x.wer).length;
+    teile = block('Aufgaben', U.A, aufg, ohneWer ? ohneWer + ' ohne Wer' : 'alle verteilt', !!ohneWer) +
+      block('Beschlüsse', U.B, besch(false), String(U.B.length)) +
+      block(zj ? zj.titel : 'Ziele', U.Z, besch(true), String(U.Z.length)) +
+      block('Bedarf und Nachfolge', U.D, bed, String(U.D.length));
+  }
+  return '<div class="umsetzung' + (jahr ? ' um-jahr' : ' um-schluss') + '">' + wahl + teile +
+    '<p class="muted klein hilfe">' + ic('info') + '<span>' + (jahr ? 'Abhaken und antippen geht hier auch, wenn das Thema abgeschlossen ist.' : 'Einen Eintrag antippen: Wer und Bis wann setzen, als Aufgabe oder Beschluss führen, für die GL vormerken. Das geht auch, wenn das Thema abgeschlossen ist.') + ' Neues entsteht im Thema; ein Tipp auf das Thema rechts führt dorthin.</span></p></div>';
 }
-function umsetzungDruckHTML() {   // dieselbe Übersicht als Blatt: wer macht was bis wann
-  const m = S.meta, U = umsetzungTeile(), zj = S.themen.find((t) => t.art === 'ziele');
+function umsetzungDruckHTML() {   // dieselbe Übersicht als Blatt: wer macht was bis wann; «Unterm Jahr» mit dem Stand
+  const m = S.meta, U = umsetzungTeile(), zj = S.themen.find((t) => t.art === 'ziele'), jahr = uArt() === 'jahr';
   const tab = (kopf, zeilen) => '<div class="e-tab-rahmen"><table class="e-besch"><thead><tr>' + kopf.map((k) => '<th>' + k + '</th>').join('') + '</tr></thead><tbody>' + zeilen.join('') + '</tbody></table></div>';
-  const stand = (ja, wort) => '<td class="nw">' + (ja ? '<span class="e-ok">✓</span>' + wort : 'offen') + '</td>';
-  let h = '<header class="e-kopf"><h1>' + esc(m.titel) + '</h1><p>' + esc([m.abteilung, datumLang(m.datum) ? 'Strategietag vom ' + datumLang(m.datum) : '', 'Umsetzung'].filter(Boolean).join(' · ')) + '</p></header>';
-  if (U.A.length) h += '<section class="e-teil"><h2>Aufgaben</h2>' + tab(['Was', 'Wer', 'Bis wann', 'Thema', 'Stand'], U.A.map((e) => '<tr><td>' + esc(e.x.was) + (e.x.bem ? ' <span class="e-grau">(' + esc(e.x.bem) + ')</span>' : '') + '</td><td class="nw">' + esc(e.x.wer) + '</td><td class="nw">' + esc(e.x.bis) + '</td><td>' + esc(e.th) + '</td>' + stand(e.x.erl, 'erledigt') + '</tr>')) + '</section>';
-  if (U.B.length) h += '<section class="e-teil"><h2>Beschlüsse</h2>' + tab(['Was', 'Wer', 'Bis wann', 'Thema', 'Stand'], U.B.map((e) => '<tr><td>' + esc(e.x.was) + '</td><td class="nw">' + esc(e.x.wer) + '</td><td class="nw">' + esc(e.x.bis) + '</td><td>' + esc(e.th) + '</td>' + stand(e.x.erl, 'umgesetzt') + '</tr>')) + '</section>';
-  if (U.Z.length) h += '<section class="e-teil"><h2>' + esc(zj ? zj.titel : 'Ziele') + '</h2>' + tab(['Was', 'Wer', 'Bis wann', 'Stand'], U.Z.map((e) => '<tr><td>' + esc(mitTh(e.x, e.x.was)) + '</td><td class="nw">' + esc(e.x.wer) + '</td><td class="nw">' + esc(e.x.bis) + '</td>' + stand(e.x.erl, 'erreicht') + '</tr>')) + '</section>';
+  const stand = (ja, wort) => (jahr ? '<td class="nw">' + (ja ? '<span class="e-ok">✓</span>' + wort : 'offen') + '</td>' : '');
+  const kopf = (K) => (jahr ? K.concat(['Stand']) : K);
+  let h = '<header class="e-kopf"><h1>' + esc(m.titel) + '</h1><p>' + esc([m.abteilung, datumLang(m.datum) ? 'Strategietag vom ' + datumLang(m.datum) : '', jahr ? 'Umsetzung' : 'Wer macht was bis wann'].filter(Boolean).join(' · ')) + '</p></header>';
+  if (U.A.length) h += '<section class="e-teil"><h2>Aufgaben</h2>' + tab(kopf(['Was', 'Wer', 'Bis wann', 'Thema']), U.A.map((e) => '<tr><td>' + esc(e.x.was) + (e.x.bem ? ' <span class="e-grau">(' + esc(e.x.bem) + ')</span>' : '') + '</td><td class="nw">' + esc(e.x.wer) + '</td><td class="nw">' + esc(e.x.bis) + '</td><td>' + esc(e.th) + '</td>' + stand(e.x.erl, 'erledigt') + '</tr>')) + '</section>';
+  if (U.B.length) h += '<section class="e-teil"><h2>Beschlüsse</h2>' + tab(kopf(['Was', 'Wer', 'Bis wann', 'Thema']), U.B.map((e) => '<tr><td>' + esc(e.x.was) + '</td><td class="nw">' + esc(e.x.wer) + '</td><td class="nw">' + esc(e.x.bis) + '</td><td>' + esc(e.th) + '</td>' + stand(e.x.erl, 'umgesetzt') + '</tr>')) + '</section>';
+  if (U.Z.length) h += '<section class="e-teil"><h2>' + esc(zj ? zj.titel : 'Ziele') + '</h2>' + tab(kopf(['Was', 'Wer', 'Bis wann']), U.Z.map((e) => '<tr><td>' + esc(mitTh(e.x, e.x.was)) + '</td><td class="nw">' + esc(e.x.wer) + '</td><td class="nw">' + esc(e.x.bis) + '</td>' + stand(e.x.erl, 'erreicht') + '</tr>')) + '</section>';
   if (U.D.length) h += '<section class="e-teil"><h2>Bedarf und Nachfolge</h2>' + tab(['Wen oder was', 'Warum', 'Bis wann', 'Stand'], U.D.map((e) => '<tr><td>' + esc(e.x.was) + '</td><td>' + esc([e.x.warum, e.x.notiz].filter(Boolean).join(' · ')) + '</td><td class="nw">' + esc(e.x.bis) + '</td><td class="nw">' + BSTAND[e.x.stand] + '</td></tr>')) + '</section>';
   if (!U.A.length && !U.B.length && !U.Z.length && !U.D.length) h += '<section class="e-teil"><p class="muted">Noch nichts festgehalten.</p></section>';
   return h;
@@ -3516,7 +3553,7 @@ function woText() {
   if (b === 'themen') return 'Themen' + (S.ui.thema === PK ? ' › Parkplatz' : (t ? ' › ' + mitNr(t, nummern()) : ''));
   if (b === 'zahlen') return 'Zahlen › ' + (S.zahlen.ansicht === 'tabelle' ? 'Tabelle' : 'Diagramme');
   if (b === 'kunden') return 'Kunden › ' + (S.kunden.ansicht === 'tabelle' ? 'Tabelle' : 'Diagramme');
-  if (b === 'ergebnis') return 'Ergebnis › ' + (archivWahl() ? 'Protokoll (abgeschlossenes Jahr)' : ({ um: 'Umsetzung', ganz: 'Protokoll', seite: 'Eine Seite für die GL', team: 'Nach der GL fürs Team' })[eArt()]);   // seit 1.4 mit der Ansicht
+  if (b === 'ergebnis') return 'Ergebnis › ' + (archivWahl() ? 'Protokoll (abgeschlossenes Jahr)' : ({ um: 'Umsetzung › ' + (uArt() === 'jahr' ? 'Unterm Jahr' : 'Am Schluss'), ganz: 'Protokoll', seite: 'Eine Seite für die GL', team: 'Nach der GL fürs Team' })[eArt()]);   // seit 1.4 mit der Ansicht, seit 1.5 mit der Ansicht der Umsetzung
   return ({ gl: 'GL' })[b] || b;
 }
 function umgebung() {
@@ -4432,7 +4469,7 @@ const AKT = {
     else if (k === 'kansicht') { S.kunden.ansicht = v; speichern(true); render(); }
     else if (k === 'kfilter') { S.kunden.filter = v; speichern(true); render(); }
     else if (k === 'bst') { S.ui.bst = v; speichern(true); render(); }
-    else if (k === 'ejahr' || k === 'eart') { S.ui[k] = v; speichern(true); render(); }   // seit 1.0: Ergebnis eines abgeschlossenen Jahrs, eine Seite für die GL
+    else if (k === 'ejahr' || k === 'eart' || k === 'uart') { S.ui[k] = v; speichern(true); render(); }   // seit 1.0: Ergebnis eines abgeschlossenen Jahrs, eine Seite für die GL
     else if (k === 'modus') { S.meta.modus = v; speichern(true); anzeigeMerken(); render(); renderSheet(false); }
   },
   sheet(el) { auf({ art: el.dataset.s, zurueck: el.dataset.s === 'maimport' && sheet && sheet.art === 'maliste' ? 'maliste' : '' }); },
