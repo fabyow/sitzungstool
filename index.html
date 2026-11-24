@@ -267,6 +267,42 @@ body.drueber .ablage,body.drueber .tab-rahmen,body.drueber .dg{border-color:var(
 .bu-std small{color:var(--muted);font-size:.8125rem}
 .bu-sel{height:2.5rem;max-width:100%;min-width:0;padding:0 .7rem;border-radius:.7rem;border:1px solid var(--sep);background:var(--card);font-weight:600}
 .kz-hilfe{margin-top:.35rem}
+/* Abgleich (seit 1.8): Zeilen zum Antippen, Hinweis unter dem Namen, die geöffnete Zeile */
+.abg tr.klick{cursor:pointer}
+.abg th button{font:inherit;color:inherit;text-align:left;padding:0;overflow-wrap:anywhere}
+.abg tr.klick:hover th button{text-decoration:underline;text-underline-offset:.15em}
+.abg .abg-u{display:block;color:var(--muted);font-size:.8125rem;font-weight:400;margin-top:.1rem;white-space:normal}
+.abg tr.paar td.abw{color:var(--muted);font-weight:600}
+.abg td.neg{color:var(--alarm)}
+.abg tfoot th,.abg tfoot td{font-weight:700}
+.abg-d th:first-child{font-weight:500}
+.abg tr.spur th:first-child{box-shadow:inset 3px 0 0 var(--warn);padding-left:.65rem}
+.abg-sph{margin-top:-.2rem}
+.abg-zur{align-self:flex-start;display:inline-flex;align-items:center;gap:.2rem;color:var(--accent);font-weight:600;padding:.2rem 0;margin:-.25rem 0 -.2rem -.25rem}
+.abg-zur .ic{width:1.1rem;height:1.1rem}
+.abg-zk h3{font-size:1.1875rem;font-weight:700;line-height:1.25;overflow-wrap:anywhere}
+.abg-zk .nr{color:var(--muted);font-weight:600;margin-right:.45rem}
+.abg-drei{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;padding:.75rem .9rem;border-radius:1rem;background:var(--bg)}
+.abg-drei span{display:block;color:var(--muted);font-size:.8125rem;font-weight:600}
+.abg-drei b{display:block;font-size:1.1875rem;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-.01em}
+.abg-drei b.abw{color:var(--warn)}
+.abg-drei b.ok{color:var(--accent)}
+.abg-spur{display:flex;align-items:flex-start;gap:.55rem;padding:.75rem .9rem;border-radius:1rem;background:var(--warn-soft);font-size:.9375rem}
+.abg-spur > .ic{flex:none;width:1.15rem;height:1.15rem;margin-top:.1rem;color:var(--warn)}
+.abg-spur > div{min-width:0}
+.abg-spur b{display:block;font-size:.75rem;letter-spacing:.05em;text-transform:uppercase;color:var(--warn);margin-bottom:.1rem}
+.abg-spur p{overflow-wrap:anywhere}
+.abg-spur p + p{margin-top:.3rem;color:var(--muted)}
+.abg-spur .textlink{padding:.3rem 0 0;color:var(--ink)}
+.abg-spur.ruhig{background:var(--bg)}
+.abg-spur.ruhig > .ic,.abg-spur.ruhig b{color:var(--muted)}
+.sheet-inhalt > .seg.klein{align-self:flex-start}
+.abg-schalter .textlink{padding:0;color:var(--accent);font-size:inherit}
+.abg th.abg-pf,.abg td.abg-pf{width:1rem;padding-left:.3rem;color:var(--idle);vertical-align:middle}
+.abg td.abg-pf .ic{display:block;width:.9rem;height:.9rem}
+/* Mitarbeiter (seit 1.8): Wer zu einer anderen Abteilung gehört, braucht weder Polier noch Eintritt, Geburtsdatum und Austritt */
+.ma-eigen{display:flex;flex-direction:column;gap:.9rem}
+form[data-form="ma"]:has(#ma-abt:not(:placeholder-shown)) :is(#ma-eigen,#ma-po-feld){display:none}
 /* ---------- Themen ---------- */
 .themen{display:grid;grid-template-columns:17rem minmax(0,1fr);gap:1.5rem;align-items:start}
 .tliste2{display:flex;flex-direction:column;gap:.2rem;position:sticky;top:5rem;max-height:calc(100vh - 6rem);overflow-y:auto;scrollbar-width:thin;padding:.2rem;margin:-.2rem}
@@ -925,6 +961,16 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
   .bu-stand{margin-left:0}
   .bst.aw .alt,.aw-bk{display:none}
   .bst.aw td:first-child{min-width:0}
+  /* seit 1.8: Abgleich am Handy. Der Name steht über seinen drei Zahlen, statt sich neben ihnen in eine schmale Spalte zu zwängen */
+  .abg-liste,.abg-liste thead,.abg-liste tbody{display:block}
+  .abg-liste tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:.5rem;align-items:baseline}
+  .abg-liste.pfeil tr{grid-template-columns:repeat(3,minmax(0,1fr)) 1rem}
+  .abg-liste th:first-child{grid-column:1/-1;padding-bottom:0}
+  .abg-liste thead th:first-child{display:none}
+  .abg-liste td,.abg-liste thead th{border-top:0;padding:.1rem 0 .5rem}
+  .abg-liste thead th{padding-bottom:.25rem}
+  .abg-liste td.abg-pf,.abg-liste th.abg-pf{padding-left:0;align-self:center}
+  .abg-liste tr.zw th{padding-bottom:.3rem}
   .stw li .stw-t{font-size:1.0625rem}
   .stw-antw{width:calc(100% - 2.3rem)}
   .frage{font-size:1.0625rem}
@@ -1046,7 +1092,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '1.7';         // Version des Tools, steht in den Einstellungen
+const VERSION = '1.8';         // Version des Tools, steht in den Einstellungen
 const FORMAT = 12;             // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
@@ -1128,6 +1174,7 @@ const AUFTRAEGE_FRAGE = 'Reichen die Aufträge fürs Budget, und wie sind wir au
    Position hat; Leiter und Bauführer arbeiten im Büro und stehen nicht auf der Tafel; Kader sind sie, die Poliere und die Vorarbeiter. */
 const POSITIONEN = ['Abteilungsleiter', 'Bauführer', 'Hilfsbauführer', 'Polier', 'Vorarbeiter', 'Facharbeiter', 'Maschinist', 'Bauarbeiter', 'Lernender'];
 const istPolier = (m) => /polier/i.test(m.position || '');
+const fremd = (m) => !!(m && typeof m.abt === 'string' && m.abt.trim());   // seit 1.8: gehört zu einer anderen Abteilung. Zählt nur bei den Buchungen (Kürzel, Bauführer), nie beim Personal
 const imBuero = (m) => !istPolier(m) && /leiter|führer|fuehrer/i.test(m.position || '');
 const istKader = (m) => istPolier(m) || imBuero(m) || /vorarbeiter/i.test(m.position || '');
 /* Kader getrennt nach Baustelle (Polier, Vorarbeiter) und Buero (Bauleitung, Abteilungsleitung); Chefs Notiz bei 147.7. Seit 0.8.7. */
@@ -1453,7 +1500,7 @@ function maNormal(roh, themen) {
     if (!m.id || typeof m.id !== 'string' || ids[m.id]) m.id = uid();
     ids[m.id] = 1;
     m.name = m.name.trim();
-    ['position', 'polier', 'eintritt', 'austritt', 'geburt', 'kuerzel'].forEach((k) => { m[k] = typeof m[k] === 'string' ? m[k].trim() : ''; });   // kuerzel (seit 1.7): wie die Person im Auszug als Bauleiter steht
+    ['position', 'polier', 'eintritt', 'austritt', 'geburt', 'kuerzel', 'abt'].forEach((k) => { m[k] = typeof m[k] === 'string' ? m[k].trim() : ''; });   // kuerzel (seit 1.7): wie die Person im Auszug als Bauleiter steht
   });
   L.forEach((m) => { if (m.polier && (!ids[m.polier] || m.polier === m.id)) m.polier = ''; });
   return L;
@@ -1505,9 +1552,9 @@ function austrittMeta(m, w) {
   if (A.art === 'erreicht') return 'Pensionsalter erreicht';
   return A.art === 'pension' && Math.floor(A.wert / 10000) <= Math.floor(w / 10000) + VORAUS ? 'Pension ' + A.text : '';
 }
-const imFolgejahr = (m, J, w) => { const a = austrittVon(m, w).wert; return !a || Math.floor(a / 10000) > J; };   // im Jahr nach dem Strategietag noch dabei
+const imFolgejahr = (m, J, w) => { if (fremd(m)) return false; const a = austrittVon(m, w).wert; return !a || Math.floor(a / 10000) > J; };   // im Jahr nach dem Strategietag noch dabei
 const aufTafel = (m, J, w) => !istPolier(m) && !imBuero(m) && imFolgejahr(m, J, w);
-const imBestand = (m, w) => { const e = datumWert(m.eintritt), a = austrittVon(m, w).wert; return (!e || e <= w) && (!a || a >= w); };   // am Tag des Strategietags angestellt
+const imBestand = (m, w) => { if (fremd(m)) return false; const e = datumWert(m.eintritt), a = austrittVon(m, w).wert; return (!e || e <= w) && (!a || a >= w); };   // am Tag des Strategietags angestellt
 /* Die Tafel jeder Gruppenzuteilung folgt der Liste: Die Poliere sind die Gruppen, die übrigen Mitarbeiter ausser dem Büro die Kärtchen.
    «gruppen» und «leute» am Thema sind davon eine Abschrift. Ist die Zuteilung festgehalten, bleibt die Abschrift, wie sie war; nur
    Namen folgen der Liste. */
@@ -1582,7 +1629,8 @@ const BED_NAME = { ERLOES: 'Ertrag', ERTRAG: 'Ertrag', LOHN: 'Lohn', MATERIAL: '
 /* Spalten des Auszugs, erkannt an ihrem Titel. Pflicht: Kostenstelle, Kostenart, Betrag, Buchungsperiode. */
 const BSPALTEN = [['kst', /^kostenstelle$|^kst\.?$/i], ['ka', /^kostenart$/i], ['b', /^ist-?\s?betrag$|^betrag$/i], ['m', /^menge$/i], ['e', /^einheit$/i], ['p', /^buchungsperiode$|^periode$/i],
   ['da', /^debitor\s*\/\s*kreditor$/i], ['d', /^debitor\s*\/\s*kreditor\W*nr\.?$/i], ['bn', /^belegn/i], ['bd', /^belegdatum$/i], ['t', /^buchungstext$/i], ['bab', /bab\W*zeile/i], ['bed', /^bedeutung/i],
-  ['h', /^herkunft$/i], ['bl', /^bauleiter|^bauf(ü|ue)hrer/i], ['ksn', /kostenstelle.*(bez|name)|bez.*kostenstelle/i], ['kan', /kostenart.*(bez|name|text)|bez.*kostenart/i]];
+  ['h', /^herkunft$/i], ['bl', /^bauleiter|^bauf(ü|ue)hrer/i], ['ksn', /kostenstelle.*(bez|name)|bez.*kostenstelle/i], ['kan', /kostenart.*(bez|name|text)|bez.*kostenart/i],
+  ['ae', /^(ä|ae)nderungsdatum$|^ge(ä|ae)ndert(\s+am)?$/i]];   // ae (seit 1.8): wann die Buchung zuletzt geändert wurde, für die Spur im Abgleich
 function buchSpalten(kopf) {   // Titelzeile → je Feld die Spalte (−1: fehlt); null, wenn es kein Auszug mit Buchungen ist
   const sp = BSPALTEN.map((s) => kopf.findIndex((x) => s[1].test(String(x === undefined || x === null ? '' : x).trim())));
   const hat = (k) => sp[BSPALTEN.findIndex((s) => s[0] === k)] >= 0;
@@ -1597,9 +1645,9 @@ function buchYm(v) {   // Buchungsperiode → Jahr × 12 + Monat (0 bis 11); −
   const mj = monatJahr(v);
   return mj && mj[0] >= 1 && mj[0] <= 12 && mj[1] > 1990 && mj[1] < 2100 ? mj[1] * 12 + mj[0] - 1 : -1;
 }
-function buchTag(v) {   // Belegdatum → Tage seit dem 1.1.1970; 0: unbekannt
-  if (v && typeof v === 'object' && typeof v.tag === 'number') return Math.round(v.tag) - 25569;
-  if (typeof v === 'number') return v > 20000 && v < 80000 ? Math.round(v) - 25569 : 0;
+function buchTag(v) {   // Belegdatum oder Änderungsdatum → Tage seit dem 1.1.1970; 0: unbekannt. Eine Uhrzeit (Nachkommastellen) fällt weg
+  if (v && typeof v === 'object' && typeof v.tag === 'number') return Math.floor(v.tag + 1e-6) - 25569;
+  if (typeof v === 'number') return v > 20000 && v < 80000 ? Math.floor(v + 1e-6) - 25569 : 0;
   const s = String(v === undefined || v === null ? '' : v).trim();
   let m = /^(\d{1,2})\.(\d{1,2})\.(\d{2,4})/.exec(s);
   if (m) return Math.round(Date.UTC(+m[3] < 100 ? 2000 + (+m[3]) : +m[3], +m[2] - 1, +m[1]) / 864e5);
@@ -1613,7 +1661,7 @@ function buchSammler() {
   const T = {}, I = {};
   ['KST', 'KA', 'EIN', 'HER', 'TXT', 'DK', 'DKA', 'BEL'].forEach((k) => { T[k] = []; I[k] = new Map(); });
   const ix = (k, v) => { let i = I[k].get(v); if (i === undefined) { i = T[k].length; T[k].push(v); I[k].set(v, i); } return i; };
-  const z = { ym: [], k: [], a: [], b: [], m: [], e: [], h: [], t: [], d: [], da: [], bd: [], bn: [] };
+  const z = { ym: [], k: [], a: [], b: [], m: [], e: [], h: [], t: [], d: [], da: [], bd: [], bn: [], ae: [] };
   const BL = [], KSN = [], BAB = [], BED = [], KAN = [];
   const merk = (L, i, v) => { if (v) L[i] = v; else if (L[i] === undefined) L[i] = ''; };   // der letzte Wert gilt; ein leerer überschreibt nichts
   return {
@@ -1621,7 +1669,7 @@ function buchSammler() {
       const k = ix('KST', o.kst), a = ix('KA', o.ka);
       merk(BL, k, o.bl); merk(KSN, k, o.ksn); merk(BAB, a, o.bab); merk(BED, a, o.bed); merk(KAN, a, o.kan);
       z.ym.push(o.ym); z.k.push(k); z.a.push(a); z.b.push(Math.round(o.b * 100) / 100); z.m.push(Math.round(o.m * 1000) / 1000);
-      z.e.push(ix('EIN', o.e)); z.h.push(ix('HER', o.h)); z.t.push(ix('TXT', o.t)); z.d.push(ix('DK', o.d)); z.da.push(ix('DKA', o.da)); z.bd.push(o.bd); z.bn.push(ix('BEL', o.bn));
+      z.e.push(ix('EIN', o.e)); z.h.push(ix('HER', o.h)); z.t.push(ix('TXT', o.t)); z.d.push(ix('DK', o.d)); z.da.push(ix('DKA', o.da)); z.bd.push(o.bd); z.bn.push(ix('BEL', o.bn)); z.ae.push(o.ae || 0);
     },
     fertig() { return Object.assign({ v: 1, z: z, BL: BL, KSN: KSN, BAB: BAB, BED: BED, KAN: KAN }, T); }
   };
@@ -1636,7 +1684,7 @@ function buchZeilenDazu(sammler, zeilen) {
     const kst = nr(z[BF.kst]), ka = nr(z[BF.ka]), ym = buchYm(z[BF.p]);
     if (!kst && !ka && (z[BF.b] === undefined || z[BF.b] === '')) return;   // leere Zeile
     if (!kst || !ka || ym < 0) { schlecht++; return; }
-    sammler.dazu({ ym: ym, kst: kst, ka: ka, b: num(z[BF.b]), m: num(z[BF.m]), e: txt(z[BF.e]), h: txt(z[BF.h]), t: txt(z[BF.t]), d: nr(z[BF.d]), da: txt(z[BF.da]), bd: buchTag(z[BF.bd]), bn: txt(z[BF.bn]),
+    sammler.dazu({ ym: ym, kst: kst, ka: ka, b: num(z[BF.b]), m: num(z[BF.m]), e: txt(z[BF.e]), h: txt(z[BF.h]), t: txt(z[BF.t]), d: nr(z[BF.d]), da: txt(z[BF.da]), bd: buchTag(z[BF.bd]), bn: txt(z[BF.bn]), ae: buchTag(z[BF.ae]),
       bl: txt(z[BF.bl]), ksn: txt(z[BF.ksn]), bab: nr(z[BF.bab]), bed: txt(z[BF.bed]).toUpperCase(), kan: txt(z[BF.kan]) });
   });
   return schlecht;
@@ -1646,7 +1694,9 @@ function buchFest(P) {
   if (!P || !P.z || !Array.isArray(P.z.ym)) return null;
   const z = P.z, n = z.ym.length;
   const B = { n: n, ym: Int32Array.from(z.ym), k: Int32Array.from(z.k), a: Int32Array.from(z.a), b: Float64Array.from(z.b), m: Float64Array.from(z.m), e: Int32Array.from(z.e), h: Int32Array.from(z.h),
-    t: Int32Array.from(z.t), d: Int32Array.from(z.d), da: Int32Array.from(z.da), bd: Int32Array.from(z.bd), bn: Int32Array.from(z.bn) };
+    t: Int32Array.from(z.t), d: Int32Array.from(z.d), da: Int32Array.from(z.da), bd: Int32Array.from(z.bd), bn: Int32Array.from(z.bn),
+    ae: Array.isArray(z.ae) && z.ae.length === n ? Int32Array.from(z.ae) : new Int32Array(n) };   // ae fehlt in Auszügen, die vor 1.8 eingelesen wurden
+  B.hatAe = B.ae.some((x) => x > 0);
   const liste = (k, laenge) => { const L = Array.isArray(P[k]) ? P[k] : [], aus = []; for (let i = 0; i < Math.max(L.length, laenge || 0); i++) aus.push(L[i] === null || L[i] === undefined ? '' : String(L[i])); return aus; };
   ['KST', 'KA', 'EIN', 'HER', 'TXT', 'DK', 'DKA', 'BEL'].forEach((k) => { B[k] = liste(k); });
   ['BL', 'KSN'].forEach((k) => { B[k] = liste(k, B.KST.length); });
@@ -1704,6 +1754,7 @@ function buchFest(P) {
 function buchInhalt(B) {
   const z = {};
   ['ym', 'k', 'a', 'b', 'm', 'e', 'h', 't', 'd', 'da', 'bd', 'bn'].forEach((k) => { z[k] = Array.from(B[k]); });
+  if (B.hatAe) z.ae = Array.from(B.ae);
   const P = { v: 1, z: z };
   ['KST', 'KA', 'EIN', 'HER', 'TXT', 'DK', 'DKA', 'BEL', 'BL', 'KSN', 'BAB', 'BED', 'KAN'].forEach((k) => { P[k] = B[k]; });
   return P;
@@ -1711,7 +1762,7 @@ function buchInhalt(B) {
 /* Bestehende Buchungen und ein neuer Auszug: Jeder Monat, der im neuen vorkommt, wird ganz ersetzt */
 function buchVerbinden(alt, neu) {
   const S0 = buchSammler(), drin = new Set(neu.ym);
-  const zeile = (B, i) => ({ ym: B.ym[i], kst: B.KST[B.k[i]], ka: B.KA[B.a[i]], b: B.b[i], m: B.m[i], e: B.EIN[B.e[i]], h: B.HER[B.h[i]], t: B.TXT[B.t[i]], d: B.DK[B.d[i]], da: B.DKA[B.da[i]], bd: B.bd[i], bn: B.BEL[B.bn[i]],
+  const zeile = (B, i) => ({ ym: B.ym[i], kst: B.KST[B.k[i]], ka: B.KA[B.a[i]], b: B.b[i], m: B.m[i], e: B.EIN[B.e[i]], h: B.HER[B.h[i]], t: B.TXT[B.t[i]], d: B.DK[B.d[i]], da: B.DKA[B.da[i]], bd: B.bd[i], bn: B.BEL[B.bn[i]], ae: B.ae[i],
     bl: B.BL[B.k[i]], ksn: B.KSN[B.k[i]], bab: B.BAB[B.a[i]], bed: B.BED[B.a[i]], kan: B.KAN[B.a[i]] });
   if (alt) for (let i = 0; i < alt.n; i++) if (!drin.has(alt.ym[i])) S0.dazu(zeile(alt, i));
   for (let i = 0; i < neu.n; i++) S0.dazu(zeile(neu, i));
@@ -2005,7 +2056,7 @@ function blAbschnittHTML() {
   const Z = blZuordnung(), roh = Array.from(Z.keys()).sort((a, b) => a.localeCompare(b, 'de')), anz = {};
   B.BL.forEach((x) => { if (x) anz[x] = (anz[x] || 0) + 1; });
   const buero = S.mitarbeiter.filter(imBuero), rest = S.mitarbeiter.filter((m) => !imBuero(m));
-  const opt = (m, gew) => '<option value="' + m.id + '"' + (gew === m ? ' selected' : '') + '>' + esc(m.name) + '</option>';
+  const opt = (m, gew) => '<option value="' + m.id + '"' + (gew === m ? ' selected' : '') + '>' + esc(m.name + (m.abt ? ' (' + m.abt + ')' : '')) + '</option>';   // seit 1.8 mit der Abteilung, wenn es eine andere ist
   return '<section class="gr"><h3>Bauführer</h3><p class="muted klein">Im Auszug steht der Bauleiter als Kürzel. Das Tool schlägt die Person aus dem Büro vor, deren Anfangsbuchstaben passen. Hier stellst du um, was nicht stimmt; dasselbe geht im Eintrag der Mitarbeiterliste. Zwei Kürzel derselben Person zählen zusammen.</p><ul class="bu-std">' +
     roh.map((r) => {
       const z = Z.get(r), fest = z.art === 'fest' ? z.m : null;
@@ -2013,6 +2064,12 @@ function blAbschnittHTML() {
         '<option value=""' + (z.art === 'vorschlag' || z.art === 'frei' ? ' selected' : '') + '>' + esc(z.v ? 'Vorschlag: ' + z.v.name : 'Kein Vorschlag, Kürzel bleibt') + '</option><option value="-"' + (z.art === 'ohne' ? ' selected' : '') + '>Kürzel belassen</option>' +
         (buero.length ? '<optgroup label="Büro">' + buero.map((m) => opt(m, fest)).join('') + '</optgroup>' : '') + (rest.length ? '<optgroup label="Weitere">' + rest.map((m) => opt(m, fest)).join('') + '</optgroup>' : '') + '</select></li>';
     }).join('') + '</ul>' + (S.mitarbeiter.length ? '' : '<p class="muted klein">Noch keine Mitarbeiterliste. Sie steht in den Einstellungen unter «Mitarbeiter».</p>') + '</section>';
+}
+/* Abteilung einer Person (seit 1.8): leer ist die eigene. Wer den Namen der eigenen Abteilung eintippt, gehört zu ihr. */
+const abtListe = () => Array.from(new Set(S.mitarbeiter.map((m) => (m.abt || '').trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'de'));
+function abtAusFeld(v) {
+  const t = String(v || '').replace(/\s+/g, ' ').trim(), eigen = String((S.meta && S.meta.abteilung) || '').replace(/\s+/g, ' ').trim();
+  return t && eigen && t.toLowerCase() === eigen.toLowerCase() ? '' : t;
 }
 /* ---------- Beispiel: der BAB und dazu passende Buchungen, alles erfunden ---------- */
 const BSP_BAB = [   // Nummer, Bezeichnung, Art, Stufe, Werte für 2023, 2024, 2025, «Sep 26» und «Budget 2027»
@@ -3221,6 +3278,7 @@ const EW_ART = { ein: 'Eintritt', aus: 'Austritt', pension: 'Pension' };
 function wechselListe() {
   const J = sitzungsJahr(), w = sitzungWert(), aus = [];
   S.mitarbeiter.forEach((m) => {
+    if (fremd(m)) return;   // seit 1.8: andere Abteilung
     const e = datumWert(m.eintritt), A = austrittVon(m, w), a = A.wert;
     if (e && Math.floor(e / 10000) >= J) aus.push({ m: m, art: 'ein', wert: e, text: m.eintritt });
     if (A.art === 'hand' && (!a || Math.floor(a / 10000) >= J)) aus.push({ m: m, art: 'aus', wert: a || 99991231, text: m.austritt });
@@ -3760,74 +3818,6 @@ function awHTML() {
   return h + '<div class="unter"><p class="muted klein">' + esc(hinweis + 'Eine Zeile antippen grenzt ein. Gezählt bis ' + ymName(buchBis()) + '.') + '</p>' + (Z.length > zeigen.length ? '<button type="button" class="textlink" data-a="aw-alle">Alle ' + Z.length + ' zeigen</button>' : '') + '</div>';
 }
 
-/* ---------- Abgleich: die Buchungen gegen den BAB, je Spalte des BAB ---------- */
-/* «2025» → das ganze Jahr; «Sep 26» → Januar bis September; «Monat Sep 26» → nur dieser Monat; ohne Jahr: null */
-function periodeBereich(name) {
-  const n = String(name || '').trim(), einzeln = /^monat\s+/i.test(n), kern = n.replace(/^monat\s+/i, ''), y4 = /(19|20)\d{2}/.exec(kern), y2 = y4 ? null : /(?:^|\D)(\d{2})\s*$/.exec(kern);
-  const j = y4 ? +y4[0] : (y2 ? 2000 + (+y2[1]) : 0), mo = monatAus(kern);
-  if (!j || /budget/i.test(n)) return null;
-  return einzeln && mo ? { von: j * 12 + mo - 1, bis: j * 12 + mo - 1 } : { von: j * 12, bis: j * 12 + (mo ? mo - 1 : 11) };
-}
-function abgleichDaten() {
-  const B = BUCH, zs = S.zahlen.zeilen, k = kernZeilen(), iE = zs.indexOf(k.ertrag), bis = buchBis(), std = buchStd();
-  const konten = zs.filter((z) => z.art === 'konto' && z.nr), stdZ = zs.filter((z) => z.art === 'stunden' && z.stufe === 0);
-  const istEZ = (z) => (iE >= 0 ? zs.indexOf(z) < iE : +z.nr < 4000), babVon = B.KA.map((nr, a) => ohneNull(B.BAB[a] || nr));
-  return S.zahlen.perioden.filter((p) => !istBudget(p)).map((p) => {
-    const r = periodeBereich(p.name);
-    if (!r) return { p: p, grund: 'Aus dem Namen der Spalte lässt sich kein Zeitraum lesen.' };
-    if (r.bis < B.ymMin || r.von > Math.min(B.ymMax, bis)) return { p: p, grund: 'Für diesen Zeitraum gibt es keine gezählten Buchungen.' };
-    const sum = new Map();
-    let sE = 0, sA = 0, eig = 0, tmp = 0;
-    for (let i = 0; i < B.n; i++) {
-      const ym = B.ym[i];
-      if (ym < r.von || ym > r.bis || ym > bis) continue;
-      const a = B.a[i];
-      sum.set(babVon[a], (sum.get(babVon[a]) || 0) + B.b[i]);
-      if (B.istE[a]) sE += B.b[i] * B.vzE; else sA += B.b[i] * B.vzA;
-      if (std[a] && B.stdEin[B.e[i]]) { if (std[a] === 1) eig += B.m[i]; else tmp += B.m[i]; }
-    }
-    // Vorzeichen: Der BAB zeigt Erträge und Aufwand oft beide positiv, gebucht ist der Ertrag als Minus. Je Block gilt die Richtung, die zur Mehrheit passt.
-    let oE = 0, oA = 0;
-    konten.forEach((z) => { const v = z.w[p.id], s = sum.get(ohneNull(z.nr)); if (v && s) { if (istEZ(z)) oE += v * s; else oA += v * s; } });
-    const zeilen = [], gesehen = new Set();
-    konten.forEach((z) => {
-      const key = ohneNull(z.nr), v = z.w[p.id] || 0, s = (sum.get(key) || 0) * ((istEZ(z) ? oE : oA) < 0 ? -1 : 1);
-      gesehen.add(key);
-      if (v || Math.abs(s) >= 0.005) zeilen.push({ nr: z.nr, name: z.name, bab: v, buch: s, diff: s - v });
-    });
-    sum.forEach((s, key) => { if (!gesehen.has(key) && Math.abs(s) >= 0.005) zeilen.push({ nr: key, name: 'Nur in den Buchungen (Kostenart ' + B.KA.filter((nr, a) => babVon[a] === key).join(', ') + ')', bab: null, buch: s, diff: s }); });
-    const wert = (z) => { const v = z ? z.w[p.id] : undefined; return v === undefined || v === null ? null : Math.abs(v); };
-    const stdSumme = (test) => { let s = 0, hat = false; stdZ.forEach((z) => { if (test(z.name) && wert(z) !== null) { s += wert(z); hat = true; } }); return hat ? s : null; };
-    const bE = wert(k.ertrag), bA = wert(k.aufwand);
-    const kopf = [['Ertrag', bE, B.hatE ? sE : null, 1], ['Aufwand', bA, sA, 1], ['Ergebnis', bE !== null && bA !== null ? bE - bA : null, B.hatE ? sE - sA : null, 1],
-      ['Stunden eigene Leute', stdSumme((n) => /monatslohn|stundenlohn|eigen/i.test(n)), eig, 0.5], ['Stunden Temporäre', stdSumme((n) => /temp/i.test(n)), tmp, 0.5]]
-      .map((x) => ({ name: x[0], bab: x[1], buch: x[2], diff: x[1] === null || x[2] === null ? null : x[2] - x[1], tol: x[3] }));
-    const abw = zeilen.filter((z) => Math.abs(z.diff) >= 1);
-    return { p: p, r: r, kopf: kopf, zeilen: zeilen, abw: abw, stimmt: !abw.length && kopf.every((x) => x.diff === null || Math.abs(x.diff) < x.tol),
-      knapp: r.bis > bis ? 'Die Buchungen zählen erst bis ' + ymName(bis) + '; diese Spalte des BAB reicht weiter.' : (r.von < B.ymMin ? 'Die Buchungen beginnen erst im ' + ymName(B.ymMin) + '.' : '') };
-  });
-}
-function abgleichHTML() {
-  if (!buchDa()) return '';
-  const A = abgleichDaten();
-  if (!A.length) return huelle('Abgleich mit dem BAB', '<p class="muted">Es ist noch kein BAB da. Füge ihn über «Zahlen einfügen» ein; dann steht hier, ob die Buchungen dieselben Zahlen ergeben.</p>');
-  const brauchbar = A.filter((x) => !x.grund), wahl = A.find((x) => x.p.id === sheet.pid) || brauchbar.filter((x) => !x.stimmt).pop() || brauchbar[brauchbar.length - 1] || A[A.length - 1];
-  const chips = '<div class="chips abg-chips" role="group" aria-label="Spalte des BAB">' + A.map((x) => '<button type="button" class="chip' + (x.grund ? ' leer' : (x.stimmt ? ' ok' : ' abw')) + '" data-a="abg-periode" data-id="' + x.p.id + '" aria-pressed="' + (x === wahl) + '">' +
-    esc(x.p.name) + (x.grund ? '' : (x.stimmt ? ic('check') : '<i class="tnum">' + (x.abw.length || '!') + '</i>')) + '</button>').join('') + '</div>';
-  if (wahl.grund) return huelle('Abgleich mit dem BAB', chips + '<p class="muted">' + esc(wahl.grund) + '</p>');
-  const z = (v, stellen) => (v === null || v === undefined ? '' : (stellen ? fmtN(v, stellen) : fmt(v)));
-  const diffZ = (d, tol) => (d === null ? '<td></td>' : (Math.abs(d) < tol ? '<td class="ok">' + ic('check') + '</td>' : '<td class="abw">' + mitVz(d, fmt(Math.abs(d))) + '</td>'));
-  const reihe = (x, tol) => '<tr><th>' + (x.nr ? '<span class="nr tnum">' + esc(x.nr) + '</span>' : '') + esc(x.name) + '</th><td>' + z(x.bab) + '</td><td>' + z(x.buch) + '</td>' + diffZ(x.diff, tol) + '</tr>';
-  const liste = sheet.alle ? wahl.zeilen : wahl.abw;
-  return huelle('Abgleich mit dem BAB', chips +
-    '<p class="' + (wahl.stimmt ? 'abg-urteil ok' : 'abg-urteil abw') + '">' + ic(wahl.stimmt ? 'check' : 'info') + '<span>' + esc('«' + wahl.p.name + '»: ' + (wahl.stimmt ? 'Die Buchungen ergeben dieselben Zahlen wie der BAB.' : (wahl.abw.length ? mehrzahl(wahl.abw.length, 'Zeile weicht', 'Zeilen weichen') + ' um mehr als einen Franken ab.' : 'Die Summen weichen ab.'))) + '</span></p>' +
-    (wahl.knapp ? '<p class="hinweis">' + ic('info') + '<span>' + esc(wahl.knapp) + '</span></p>' : '') +
-    '<table class="abg"><thead><tr><th></th><th>BAB</th><th>Buchungen</th><th>Differenz</th></tr></thead><tbody>' + wahl.kopf.map((x) => reihe(x, x.tol)).join('') + '</tbody>' +
-    (liste.length ? '<tbody><tr class="zw"><th colspan="4">' + (sheet.alle ? 'Alle Zeilen' : 'Abweichungen je Zeile') + '</th></tr>' + liste.map((x) => reihe(x, 1)).join('') + '</tbody>' : '') + '</table>' +
-    '<div class="unter"><p class="muted klein">Verglichen wird je Zeile des BAB mit den Buchungen derselben BAB-Zeile, gezählt bis ' + esc(ymName(buchBis())) + '.</p>' +
-    (wahl.zeilen.length > wahl.abw.length || sheet.alle ? '<button type="button" class="textlink" data-a="abg-alle">' + (sheet.alle ? 'Nur Abweichungen' : 'Alle ' + wahl.zeilen.length + ' Zeilen zeigen') + '</button>' : '') + '</div>');
-}
-
 /* ---------- Fenster «Buchungen»: Eckdaten, bis wann gezählt wird, was als Stunde zählt ---------- */
 function buchInfoHTML() {
   if (!buchDa()) return '';
@@ -3879,6 +3869,394 @@ function buchErgebnisTabelle(n, mitAufwand) {
     zeile('Gewinn in % des Ertrags', (d) => (d.G === null || !d.E ? '' : fmtN(d.G / d.E * 100, 1) + ' %')) + (D.some((d) => d.h) ? zeile('Produktive Stunden', (d) => oder(d.h)) : '') + '</tbody></table></div>' +
     '<p class="e-fuss">Aus den Buchungen, gezählt bis ' + esc(ymName(buchBis())) + '. Ergebnis: Ertrag minus Aufwand.</p>';
 }
+/* ---------- Abgleich: die Buchungen gegen den BAB, je Spalte des BAB ----------
+   Seit 1.8 (Chefs Beispiel vom 24.11.2026):
+   1) Die Zuordnung folgt dem BAB: Eine Kostenart zählt zuerst in der Zeile mit ihrer eigenen Nummer, sonst in ihrer «Standard BAB-Zeile».
+      Hat sie im BAB keine Zeile, gehört sie dorthin, wo ihr Betrag die Differenz genau ausgleicht (ein BAB kann zwei Kostenarten in einer Zeile führen).
+   2) Zwei Zeilen, die sich ausgleichen, sind keine Abweichung: Derselbe Betrag steht im BAB nur in der anderen Zeile.
+   3) Eine angetippte Zeile zeigt ihre Buchungen je Baustelle und Monat und die Spur zur Differenz. Weil dort einzelne Buchungen stehen,
+      geht das nur mit dem Schalter «Bauführer und Auswertung» (je Gerät). */
+/* «2025» → das ganze Jahr; «Sep 26» → Januar bis September; «Monat Sep 26» → nur dieser Monat; ohne Jahr: null */
+function periodeBereich(name) {
+  const n = String(name || '').trim(), einzeln = /^monat\s+/i.test(n), kern = n.replace(/^monat\s+/i, ''), y4 = /(19|20)\d{2}/.exec(kern), y2 = y4 ? null : /(?:^|\D)(\d{2})\s*$/.exec(kern);
+  const j = y4 ? +y4[0] : (y2 ? 2000 + (+y2[1]) : 0), mo = monatAus(kern);
+  if (!j || /budget/i.test(n)) return null;
+  return einzeln && mo ? { von: j * 12 + mo - 1, bis: j * 12 + mo - 1 } : { von: j * 12, bis: j * 12 + (mo ? mo - 1 : 11) };
+}
+const ABG_TOL = 1;   // so viele Franken darf eine Zeile abweichen
+let ABGSUCHE = '';
+const tagText = (t, lang) => { if (!t || t <= 0) return ''; const d = new Date(t * 864e5); return String(d.getUTCDate()).padStart(2, '0') + '.' + String(d.getUTCMonth() + 1).padStart(2, '0') + '.' + (lang ? d.getUTCFullYear() : String(d.getUTCFullYear()).slice(2)); };
+/* Was für alle Spalten gleich ist: die Kontozeilen des BAB nach Nummer, je Kostenart ihre eigene Nummer und ihre Standard BAB-Zeile */
+function abgBasis() {
+  const B = BUCH, zs = S.zahlen.zeilen, k = kernZeilen(), iE = zs.indexOf(k.ertrag), platz = new Map(), reihe = new Map();
+  zs.forEach((z, i) => { platz.set(z, i); });
+  const konten = zs.filter((z) => z.art === 'konto' && z.nr);
+  konten.forEach((z) => { const key = ohneNull(z.nr); if (!reihe.has(key)) reihe.set(key, z); });
+  return { B: B, k: k, konten: konten, reihe: reihe, istEZ: (z) => (iE >= 0 ? platz.get(z) < iE : +z.nr < 4000),
+    eigen: B.KA.map((nr) => ohneNull(nr)), standard: B.KA.map((nr, a) => ohneNull(B.BAB[a] || nr)),
+    stdZ: zs.filter((z) => z.art === 'stunden' && z.stufe === 0), std: buchStd(), bis: buchBis() };
+}
+/* In welcher Zeile des BAB eine Kostenart in dieser Spalte zählt; null: Sie steht nur in den Buchungen */
+function abgZiel(G, p, lern) {
+  return G.B.KA.map((nr, a) => {
+    const e = G.eigen[a], s = G.standard[a], ze = G.reihe.get(e);
+    if (ze && ze.w[p.id]) return e;          // der BAB zeigt die Kostenart einzeln
+    if (G.reihe.has(s)) return s;            // sonst ihre Standard BAB-Zeile
+    if (ze) return e;
+    return lern && lern[a] !== undefined ? lern[a] : null;
+  });
+}
+function abgSpalte(G, p, r, lern) {
+  const B = G.B, bis = G.bis, ziel = abgZiel(G, p, lern), na = B.KA.length, sum = new Map(), waise = new Float64Array(na), da = new Uint8Array(na);
+  let sE = 0, sA = 0, eig = 0, tmp = 0;
+  for (let i = 0; i < B.n; i++) {
+    const ym = B.ym[i];
+    if (ym < r.von || ym > r.bis || ym > bis) continue;
+    const a = B.a[i], t = ziel[a], b = B.b[i];
+    da[a] = 1;
+    if (t === null) waise[a] += b; else sum.set(t, (sum.get(t) || 0) + b);
+    if (B.istE[a]) sE += b * B.vzE; else sA += b * B.vzA;
+    if (G.std[a] && B.stdEin[B.e[i]]) { if (G.std[a] === 1) eig += B.m[i]; else tmp += B.m[i]; }
+  }
+  // Vorzeichen: Der BAB zeigt Erträge und Aufwand oft beide positiv, gebucht ist der Ertrag als Minus. Je Block gilt die Richtung, die zur Mehrheit passt.
+  let oE = 0, oA = 0;
+  G.konten.forEach((z) => { const v = z.w[p.id], s = sum.get(ohneNull(z.nr)); if (v && s) { if (G.istEZ(z)) oE += v * s; else oA += v * s; } });
+  const vE = oE < 0 ? -1 : (oE > 0 ? 1 : B.vzE), vA = oA < 0 ? -1 : (oA > 0 ? 1 : B.vzA), zeilen = [];
+  G.konten.forEach((z) => {
+    const key = ohneNull(z.nr);
+    if (G.reihe.get(key) !== z) return;
+    const e = G.istEZ(z), v = z.w[p.id] || 0, s = (sum.get(key) || 0) * (e ? vE : vA);
+    if (v || Math.abs(s) >= 0.005) zeilen.push({ key: key, nr: z.nr, name: z.name, e: e, bab: v, buch: s, diff: s - v });
+  });
+  for (let a = 0; a < na; a++) if (Math.abs(waise[a]) >= 0.005) {
+    const e = !!B.istE[a], s = waise[a] * (e ? vE : vA);
+    zeilen.push({ key: '+' + B.KA[a], nr: B.KA[a], name: 'Nur in den Buchungen' + (B.KAN[a] ? ': ' + B.KAN[a] : ''), e: e, bab: null, buch: s, diff: s, nur: true, a: a });
+  }
+  const wert = (z) => { const v = z ? z.w[p.id] : undefined; return v === undefined || v === null ? null : Math.abs(v); };
+  const stdSumme = (test) => { let s = 0, hat = false; G.stdZ.forEach((z) => { if (test(z.name) && wert(z) !== null) { s += wert(z); hat = true; } }); return hat ? s : null; };
+  const bE = wert(G.k.ertrag), bA = wert(G.k.aufwand);
+  const kopf = [['Ertrag', bE, B.hatE ? sE : null, 1], ['Aufwand', bA, sA, 1], ['Ergebnis', bE !== null && bA !== null ? bE - bA : null, B.hatE ? sE - sA : null, 1],
+    ['Stunden eigene Leute', stdSumme((n) => /monatslohn|stundenlohn|eigen/i.test(n)), eig, 0.5], ['Stunden Temporäre', stdSumme((n) => /temp/i.test(n)), tmp, 0.5]]
+    .map((x) => ({ name: x[0], bab: x[1], buch: x[2], diff: x[1] === null || x[2] === null ? null : x[2] - x[1], tol: x[3] }));
+  return { p: p, r: r, ziel: ziel, vE: vE, vA: vA, da: da, zeilen: zeilen, kopf: kopf,
+    knapp: r.bis > bis ? 'Die Buchungen zählen erst bis ' + ymName(bis) + '; diese Spalte des BAB reicht weiter.' : (r.von < B.ymMin ? 'Die Buchungen beginnen erst im ' + ymName(B.ymMin) + '.' : '') };
+}
+/* Kostenarten ohne Zeile im BAB: Wo ihr Betrag die Differenz einer Zeile genau ausgleicht, gehören sie dorthin, einzeln oder zu zweit oder dritt.
+   Gibt [[Kostenart, Zeile] …] zurück; was nicht eindeutig ist, bleibt offen. */
+function abgStimmen(x) {
+  const aus = [];
+  [true, false].forEach((e) => {
+    let W = x.zeilen.filter((z) => z.nur && z.e === e && Math.abs(z.diff) >= ABG_TOL), R = x.zeilen.filter((z) => !z.nur && z.e === e && Math.abs(z.diff) >= ABG_TOL);
+    if (!W.length || !R.length) return;
+    const passt = W.map((w) => R.filter((z) => Math.abs(z.diff + w.diff) < ABG_TOL)), vergeben = new Set(), weg = new Set();
+    W.forEach((w, i) => {
+      if (passt[i].length !== 1) return;
+      const z = passt[i][0];
+      if (W.some((w2, j) => j !== i && passt[j].indexOf(z) >= 0)) return;   // zwei gleich grosse Beträge: nicht eindeutig
+      aus.push([w.a, z.key]); vergeben.add(z); weg.add(w);
+    });
+    W = W.filter((w) => !weg.has(w)); R = R.filter((z) => !vergeben.has(z));
+    if (W.length < 2 || W.length > 12) return;
+    R.forEach((z) => {
+      const frei = W.filter((w) => !weg.has(w)), treffer = [];
+      for (let i = 0; i < frei.length; i++) for (let j = i + 1; j < frei.length; j++) {
+        if (Math.abs(z.diff + frei[i].diff + frei[j].diff) < ABG_TOL) treffer.push([frei[i], frei[j]]);
+        for (let l = j + 1; l < frei.length; l++) if (Math.abs(z.diff + frei[i].diff + frei[j].diff + frei[l].diff) < ABG_TOL) treffer.push([frei[i], frei[j], frei[l]]);
+      }
+      if (treffer.length === 1) treffer[0].forEach((w) => { aus.push([w.a, z.key]); weg.add(w); });
+    });
+  });
+  return aus;
+}
+/* Nach der Zuordnung: was dazugelernt ist, was sich ausgleicht, was wirklich abweicht */
+function abgFertig(G, x, L) {
+  const B = G.B;
+  x.gelernt = [];
+  Object.keys(L).forEach((k) => {
+    const a = +k, z = x.da[a] && x.ziel[a] === L[k] ? x.zeilen.find((y) => y.key === L[k]) : null;
+    if (!z) return;
+    (z.mit || (z.mit = [])).push(B.KA[a]);
+    x.gelernt.push({ ka: B.KA[a], nr: z.nr });
+  });
+  const R = x.zeilen.filter((z) => Math.abs(z.diff) >= ABG_TOL), partner = R.map((z) => R.filter((y) => y !== z && y.e === z.e && Math.abs(y.diff + z.diff) < ABG_TOL));
+  R.forEach((z, i) => { if (partner[i].length !== 1) return; const y = partner[i][0]; if (partner[R.indexOf(y)].length === 1) z.paar = y; });
+  x.abw = R.filter((z) => !z.paar);
+  x.lage = R.filter((z) => z.paar);
+  x.stimmt = !x.abw.length && x.kopf.every((k) => k.diff === null || Math.abs(k.diff) < k.tol);
+  return x;
+}
+function abgleichDaten() {
+  const G = abgBasis(), B = G.B;
+  const Sp = S.zahlen.perioden.filter((p) => !istBudget(p)).map((p) => {
+    const r = periodeBereich(p.name);
+    if (!r) return { p: p, grund: 'Aus dem Namen der Spalte lässt sich kein Zeitraum lesen.' };
+    if (r.bis < B.ymMin || r.von > Math.min(B.ymMax, G.bis)) return { p: p, grund: 'Für diesen Zeitraum gibt es keine gezählten Buchungen.' };
+    return { p: p, r: r };
+  });
+  // 1. Durchgang: Was gehört wohin? Was eine Spalte zeigt, gilt für alle, solange keine andere widerspricht.
+  const stimmen = new Map(), eigene = new Map();
+  Sp.forEach((sp) => {
+    if (sp.grund) return;
+    sp.x = abgSpalte(G, sp.p, sp.r, null);
+    const P = abgStimmen(sp.x);
+    if (P.length) eigene.set(sp.p.id, P);
+    P.forEach((q) => { let m = stimmen.get(q[0]); if (!m) stimmen.set(q[0], m = new Set()); m.add(q[1]); });
+  });
+  const lern = {};
+  stimmen.forEach((m, a) => { if (m.size === 1) lern[a] = Array.from(m)[0]; });
+  // 2. Durchgang mit dem Gelernten
+  const A = Sp.map((sp) => {
+    if (sp.grund) return sp;
+    const L = Object.assign({}, lern);
+    (eigene.get(sp.p.id) || []).forEach((q) => { L[q[0]] = q[1]; });
+    return abgFertig(G, Object.keys(L).length ? abgSpalte(G, sp.p, sp.r, L) : sp.x, L);
+  });
+  A.G = G;
+  return A;
+}
+/* Spur zur Differenz (seit 1.8). Je abweichende Zeile: Welche natürliche Gruppe ihrer Buchungen ergibt genau die Differenz (eine Buchung, ein Beleg,
+   eine Baustelle, ein Monat, spät Geändertes), oder stimmt die Zeile mit dem Nachbarmonat? Für die ganze Spalte: Passt sie zu einem anderen
+   Zeitraum, oder stimmt sie ohne eine einzelne Baustelle? Das sind Hinweise, keine Beweise. */
+function abgSpur(G, x) {
+  const B = G.B, r = x.r, bis = G.bis, ende = Math.min(r.bis, bis), jahr0 = Math.floor(r.von / 12) * 12, fVon = jahr0 - 12, nF = 36;
+  const keyA = B.KA.map((nr, a) => (x.ziel[a] === null ? '+' + nr : x.ziel[a]));
+  const vzA = keyA.map((key, a) => { const z = G.reihe.get(key); return (z ? G.istEZ(z) : B.istE[a]) ? x.vE : x.vA; });
+  const wert = (i) => B.b[i] * vzA[B.a[i]];
+  const spaetAb = Math.round(Date.UTC(Math.floor((ende + 4) / 12), (ende + 4) % 12, 1) / 864e5);   // mehr als drei Monate nach dem Zeitraum geändert
+  const M = new Map(), KS = new Map(), L = new Map(), will = new Set(x.abw.map((z) => z.key));
+  for (let i = 0; i < B.n; i++) {
+    const ym = B.ym[i];
+    if (ym < fVon || ym >= fVon + nF) continue;
+    const key = keyA[B.a[i]], v = wert(i);
+    let m = M.get(key);
+    if (!m) M.set(key, m = new Float64Array(nF));
+    m[ym - fVon] += v;
+    if (ym < r.von || ym > ende) continue;
+    let ks = KS.get(key);
+    if (!ks) KS.set(key, ks = new Map());
+    ks.set(B.k[i], (ks.get(B.k[i]) || 0) + v);
+    if (will.has(key)) { let l = L.get(key); if (!l) L.set(key, l = []); l.push(i); }
+  }
+  const nahe = (s, d) => Math.abs(s - d) < ABG_TOL && Math.abs(s) >= ABG_TOL, je = new Map();
+  x.abw.forEach((z) => {
+    const d = z.diff, l = L.get(z.key) || [], m = M.get(z.key);
+    let h = null;
+    if (z.bab && l.length > 1) {   // «ohne … stimmt die Zeile»
+      const gruppe = (fn, art) => {   // genau eine Gruppe von mindestens zwei Buchungen, deren Summe die Differenz ergibt
+        const g = new Map(), T = [];
+        l.forEach((i) => { const k = fn(i); if (k === null) return; let o = g.get(k); if (!o) g.set(k, o = { s: 0, L: [] }); o.s += wert(i); o.L.push(i); });
+        g.forEach((o) => { if (o.L.length >= 2 && o.L.length < l.length && nahe(o.s, d)) T.push(o); });
+        return T.length === 1 ? { art: art, L: T[0].L } : null;
+      };
+      const E = l.filter((i) => nahe(wert(i), d));
+      if (E.length) h = { art: 'einzel', L: [E[0]], n: E.length };
+      if (!h) h = gruppe((i) => (B.BEL[B.bn[i]] ? 'b' + B.bn[i] : null), 'beleg');
+      if (!h) h = gruppe((i) => B.k[i] + '|' + B.ym[i], 'kstmonat');
+      if (!h) h = gruppe((i) => 'k' + B.k[i], 'kst');
+      if (!h) h = gruppe((i) => 'm' + B.ym[i], 'monat');
+      if (!h && B.hatAe) h = gruppe((i) => (B.ae[i] >= spaetAb ? 'a' + B.ae[i] : null), 'tag');
+      if (!h && B.hatAe) h = gruppe((i) => (B.ae[i] >= spaetAb ? 's' : null), 'spaet');
+    }
+    if (!h && m) {   // «mit … stimmt die Zeile»: der Monat davor oder danach
+      const vor = r.von - 1, nach = ende + 1;
+      if (vor >= B.ymMin && nahe(m[vor - fVon], -d)) h = { art: 'vor', ym: vor };
+      else if (nach <= B.ymMax && nach - fVon < nF && nahe(m[nach - fVon], -d)) h = { art: nach > bis ? 'laeuft' : 'nach', ym: nach };
+    }
+    if (h) je.set(z.key, h);
+  });
+  // die ganze Spalte: anderer Zeitraum oder eine Baustelle, die der BAB nicht zählt
+  let zeit = null, kst = null;
+  const babVon = new Map(), keys = new Set(M.keys());
+  x.zeilen.forEach((z) => { babVon.set(z.key, z.bab || 0); keys.add(z.key); });
+  const zaehl = (von, bisM) => { let n = 0; keys.forEach((key) => { const m = M.get(key); let s = 0; if (m) for (let y = von; y <= bisM; y++) s += m[y - fVon]; if (Math.abs(s - (babVon.get(key) || 0)) >= ABG_TOL) n++; }); return n; };
+  const roh = zaehl(r.von, ende), genug = (n) => roh >= 3 && roh - n >= 3 && n <= roh * 0.2;
+  if (roh >= 3 && r.von === jahr0 && !/^monat\s+/i.test(String(x.p.name).trim())) {
+    const kand = [];
+    for (let e = Math.max(jahr0, B.ymMin); e <= Math.min(jahr0 + 11, B.ymMax); e++) if (e !== ende) kand.push([jahr0, e]);
+    if (B.ymMin <= jahr0 - 1) kand.push([jahr0 - 12, jahr0 - 1]);
+    if (B.ymMax >= jahr0 + 12) kand.push([jahr0 + 12, Math.min(jahr0 + 23, B.ymMax)]);
+    kand.forEach((c) => { const n = zaehl(c[0], c[1]); if (!zeit || n < zeit.n) zeit = { von: c[0], bis: c[1], n: n, vorher: roh }; });
+    if (zeit && !genug(zeit.n)) zeit = null;
+  }
+  if (roh >= 3) {
+    const alleK = new Set();
+    KS.forEach((ks) => { ks.forEach((v, k) => { alleK.add(k); }); });
+    alleK.forEach((k) => {
+      let n = 0;
+      x.zeilen.forEach((z) => { const ks = KS.get(z.key), ab = ks ? (ks.get(k) || 0) : 0; if (Math.abs(z.buch - ab - (z.bab || 0)) >= ABG_TOL) n++; });
+      if (!kst || n < kst.n) kst = { k: k, n: n, vorher: roh };
+    });
+    if (kst && (!genug(kst.n) || (zeit && zeit.n <= kst.n))) kst = null;
+    if (kst) zeit = null;
+  }
+  return { je: je, zeit: zeit, kst: kst, spaetAb: spaetAb };
+}
+/* Die Buchungen einer Zeile im gezählten Zeitraum (oder von … bis), mit den Summen je Baustelle und je Monat */
+function abgZeile(G, x, key, von, bis) {
+  const B = G.B, a0 = von === undefined ? x.r.von : von, e0 = bis === undefined ? Math.min(x.r.bis, G.bis) : bis, z = G.reihe.get(key), kst = new Map(), mon = new Map(), L = [];
+  for (let i = 0; i < B.n; i++) {
+    const ym = B.ym[i];
+    if (ym < a0 || ym > e0) continue;
+    const a = B.a[i];
+    if ((x.ziel[a] === null ? '+' + B.KA[a] : x.ziel[a]) !== key) continue;
+    const v = B.b[i] * ((z ? G.istEZ(z) : B.istE[a]) ? x.vE : x.vA);
+    L.push([i, v]);
+    let o = kst.get(B.k[i]);
+    if (!o) kst.set(B.k[i], o = { s: 0, n: 0 });
+    o.s += v; o.n++;
+    o = mon.get(ym);
+    if (!o) mon.set(ym, o = { s: 0, n: 0 });
+    o.s += v; o.n++;
+  }
+  return { L: L, kst: kst, mon: mon };
+}
+function spurKurz(h) {   // kurz für die Liste; Namen und Belege stehen erst in der geöffneten Zeile
+  const B = BUCH, n = h.L ? h.L.length : 0, i = h.L ? h.L[0] : -1;
+  if (h.art === 'einzel') return h.n > 1 ? 'eine von ' + h.n + ' gleichen Buchungen' : 'eine Buchung';
+  if (h.art === 'beleg') return 'ein Beleg (' + n + ' Buchungen)';
+  if (h.art === 'kstmonat') return 'eine Baustelle im ' + MONATE[B.ym[i] % 12];
+  if (h.art === 'kst') return 'eine Baustelle';
+  if (h.art === 'monat') return 'der ' + MONATE[B.ym[i] % 12];
+  if (h.art === 'tag' || h.art === 'spaet') return n + ' später geänderte Buchungen';
+  if (h.art === 'laeuft') return 'der ' + MONATE[h.ym % 12] + ', der noch nicht zählt';
+  return 'der ' + ymName(h.ym);
+}
+function spurSatz(h, N) {
+  const B = BUCH, L = h.L || [], i = L.length ? L[0] : -1, n = L.length, kst = (j) => N.name('kst', B.KST[B.k[j]]);
+  if (h.art === 'einzel') return (h.n > 1 ? 'Die Differenz entspricht einer von ' + h.n + ' gleichen Buchungen' : 'Ohne eine einzelne Buchung stimmt die Zeile') + ': ' +
+    [tagText(B.bd[i]) || ymName(B.ym[i]), B.TXT[B.t[i]] ? '«' + B.TXT[B.t[i]] + '»' : '', 'Baustelle ' + kst(i), B.BEL[B.bn[i]] ? 'Beleg ' + B.BEL[B.bn[i]] : ''].filter(Boolean).join(', ') + '.';
+  if (h.art === 'beleg') return 'Ohne die ' + n + ' Buchungen des Belegs ' + B.BEL[B.bn[i]] + ' stimmt die Zeile.';
+  if (h.art === 'kstmonat') return 'Ohne die Baustelle ' + kst(i) + ' im ' + ymName(B.ym[i]) + ' stimmt die Zeile (' + n + ' Buchungen).';
+  if (h.art === 'kst') return 'Ohne die Baustelle ' + kst(i) + ' stimmt die Zeile (' + n + ' Buchungen).';
+  if (h.art === 'monat') return 'Ohne den ' + ymName(B.ym[i]) + ' stimmt die Zeile (' + n + ' Buchungen).';
+  if (h.art === 'tag') return 'Ohne die ' + n + ' Buchungen, die am ' + tagText(B.ae[i], true) + ' geändert wurden, stimmt die Zeile.';
+  if (h.art === 'spaet') return 'Ohne die ' + n + ' Buchungen, die lange nach dem Zeitraum noch geändert wurden, stimmt die Zeile.';
+  if (h.art === 'laeuft') return 'Mit dem ' + ymName(h.ym) + ' stimmt die Zeile. Er zählt bei den Buchungen noch nicht.';
+  return 'Mit den Buchungen vom ' + ymName(h.ym) + ' stimmt die Zeile.';
+}
+const spurFolge = (h) => (h.art === 'vor' || h.art === 'nach' ? 'Der BAB zählt sie wohl zu diesem Zeitraum.' : (h.art === 'laeuft' ? 'Ändern lässt sich das unter «Buchungen» bei «Gezählt wird bis».'
+  : (h.art === 'tag' || h.art === 'spaet' ? 'Ist dein BAB älter als diese Änderung, erklärt das die Differenz.' : (h.art === 'einzel' ? 'Der BAB zählt sie wohl nicht, oder sie kam erst nach dem BAB dazu.' : 'Der BAB zählt sie wohl nicht, oder sie kamen erst nach dem BAB dazu.'))));
+function abgleichHTML() {
+  if (!buchDa()) return '';
+  const T = 'Abgleich mit dem BAB', A = abgleichDaten(), G = A.G;
+  if (!A.length) return huelle(T, '<p class="muted">Es ist noch kein BAB da. Füge ihn über «Zahlen einfügen» ein; dann steht hier, ob die Buchungen dieselben Zahlen ergeben.</p>');
+  const brauchbar = A.filter((x) => !x.grund), wahl = A.find((x) => x.p.id === sheet.pid) || brauchbar.filter((x) => !x.stimmt).pop() || brauchbar[brauchbar.length - 1] || A[A.length - 1];
+  const chips = '<div class="chips abg-chips" role="group" aria-label="Spalte des BAB">' + A.map((x) => '<button type="button" class="chip' + (x.grund ? ' leer' : (x.stimmt ? ' ok' : ' abw')) + '" data-a="abg-periode" data-id="' + x.p.id + '" aria-pressed="' + (x === wahl) + '">' +
+    esc(x.p.name) + (x.grund ? '' : (x.stimmt ? ic('check') : '<i class="tnum">' + (x.abw.length || '!') + '</i>')) + '</button>').join('') + '</div>';
+  if (wahl.grund) return huelle(T, chips + '<p class="muted">' + esc(wahl.grund) + '</p>');
+  const SP = abgSpur(G, wahl);
+  if (sheet.zeile && bfAn) {   // eine geöffnete Zeile
+    const offen = wahl.zeilen.find((y) => y.key === sheet.zeile);
+    if (offen) return huelle(T, abgZeileHTML(G, wahl, offen, SP));
+    sheet.zeile = '';
+  }
+  const zahlT = (v) => (v === null || v === undefined ? '' : fmt(v));
+  const diffT = (d, tol) => (d === null ? '<td></td>' : (Math.abs(d) < tol ? '<td class="ok">' + ic('check') + '</td>' : '<td class="abw">' + mitVz(d, fmt(Math.abs(d))) + '</td>'));
+  const pf = bfAn ? '<td class="abg-pf">' + ic('right') + '</td>' : '', pfLeer = bfAn ? '<td class="abg-pf"></td>' : '', breit = bfAn ? 5 : 4;   // Pfeil am Zeilenende: Die Zeile lässt sich öffnen
+  const kopfR = (k) => '<tr><th>' + esc(k.name) + '</th><td>' + zahlT(k.bab) + '</td><td>' + zahlT(k.buch) + '</td>' + diffT(k.diff, k.tol) + pfLeer + '</tr>';
+  const unter = (y) => {   // kleine Zeile unter dem Namen: was mitzählt, womit es sich ausgleicht, wohin die Spur führt
+    const t = [];
+    if (y.mit) t.push('mit Kostenart ' + y.mit.join(', '));
+    if (y.paar) t.push('gleicht sich aus mit ' + y.paar.nr);
+    else if (Math.abs(y.diff) >= ABG_TOL) { const h = SP.je.get(y.key); if (h) t.push('Spur: ' + spurKurz(h)); else if (!y.nur && !y.bab) t.push('im BAB leer'); else if (!y.nur && Math.abs(y.buch) < 0.005) t.push('keine Buchungen'); }
+    const s = t.join(' · ');
+    return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+  };
+  const auf = (y) => (bfAn ? ' data-a="abg-zeile" data-k="' + esc(y.key) + '" data-p="' + esc(wahl.p.id) + '"' : '');
+  const reihe = (y) => { const u = unter(y); return '<tr class="' + (bfAn ? 'klick' : '') + (y.paar ? ' paar' : '') + '"' + auf(y) + '><th>' + (y.nr ? '<span class="nr tnum">' + esc(y.nr) + '</span>' : '') +
+    (bfAn ? '<button type="button"' + auf(y) + '>' + esc(y.name) + '</button>' : esc(y.name)) + (u ? '<small class="abg-u">' + esc(u) + '</small>' : '') + '</th><td>' + zahlT(y.bab) + '</td><td>' + zahlT(y.buch) + '</td>' + diffT(y.diff, ABG_TOL) + pf + '</tr>'; };
+  const liste = sheet.alle ? wahl.zeilen : wahl.abw, anders = wahl.lage.length || wahl.gelernt.length;
+  const urteil = wahl.stimmt ? 'Die Buchungen ergeben dieselben Zahlen wie der BAB' + (anders ? '; einzelne Beträge stehen im BAB nur in einer anderen Zeile.' : '.')
+    : (wahl.abw.length ? mehrzahl(wahl.abw.length, 'Zeile weicht', 'Zeilen weichen') + ' um mehr als einen Franken ab.' : 'Die Summen weichen ab.');
+  const noch = (n) => (n ? (n === 1 ? 'weicht noch eine Zeile ab' : 'weichen noch ' + n + ' Zeilen ab') : 'weicht keine Zeile mehr ab');
+  let spalteH = '';
+  if (SP.zeit) {
+    const c = SP.zeit, anderesJahr = c.von !== Math.floor(wahl.r.von / 12) * 12, name = c.bis % 12 === 11 ? String(Math.floor(c.bis / 12)) : ymKurz(c.bis);
+    spalteH = 'Diese Spalte passt besser ' + (anderesJahr ? 'zum Jahr ' + Math.floor(c.von / 12) : 'zu Januar bis ' + ymName(c.bis)) + ': Dann ' + noch(c.n) + ' statt ' + c.vorher + '. ' +
+      (anderesJahr ? 'Vermutlich ist es der BAB eines anderen Jahrs.' : 'Vermutlich reicht der BAB bis ' + MONATE[c.bis % 12] + ': die Spalte «' + name + '» nennen oder den BAB für ihren Zeitraum neu einlesen.' + (c.bis > G.bis ? ' Die Buchungen zählen erst bis ' + ymName(G.bis) + '.' : ''));
+  } else if (SP.kst) {
+    spalteH = 'Ohne ' + (bfAn ? 'die Baustelle ' + awNamen().name('kst', G.B.KST[SP.kst.k]) : 'eine einzelne Baustelle') + ' ' + noch(SP.kst.n) + ' statt ' + SP.kst.vorher + '. Vermutlich zählt der BAB sie nicht (anderer Filter).';
+  }
+  return huelle(T, chips +
+    '<p class="' + (wahl.stimmt ? 'abg-urteil ok' : 'abg-urteil abw') + '">' + ic(wahl.stimmt ? 'check' : 'info') + '<span>' + esc('«' + wahl.p.name + '»: ' + urteil) + '</span></p>' +
+    (wahl.knapp ? '<p class="hinweis">' + ic('info') + '<span>' + esc(wahl.knapp) + '</span></p>' : '') +
+    (spalteH ? '<p class="hinweis abg-sph">' + ic('info') + '<span>' + esc(spalteH) + '</span></p>' : '') +
+    '<table class="abg abg-liste' + (bfAn ? ' pfeil' : '') + '"><thead><tr><th></th><th>BAB</th><th>Buchungen</th><th>Differenz</th>' + (bfAn ? '<th class="abg-pf"></th>' : '') + '</tr></thead><tbody>' + wahl.kopf.map(kopfR).join('') + '</tbody>' +
+    (liste.length ? '<tbody><tr class="zw"><th colspan="' + breit + '">' + (sheet.alle ? 'Alle Zeilen' : 'Abweichungen je Zeile') + '</th></tr>' + liste.map(reihe).join('') + '</tbody>' : '') +
+    (!sheet.alle && wahl.lage.length ? '<tbody class="abg-lage"><tr class="zw"><th colspan="' + breit + '">Gleichen sich aus</th></tr>' + wahl.lage.map(reihe).join('') + '</tbody>' : '') + '</table>' +
+    (wahl.gelernt.length ? '<p class="muted klein abg-gelernt">Im BAB anders eingereiht: ' + esc(wahl.gelernt.map((g) => 'Kostenart ' + g.ka + ' zählt zu Zeile ' + g.nr).join('; ')) + '.</p>' : '') +
+    '<div class="unter"><p class="muted klein">Verglichen wird je Zeile des BAB, gezählt bis ' + esc(ymName(G.bis)) + '.' + (bfAn ? ' Eine Zeile antippen zeigt ihre Buchungen.' : '') + '</p>' +
+    (wahl.zeilen.length > wahl.abw.length || sheet.alle ? '<button type="button" class="textlink" data-a="abg-alle">' + (sheet.alle ? 'Nur Abweichungen' : 'Alle ' + wahl.zeilen.length + ' Zeilen zeigen') + '</button>' : '') + '</div>' +
+    (bfAn ? '' : '<p class="muted klein abg-schalter">Die Buchungen hinter einer Zeile zeigt das Tool, wenn «Bauführer» und «Auswertung» auf diesem Gerät eingeschaltet sind. <button type="button" class="textlink" data-a="bf-an">Einschalten</button></p>'));
+}
+/* Eine geöffnete Zeile: BAB, Buchungen und Differenz; die Spur; die Buchungen je Baustelle, je Monat und einzeln */
+function abgZeileHTML(G, x, z, SP) {
+  const B = G.B, N = awNamen(), ende = Math.min(x.r.bis, G.bis), h = z.paar ? null : (SP.je.get(z.key) || null), D = abgZeile(G, x, z.key);
+  const dim = ['kst', 'monat', 'buch'].indexOf(sheet.zdim) >= 0 ? sheet.zdim : 'kst', f = dim === 'buch' && sheet.zf ? sheet.zf : null;
+  const abw = Math.abs(z.diff) >= ABG_TOL, spaet = B.hatAe ? D.L.filter((e) => B.ae[e[0]] >= SP.spaetAb) : [], mehrKA = new Set(D.L.map((e) => B.a[e[0]])).size > 1;
+  const zeitraum = x.r.von === ende ? ymName(ende) : MONATE[x.r.von % 12] + ' bis ' + ymName(ende);
+  const box = (titel, text, folge, ruhig, knopf) => '<div class="abg-spur' + (ruhig ? ' ruhig' : '') + '">' + ic('info') + '<div><b>' + esc(titel) + '</b><p>' + esc(text) + '</p>' + (folge ? '<p>' + esc(folge) + '</p>' : '') + (knopf || '') + '</div></div>';
+  const zeig = (d, text) => (f && f.d === d ? '' : '<button type="button" class="textlink" data-a="abg-f" data-d="' + d + '">' + text + '</button>');
+  let spur = '';
+  if (z.paar) spur = box('Gleicht sich aus', 'Derselbe Betrag steht im BAB in der Zeile ' + z.paar.nr + ' ' + z.paar.name + '. Zusammen stimmen die beiden Zeilen.', '', true);
+  else if (abw) {
+    if (h) spur = box('Spur', spurSatz(h, N), spurFolge(h), false, zeig('spur', 'Diese Buchungen zeigen'));
+    else if (z.nur) spur = box('Nur in den Buchungen', 'Diese Kostenart hat im BAB keine Zeile, und ihr Betrag gleicht keine andere Zeile aus.', '', true);
+    else if (!z.bab) spur = box('Im BAB leer', 'Im BAB hat diese Zeile in «' + x.p.name + '» keinen Betrag.', '', true);
+    else if (!D.L.length) spur = box('Keine Buchungen', 'In diesem Zeitraum gibt es zu dieser Zeile keine gezählten Buchungen.', '', true);
+    else spur = box('Keine Spur', 'Keine einzelne Buchung, kein Beleg, kein Monat und keine Baustelle ergibt genau die Differenz.', 'Vergleiche die Summen je Baustelle und je Monat mit Nevaris: Wo sie abweichen, liegt die Ursache.', true);
+    if (spaet.length && !(h && (h.art === 'tag' || h.art === 'spaet'))) {
+      let letzt = 0;
+      spaet.forEach((e) => { if (B.ae[e[0]] > letzt) letzt = B.ae[e[0]]; });
+      spur += box('Später geändert', mehrzahl(spaet.length, 'Buchung dieser Zeile ist', 'Buchungen dieser Zeile sind') + ' lange nach dem Zeitraum noch geändert worden, zuletzt am ' + tagText(letzt, true) + '.', 'Ist dein BAB älter, kann das die Differenz sein.', true, zeig('spaet', 'Diese Buchungen zeigen'));
+    } else if (!B.hatAe && !h && D.L.length) spur += '<p class="muted klein">Ob Buchungen später geändert wurden, zeigt das Tool, sobald du den Auszug neu einliest: Ab dieser Fassung liest es das Änderungsdatum mit.</p>';
+  }
+  const betragZ = (v) => '<td' + (v < -0.005 ? ' class="neg"' : '') + '>' + fmt(v) + '</td>', pf = '<td class="abg-pf">' + ic('right') + '</td>';
+  const total = (n) => '<tfoot><tr><th>Total' + (n === undefined ? '' : ', ' + mehrzahl(n, 'Buchung', 'Buchungen')) + '</th>';
+  const spurK = h && h.L && (h.art === 'kst' || h.art === 'kstmonat') ? B.k[h.L[0]] : -1, spurM = h && h.L && (h.art === 'monat' || h.art === 'kstmonat') ? B.ym[h.L[0]] : (h && !h.L ? h.ym : -1);
+  let inhalt;
+  if (!D.L.length && !(f && f.d === 'spur')) inhalt = '<p class="leer">Keine gezählten Buchungen in diesem Zeitraum.</p>';
+  else if (dim === 'kst') {
+    const R = Array.from(D.kst.entries()).sort((p, q) => Math.abs(q[1].s) - Math.abs(p[1].s));
+    inhalt = '<table class="abg abg-d"><tbody>' + R.map((e) => {
+      const k = e[0], o = e[1], key = B.KST[k], bf = N.klein('kst', key), an = ' data-a="abg-f" data-d="kst" data-k="' + k + '"';
+      return '<tr class="klick' + (k === spurK ? ' spur' : '') + '"' + an + '><th><button type="button"' + an + '>' + esc(N.name('kst', key)) + '</button><small class="abg-u">' + esc([bf, mehrzahl(o.n, 'Buchung', 'Buchungen')].filter(Boolean).join(' · ')) + '</small></th>' + betragZ(o.s) + pf + '</tr>';
+    }).join('') + '</tbody>' + total(D.L.length) + betragZ(z.buch) + '<td class="abg-pf"></td></tr></tfoot></table>';
+  } else if (dim === 'monat') {
+    const R = Array.from(D.mon.entries()).sort((p, q) => p[0] - q[0]);
+    inhalt = '<table class="abg abg-d"><tbody>' + R.map((e) => {
+      const ym = e[0], o = e[1], an = ' data-a="abg-f" data-d="monat" data-k="' + ym + '"';
+      return '<tr class="klick' + (ym === spurM ? ' spur' : '') + '"' + an + '><th><button type="button"' + an + '>' + esc(ymName(ym)) + '</button><small class="abg-u">' + esc(mehrzahl(o.n, 'Buchung', 'Buchungen')) + '</small></th>' + betragZ(o.s) + pf + '</tr>';
+    }).join('') + '</tbody>' + total(D.L.length) + betragZ(z.buch) + '<td class="abg-pf"></td></tr></tfoot></table>';
+  } else {
+    let E = D.L, chip = '';
+    if (f && f.d === 'kst') { E = E.filter((e) => String(B.k[e[0]]) === String(f.k)); chip = 'Baustelle ' + N.name('kst', B.KST[+f.k]); }
+    else if (f && f.d === 'monat') { E = E.filter((e) => String(B.ym[e[0]]) === String(f.k)); chip = ymName(+f.k); }
+    else if (f && f.d === 'spaet') { E = spaet; chip = 'Später geändert'; }
+    else if (f && f.d === 'spur' && h) {
+      if (h.L) { const drin = new Set(h.L); E = E.filter((e) => drin.has(e[0])); } else E = abgZeile(G, x, z.key, h.ym, h.ym).L;
+      chip = 'Spur';
+    }
+    E = E.slice().sort((p, q) => Math.abs(q[1]) - Math.abs(p[1]));
+    const zeigen = E.slice(0, sheet.zalle ? 2000 : 200), q = ABGSUCHE.trim().toLowerCase();
+    let tot = 0;
+    E.forEach((e) => { tot += e[1]; });
+    inhalt = (chip ? '<div class="aw-filter"><button type="button" class="chip" data-a="abg-f-weg" aria-pressed="true" aria-label="' + esc(chip) + ', Eingrenzung aufheben"><span>' + esc(chip) + '</span>' + ic('x') + '</button></div>' : '') +
+      (E.length > 10 ? '<div class="k-such"><input type="search" id="abg-suche" value="' + esc(ABGSUCHE) + '" placeholder="Suchen …" aria-label="Buchungen durchsuchen" autocomplete="off"></div>' : '') +
+      (E.length ? '<table class="abg abg-d" id="t-abg"><tbody>' + zeigen.map((e) => {
+        const i = e[0], text = B.TXT[B.t[i]] || '(ohne Text)', bel = B.BEL[B.bn[i]];
+        const klein = [tagText(B.bd[i]) || ymKurz(B.ym[i]), N.name('kst', B.KST[B.k[i]]), mehrKA ? 'Kostenart ' + B.KA[B.a[i]] : '', bel ? 'Beleg ' + bel : '', B.hatAe && B.ae[i] >= SP.spaetAb ? 'geändert ' + tagText(B.ae[i]) : ''].filter(Boolean).join(' · ');
+        const s = (text + ' ' + klein).toLowerCase();
+        return '<tr data-such="' + esc(s) + '"' + (q && s.indexOf(q) < 0 ? ' hidden' : '') + '><th>' + esc(text) + '<small class="abg-u">' + esc(klein) + '</small></th><td' + (e[1] < 0 ? ' class="neg"' : '') + '>' + fmtN(e[1], 2) + '</td></tr>';
+      }).join('') + '</tbody>' + total(E.length) + betragZ(tot) + '</tr></tfoot></table>' : '<p class="leer">Keine Buchungen mit dieser Eingrenzung.</p>') +
+      (E.length > zeigen.length ? '<button type="button" class="textlink" data-a="abg-mehr">Mehr zeigen (' + fmt(E.length) + ')</button>' : '');
+  }
+  return '<button type="button" class="abg-zur" data-a="abg-zurueck">' + ic('left') + '<span>' + esc('«' + x.p.name + '»: alle Zeilen') + '</span></button>' +
+    '<div class="abg-zk"><h3>' + (z.nr ? '<span class="nr tnum">' + esc(z.nr) + '</span>' : '') + esc(z.name) + '</h3><p class="muted klein">' + esc(zeitraum + (z.mit ? ' · mit Kostenart ' + z.mit.join(', ') : '')) + '</p></div>' +
+    '<div class="abg-drei"><div><span>BAB</span><b class="tnum">' + (z.bab === null ? '–' : fmt(z.bab)) + '</b></div><div><span>Buchungen</span><b class="tnum">' + fmt(z.buch) + '</b></div><div><span>Differenz</span><b class="tnum ' + (abw ? (z.paar ? '' : 'abw') : 'ok') + '">' + (abw ? mitVz(z.diff, fmt(Math.abs(z.diff))) : 'keine') + '</b></div></div>' +
+    spur + seg('abgdim', [['kst', 'Baustelle'], ['monat', 'Monat'], ['buch', 'Buchungen']], dim, 'klein') + inhalt;
+}
+function abgRollen(y) { const inh = $('#sheets .sheet-inhalt'); if (inh) inh.scrollTop = y; }
 
 /* ---------- Zahlen: Ausblick aufs Folgejahr ---------- */
 function ausblickHTML() {
@@ -3904,6 +4282,7 @@ const offeneListe = () => S.kunden.auftraege.filter((a) => a.erhalten === 'offen
    BAB (eigene Stunden des letzten ganzen Jahres durch die Koepfe jenes Jahres) plus Temporaerstunden, x Ertrag pro Stunde (Schnitt
    der ganzen Jahre) plus Teuerung. Jeder Wert ist ein Vorschlag und laesst sich im Blatt aendern. */
 function monateIm(m, J) {
+  if (fremd(m)) return 0;   // seit 1.8: andere Abteilung, zählt nicht zu den Köpfen
   const e = datumWert(m.eintritt), A = austrittVon(m, J * 10000 + 101), a = A.art === 'hand' || A.art === 'pension' ? A.wert : 0;
   const von = Math.max(e || 0, J * 10000 + 101), bis = Math.min(a || 99991231, J * 10000 + 1231);
   if (bis < von) return 0;
@@ -4865,7 +5244,7 @@ const SHEET = {
       '<section class="gr"><h3>Für dich</h3><label class="schalter" for="e-gl"><span>Reiter «GL» zeigen</span><input type="checkbox" id="e-gl" data-wahl="glreiter"' + (glAn ? ' checked' : '') + '></label>' +
       '<p class="muted klein">Deine eigenen Punkte für die GL. Der Schalter gilt nur auf diesem Gerät. Im Ergebnis und im PDF stehen die Punkte nie.</p>' +
       '<label class="schalter" for="e-bf"><span>«Bauführer» und «Auswertung» zeigen</span><input type="checkbox" id="e-bf" data-wahl="bfreiter"' + (bfAn ? ' checked' : '') + '></label>' +
-      '<p class="muted klein">Unter «Zahlen», sobald Buchungen eingelesen sind: die Bauführer nebeneinander und die Auswertung nach Kostenart, Lieferant, Gerät und Baustelle. Auch dieser Schalter gilt nur auf diesem Gerät.</p></section>' +
+      '<p class="muted klein">Unter «Zahlen», sobald Buchungen eingelesen sind: die Bauführer nebeneinander und die Auswertung nach Kostenart, Lieferant, Gerät und Baustelle; im Abgleich mit dem BAB öffnet er die einzelnen Zeilen. Auch dieser Schalter gilt nur auf diesem Gerät.</p></section>' +
       '<section class="gr"><h3>Jahr</h3><div class="reihe zw"><span>' + esc(jahrName(m)) + (S.archiv.length ? ' · ' + mehrzahl(S.archiv.length, 'abgeschlossenes Jahr', 'abgeschlossene Jahre') : '') + '</span><button type="button" class="btn" data-a="neujahr"' + (IM_RAHMEN ? ' disabled' : '') + '>' + ic('plus') + '<span>Neues Jahr beginnen</span></button></div>' +
       '<p class="muted klein">Für den nächsten Strategietag: Dieses Jahr bleibt unter «Ergebnis» nachzulesen.</p></section>' +
       '<section class="gr"><h3>Mitarbeiter</h3><div class="reihe zw"><span>' + mehrzahl(S.mitarbeiter.length, 'Eintrag', 'Einträge') + ' in der Mitarbeiterliste</span><button type="button" class="btn" data-a="sheet" data-s="maliste">' + ic('liste') + '<span>Mitarbeiterliste</span></button></div></section>' +
@@ -4945,15 +5324,17 @@ const SHEET = {
       '<label class="f" for="ba-b"><span>Betrag in Franken</span><input id="ba-b" name="betrag" value="' + (a.betrag === null ? '' : esc(fmt(a.betrag))) + '" inputmode="decimal" autocomplete="off"></label>' + loeschKnopf('bauftrag-weg', 'Auftrag entfernen'));
   },
   maliste() {
-    const L = S.mitarbeiter, w = sitzungWert();
-    const weg = L.filter((m) => { const a = austrittVon(m, w); return a.art === 'hand' && a.wert && a.wert < w; }), da = L.filter((m) => weg.indexOf(m) < 0);
+    const L = S.mitarbeiter, w = sitzungWert(), F = L.filter(fremd), E = L.filter((m) => !fremd(m));   // F (seit 1.8): andere Abteilungen, nur für die Buchungen
+    const weg = E.filter((m) => { const a = austrittVon(m, w); return a.art === 'hand' && a.wert && a.wert < w; }), da = E.filter((m) => weg.indexOf(m) < 0);
+    const zeileF = (m) => '<li><button type="button" class="ma-z" data-a="ma" data-id="' + m.id + '"><span class="ma-n">' + esc(m.name) + '</span><span class="ma-m">' + esc([m.abt, m.position, kzText(m) ? 'Kürzel ' + kzText(m) : ''].filter(Boolean).join(' · ')) + '</span>' + ic('right', 'pf') + '</button></li>';
     const zeile = (m) => '<li><button type="button" class="ma-z" data-a="ma" data-id="' + m.id + '"><span class="ma-n">' + esc(m.name) + '</span><span class="ma-m">' + esc([maMeta(m, weg.indexOf(m) >= 0), kzText(m) ? 'Kürzel ' + kzText(m) : ''].filter(Boolean).join(' · ')) + '</span>' + ic('right', 'pf') + '</button></li>';
-    return huelle('Mitarbeiter' + (L.length ? ' (' + L.length + ')' : ''),
+    return huelle('Mitarbeiter' + (E.length ? ' (' + E.length + ')' : ''),
       '<div class="reihe"><button type="button" class="btn stark" data-a="ma-neu">' + ic('plus') + '<span>Mitarbeiter</span></button><button type="button" class="btn" data-a="sheet" data-s="maimport">' + ic('liste') + '<span>Liste einfügen</span></button></div>' +
       (L.length ? posGruppen(da).map((g) => '<h3 class="bl">' + esc(g.name) + ' (' + g.liste.length + ')</h3><ul class="ma-liste">' + g.liste.map(zeile).join('') + '</ul>').join('') +
-        (weg.length ? '<details class="ma-weg"><summary>Ausgetreten (' + weg.length + ')</summary><ul class="ma-liste">' + weg.map(zeile).join('') + '</ul></details>' : '')
+        (weg.length ? '<details class="ma-weg"><summary>Ausgetreten (' + weg.length + ')</summary><ul class="ma-liste">' + weg.map(zeile).join('') + '</ul></details>' : '') +
+        (F.length ? '<h3 class="bl">Andere Abteilungen (' + F.length + ')</h3><ul class="ma-liste ma-fremd">' + F.slice().sort((a, b) => a.abt.localeCompare(b.abt, 'de') || a.name.localeCompare(b.name, 'de')).map(zeileF).join('') + '</ul>' : '')
         : '<p class="muted">Noch niemand eingetragen. Am schnellsten: die Liste in Excel samt Kopfzeile kopieren und über «Liste einfügen» übernehmen: Name, Vorname, Position, Polier, Eintritt, Geburtsdatum.</p>') +
-      '<p class="muted klein">Steht nur in deiner Datei. Gruppenzuteilung, Kader, Betrieb und Ein- und Austritte lesen daraus. Wer geht, bekommt einen Austritt und bleibt in der Liste.</p>');
+      '<p class="muted klein">Steht nur in deiner Datei. Gruppenzuteilung, Kader, Betrieb und Ein- und Austritte lesen daraus. Wer geht, bekommt einen Austritt und bleibt in der Liste. Wer zu einer anderen Abteilung gehört, zählt nur bei den Buchungen.</p>');
   },
   maimport() {
     return formHuelle('Mitarbeiter als Liste', 'maimport',
@@ -4975,13 +5356,15 @@ const SHEET = {
       '<label class="f" for="ma-n"><span>Name</span><input id="ma-n" name="name" value="' + esc(x.name) + '" autocomplete="off" data-fokus></label>' +
       '<label class="f" for="ma-p"><span>Position</span><input id="ma-p" name="position" value="' + esc(x.position) + '" list="ma-pos" autocomplete="off" placeholder="z. B. Bauarbeiter"><datalist id="ma-pos">' + POSITIONEN.map((p) => '<option value="' + p + '">').join('') + '</datalist></label>' +
       kzFeldHTML(x, m) +
+      '<label class="f" for="ma-abt"><span>Abteilung</span><input id="ma-abt" name="abt" value="' + esc(x.abt || '') + '" list="ma-abt-l" autocomplete="off" placeholder="Eigene Abteilung"><datalist id="ma-abt-l">' + abtListe().map((a) => '<option value="' + esc(a) + '">').join('') + '</datalist>' +
+        '<small class="muted">Leer lassen für deine Abteilung. Wer zu einer anderen gehört, zählt nur bei den Buchungen und fehlt beim Personal.</small></label>' +
       '<div class="f" id="ma-po-feld"' + (istPolier(x) || imBuero(x) ? ' hidden' : '') + '><span>Polier (Stammgruppe)</span><input type="hidden" name="polier" value="' + esc(drin ? x.polier : '') + '"><div class="reihe">' +
         P.map((p) => '<button type="button" class="btn' + (x.polier === p.id ? ' stark' : '') + '" data-a="ma-polier" data-v="' + p.id + '">' + esc(p.name) + '</button>').join('') +
         '<button type="button" class="btn' + (drin ? '' : ' stark') + '" data-a="ma-polier" data-v="">' + (P.length ? 'Keiner' : 'Noch kein Polier in der Liste') + '</button></div>' +
         (fest ? '<p class="muted klein">Die Gruppenzuteilung ist festgehalten. Eine Änderung hier zeigt die Tafel erst nach «Ändern».</p>' : '') + '</div>' +
-      '<div class="zwei"><label class="f" for="ma-e"><span>Eintritt</span><input id="ma-e" name="eintritt" value="' + esc(x.eintritt) + '" autocomplete="off" placeholder="z. B. 1.3.2026"></label><label class="f" for="ma-g"><span>Geburtsdatum</span><input id="ma-g" name="geburt" value="' + esc(x.geburt || '') + '" autocomplete="off" placeholder="z. B. 25.6.1975"></label></div>' +
+      '<div id="ma-eigen" class="ma-eigen"><div class="zwei"><label class="f" for="ma-e"><span>Eintritt</span><input id="ma-e" name="eintritt" value="' + esc(x.eintritt) + '" autocomplete="off" placeholder="z. B. 1.3.2026"></label><label class="f" for="ma-g"><span>Geburtsdatum</span><input id="ma-g" name="geburt" value="' + esc(x.geburt || '') + '" autocomplete="off" placeholder="z. B. 25.6.1975"></label></div>' +
       '<label class="f" for="ma-a"><span>Austritt</span><input id="ma-a" name="austritt" value="' + esc(x.austritt) + '" autocomplete="off" placeholder="' + esc(pen.art === 'pension' ? 'Pension ' + pen.text : 'z. B. Sommer 2027') + '"></label>' +
-      '<p class="muted klein" id="ma-pen">' + esc(penText) + (m ? ' Wer geht, bleibt mit seinem Austritt in der Liste.' : '') + '</p>' +
+      '<p class="muted klein" id="ma-pen">' + esc(penText) + (m ? ' Wer geht, bleibt mit seinem Austritt in der Liste.' : '') + '</p></div>' +
       (m ? loeschKnopf('ma-weg', 'Aus der Liste entfernen') : ''), m ? 'Fertig' : 'Hinzufügen');
   },
   anhang() {
@@ -5477,6 +5860,7 @@ const AKT = {
     else if (k === 'ansicht') { S.zahlen.ansicht = v; AWSUCHE = ''; AW_ALLE = false; speichern(true); render(); }
     else if (k === 'zzeit') { S.ui.zzeit = v; S.ui.zsp = ''; AW_ALLE = false; speichern(true); render(); }   // seit 1.6: ganze Jahre oder jedes Jahr bis zum selben Monat
     else if (k === 'awdim' || k === 'awmass') { awStand()[k === 'awdim' ? 'dim' : 'mass'] = v; AWSUCHE = ''; AW_ALLE = false; speichern(true); render(); }
+    else if (k === 'abgdim') { if (sheet) { sheet.zdim = v; sheet.zf = null; sheet.zalle = false; ABGSUCHE = ''; renderSheet(false); } }   // seit 1.8: geöffnete Zeile im Abgleich nach Baustelle, Monat oder einzeln
     else if (k === 'kansicht') { S.kunden.ansicht = v; speichern(true); render(); }
     else if (k === 'kfilter') { S.kunden.filter = v; speichern(true); render(); }
     else if (k === 'bst') { S.ui.bst = v; speichern(true); render(); }
@@ -5497,8 +5881,15 @@ const AKT = {
   'aw-zeile'(el) { const a = awStand(); if (a.dim === 'buch') return; a.f[a.dim] = String(el.dataset.k || '=').slice(1); a.dim = awWeiter(a); AWSUCHE = ''; AW_ALLE = false; speichern(true); render(); },
   'aw-filter-weg'(el) { delete awStand().f[el.dataset.d]; AW_ALLE = false; speichern(true); render(); },
   'aw-alle'() { AW_ALLE = true; render(); },
-  'abg-periode'(el) { if (!sheet) return; sheet.pid = el.dataset.id; sheet.alle = false; renderSheet(false); },
+  'abg-periode'(el) { if (!sheet) return; sheet.pid = el.dataset.id; sheet.alle = false; sheet.zeile = ''; renderSheet(false); },
   'abg-alle'() { if (!sheet) return; sheet.alle = !sheet.alle; renderSheet(false); },
+  /* seit 1.8: eine Zeile des Abgleichs öffnen (nur mit dem Schalter «Bauführer und Auswertung»), darin eingrenzen und zurück */
+  'abg-zeile'(el) { if (!sheet || !bfAn) return; const inh = $('#sheets .sheet-inhalt'); sheet.zsc = inh ? inh.scrollTop : 0; sheet.pid = el.dataset.p; sheet.zeile = el.dataset.k; sheet.zdim = 'kst'; sheet.zf = null; sheet.zalle = false; ABGSUCHE = ''; renderSheet(false); abgRollen(0); },
+  'abg-zurueck'() { if (!sheet) return; const sc = sheet.zsc || 0; sheet.zeile = ''; sheet.zf = null; ABGSUCHE = ''; renderSheet(false); abgRollen(sc); },
+  'abg-f'(el) { if (!sheet) return; sheet.zf = { d: el.dataset.d, k: el.dataset.k || '' }; sheet.zdim = 'buch'; sheet.zalle = false; ABGSUCHE = ''; renderSheet(false); },
+  'abg-f-weg'() { if (!sheet) return; sheet.zf = null; sheet.zalle = false; ABGSUCHE = ''; renderSheet(false); },
+  'abg-mehr'() { if (!sheet) return; sheet.zalle = true; renderSheet(false); },
+  'bf-an'() { bfAn = true; anzeigeMerken(); render(); renderSheet(false); },
   'buch-std'(el) { if (!S.buch) return; merken(); if (!S.buch.std || typeof S.buch.std !== 'object') S.buch.std = {}; S.buch.std[el.dataset.nr] = el.dataset.v; speichern(); render(); renderSheet(false); },
   'buch-weg'(el) { if (!bestaetigt(el, 'Wirklich alle Buchungen entfernen?')) return; buchWeg(); },
   spalte(el) { auf({ art: 'spalte', id: el.dataset.id }); },
@@ -5987,6 +6378,7 @@ const FORMS = {
     m.austritt = f.elements.austritt.value.trim();
     m.geburt = f.elements.geburt.value.trim();
     kzAusFeld(m, f.elements.kuerzel);   // seit 1.7
+    m.abt = abtAusFeld(f.elements.abt.value);   // seit 1.8
     const zur = sheet && sheet.zurueck;
     speichern(); render();
     if (zur) auf({ art: zur }); else zu();
@@ -6405,6 +6797,12 @@ if (ALS_LINK) {
 document.addEventListener('input', (e) => {   // Suche in der Kunden-Tabelle (247.2); Vorrechnen (242.5) rechnet beim Tippen neu
   const el = e.target, vf = el && el.closest ? el.closest('form[data-form="vorrechnen"]') : null;
   if (vf) { const o = document.getElementById('vr-aus'); if (o) o.innerHTML = vrAus(vrLesen(vf)); return; }
+  if (el && el.id === 'abg-suche') {   // seit 1.8: Suche in den Buchungen einer Zeile des Abgleichs
+    ABGSUCHE = el.value;
+    const qb = ABGSUCHE.trim().toLowerCase();
+    document.querySelectorAll('#t-abg tbody tr').forEach((tr) => { tr.hidden = !!qb && (tr.dataset.such || '').indexOf(qb) < 0; });
+    return;
+  }
   if (el && el.id === 'aw-suche') {   // seit 1.6: Suche in der Auswertung, blendet wie bei den Kunden nur Zeilen aus
     AWSUCHE = el.value;
     const qa = AWSUCHE.trim().toLowerCase();
