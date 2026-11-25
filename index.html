@@ -310,7 +310,7 @@ body.drueber .ablage,body.drueber .tab-rahmen,body.drueber .dg{border-color:var(
 .abg-spur .textlink{padding:.3rem 0 0;color:var(--ink)}
 .abg-spur.ruhig{background:var(--bg)}
 .abg-spur.ruhig > .ic,.abg-spur.ruhig b{color:var(--muted)}
-/* Abgleich (seit 1.9.4, 496): Prüfzahlen bei später geänderten Buchungen, geklärte Abweichungen */
+/* Abgleich (seit 1.9.4, 496): Prüfzahlen bei später geänderten Buchungen, abgehakte Differenzen */
 .abg-spur p.abg-pruef{margin-top:.45rem;color:var(--ink)}
 .abg-pruef-l{display:flex;flex-direction:column;gap:.2rem;margin:.35rem 0 0;padding:.5rem .75rem;border-radius:.75rem;background:var(--card)}
 .abg-pruef-l li{display:flex;justify-content:space-between;align-items:baseline;gap:.8rem}
@@ -322,6 +322,7 @@ body.drueber .ablage,body.drueber .tab-rahmen,body.drueber .dg{border-color:var(
 .abg td.klar{color:var(--muted);font-weight:600}
 .abg td.klar .ic{width:.85rem;height:.85rem;margin-right:.25rem;vertical-align:-.1rem;color:var(--accent)}
 .abg-klar-k{display:flex}
+.abg-klar-l{display:flex;flex-wrap:wrap;gap:0 1.2rem}
 .abg-klar-form{display:flex;flex-direction:column;gap:.65rem;padding:.8rem .9rem;border-radius:1rem;background:var(--bg)}
 .abg-klar-form .f textarea{background:var(--card);min-height:4.5rem}
 .sheet-inhalt > .seg.klein{align-self:flex-start}
@@ -1321,7 +1322,7 @@ function leer() {
   return {
     v: FORMAT, beispiel: false, stand: '',
     meta: { titel: 'Strategie ' + (new Date().getFullYear() + 1), abteilung: 'Abteilung', datum: heute(), zoom: (window.innerWidth || 0) >= 1500 ? 1.15 : 1, modus: 'auto' },
-    zahlen: { perioden: [], zeilen: [], sicht: 'summen', ansicht: 'diagramme', klar: {} },   // klar (seit 1.9.4, Fahrplan 496): geklärte Abweichungen im Abgleich {Spalte: {Zeile: {d, n, am}}}
+    zahlen: { perioden: [], zeilen: [], sicht: 'summen', ansicht: 'diagramme', klar: {} },   // klar (seit 1.9.4, Fahrplan 496): abgehakte Differenzen im Abgleich {Spalte: {Zeile: {d, n, am}}}
     buch: null,   // seit 1.6: Buchungen als Quelle der Zahlen {id, typ, groesse, n, von, bis, abg, am, std (eigene Wahl je Kostenart), zaehlBis}; der Inhalt liegt wie ein Anhang daneben
     themen: themenStart(),
     parkplatz: [],   // bis 1.2 die Punkte des Parkplatzes; seit 1.3 stehen sie in «park». Das Feld bleibt leer und nimmt nur noch Stände älterer Fassungen auf
@@ -4066,9 +4067,9 @@ function buchErgebnisTabelle(n, mitAufwand) {
    Seit 1.9.4 (Fahrplan 496, nach einem in Nevaris nachgeprüften Fall vom 25.11.2026):
    4) Später geänderte Buchungen sind eine Spur, auch wenn keine Summe genau passt: Nevaris kann sie im BAB noch mit dem Betrag vor der
       Änderung zählen. Die Prüfzahl ist die Summe der Zeile (und je Baustelle) bis zum Monat vor der ersten geänderten Buchung.
-   5) Eine Abweichung lässt sich als geklärt markieren (S.zahlen.klar je Spalte und Zeile, mit Differenz und Notiz). Sie gilt, solange die
-      Differenz dieselbe ist; Ertrag, Aufwand und Ergebnis oben werden um geklärte Zeilen bereinigt. */
-/* Geklärte Abweichungen aus der Datei: {Spalte: {Zeile: {d: Differenz, n: Notiz, am: Datum}}}; Unlesbares fällt weg */
+   5) Eine Differenz lässt sich mit einer Notiz abhaken (S.zahlen.klar je Spalte und Zeile, mit Differenz und Notiz). Das gilt, solange die
+      Differenz dieselbe ist; Ertrag, Aufwand und Ergebnis oben werden um abgehakte Zeilen bereinigt, die Spalte bekommt ihren Haken. */
+/* Abgehakte Differenzen aus der Datei: {Spalte: {Zeile: {d: Differenz, n: Notiz, am: Datum}}}; Unlesbares fällt weg */
 function klarNormal(k) {
   const aus = {};
   if (k && typeof k === 'object') Object.keys(k).forEach((pid) => {
@@ -4185,13 +4186,13 @@ function abgFertig(G, x, L) {
   });
   const R = x.zeilen.filter((z) => Math.abs(z.diff) >= ABG_TOL), partner = R.map((z) => R.filter((y) => y !== z && y.e === z.e && Math.abs(y.diff + z.diff) < ABG_TOL));
   R.forEach((z, i) => { if (partner[i].length !== 1) return; const y = partner[i][0]; if (partner[R.indexOf(y)].length === 1) z.paar = y; });
-  // seit 1.9.4 (496): von Hand geklärte Abweichungen; eine Klärung gilt, solange die Differenz dieselbe ist (auf einen Franken)
+  // seit 1.9.4 (496): von Hand abgehakte Differenzen; das gilt, solange die Differenz dieselbe ist (auf einen Franken)
   const K = (S.zahlen.klar && S.zahlen.klar[x.p.id]) || {};
   R.forEach((z) => { const k = z.paar ? null : K[z.key]; if (!k) return; if (Math.abs(z.diff - k.d) < ABG_TOL) z.klar = k; else z.klarAlt = k; });
   x.abw = R.filter((z) => !z.paar && !z.klar);
   x.lage = R.filter((z) => z.paar);
   x.klar = R.filter((z) => z.klar);
-  // Ertrag, Aufwand und Ergebnis oben ohne die geklärten Zeilen, umgerechnet in die Richtung der Kopfzeilen
+  // Ertrag, Aufwand und Ergebnis oben ohne die abgehakten Zeilen, umgerechnet in die Richtung der Kopfzeilen
   let kE = 0, kA = 0;
   x.klar.forEach((z) => { if (z.e) kE += z.diff * x.vE * B.vzE; else kA += z.diff * x.vA * B.vzA; });
   const weg = [kE, kA, kE - kA];
@@ -4199,18 +4200,18 @@ function abgFertig(G, x, L) {
   x.stimmt = !x.abw.length && x.kopf.every((k) => k.rest === null || Math.abs(k.rest) < k.tol);
   return x;
 }
-/* Eine Abweichung als geklärt markieren oder wieder öffnen (seit 1.9.4, 496): die geöffnete Zeile der gewählten Spalte */
+/* Eine Differenz abhaken (mit Notiz) oder wieder öffnen (seit 1.9.4, 496): die geöffnete Zeile der gewählten Spalte */
 function abgKlarSetzen() {
   if (!sheet || !sheet.pid || !sheet.zeile) return;
   const x = abgleichDaten().find((y) => y.p && y.p.id === sheet.pid && !y.grund), z = x ? x.zeilen.find((y) => y.key === sheet.zeile) : null;
-  if (!z || z.paar || Math.abs(z.diff) < ABG_TOL) return;
-  const ta = document.getElementById('abg-klar-n'), notiz = String(ta ? ta.value : (sheet.klarText || '')).trim();
+  if (!z || z.paar || Math.abs(z.diff) < ABG_TOL) return;   // eine abgehakte Zeile behält ihre Differenz; neu ist nur die Notiz
+  const ta = document.getElementById('abg-klar-n'), notiz = String(ta ? ta.value : (sheet.klarText || '')).trim(), neu = !z.klar;
   merken();
   if (!S.zahlen.klar || typeof S.zahlen.klar !== 'object') S.zahlen.klar = {};
-  (S.zahlen.klar[x.p.id] || (S.zahlen.klar[x.p.id] = {}))[z.key] = { d: Math.round(z.diff * 100) / 100, n: notiz, am: heute() };
+  (S.zahlen.klar[x.p.id] || (S.zahlen.klar[x.p.id] = {}))[z.key] = { d: Math.round(z.diff * 100) / 100, n: notiz, am: neu || !z.klar.am ? heute() : z.klar.am };   // Notiz ändern behält das Datum
   sheet.klarAuf = ''; sheet.klarText = null;
   speichern(); render(); renderSheet(false);
-  toast('Als geklärt markiert', true);
+  toast(neu ? 'Abgehakt' : 'Notiz geändert', true);
 }
 function abgKlarWeg() {
   if (!sheet || !sheet.pid || !sheet.zeile) return;
@@ -4406,18 +4407,18 @@ function abgleichHTML() {
   const zahlT = (v) => (v === null || v === undefined ? '' : fmt(v));
   const diffT = (d, tol) => (d === null ? '<td></td>' : (Math.abs(d) < tol ? '<td class="ok">' + ic('check') + '</td>' : '<td class="abw">' + mitVz(d, fmt(Math.abs(d))) + '</td>'));
   const pf = bfAn ? '<td class="abg-pf">' + ic('right') + '</td>' : '', pfLeer = bfAn ? '<td class="abg-pf"></td>' : '', breit = bfAn ? 5 : 4;   // Pfeil am Zeilenende: Die Zeile lässt sich öffnen
-  const klarT = (d) => '<td class="klar">' + ic('check') + mitVz(d, fmt(Math.abs(d))) + '</td>';   // seit 1.9.4 (496): geklärte Differenz, ruhig
+  const klarT = (d) => '<td class="klar">' + ic('check') + mitVz(d, fmt(Math.abs(d))) + '</td>';   // seit 1.9.4 (496): abgehakte Differenz, ruhig
   const kopfR = (k) => '<tr><th>' + esc(k.name) + '</th><td>' + zahlT(k.bab) + '</td><td>' + zahlT(k.buch) + '</td>' +
     (k.diff !== null && Math.abs(k.diff) >= k.tol && k.rest !== null && k.rest !== undefined && Math.abs(k.rest) < k.tol ? klarT(k.diff) : diffT(k.diff, k.tol)) + pfLeer + '</tr>';
   const unter = (y) => {   // kleine Zeile unter dem Namen: was mitzählt, womit es sich ausgleicht, wohin die Spur führt
     const t = [];
     if (y.mit) t.push('mit Kostenart ' + y.mit.join(', '));
     if (y.paar) t.push('gleicht sich aus mit ' + y.paar.nr);
-    else if (y.klar) t.push('geklärt' + (y.klar.n ? ': ' + y.klar.n : ''));
+    else if (y.klar) t.push('abgehakt' + (y.klar.n ? ': ' + y.klar.n : ''));
     else if (Math.abs(y.diff) >= ABG_TOL) {
       const h = SP.je.get(y.key);
       if (h) t.push('Spur: ' + spurKurz(h)); else if (!y.nur && !y.bab) t.push('im BAB leer'); else if (!y.nur && SP.ge.get(y.key)) t.push('Spur: später geändert'); else if (!y.nur && Math.abs(y.buch) < 0.005) t.push('keine Buchungen');
-      if (y.klarAlt) t.push('früher geklärt, die Differenz ist jetzt eine andere');
+      if (y.klarAlt) t.push('früher abgehakt, die Differenz ist jetzt eine andere');
     }
     const s = t.join(' · ');
     return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
@@ -4426,8 +4427,8 @@ function abgleichHTML() {
   const reihe = (y) => { const u = unter(y); return '<tr class="' + (bfAn ? 'klick' : '') + (y.paar ? ' paar' : '') + '"' + auf(y) + '><th>' + (y.nr ? '<span class="nr tnum">' + esc(y.nr) + '</span>' : '') +
     (bfAn ? '<button type="button"' + auf(y) + '>' + esc(y.name) + '</button>' : esc(y.name)) + (u ? '<small class="abg-u">' + esc(u) + '</small>' : '') + '</th><td>' + zahlT(y.bab) + '</td><td>' + zahlT(y.buch) + '</td>' + (y.klar ? klarT(y.diff) : diffT(y.diff, ABG_TOL)) + pf + '</tr>'; };
   const liste = sheet.alle ? wahl.zeilen : wahl.abw, anders = wahl.lage.length || wahl.gelernt.length, nk = wahl.klar.length;
-  const urteil = wahl.stimmt ? 'Die Buchungen ergeben dieselben Zahlen wie der BAB' + (nk ? ', bis auf ' + (nk === 1 ? 'eine geklärte Abweichung' : nk + ' geklärte Abweichungen') : '') + (anders ? '; einzelne Beträge stehen im BAB nur in einer anderen Zeile.' : '.')
-    : (wahl.abw.length ? mehrzahl(wahl.abw.length, 'Zeile weicht', 'Zeilen weichen') + ' um mehr als einen Franken ab' + (nk ? '; ' + (nk === 1 ? 'eine weitere ist geklärt.' : nk + ' weitere sind geklärt.') : '.') : 'Die Summen weichen ab.');
+  const urteil = wahl.stimmt ? 'Die Buchungen ergeben dieselben Zahlen wie der BAB' + (nk ? ', bis auf ' + (nk === 1 ? 'eine abgehakte Differenz' : nk + ' abgehakte Differenzen') : '') + (anders ? '; einzelne Beträge stehen im BAB nur in einer anderen Zeile.' : '.')
+    : (wahl.abw.length ? mehrzahl(wahl.abw.length, 'Zeile weicht', 'Zeilen weichen') + ' um mehr als einen Franken ab' + (nk ? '; ' + (nk === 1 ? 'eine weitere ist abgehakt.' : nk + ' weitere sind abgehakt.') : '.') : 'Die Summen weichen ab.');
   const noch = (n) => (n ? (n === 1 ? 'weicht noch eine Zeile ab' : 'weichen noch ' + n + ' Zeilen ab') : 'weicht keine Zeile mehr ab');
   let spalteH = '';
   if (SP.zeit) {
@@ -4444,7 +4445,7 @@ function abgleichHTML() {
     '<table class="abg abg-liste' + (bfAn ? ' pfeil' : '') + '"><thead><tr><th></th><th>BAB</th><th>Buchungen</th><th>Differenz</th>' + (bfAn ? '<th class="abg-pf"></th>' : '') + '</tr></thead><tbody>' + wahl.kopf.map(kopfR).join('') + '</tbody>' +
     (liste.length ? '<tbody><tr class="zw"><th colspan="' + breit + '">' + (sheet.alle ? 'Alle Zeilen' : 'Abweichungen je Zeile') + '</th></tr>' + liste.map(reihe).join('') + '</tbody>' : '') +
     (!sheet.alle && wahl.lage.length ? '<tbody class="abg-lage"><tr class="zw"><th colspan="' + breit + '">Gleichen sich aus</th></tr>' + wahl.lage.map(reihe).join('') + '</tbody>' : '') +
-    (!sheet.alle && nk ? '<tbody class="abg-klar"><tr class="zw"><th colspan="' + breit + '">Geklärt</th></tr>' + wahl.klar.map(reihe).join('') + '</tbody>' : '') + '</table>' +
+    (!sheet.alle && nk ? '<tbody class="abg-klar"><tr class="zw"><th colspan="' + breit + '">Abgehakt</th></tr>' + wahl.klar.map(reihe).join('') + '</tbody>' : '') + '</table>' +
     (wahl.gelernt.length ? '<p class="muted klein abg-gelernt">Im BAB anders eingereiht: ' + esc(wahl.gelernt.map((g) => 'Kostenart ' + g.ka + ' zählt zu Zeile ' + g.nr).join('; ')) + '.</p>' : '') +
     '<div class="unter"><p class="muted klein">Verglichen wird je Zeile des BAB, gezählt bis ' + esc(ymName(G.bis)) + '.' + (bfAn ? ' Eine Zeile antippen zeigt ihre Buchungen.' : '') + '</p>' +
     (wahl.zeilen.length > wahl.abw.length || sheet.alle ? '<button type="button" class="textlink" data-a="abg-alle">' + (sheet.alle ? 'Nur Abweichungen' : 'Alle ' + wahl.zeilen.length + ' Zeilen zeigen') + '</button>' : '') + '</div>' +
@@ -4473,21 +4474,21 @@ function abgGeBox(G, x, z, g, f, N, knopf) {
     '<ul class="abg-pruef-l">' + li('Zeile ' + (z.nr || z.name), g.s) + K.map((e) => li('Baustelle ' + N.name('kst', B.KST[e[0]]), e[1].s)).join('') + '</ul>' +
     '<p>' + esc(schluss + (mehr ? ' ' + mehrzahl(mehr, 'weitere Baustelle hat', 'weitere Baustellen haben') + ' geänderte Buchungen: unter «Baustelle» antippen.' : '')) + '</p>' + (knopf || '') + '</div></div>';
 }
-/* seit 1.9.4 (496): geklärte Abweichung; alt = die Klärung galt einer anderen Differenz */
+/* seit 1.9.4 (496): abgehakte Differenz (intern «klar»); alt = sie wurde bei einer anderen Differenz abgehakt */
 function abgKlarBox(k, alt) {
   const am = amText(k.am);
-  if (alt) return '<div class="abg-spur ruhig">' + ic('info') + '<div><b>Früher geklärt</b><p>' + esc((am ? 'Am ' + am + ' ' : '') + 'als geklärt markiert, bei einer Differenz von ' + mitVz(k.d, fmt(Math.abs(k.d))) + (k.n ? ': ' + k.n : '.')) + '</p>' +
-    '<p>Die Differenz ist jetzt eine andere, darum gilt die Klärung nicht mehr.</p></div></div>';
-  return '<div class="abg-spur klar">' + ic('check') + '<div><b>Geklärt</b>' + (k.n ? '<p>' + esc(k.n) + '</p>' : '') +
-    '<p>' + esc((am ? 'Am ' + am + ' markiert. ' : '') + 'Die Zeile zählt nicht als Abweichung, solange die Differenz dieselbe bleibt.') + '</p>' +
-    '<button type="button" class="textlink" data-a="abg-offen">Wieder als offen führen</button></div></div>';
+  if (alt) return '<div class="abg-spur ruhig">' + ic('info') + '<div><b>Früher abgehakt</b><p>' + esc((am ? 'Am ' + am + ' ' : '') + 'abgehakt, bei einer Differenz von ' + mitVz(k.d, fmt(Math.abs(k.d))) + (k.n ? ': ' + k.n : '.')) + '</p>' +
+    '<p>Die Differenz ist jetzt eine andere, darum gilt das Abhaken nicht mehr.</p></div></div>';
+  return '<div class="abg-spur klar">' + ic('check') + '<div><b>Abgehakt</b>' + (k.n ? '<p>' + esc(k.n) + '</p>' : '') +
+    '<p>' + esc((am ? 'Am ' + am + ' abgehakt. ' : '') + 'Die Zeile zählt nicht als Abweichung, solange die Differenz dieselbe bleibt.') + '</p>' +
+    '<div class="abg-klar-l"><button type="button" class="textlink" data-a="abg-klar-edit">Notiz ändern</button><button type="button" class="textlink" data-a="abg-offen">Wieder öffnen</button></div></div></div>';
 }
 function abgKlarForm(z, g, h, N) {
-  if (!sheet || sheet.klarAuf !== z.key) return '<div class="abg-klar-k"><button type="button" class="btn klein" data-a="abg-klar-auf">' + ic('check') + '<span>' + (z.klarAlt ? 'Neu als geklärt markieren' : 'Als geklärt markieren') + '</span></button></div>';
+  if (!sheet || sheet.klarAuf !== z.key) return '<div class="abg-klar-k"><button type="button" class="btn klein" data-a="abg-klar-auf">' + ic('check') + '<span>' + (z.klarAlt ? 'Neu abhaken' : 'Differenz abhaken') + '</span></button></div>';
   const vorschlag = g ? (g.L.length === 1 ? 'Buchung vom ' : 'Buchungen vom ') + geMonate(g) + ' am ' + tagText(g.letzt, true) + ' geändert; der BAB in Nevaris zählt den alten Betrag.' : (h ? spurSatz(h, N) : '');
   const wert = typeof sheet.klarText === 'string' ? sheet.klarText : vorschlag;
   return '<div class="abg-klar-form"><label class="f" for="abg-klar-n"><span>Was erklärt die Differenz?</span><textarea id="abg-klar-n" rows="3" placeholder="Grund in einem Satz">' + esc(wert) + '</textarea></label>' +
-    '<div class="reihe"><button type="button" class="btn stark klein" data-a="abg-klar">' + ic('check') + '<span>Als geklärt markieren</span></button><button type="button" class="btn klein" data-a="abg-klar-ab">Abbrechen</button></div></div>';
+    '<div class="reihe"><button type="button" class="btn stark klein" data-a="abg-klar">' + ic('check') + '<span>' + (z.klar ? 'Speichern' : 'Abhaken') + '</span></button><button type="button" class="btn klein" data-a="abg-klar-ab">Abbrechen</button></div></div>';
 }
 function abgZeileHTML(G, x, z, SP) {
   const B = G.B, N = awNamen(), ende = Math.min(x.r.bis, G.bis), h = z.paar ? null : (SP.je.get(z.key) || null), D = abgZeile(G, x, z.key);
@@ -4499,7 +4500,7 @@ function abgZeileHTML(G, x, z, SP) {
   const g = abw && !z.paar && !z.klar && !z.nur && z.bab ? (SP.ge.get(z.key) || null) : null;   // seit 1.9.4 (496): später geänderte Buchungen als Spur
   let spur = '';
   if (z.paar) spur = box('Gleicht sich aus', 'Derselbe Betrag steht im BAB in der Zeile ' + z.paar.nr + ' ' + z.paar.name + '. Zusammen stimmen die beiden Zeilen.', '', true);
-  else if (z.klar) spur = abgKlarBox(z.klar, false);
+  else if (z.klar) spur = sheet.klarAuf === z.key ? abgKlarForm(z, null, null, N) : abgKlarBox(z.klar, false);
   else if (abw) {
     if (h) spur = box('Spur', spurSatz(h, N), spurFolge(h), false, zeig('spur', 'Diese Buchungen zeigen'));
     else if (z.nur) spur = box('Nur in den Buchungen', 'Diese Kostenart hat im BAB keine Zeile, und ihr Betrag gleicht keine andere Zeile aus.', '', true);
@@ -6237,8 +6238,9 @@ const AKT = {
   'aw-filter-weg'(el) { delete awStand().f[el.dataset.d]; AW_ALLE = false; speichern(true); render(); },
   'aw-alle'() { AW_ALLE = true; render(); },
   'abg-periode'(el) { if (!sheet) return; sheet.pid = el.dataset.id; sheet.alle = false; sheet.zeile = ''; sheet.klarAuf = ''; renderSheet(false); },
-  'abg-klar-auf'() { if (!sheet) return; sheet.klarAuf = sheet.zeile; sheet.klarText = null; renderSheet(false); },   // seit 1.9.4 (496): Abweichung als geklärt markieren
+  'abg-klar-auf'() { if (!sheet) return; sheet.klarAuf = sheet.zeile; sheet.klarText = null; renderSheet(false); },   // seit 1.9.4 (496): Differenz abhaken
   'abg-klar-ab'() { if (!sheet) return; sheet.klarAuf = ''; sheet.klarText = null; renderSheet(false); },
+  'abg-klar-edit'() { if (!sheet) return; const K = S.zahlen.klar && S.zahlen.klar[sheet.pid], k = K && K[sheet.zeile]; sheet.klarAuf = sheet.zeile; sheet.klarText = k ? k.n : null; renderSheet(false); },
   'abg-klar'() { abgKlarSetzen(); },
   'abg-offen'() { abgKlarWeg(); },
   'abg-alle'() { if (!sheet) return; sheet.alle = !sheet.alle; renderSheet(false); },
