@@ -274,6 +274,7 @@ body.drueber .ablage,body.drueber .tab-rahmen,body.drueber .dg{border-color:var(
 .abg td.ok .ic{width:1rem;height:1rem}
 .abg tr.zw th{padding-top:1.1rem;color:var(--muted);font-size:.8125rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-top:0}
 .bu-std{display:flex;flex-direction:column;gap:.5rem}
+.bu-la{margin-top:1rem}   /* seit 1.9.2 (492): Lohnarten unter den Kostenarten */
 .bu-std li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.4rem .8rem;padding:.6rem .8rem;border-radius:.9rem;background:var(--bg)}
 .bu-std li > div:first-child{min-width:0}
 .bu-std b{display:block;font-weight:600;overflow-wrap:anywhere}
@@ -1149,7 +1150,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '1.9.1';         // Version des Tools, steht in den Einstellungen
+const VERSION = '1.9.2';         // Version des Tools, steht in den Einstellungen
 const FORMAT = 12;             // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
@@ -1438,7 +1439,7 @@ function normal(d) {
   const bu0 = d && d.buch && typeof d.buch === 'object' && typeof d.buch.id === 'string' && d.buch.id ? d.buch : null;
   if (bu0) {
     if (typeof bu0.inhalt === 'string' && bu0.inhalt) anhMerken(bu0.id, bu0.inhalt);
-    s.buch = Object.assign({}, bu0, { typ: BUCH_TYP, groesse: typeof bu0.groesse === 'number' && bu0.groesse > 0 ? bu0.groesse : 0, std: bu0.std && typeof bu0.std === 'object' ? bu0.std : {}, blOhne: Array.isArray(bu0.blOhne) ? bu0.blOhne.filter((x) => typeof x === 'string') : [], zaehlBis: typeof bu0.zaehlBis === 'number' ? bu0.zaehlBis : null });
+    s.buch = Object.assign({}, bu0, { typ: BUCH_TYP, groesse: typeof bu0.groesse === 'number' && bu0.groesse > 0 ? bu0.groesse : 0, std: bu0.std && typeof bu0.std === 'object' ? bu0.std : {}, la: bu0.la && typeof bu0.la === 'object' ? Object.fromEntries(Object.entries(bu0.la).filter((e) => typeof e[1] === 'boolean')) : {}, blOhne: Array.isArray(bu0.blOhne) ? bu0.blOhne.filter((x) => typeof x === 'string') : [], zaehlBis: typeof bu0.zaehlBis === 'number' ? bu0.zaehlBis : null });
     delete s.buch.inhalt;
   } else s.buch = null;
   if (!Array.isArray(s.themen)) s.themen = l.themen;
@@ -1885,7 +1886,7 @@ function buchUebernehmen() {
   const B = buchVerbinden(alt, w.B);
   const text = JSON.stringify(buchInhalt(B)), id = 'buch-' + uid();
   anhMerken(id, text);
-  S.buch = { id: id, typ: BUCH_TYP, groesse: text.length, n: B.n, von: B.ymMin, bis: B.ymMax, abg: B.ymAbg, am: new Date().toISOString(), std: vor.std && typeof vor.std === 'object' ? vor.std : {}, blOhne: Array.isArray(vor.blOhne) ? vor.blOhne : [], zaehlBis: null };
+  S.buch = { id: id, typ: BUCH_TYP, groesse: text.length, n: B.n, von: B.ymMin, bis: B.ymMax, abg: B.ymAbg, am: new Date().toISOString(), std: vor.std && typeof vor.std === 'object' ? vor.std : {}, la: vor.la && typeof vor.la === 'object' ? vor.la : {}, blOhne: Array.isArray(vor.blOhne) ? vor.blOhne : [], zaehlBis: null };   // la seit 1.9.2 (492): die Wahl der Lohnarten bleibt beim Neueinlesen
   BUCH = B; BUCH_ID = id; buchWartet = null;
   S.ui.bereich = 'zahlen';
   if (['diagramme', 'bf', 'aw'].indexOf(S.zahlen.ansicht) < 0) S.zahlen.ansicht = 'diagramme';
@@ -1947,6 +1948,18 @@ function buchStd() {
   const B = BUCH, eigen = (S.buch && S.buch.std) || {};
   return B.KA.map((nr, a) => { const w = eigen[nr] || B.stdVor[a]; return w === 'e' ? 1 : (w === 't' ? 2 : 0); });
 }
+/* Lohnarten (seit 1.9.2, Fahrplan 492): Die Lohnbuchungen tragen im Buchungstext ein Kürzel wie «$L-ML$». Der BAB zählt bei den Lohnstunden
+   nur ML und PL, nicht SL (Chef, 25.11.2026). Das Tool zählt darum die Stunden einer Buchung mit «$L-SL$» nicht mit; die Kosten bleiben.
+   Eigene Wahl unter «Buchungen» in S.buch.la { Kürzel: true (zählt) oder false }. Buchungen ohne Kürzel zählen wie bisher. */
+const LA_VOR = { SL: false };
+const laVon = (txt) => { const m = /\$L-([A-Z0-9]+)\$/i.exec(txt || ''); return m ? m[1].toUpperCase() : ''; };
+const laZaehlt = (k) => { const eigen = (S.buch && S.buch.la) || {}; return !k || (typeof eigen[k] === 'boolean' ? eigen[k] : LA_VOR[k] !== false); };
+let laMerk = { sig: null, z: null };
+function buchLaZaehlt() {   // je Buchungstext (B.t): 1, wenn seine Stunden zählen
+  const sig = BUCH_ID + '|' + BUCH.TXT.length + '|' + JSON.stringify((S.buch && S.buch.la) || {});
+  if (laMerk.sig !== sig) laMerk = { sig: sig, z: Uint8Array.from(BUCH.TXT.map((t) => (laZaehlt(laVon(t)) ? 1 : 0))) };
+  return laMerk.z;
+}
 /* Kostengruppe einer Kostenart für die Diagramme: 0 Ertrag, 1 Personal, 2 Material, 3 Fremdleistung, 4 Übriges.
    Gibt es einen BAB, gilt seine Gliederung (die Summe, unter der das Konto steht), damit beide dasselbe zeigen. */
 function babGruppen() {
@@ -1985,7 +1998,7 @@ function buchSpaltenListe(zeit) {
 }
 /* Summen je Schlüssel für einen Zeitraum: Ertrag, Aufwand, Gruppen und Stunden. schluessel(i) → Schlüssel oder null (zählt nicht). */
 function buchAkk(von, bis, schluessel) {
-  const B = BUCH, gr = buchGruppen(), std = buchStd(), M = new Map(), ende = Math.min(bis, buchBis());
+  const B = BUCH, gr = buchGruppen(), std = buchStd(), la = buchLaZaehlt(), M = new Map(), ende = Math.min(bis, buchBis());
   for (let i = 0; i < B.n; i++) {
     const ym = B.ym[i];
     if (ym < von || ym > ende) continue;
@@ -1997,7 +2010,7 @@ function buchAkk(von, bis, schluessel) {
     d.n++;
     if (g === 0) d.E += B.b[i] * B.vzE;
     else { const v = B.b[i] * B.vzA; d.A += v; if (g === 1) d.personal += v; else if (g === 2) d.material += v; else if (g === 3) d.fremd += v; }
-    if (std[a] && B.stdEin[B.e[i]]) { if (std[a] === 1) d.eigene += B.m[i]; else d.temp += B.m[i]; }
+    if (std[a] && B.stdEin[B.e[i]] && la[B.t[i]]) { if (std[a] === 1) d.eigene += B.m[i]; else d.temp += B.m[i]; }
   }
   M.forEach((d) => { d.G = d.E - d.A; d.h = d.eigene + d.temp > 0 ? d.eigene + d.temp : null; d.bud = false; if (!B.hatE) { d.E = null; d.G = null; } });
   return M;
@@ -3930,8 +3943,16 @@ function buchInfoHTML() {
   if (!buchDa()) return '';
   const B = BUCH, m = S.buch, bis = buchBis(), N = awNamen(), eigen = m.std || {}, L = buchSpaltenListe('jahr'), sp = L[L.length - 1];
   const zeile = (k, v) => '<tr><th>' + k + '</th><td>' + v + '</td></tr>';
-  const menge = B.KA.map(() => 0);
-  for (let i = 0; i < B.n; i++) if (B.ym[i] >= sp.von && B.ym[i] <= sp.bis && B.ym[i] <= bis && B.stdStat[B.a[i]].n && B.stdEin[B.e[i]]) menge[B.a[i]] += B.m[i];
+  const menge = B.KA.map(() => 0), laT = B.TXT.map(laVon), laM = new Map(), la = buchLaZaehlt(), stdA = buchStd();   // seit 1.9.2 (492): je Lohnart die Stunden, nur auf Kostenarten, deren Stunden zählen
+  for (let i = 0; i < B.n; i++) {
+    if (!(B.ym[i] >= sp.von && B.ym[i] <= sp.bis && B.ym[i] <= bis && B.stdStat[B.a[i]].n && B.stdEin[B.e[i]])) continue;
+    if (la[B.t[i]]) menge[B.a[i]] += B.m[i];
+    const k = laT[B.t[i]];
+    if (k && stdA[B.a[i]]) laM.set(k, (laM.get(k) || 0) + B.m[i]);
+  }
+  Array.from(new Set(laT.filter(Boolean))).forEach((k) => { if (!laM.has(k)) for (let i = 0; i < B.n; i++) if (laT[B.t[i]] === k && stdA[B.a[i]] && B.m[i] && B.stdEin[B.e[i]]) { laM.set(k, 0); break; } });
+  const laListe = Array.from(laM.keys()).sort((x, y) => x.localeCompare(y));
+  const laWahl = (k) => '<div class="seg klein" role="group">' + [[true, 'Zählt'], [false, 'Zählt nicht']].map((o) => '<button type="button" data-a="buch-la" data-k="' + esc(k) + '" data-v="' + (o[0] ? '1' : '0') + '" aria-pressed="' + (laZaehlt(k) === o[0]) + '">' + o[1] + '</button>').join('') + '</div>';
   const monate = [];
   for (let ym = B.ymMax; ym >= Math.max(B.ymMin, B.ymMax - 17); ym--) monate.push(ym);
   const stdListe = B.KA.map((nr, a) => a).filter((a) => B.stdStat[a].n > 0).sort((x, y) => B.KA[x].localeCompare(B.KA[y]));
@@ -3945,7 +3966,9 @@ function buchInfoHTML() {
     '<p class="muted klein">Ein laufender Monat ist erst vollständig, wenn er abgegrenzt ist. Darum zählt das Tool von selbst nur bis zum letzten Monat mit Abschlussbuchung.</p></section>' +
     blAbschnittHTML() +
     (stdListe.length ? '<section class="gr"><h3>Stunden</h3><p class="muted klein">Welche Kostenarten als produktive Stunden zählen. Der Vorschlag kommt aus den Lohnbuchungen; mit dem Abgleich siehst du, ob er zum BAB passt.</p><ul class="bu-std">' +
-      stdListe.map((a) => '<li><div><b>' + esc(N.name('art', B.KA[a])) + '</b><small class="tnum">' + esc(spalteLang(sp) + ': ' + fmt(menge[a]) + ' Std.') + '</small></div>' + stdWahl(a) + '</li>').join('') + '</ul></section>' : '') +
+      stdListe.map((a) => '<li><div><b>' + esc(N.name('art', B.KA[a])) + '</b><small class="tnum">' + esc(spalteLang(sp) + ': ' + fmt(menge[a]) + ' Std.') + '</small></div>' + stdWahl(a) + '</li>').join('') + '</ul>' +
+      (laListe.length ? '<h3 class="bu-la">Lohnarten</h3><p class="muted klein">Das Kürzel im Buchungstext der Lohnbuchungen, z. B. «$L-ML$». Wie im BAB zählen ML und PL, SL nicht. Die Kosten zählen immer.</p><ul class="bu-std">' +
+        laListe.map((k) => '<li><div><b>' + esc(k) + '</b><small class="tnum">' + esc(spalteLang(sp) + ': ' + fmt(laM.get(k)) + ' Std.') + '</small></div>' + laWahl(k) + '</li>').join('') + '</ul>' : '') + '</section>' : '') +
     '<p class="muted klein">Neu einlesen über «Zahlen einfügen»: Jeder Monat, der im Auszug vorkommt, wird ersetzt; die übrigen bleiben stehen.</p>' + loeschKnopf('buch-weg', 'Buchungen entfernen'));
 }
 /* ---------- Fenster «Buchungen einlesen»: was der Auszug enthält und was er ändert ---------- */
@@ -4002,7 +4025,7 @@ function abgBasis() {
   konten.forEach((z) => { const key = ohneNull(z.nr); if (!reihe.has(key)) reihe.set(key, z); });
   return { B: B, k: k, konten: konten, reihe: reihe, istEZ: (z) => (iE >= 0 ? platz.get(z) < iE : +z.nr < 4000),
     eigen: B.KA.map((nr) => ohneNull(nr)), standard: B.KA.map((nr, a) => ohneNull(B.BAB[a] || nr)),
-    stdZ: zs.filter((z) => z.art === 'stunden' && z.stufe === 0), std: buchStd(), bis: buchBis() };
+    stdZ: zs.filter((z) => z.art === 'stunden' && z.stufe === 0), std: buchStd(), la: buchLaZaehlt(), bis: buchBis() };
 }
 /* In welcher Zeile des BAB eine Kostenart in dieser Spalte zählt; null: Sie steht nur in den Buchungen */
 function abgZiel(G, p, lern) {
@@ -4024,7 +4047,7 @@ function abgSpalte(G, p, r, lern) {
     da[a] = 1;
     if (t === null) waise[a] += b; else sum.set(t, (sum.get(t) || 0) + b);
     if (B.istE[a]) sE += b * B.vzE; else sA += b * B.vzA;
-    if (G.std[a] && B.stdEin[B.e[i]]) { if (G.std[a] === 1) eig += B.m[i]; else tmp += B.m[i]; }
+    if (G.std[a] && B.stdEin[B.e[i]] && G.la[B.t[i]]) { if (G.std[a] === 1) eig += B.m[i]; else tmp += B.m[i]; }
   }
   // Vorzeichen: Der BAB zeigt Erträge und Aufwand oft beide positiv, gebucht ist der Ertrag als Minus. Je Block gilt die Richtung, die zur Mehrheit passt.
   let oE = 0, oA = 0;
@@ -6042,6 +6065,7 @@ const AKT = {
   'abg-f-weg'() { if (!sheet) return; sheet.zf = null; sheet.zalle = false; ABGSUCHE = ''; renderSheet(false); },
   'abg-mehr'() { if (!sheet) return; sheet.zalle = true; renderSheet(false); },
   'bf-an'() { bfAn = true; anzeigeMerken(); render(); renderSheet(false); },
+  'buch-la'(el) { if (!S.buch) return; merken(); if (!S.buch.la || typeof S.buch.la !== 'object') S.buch.la = {}; S.buch.la[el.dataset.k] = el.dataset.v === '1'; speichern(); render(); renderSheet(false); },   // seit 1.9.2 (492): Stunden einer Lohnart zählen oder nicht
   'buch-std'(el) { if (!S.buch) return; merken(); if (!S.buch.std || typeof S.buch.std !== 'object') S.buch.std = {}; S.buch.std[el.dataset.nr] = el.dataset.v; speichern(); render(); renderSheet(false); },
   'buch-weg'(el) { if (!bestaetigt(el, 'Wirklich alle Buchungen entfernen?')) return; buchWeg(); },
   spalte(el) { auf({ art: 'spalte', id: el.dataset.id }); },
