@@ -602,6 +602,37 @@ button.b-ic.abh[aria-pressed="true"]{background:var(--accent-fill);box-shadow:no
 .gl-zeile::placeholder{color:var(--muted)}
 .gl-u .gl-mit{margin-top:.3rem}
 .gl-unter-neu{margin:.5rem .2rem 0}
+/* seit 1.9.1 (488): GL-Themen und Unterthemen klappen auf und zu, je Stufe eins offen. Zugeklappt eine ruhige Zeile; offen der Inhalt darunter */
+.gl-brett:has(> .gla){gap:.6rem}
+.gla{background:var(--card);border-radius:1.1rem;box-shadow:var(--shadow);border:1.5px solid transparent;min-width:0}
+.gla.ziel{border-color:var(--brand);background:var(--brand-soft)}
+.gla-kopf{display:flex;align-items:center;gap:.25rem;padding:0 .45rem 0 .35rem}
+.gla-t{flex:1;min-width:0;display:flex;align-items:center;gap:.6rem;min-height:3.5rem;padding:.45rem .45rem;text-align:left;color:var(--ink);border-radius:.9rem}
+.gla-t:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.gla-chev{width:1rem;height:1rem;color:var(--muted);flex:none;transition:transform .18s ease}
+.gla.auf > .gla-kopf .gla-chev{transform:rotate(90deg);color:var(--accent)}
+.gla-titel{flex:1;min-width:0;font-weight:600;font-size:1.1875rem;line-height:1.3;overflow-wrap:anywhere}
+.gla-info{flex:none;max-width:45%;color:var(--muted);font-size:.875rem;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gla-stift{flex:none;width:2.5rem;height:2.5rem;border-radius:50%;display:grid;place-items:center;color:var(--muted)}
+.gla-stift .ic{width:.95rem;height:.95rem}
+.gla-stift:hover{background:var(--fill)}
+.gla-inhalt{padding:0 1rem 1rem 2.45rem}
+.gla-inhalt > .gl-liste + .gl-zeile,.gla-inhalt > .gl-neu + .gl-zeile{margin-top:.5rem}
+.gla-inhalt > .gl-liste:not(:empty) + .gl-neu{border-top:1px solid var(--sep)}
+.gla-aktion{display:flex;flex-wrap:wrap;gap:.1rem 1.1rem;margin-top:.45rem}
+.gla-unter{margin-top:.7rem;border-top:1px solid var(--sep)}
+.gla-unter > .gla{background:none;box-shadow:none;border-radius:.9rem}
+.gla-unter > .gla + .gla{border-top:1px solid var(--sep);border-top-left-radius:0;border-top-right-radius:0}
+.gla-unter > .gla.ziel{background:var(--brand-soft)}
+.gla-unter .gla-kopf{padding:0}
+.gla-unter .gla-t{min-height:3rem;padding-left:.1rem}
+.gla-unter .gla-titel{font-size:1.0625rem}
+.gla-unter .gla-inhalt{padding:0 0 .8rem 1.7rem}
+.gla-zahlen{display:flex;flex-direction:column;gap:.8rem;margin:.1rem 0 .9rem}
+.gla-z .ausblick,.gla-z .dg{box-shadow:none;background:var(--bg)}
+.gla-z > .bl:first-child,.gla-z > .bl-zeile:first-child{margin-top:0}
+.gla-z .bl-zeile{margin-top:0}
+@media (max-width:40rem){.gla-inhalt{padding:0 .85rem .9rem .9rem}.gla-unter .gla-inhalt{padding-left:.9rem}.gla-info{max-width:38%}}
 /* seit 1.9 (482): Unterthemen eines Unterthemas, eingerückt mit einer feinen Linie */
 .gl-u .gl-unter{background:none;box-shadow:none;border-radius:0;padding:0 0 0 .9rem;margin:.45rem 0 0 .15rem;border-left:2px solid var(--sep)}
 .gl-u .gl-u-kopf > button:first-child{font-size:1rem}
@@ -1118,7 +1149,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '1.9';         // Version des Tools, steht in den Einstellungen
+const VERSION = '1.9.1';         // Version des Tools, steht in den Einstellungen
 const FORMAT = 12;             // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
@@ -1435,7 +1466,10 @@ function normal(d) {
   spiegeln(s);
   s.glPunkte = (Array.isArray(s.glPunkte) ? s.glPunkte : []).filter((x) => x && typeof x.text === 'string');
   s.glGruppen = (Array.isArray(s.glGruppen) ? s.glGruppen : []).filter((g) => g && typeof g === 'object' && typeof g.titel === 'string');
-  s.glGruppen.forEach((g) => { if (typeof g.id !== 'string' || !g.id) g.id = uid(); if (typeof g.notiz !== 'string') g.notiz = ''; if (typeof g.eltern !== 'string') g.eltern = ''; });
+  s.glGruppen.forEach((g) => {
+    if (typeof g.id !== 'string' || !g.id) g.id = uid(); if (typeof g.notiz !== 'string') g.notiz = ''; if (typeof g.eltern !== 'string') g.eltern = '';
+    if (g.zeigen !== undefined) { const z = {}; ['budget', 'auslastung', 'kunden'].forEach((k) => { if (g.zeigen && g.zeigen[k] === true) z[k] = true; }); if (Object.keys(z).length) g.zeigen = z; else delete g.zeigen; }   // seit 1.9.1 (490)
+  });
   s.glGruppen = glOrdnen(s.glGruppen);   // seit 1.4: Unterthemen stehen direkt hinter ihrem GL-Thema
   const glIds = s.glGruppen.map((g) => g.id);
   s.glPunkte.forEach((x) => { if (!x.id) x.id = uid(); if (glIds.indexOf(x.gruppe) < 0) x.gruppe = ''; x.an = !!x.an; x.vert = !!x.vert; x.erl = !!x.erl; ['ergebnis', 'thema', 'wer', 'bis'].forEach((k) => { if (typeof x[k] !== 'string') x[k] = ''; }); if (pkAlt[x.quelle]) x.quelle = pkAlt[x.quelle]; });   // vert und erl seit 1.9 (472)
@@ -1482,6 +1516,8 @@ function normal(d) {
   if (!s.ui.aw || typeof s.ui.aw !== 'object') s.ui.aw = { dim: 'gruppe', f: {}, mass: 'k' };   // seit 1.6: Wahl unter «Zahlen» aus den Buchungen
   if (!s.ui.aw.f || typeof s.ui.aw.f !== 'object') s.ui.aw.f = {};
   ['zbl', 'zsp'].forEach((k) => { if (typeof s.ui[k] !== 'string') s.ui[k] = ''; });
+  if (!s.ui.glAuf || typeof s.ui.glAuf !== 'object' || Array.isArray(s.ui.glAuf)) s.ui.glAuf = {};   // seit 1.9.1 (488): welches GL-Thema je Stufe offen ist
+  Object.keys(s.ui.glAuf).forEach((k) => { if (typeof s.ui.glAuf[k] !== 'string') delete s.ui.glAuf[k]; });
   if (s.ui.zzeit !== 'bis') s.ui.zzeit = 'jahr';
   return s;
 }
@@ -4586,32 +4622,41 @@ const ANSICHT = {
     const von = (g) => P.filter((x) => (g ? x.gruppe === g.id : !x.gruppe));
     const info = (L) => '<span class="fd-info">' + (L.length ? L.filter((x) => x.an).length + ' von ' + L.length + ' gesagt' : '') + '</span>';
     const neu = (g) => '<form class="gl-neu" data-form="glpunkt" data-g="' + (g ? g.id : '') + '"><button aria-label="Punkt hinzufügen">' + ic('plus') + '</button><input name="text"' + (g ? '' : ' id="neu-glpunkt"') + ' placeholder="Punkt hinzufügen …" aria-label="Punkt hinzufügen' + (g ? ' zu ' + esc(g.titel) : '') + '" autocomplete="off" enterkeyhint="done"></form>';
-    const mitschrift = (g) => (g.notiz ? '<button type="button" class="gl-mit" data-a="glmitschrift" data-id="' + g.id + '"><span class="gl-mit-k">Mitschrift</span><span class="gl-mit-t">' + esc(g.notiz) + '</span></button>' : '<button type="button" class="textlink gl-mit-neu" data-a="glmitschrift" data-id="' + g.id + '">' + ic('pen') + '<span>Mitschrift</span></button>');
+    const mitschrift = (g) => '<button type="button" class="gl-mit" data-a="glmitschrift" data-id="' + g.id + '"><span class="gl-mit-k">Mitschrift</span><span class="gl-mit-t">' + esc(g.notiz) + '</span></button>';
     const plus = (g) => '<button type="button" class="gl-plus" data-a="gl-punkt-neu" data-id="' + g.id + '">' + ic('plus') + '<span>Punkt</span></button>';
-    function unter(u) {   // Unterthema: der Titel, Punkte nur wo du etwas zu sagen hast, darunter eine Zeile zum Mitschreiben (mehrere Zeilen über den Stift)
-      const L = von(u), offen = L.length > 0 || !!GL_OFFEN[u.id], lang = /[\r\n]/.test(u.notiz || '');
-      const K = glKinder(u);   // seit 1.9 (482): auch ein Unterthema kann Unterthemen haben, beliebig tief
-      return '<section class="gl-u" data-spalte="' + u.id + '"><header class="gl-u-kopf"><button type="button" data-a="glgruppe" data-id="' + u.id + '" title="Unterthema umbenennen, verschieben oder löschen"><span>' + esc(u.titel) + '</span>' + ic('pen') + '</button>' + info(L) + (offen ? '' : plus(u)) +
-        '<button type="button" class="gl-plus gl-plus-u" data-a="glunter-neu" data-id="' + u.id + '" title="Unterthemen zu «' + esc(u.titel) + '» hinzufügen" aria-label="Unterthema zu ' + esc(u.titel) + ' hinzufügen">' + ic('plus') + '<span>Unterthema</span></button></header>' +
-        '<ul class="gl-liste">' + L.map(punkt).join('') + '</ul>' + (offen ? neu(u) : '') +
-        (lang ? mitschrift(u) : '<input class="gl-zeile" data-glmit="' + u.id + '" value="' + esc(u.notiz || '') + '" placeholder="Mitschreiben …" aria-label="Mitschrift zu ' + esc(u.titel) + '" autocomplete="off" enterkeyhint="done">') +
-        (K.length ? '<div class="gl-unter">' + K.map(unter).join('') + '</div>' : '') + '</section>';
-    };
-    const block = (g) => {
-      const L = von(g), K = g ? glKinder(g) : [], karte = !g || !K.length || L.length > 0 || !!GL_OFFEN[g.id];   // mit Unterthemen steht die eigene Karte nur da, wenn sie etwas enthält oder «+ Punkt» gedrückt ist
-      const kopf = g ? '<header class="gl-kopf"><button type="button" data-a="glgruppe" data-id="' + g.id + '" title="GL-Thema umbenennen, verschieben oder löschen"><h2 class="bl">' + esc(g.titel) + '</h2>' + ic('pen') + '</button>' + info(L) +
-          (karte ? '' : plus(g)) + '<button type="button" class="gl-plus" data-a="glunter-neu" data-id="' + g.id + '" title="Unterthemen hinzufügen, z. B. je Abteilung eines">' + ic('plus') + '<span>Unterthema</span></button></header>'
-        : (G.length && L.length ? '<header class="gl-kopf"><h2 class="bl">Noch keinem GL-Thema zugeordnet</h2>' + info(L) + '</header>' : '');
-      return '<section class="gl-gr' + (g ? '' : ' ohne') + '" data-spalte="' + (g ? g.id : '') + '">' + kopf +
-        (karte ? '<div class="gl-karte"><ul class="gl-liste">' + L.map(punkt).join('') + '</ul>' + neu(g) + '</div>' : '') +
-        (g ? mitschrift(g) : '') + (K.length ? '<div class="gl-unter">' + K.map(unter).join('') + '</div>' : '') + '</section>';
-    };
+    /* Seit 1.9.1 (488): Jedes GL-Thema und Unterthema klappt auf und zu, je Stufe ist höchstens eins offen (wie die Unterpunkte bei den Themen).
+       Zugeklappt steht nur die Zeile mit Titel und Zahl; Punkte lassen sich trotzdem hineinschieben (data-spalte).
+       Offen: die Bilder, die im Stift eingeschaltet sind (490), die Punkte, das Feld «Mitschreiben» (486), «+ Punkt», «+ Unterthema», die Unterthemen. */
+    const zeile = (id, titelText, infoText, auf, stift) => '<div class="gla-kopf"><button type="button" class="gla-t" data-a="gl-auf" data-id="' + id + '" aria-expanded="' + auf + '">' + ic('right', 'gla-chev') +
+      '<span class="gla-titel">' + esc(titelText) + '</span>' + (infoText ? '<span class="gla-info">' + esc(infoText) + '</span>' : '') + '</button>' +
+      (stift ? '<button type="button" class="gla-stift" data-a="glgruppe" data-id="' + id + '" aria-label="' + esc(titelText) + ': umbenennen, verschieben, Zahlen zeigen oder löschen" title="Umbenennen, verschieben, Zahlen zeigen oder löschen">' + ic('pen') + '</button>' : '') + '</div>';
+    const zahlText = (L) => (L.length ? (L.some((x) => x.an) ? L.filter((x) => x.an).length + ' von ' + L.length + ' gesagt' : mehrzahl(L.length, 'Punkt', 'Punkte')) : '');
+    function eintrag(g, stufe) {
+      const L = von(g), K = glKinder(g), auf = glOffen(g.id, g.eltern), alle = new Set([g.id].concat(Array.from(glUnterAlle(g)).map((x) => x.id)));
+      const z = glZeigt(g), infoText = [zahlText(P.filter((x) => alle.has(x.gruppe))), z.length ? z.map((k) => GL_ZEIGEN_NAME[k]).join(', ') : '', (g.notiz || '').trim() ? 'Mitschrift' : ''].filter(Boolean).join(' · ');
+      let inhalt = '';
+      if (auf) {
+        const offen = L.length > 0 || !!GL_OFFEN[g.id] || (!K.length && !z.length && stufe === 1), lang = /[\r\n]/.test(g.notiz || '');
+        inhalt = '<div class="gla-inhalt">' + glZahlenHTML(g) + '<ul class="gl-liste">' + L.map(punkt).join('') + '</ul>' + (offen ? neu(g) : '') +
+          (lang ? mitschrift(g) : '<input class="gl-zeile" data-glmit="' + g.id + '" value="' + esc(g.notiz || '') + '" placeholder="Mitschreiben …" aria-label="Mitschrift zu ' + esc(g.titel) + '" autocomplete="off" enterkeyhint="done">') +
+          '<div class="gla-aktion">' + (offen ? '' : plus(g)) + '<button type="button" class="gl-plus" data-a="glunter-neu" data-id="' + g.id + '" title="Unterthemen zu «' + esc(g.titel) + '» hinzufügen, z. B. je Abteilung eines">' + ic('plus') + '<span>Unterthema</span></button></div>' +
+          (K.length ? '<div class="gla-unter">' + K.map((k) => eintrag(k, stufe + 1)).join('') + '</div>' : '') + '</div>';
+      }
+      return '<section class="gla gla-' + Math.min(stufe, 3) + (auf ? ' auf' : '') + '" data-spalte="' + g.id + '">' + zeile(g.id, g.titel, infoText, auf, true) + inhalt + '</section>';
+    }
+    function ohneBlock() {   // Punkte ohne GL-Thema: ohne GL-Themen eine einfache Liste; sonst eine Zeile wie die GL-Themen, solange etwas darin steht
+      const L = von(null);
+      if (!G.length || !L.length) return '<section class="gl-gr ohne" data-spalte=""><div class="gl-karte"><ul class="gl-liste">' + L.map(punkt).join('') + '</ul>' + neu(null) + '</div></section>';
+      const auf = glOffen('-', '');
+      return '<section class="gla gla-1 ohne' + (auf ? ' auf' : '') + '" data-spalte="">' + zeile('-', 'Noch keinem GL-Thema zugeordnet', zahlText(L), auf, false) +
+        (auf ? '<div class="gla-inhalt"><ul class="gl-liste">' + L.map(punkt).join('') + '</ul>' + neu(null) + '</div>' : '') + '</section>';
+    }
     const vj = S.archiv.filter((a) => a.gl.punkte.length || a.gl.gruppen.some((g) => g.notiz)).slice().reverse();
     const vorjahre = vj.length ? '<details class="gl-vj"><summary>' + ic('right', 'pf') + '<span>Vorjahre nachlesen</span></summary>' + vj.map((a) => '<section><h3>' + esc(a.titel || String(a.jahr)) + '</h3>' +
       [{ id: '', titel: 'Ohne GL-Thema', notiz: '' }].concat(a.gl.gruppen).map((g) => { const L = a.gl.punkte.filter((x) => (x.gruppe || '') === g.id); return L.length || g.notiz ? '<h4>' + esc(g.id ? glTitel(a.gl.gruppen, g.id) : g.titel) + '</h4><ul>' + L.map((x) => '<li>' + (x.an ? '✓ ' : '') + esc(x.text) + (x.ergebnis ? ' <span class="glp-e">' + esc(x.ergebnis) + '</span>' : '') + '</li>').join('') + '</ul>' + (g.notiz ? '<p class="e-klein">' + esc(g.notiz) + '</p>' : '') : ''; }).join('') + '</section>').join('') + '</details>' : '';
     return '<div class="glseite">' + titel('Meine Punkte für die GL', 'Für die GL-Strategietagung: die Themen der GL, was du am Strategietag mit «GL» markiert hast und deine eigenen Punkte.', '<button type="button" class="btn" data-a="glgruppe-neu">' + ic('plus') + '<span>GL-Thema</span></button>') +
-      '<div class="gl-brett" data-brett="gl">' + block(null) + G.filter((g) => !g.eltern).map(block).join('') + '</div>' + felderHTML(S.glFelder, 'gl', false) +
-      vorjahre + '<p class="muted klein hilfe">' + ic('info') + '<span>Nur für dich: Diese Punkte stehen nicht im Ergebnis und nicht im PDF. Die Themen der GL legst du mit «+ GL-Thema» an, ihre Unterthemen (z. B. je Abteilung eines) mit «+ Unterthema», und schiebst die Punkte hinein. An der Tagung abhaken, was du gesagt hast; was die GL dazu sagt, hältst du im Punkt unter «Ergebnis» fest, alles andere in der Mitschrift. Beim neuen Jahr kommen die Entscheide der GL in den Rückblick. Den Reiter blendest du in den Einstellungen aus, je Gerät.</span></p></div>';
+      '<div class="gl-brett" data-brett="gl">' + ohneBlock() + G.filter((g) => !g.eltern).map((g) => eintrag(g, 1)).join('') + '</div>' + felderHTML(S.glFelder, 'gl', false) +
+      vorjahre + '<p class="muted klein hilfe">' + ic('info') + '<span>Nur für dich: Diese Punkte stehen nicht im Ergebnis und nicht im PDF. Die Themen der GL legst du mit «+ GL-Thema» an, ihre Unterthemen (z. B. je Abteilung eines) mit «+ Unterthema», und schiebst die Punkte hinein, auch in ein zugeklapptes Thema. Ein Thema antippen öffnet es und schliesst das vorherige; über den Stift zeigt es Budget, Auslastung oder Kunden. An der Tagung abhaken, was du gesagt hast; was die GL dazu sagt, hältst du im Punkt unter «Ergebnis» fest, alles andere in der Mitschrift. Beim neuen Jahr kommen die Entscheide der GL in den Rückblick. Den Reiter blendest du in den Einstellungen aus, je Gerät.</span></p></div>';
   }
 };
 const feldGefuellt = (f) => (f.art === 'tabelle' ? (f.zeilen || []).length > 0 : f.punkte.length > 0);
@@ -4725,6 +4770,22 @@ let GL_OFFEN = {};   // GL-Themen und Unterthemen, bei denen «+ Punkt» gedrüc
 const glPfad = (G, g) => { const P = []; let n = 0; while (g && n++ < 50) { P.unshift(g); g = g.eltern ? G.find((x) => x.id === g.eltern) : null; } return P; };   // seit 1.9: vom GL-Thema bis hierher
 const glTitel = (G, id) => glPfad(G, G.find((x) => x.id === id)).map((x) => x.titel).join(' · ');
 const glKinder = (g) => S.glGruppen.filter((x) => x.eltern === g.id);
+/* Auf- und zuklappen (seit 1.9.1, Fahrplan 488): je Stufe ist höchstens ein Thema offen. S.ui.glAuf: { Kennung des Themas darüber ('' für die
+   oberste Stufe): Kennung des offenen }. Zuoberst steht «Noch keinem GL-Thema zugeordnet» mit der Kennung '-'. Wird ein Thema wieder geöffnet,
+   ist darin offen, was beim Schliessen offen war. */
+const glOffen = (id, eltern) => !!S.ui.glAuf && S.ui.glAuf[eltern || ''] === id;
+function glAufZu(id, eltern) { const A = S.ui.glAuf || (S.ui.glAuf = {}), k = eltern || ''; if (A[k] === id) delete A[k]; else A[k] = id; }
+/* Zahlen im GL-Thema (seit 1.9.1, Fahrplan 490): im Stift einzuschalten; offen stehen die Bilder über den Punkten, mit denselben Zahlen wie
+   beim Thema der Art «Aufträge» und unter «Kunden». */
+const GL_ZEIGEN = [['budget', 'Budget'], ['auslastung', 'Auslastung'], ['kunden', 'Kunden']], GL_ZEIGEN_NAME = { budget: 'Budget', auslastung: 'Auslastung', kunden: 'Kunden' };
+const glZeigt = (g) => GL_ZEIGEN.map((x) => x[0]).filter((k) => !!(g && g.zeigen && g.zeigen[k] === true));
+function glZahlenHTML(g) {
+  const z = glZeigt(g);
+  if (!z.length) return '';
+  return '<div class="gla-zahlen">' + (z.indexOf('budget') >= 0 ? '<div class="gla-z">' + TEIL.budget() + '</div>' : '') +
+    (z.indexOf('auslastung') >= 0 ? '<div class="gla-z">' + TEIL.auslastung(z.indexOf('budget') < 0) + '</div>' : '') +
+    (z.indexOf('kunden') >= 0 ? '<div class="gla-z gla-k"><div class="bl-zeile"><h2 class="bl">Kunden</h2>' + zeitraumWahl() + '</div>' + kundenDiagramme() + '</div>' : '') + '</div>';
+}
 const glUnterAlle = (g) => { const A = new Set(), dazu = (x) => { glKinder(x).forEach((k) => { if (!A.has(k)) { A.add(k); dazu(k); } }); }; dazu(g); return A; };   // seit 1.9: alle Stufen darunter
 function glZu(id) {   // das GL-Thema im offenen Fenster einem anderen als Unterthema zuweisen oder wieder zum eigenen GL-Thema machen; seine Unterthemen kommen mit (seit 1.9)
   const g = sheet && S.glGruppen.find((x) => x.id === sheet.id), e = id ? S.glGruppen.find((x) => x.id === id) : null;
@@ -5306,8 +5367,9 @@ const SHEET = {
     const oben = S.glGruppen.filter((x) => x !== g && !unten.has(x));   // seit 1.9 (482): jedes GL-Thema oder Unterthema, ausser es selbst und was darunter steht
     const einzug = (x) => '\u00a0\u00a0\u00a0'.repeat(glPfad(S.glGruppen, x).length - 1);
     const wahl = oben.length ? '<label class="f" for="gg-e"><span>Gehört zu</span><select id="gg-e" data-wahl="gleltern"><option value="">Eigenes GL-Thema</option>' + oben.map((x) => '<option value="' + x.id + '"' + (g.eltern === x.id ? ' selected' : '') + '>' + einzug(x) + 'Unterthema von: ' + esc(x.titel) + '</option>').join('') + '</select></label>' + (K.length ? '<p class="muted klein">Seine Unterthemen kommen mit.</p>' : '') : '';
+    const zeigen = '<div class="f"><span>Zahlen zeigen, wenn es offen ist</span><div class="seg" role="group">' + GL_ZEIGEN.map((x) => '<button type="button" data-a="gl-zeigen" data-v="' + x[0] + '" aria-pressed="' + (glZeigt(g).indexOf(x[0]) >= 0) + '">' + x[1] + '</button>').join('') + '</div></div>';   // seit 1.9.1 (490)
     return formHuelle(g.eltern ? 'Unterthema' : 'GL-Thema', 'glgruppe-edit', '<label class="f" for="gg-t"><span>Titel</span><input id="gg-t" name="titel" value="' + esc(g.titel) + '" autocomplete="off" data-fokus></label>' +
-      (g.eltern ? '<label class="f" for="gg-n"><span>Mitschrift</span><textarea id="gg-n" name="notiz" rows="4">' + esc(g.notiz || '') + '</textarea></label>' : '') + wahl +
+      '<label class="f" for="gg-n"><span>Mitschrift</span><textarea id="gg-n" name="notiz" rows="4">' + esc(g.notiz || '') + '</textarea></label>' + zeigen + wahl +
       '<div class="reihe"><button type="button" class="btn klein" data-a="glgruppe-schieben" data-d="-1"' + (i > 0 ? '' : ' disabled') + '>' + ic('up') + '<span>Nach oben</span></button><button type="button" class="btn klein" data-a="glgruppe-schieben" data-d="1"' + (i < ges.length - 1 ? '' : ' disabled') + '>' + ic('down') + '<span>Nach unten</span></button></div>' +
       '<p class="muted klein">' + (g.eltern ? 'Löschen nimmt nur das Unterthema weg; seine Punkte kommen zum Thema darüber' + (K.length ? ', seine Unterthemen rücken eine Stufe hinauf' : '') + '.' : 'Löschen nimmt nur das GL-Thema weg; seine Punkte bleiben, noch keinem zugeordnet' + (K.length ? ', und seine Unterthemen werden eigene GL-Themen' : '') + '.') + '</p>' + loeschKnopf('glgruppe-weg', g.eltern ? 'Unterthema löschen' : 'GL-Thema löschen'));
   },
@@ -6123,7 +6185,26 @@ const AKT = {
     S.glPunkte.forEach((x) => { if (x.gruppe === g.id) x.gruppe = g.eltern || ''; });
     geaendert(true); toast(g.eltern ? 'Unterthema gelöscht' : 'GL-Thema gelöscht', true);
   },
-  'glunter-neu'(el) { auf({ art: 'glthemen', eltern: el.dataset.id }); },   // seit 1.4: Unterthemen zu einem GL-Thema, eine Zeile je Unterthema
+  'glunter-neu'(el) { auf({ art: 'glthemen', eltern: el.dataset.id }); },
+  'gl-auf'(el) {   // seit 1.9.1 (488): ein GL-Thema öffnen (das vorherige der Stufe schliesst) oder schliessen; die angetippte Zeile bleibt, wo sie war
+    const id = el.dataset.id, g = S.glGruppen.find((x) => x.id === id), oben = el.getBoundingClientRect().top;
+    glAufZu(id, g ? g.eltern : '');
+    speichern(true); render();
+    const neu = document.querySelector('[data-a="gl-auf"][data-id="' + id + '"]');
+    if (neu) { const d = neu.getBoundingClientRect().top - oben; if (Math.abs(d) > 1) window.scrollBy(0, d); neu.focus({ preventScroll: true }); }
+  },
+  'gl-zeigen'(el) {   // seit 1.9.1 (490): Budget, Auslastung, Kunden im GL-Thema ein- und ausschalten
+    const g = sheet && S.glGruppen.find((x) => x.id === sheet.id), k = el.dataset.v;
+    if (!g || !GL_ZEIGEN_NAME[k]) return;
+    merken();
+    const tf = document.getElementById('gg-t'), nf = document.getElementById('gg-n');   // Getipptes im offenen Fenster bleibt
+    if (tf && tf.value.trim()) g.titel = tf.value.trim();
+    if (nf) g.notiz = nf.value.trim();
+    const z = {}; glZeigt(g).forEach((x) => { z[x] = true; });
+    if (z[k]) delete z[k]; else z[k] = true;
+    if (Object.keys(z).length) g.zeigen = z; else delete g.zeigen;
+    speichern(); render(); renderSheet(false);
+  },   // seit 1.4: Unterthemen zu einem GL-Thema, eine Zeile je Unterthema
   'gl-punkt-neu'(el) { GL_OFFEN[el.dataset.id] = true; render(); const f = document.querySelector('form[data-form="glpunkt"][data-g="' + el.dataset.id + '"] input'); if (f) f.focus(); },
   art(el) { const t = themaAusForm(); if (!t) return; t.art = el.dataset.v; if (t.art === 'personal' && !t.frage) t.frage = PERSONAL_FRAGE; if (t.art === 'auftraege' && !t.frage) t.frage = AUFTRAEGE_FRAGE; if (t.art === 'gruppen' && !t.gruppen.length) t.gruppen = ['Gruppe 1', 'Gruppe 2', 'Gruppe 3'].map((n) => ({ id: uid(), name: n })); speichern(); render(); renderSheet(false); },
   notiz(el) { auf({ art: 'notiz', id: el.dataset.id }); },
