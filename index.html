@@ -2756,7 +2756,10 @@ function importText(text) {
   if (buch) { buchVorschlag([buch]); return; }   // seit 1.6: eine Liste mit Buchungen (Auszug «KSt-Istwerte»)
   const nm = namenLesen(g);   // seit 1.9.5 (476)
   if (nm) { namenUebernehmen(nm); return; }
-  const imp = babLesen(g), k = imp ? null : kundenLesen(g);   // eine Tabelle mit Offerten oder Aufträgen gehört zu «Kunden»
+  if (vorbAktiv('namen')) { toast(NAMEN_FEHLT); return; }
+  let imp = babLesen(g);
+  if (imp && !imp.spalten.length) imp = null;   // seit 1.9.5: ohne Zahlenspalte kein BAB
+  const k = imp ? null : kundenLesen(g);   // eine Tabelle mit Offerten oder Aufträgen gehört zu «Kunden»
   if (k) kundenUebernehmen([k]); else zeigeImport([imp]);
 }
 /* Eine Datei als Gitter je Blatt: Excel hat mehrere Blätter, Text und CSV eines */
@@ -2954,6 +2957,7 @@ function namenLesen(g) {   // Gitter → { kst: {Nummer: Name}, ka: {…} } oder
   }
   return null;
 }
+const NAMEN_FEHLT = 'Darin finde ich keine Namen. Es braucht eine Kopfzeile mit «Kostenstelle» oder «Kostenart» und daneben «Bezeichnung».';
 function namenAusGittern(blaetter) {   // alle Blätter einer Datei zusammen (z. B. eines für Kostenstellen, eines für Kostenarten)
   const N = { kst: {}, ka: {} };
   let da = false;
@@ -2993,7 +2997,7 @@ async function importDateien(liste) {
       const k = blaetter.map((b) => kundenLesen(b.g)).filter(Boolean);   // Offerten und Aufträge gehören zu «Kunden», alles andere ist ein BAB
       if (k.length) { k.forEach((x) => { kunden.push(x); }); continue; }
       const imp = babAusGittern(blaetter);
-      if (imp) { imp.datei = dateien[i].name; teile.push(imp); } else fehler++;
+      if (imp && imp.spalten.length) { imp.datei = dateien[i].name; teile.push(imp); } else fehler++;   // seit 1.9.5: ohne eine einzige Zahlenspalte ist es kein BAB (z. B. eine Liste mit Nummern und Namen)
     } catch (e) { fehler++; if (e && e.message === 'xls') alt = true; }
   }
   if (gross) $('#toasts').innerHTML = '';
@@ -3002,6 +3006,7 @@ async function importDateien(liste) {
   if (buch.length) { buchVorschlag(buch, teile.length ? { teile: teile, fehler: fehler } : null); return; }   // ein BAB aus derselben Auswahl folgt nach dem Übernehmen
   if (!teile.length) {
     const beiKunden = S.ui.bereich === 'kunden';
+    if (!alt && vorbAktiv('namen')) { toast(NAMEN_FEHLT); return; }   // seit 1.9.5 (476)
     toast(alt ? 'Alte Excel-Dateien (.xls) kann ich nicht lesen. Die Tabelle in Excel kopieren und einfügen geht immer.'
       : beiKunden ? 'Darin finde ich keine Tabelle mit Offerten. Es braucht eine Kopfzeile wie in eurer Offertliste (Datum, Projektbezeichnung, Planer, Bauherr, Angebot) oder «Jahr», «Gerechnet», «Erhalten».'
       : (dateien.length > 1 ? 'In diesen Dateien finde ich keinen BAB.' : 'In dieser Datei finde ich keinen BAB. Die Tabelle in Excel kopieren und einfügen geht immer.'));
