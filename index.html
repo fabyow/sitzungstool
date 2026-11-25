@@ -665,6 +665,21 @@ button.b-ic.abh[aria-pressed="true"]{background:var(--accent-fill);box-shadow:no
 .n-gl{display:inline-flex;align-items:center;gap:.3rem;height:2.3rem;padding:0 .75rem;border-radius:1.15rem;color:var(--muted);font-weight:700;font-size:.8125rem;flex:none}
 .n-gl[aria-pressed="true"]{background:var(--accent-fill);color:#fff}
 .besch{padding-left:.7rem;gap:.7rem}
+/* seit 1.9.3 (494): Aufgaben, die aus einem Beschluss folgen, eingerückt unter ihm */
+.b-folge{list-style:none;margin:-.15rem 0 .1rem 1.55rem;padding-left:.9rem;border-left:2px solid var(--sep)}
+.b-folge .eintraege{gap:.4rem;margin-bottom:0}
+.b-folge .besch{box-shadow:none;background:var(--card);border:1px solid var(--sep)}
+.b-folge .b-was{font-size:1.0625rem;font-weight:500}
+.b-folge .b-text{padding:.35rem 0}
+.b-folge .b-aufg-form{margin-top:.45rem}
+.um-k{list-style:none;margin:-.15rem 0 .1rem 1.55rem;padding-left:.9rem;border-left:2px solid var(--sep)}
+.um-k .eintraege{gap:.4rem;margin-bottom:0}
+.um-k .besch{box-shadow:none;border:1px solid var(--sep)}
+.um-k .b-was{font-size:1.0625rem;font-weight:500}
+ul.e-folge{margin:.15rem 0 .1rem;padding-left:1.2rem;list-style:circle}
+tr.e-folge td:first-child{padding-left:1.2rem}
+.b-aufg-fertig{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin:.25rem .2rem 0}
+.n-aufg .ic{width:.95rem;height:.95rem}
 .b-ic{width:1.7rem;height:1.7rem;border-radius:50%;background:var(--accent-fill);color:#fff;display:grid;place-items:center;flex:none}
 .b-ic .ic{width:1rem;height:1rem;stroke-width:2.5}
 .b-text{flex:1;min-width:0;padding:.5rem 0;display:flex;flex-direction:column;gap:.05rem}
@@ -1068,6 +1083,10 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
   .umsetzung .besch,.umsetzung .rz{flex-wrap:wrap}
   .um-th{max-width:100%;flex:1 1 100%;text-align:left;padding:0 0 .35rem 2.4rem}
   .umsetzung .rz .um-th,.um-s .um-th{padding-left:0}
+  .thema .besch:has(.n-aufg){flex-wrap:wrap}   /* seit 1.9.3 (494): «Aufgabe», «Ziel» und «GL» unter dem Beschluss */
+  .thema .besch:has(.n-aufg) .b-text{flex:1 1 calc(100% - 2.6rem)}
+  .thema .besch .n-aufg{margin-left:auto}
+  .b-folge{margin-left:.8rem;padding-left:.7rem}
 }
 
 /* ---------- Druck: nur das Ergebnis ---------- */
@@ -1150,7 +1169,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '1.9.2';         // Version des Tools, steht in den Einstellungen
+const VERSION = '1.9.3';         // Version des Tools, steht in den Einstellungen
 const FORMAT = 12;             // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
@@ -1426,6 +1445,8 @@ function themaNormal(t) {
   });
   t.bedarf = t.bedarf.filter((x) => x && typeof x === 'object');
   t.bedarf.forEach((x) => { if (!x.id) x.id = uid(); ['was', 'warum', 'bis', 'notiz'].forEach((k) => { if (typeof x[k] !== 'string') x[k] = ''; }); if (!BSTAND[x.stand]) x.stand = 'offen'; });
+  const bIds = new Set(t.beschluesse.map((b) => b && b.id));   // seit 1.9.3 (494): eine Aufgabe gehört nur zu einem Beschluss, den es im Thema gibt
+  t.aufgaben.forEach((a) => { if (typeof a.zu !== 'string' || !bIds.has(a.zu)) delete a.zu; });
 }
 function normal(d) {
   const l = leer();
@@ -3170,6 +3191,13 @@ const mitAufgaben = (t) => t.art !== 'rueckblick' && t.art !== 'ziele';   // wo 
 const metaText = (b) => [b.wer, b.bis ? 'bis ' + b.bis : ''].filter(Boolean).join(' · ');
 const metaMit = (b) => [metaText(b), b.aus ? 'aus dem Rückblick' : ''].filter(Boolean).join(' · ');
 const aufgMeta = (a) => [metaText(a), a.bem].filter(Boolean).join(' · ');   // Aufgabe (seit 1.4): wer, bis wann, dazu Stand oder Bemerkung
+/* Aufgaben zu einem Beschluss (seit 1.9.3, Fahrplan 494): aufgabe.zu nennt den Beschluss im selben Thema. Sie stehen eingerückt unter ihm,
+   in der Umsetzung und im Protokoll ebenso. «GL» beim Beschluss nimmt nur den Beschluss mit, seine Aufgaben bleiben in der Abteilung.
+   Aufgaben ohne Beschluss stehen wie bisher im Block «Aufgaben» («Weitere Aufgaben», sobald es solche unter einem Beschluss gibt). */
+const aufgZu = (t, b) => (t.aufgaben || []).filter((a) => a.zu === b.id);
+const aufgFrei = (t) => (t.aufgaben || []).filter((a) => !a.zu || !t.beschluesse.some((b) => b.id === a.zu));
+const hatAufgZu = (t) => (t.aufgaben || []).some((a) => a.zu && t.beschluesse.some((b) => b.id === a.zu));
+let B_AUFG = null;   // { t: Thema, b: Beschluss }: unter welchem Beschluss das Feld für eine neue Aufgabe offen ist, bis «Fertig» oder ein anderes Thema
 const werAlle = () => ['Alle', 'Kader'].concat(S.mitarbeiter.filter((m) => imFolgejahr(m, sitzungsJahr())).map((m) => m.name));   // Vorschläge beim Tippen: eine Aufgabe kann jeder haben
 const bedarfMeta = (b) => [b.warum, b.bis ? 'bis ' + b.bis : '', b.notiz].filter(Boolean).join(' · ');
 /* Folgejahr: das Jahr nach dem Strategietag. Dorthin zeigen der Ausblick und die Ziele. */
@@ -3555,12 +3583,25 @@ const TEIL = {
   beschluss(t) {
     const ziele = t.art === 'ziele';
     /* Seit 1.4: Abgehakt wird unter «Ergebnis» › «Umsetzung» (die Einstellung «Unterjährig» fällt weg); hier zeigt ein erledigter Beschluss nur seinen Stand. */
-    return '<h2 class="bl">' + (ziele ? 'Ziele' : 'Beschluss') + '</h2><ul class="eintraege">' + t.beschluesse.map((b) => '<li class="besch' + (b.gl ? ' gl' : '') + (b.erl ? ' erl' : '') + '" data-zieh="beschluesse" data-zid="' + b.id + '"><span class="b-ic">' + ic('check') + '</span><button type="button" class="b-text" data-a="beschluss" data-id="' + b.id + '"><span class="b-was">' + (ziele ? thChip(b) : '') + esc(b.was) + '</span>' + (metaMit(b) ? '<span class="b-meta">' + esc(metaMit(b)) + '</span>' : '') + '</button>' + (!ziele && S.themen.some((x) => x.art === 'ziele') ? '<button type="button" class="n-gl n-ziel" data-a="b-ziel" data-id="' + b.id + '" aria-pressed="' + !!b.ziel + '" aria-label="Als Ziel übernehmen" title="Als Ziel ' + folgejahr() + ' übernehmen">' + ic('wahl') + '<span>Ziel</span></button>' : '') + glKnopf('b', b) + '</li>').join('') + '</ul>' +
+    const mitA = !ziele && mitAufgaben(t), offenB = B_AUFG && B_AUFG.t === t.id && !t.zu ? B_AUFG.b : '';
+    /* seit 1.9.3 (494): «+ Aufgabe» beim Beschluss; seine Aufgaben stehen eingerückt darunter, ohne «GL» (das gilt für den Beschluss) */
+    const folge = (b) => {
+      const A = mitA ? aufgZu(t, b) : [], formOffen = offenB === b.id;
+      if (!A.length && !formOffen) return '';
+      return '<li class="b-folge"><ul class="eintraege b-aufg">' + A.map((a) => '<li class="besch aufg' + (a.gl ? ' gl' : '') + (a.erl ? ' erl' : '') + '" data-zieh="aufgaben" data-zid="' + a.id + '">' +
+          '<button type="button" class="b-ic abh" data-a="a-erl" data-id="' + a.id + '" aria-pressed="' + !!a.erl + '" aria-label="Erledigt" title="Erledigt">' + ic('check') + '</button>' +
+          '<button type="button" class="b-text" data-a="aufgabe" data-id="' + a.id + '"><span class="b-was">' + esc(a.was) + '</span>' + (aufgMeta(a) ? '<span class="b-meta">' + esc(aufgMeta(a)) + '</span>' : '') + '</button></li>').join('') + '</ul>' +
+        (formOffen ? '<form class="dreier b-aufg-form" data-form="aufgabe" data-zu="' + b.id + '"><input name="was" id="neu-aufg-b" placeholder="Aufgabe: Was?" aria-label="Aufgabe zu ' + esc(b.was) + ': Was ist zu tun" autocomplete="off"><input name="wer" placeholder="Wer?" aria-label="Wer" autocomplete="off" list="dl-wer-a"><input name="bis" placeholder="Bis wann?" aria-label="Bis wann" autocomplete="off" enterkeyhint="done" list="dl-bis-a"><button class="rund" aria-label="Aufgabe hinzufügen">' + ic('plus') + '</button></form>' +
+          '<div class="b-aufg-fertig"><span class="muted klein">Gehört zu «' + esc(b.was) + '».</span><button type="button" class="textlink" data-a="b-aufg-zu">Fertig</button></div>' : '') + '</li>';
+    };
+    return '<h2 class="bl">' + (ziele ? 'Ziele' : 'Beschluss') + '</h2><ul class="eintraege">' + t.beschluesse.map((b) => '<li class="besch' + (b.gl ? ' gl' : '') + (b.erl ? ' erl' : '') + '" data-zieh="beschluesse" data-zid="' + b.id + '"><span class="b-ic">' + ic('check') + '</span><button type="button" class="b-text" data-a="beschluss" data-id="' + b.id + '"><span class="b-was">' + (ziele ? thChip(b) : '') + esc(b.was) + '</span>' + (metaMit(b) ? '<span class="b-meta">' + esc(metaMit(b)) + '</span>' : '') + '</button>' +
+      (mitA && !t.zu ? '<button type="button" class="n-gl n-aufg" data-a="b-aufg-neu" data-id="' + b.id + '" aria-label="Aufgabe zu diesem Beschluss" title="Aufgabe, die aus diesem Beschluss folgt">' + ic('plus') + '<span>Aufgabe</span></button>' : '') +
+      (!ziele && S.themen.some((x) => x.art === 'ziele') ? '<button type="button" class="n-gl n-ziel" data-a="b-ziel" data-id="' + b.id + '" aria-pressed="' + !!b.ziel + '" aria-label="Als Ziel übernehmen" title="Als Ziel ' + folgejahr() + ' übernehmen">' + ic('wahl') + '<span>Ziel</span></button>' : '') + glKnopf('b', b) + '</li>' + folge(b)).join('') + '</ul>' +
       '<form class="dreier' + (ziele ? ' mit-th' : '') + '" data-form="beschluss">' + (ziele ? themaWahl('thema', ZIEL_TH, '', 'th-wahl') : '') + '<input name="was" id="neu-was" placeholder="' + (ziele ? 'Ziel hinzufügen …' : 'Beschluss: Was?') + '" aria-label="Was" autocomplete="off"><input name="wer" placeholder="Wer?" aria-label="Wer" autocomplete="off" list="dl-wer"><input name="bis" placeholder="Bis wann?" aria-label="Bis wann" autocomplete="off" enterkeyhint="done" list="dl-bis"><button class="rund" aria-label="Hinzufügen">' + ic('plus') + '</button></form>' + optionen('dl-wer', werNamen()) + optionen('dl-bis', bisListe());
   },
   aufgaben(t) {   // seit 1.4 (448): wer macht was bis wann. Der Kreis hakt ab, auch im abgeschlossenen Thema; antippen öffnet die Aufgabe
-    const A = t.aufgaben, offen = A.filter((a) => !a.erl).length;
-    return '<div class="bl-zeile"><h2 class="bl">Aufgaben</h2><span class="fd-info">' + (A.length ? (offen ? offen + ' offen' : 'alle erledigt') : '') + '</span></div><ul class="eintraege">' + A.map((a) => '<li class="besch aufg' + (a.gl ? ' gl' : '') + (a.erl ? ' erl' : '') + '" data-zieh="aufgaben" data-zid="' + a.id + '">' +
+    const A = aufgFrei(t), offen = A.filter((a) => !a.erl).length;   // seit 1.9.3 (494): Aufgaben zu einem Beschluss stehen unter ihm
+    return '<div class="bl-zeile"><h2 class="bl">' + (hatAufgZu(t) ? 'Weitere Aufgaben' : 'Aufgaben') + '</h2><span class="fd-info">' + (A.length ? (offen ? offen + ' offen' : 'alle erledigt') : '') + '</span></div><ul class="eintraege">' + A.map((a) => '<li class="besch aufg' + (a.gl ? ' gl' : '') + (a.erl ? ' erl' : '') + '" data-zieh="aufgaben" data-zid="' + a.id + '">' +
         '<button type="button" class="b-ic abh" data-a="a-erl" data-id="' + a.id + '" aria-pressed="' + !!a.erl + '" aria-label="Erledigt" title="Erledigt">' + ic('check') + '</button>' +
         '<button type="button" class="b-text" data-a="aufgabe" data-id="' + a.id + '"><span class="b-was">' + esc(a.was) + '</span>' + (aufgMeta(a) ? '<span class="b-meta">' + esc(aufgMeta(a)) + '</span>' : '') + '</button>' + glKnopf('a', a) + '</li>').join('') + '</ul>' +
       '<form class="dreier" data-form="aufgabe"><input name="was" id="neu-aufg" placeholder="Aufgabe: Was?" aria-label="Was ist zu tun" autocomplete="off"><input name="wer" placeholder="Wer?" aria-label="Wer" autocomplete="off" list="dl-wer-a"><input name="bis" placeholder="Bis wann?" aria-label="Bis wann" autocomplete="off" enterkeyhint="done" list="dl-bis-a"><button class="rund" aria-label="Aufgabe hinzufügen">' + ic('plus') + '</button></form>' + optionen('dl-wer-a', werAlle()) + optionen('dl-bis-a', bisListe());
@@ -4880,8 +4921,8 @@ function umsetzungTeile() {
   const nr = nummern(), A = [], B = [], Z = [], D = [];
   const name = (t) => (t.art === 'parkplatz' ? 'Parkplatz' : mitNr(t, nr));
   mitPark().forEach((t) => {
-    t.aufgaben.forEach((a) => { A.push({ t: t, x: a, th: name(t) }); });
-    t.beschluesse.forEach((b) => { (t.art === 'ziele' ? Z : B).push({ t: t, x: b, th: t.art === 'ziele' ? (b.thema || '') : name(t) }); });
+    aufgFrei(t).forEach((a) => { A.push({ t: t, x: a, th: name(t) }); });   // seit 1.9.3 (494): Aufgaben zu einem Beschluss stehen unter ihm (k)
+    t.beschluesse.forEach((b) => { (t.art === 'ziele' ? Z : B).push({ t: t, x: b, th: t.art === 'ziele' ? (b.thema || '') : name(t), k: t.art === 'ziele' ? [] : aufgZu(t, b).map((a) => ({ t: t, x: a, th: '' })) }); });   // unter dem Beschluss ohne eigenes Thema
     if (t.art === 'personal') t.bedarf.forEach((d) => { D.push({ t: t, x: d, th: name(t) }); });
   });
   /* seit 1.9 (472): was an der GL entschieden wurde (Punkt mit Ergebnis), nur mit eingeschaltetem Reiter GL */
@@ -4917,8 +4958,9 @@ function umsetzungHTML() {
         (offen.length ? '<ul class="eintraege">' + offen.map(zeile).join('') + '</ul>' : '') +
         (zu.length ? '<details class="um-erl"' + (S.ui.auf['um-' + k] ? ' open' : '') + '><summary data-a="um-auf" data-k="' + k + '">' + ic('right', 'pf') + '<span>' + wort + ' (' + zu.length + ')</span></summary><ul class="eintraege">' + zu.map(zeile).join('') + '</ul></details>' : '');
     };
-    teile = block('Aufgaben', U.A, aufg, (e) => !!e.x.erl, 'Erledigt', 'a') +
-      block('Beschlüsse', U.B, besch(false), (e) => !!e.x.erl, 'Umgesetzt', 'b') +
+    const mitK = (zeile) => (e) => zeile(e) + (e.k && e.k.length ? '<li class="um-k"><ul class="eintraege">' + e.k.map(aufg).join('') + '</ul></li>' : '');   // seit 1.9.3 (494): Aufgaben unter ihrem Beschluss
+    teile = block(U.B.some((e) => e.k.length) ? 'Weitere Aufgaben' : 'Aufgaben', U.A, aufg, (e) => !!e.x.erl, 'Erledigt', 'a') +
+      block('Beschlüsse', U.B, mitK(besch(false)), (e) => !!e.x.erl, 'Umgesetzt', 'b') +
       block(zj ? zj.titel : 'Ziele', U.Z, besch(true), (e) => !!e.x.erl, 'Erreicht', 'z') +
       block('Bedarf und Nachfolge', U.D, bed, (e) => e.x.stand === 'besetzt', 'Besetzt', 'd') +
       block('Aus der GL', U.G, (e) => '<li class="besch aufg' + (e.x.erl ? ' erl' : '') + '"><button type="button" class="b-ic abh" data-a="gl-erl" data-id="' + e.x.id + '" aria-pressed="' + !!e.x.erl + '" aria-label="Erledigt" title="Erledigt">' + ic('check') + '</button>' +
@@ -4936,9 +4978,10 @@ function umsetzungHTML() {
     const verteilt = (L) => { const n = L.filter((e) => e.x.vert).length; return n === L.length ? 'alle verteilt' : n + ' von ' + L.length + ' verteilt'; };
     const bed = (e) => '<li class="besch um-v"><span class="b-ic um-platz" aria-hidden="true"></span><button type="button" class="b-text" data-a="bedarf" data-t="' + e.t.id + '" data-id="' + e.x.id + '"><span class="b-was">' + esc(e.x.was) + '</span>' + meta(bedarfMeta(e.x), stand(e.x.stand !== 'offen', BSTAND[e.x.stand])) + '</button></li>';
     const block = (titelText, L, zeile, info, warn) => (L.length ? '<div class="bl-zeile"><h2 class="bl">' + esc(titelText) + '</h2><span class="fd-info' + (warn ? ' um-warn' : '') + '">' + info + '</span></div><ul class="eintraege">' + L.map(zeile).join('') + '</ul>' : '');
-    const ohneWer = U.A.filter((e) => !e.x.erl && !e.x.wer).length;
-    teile = block('Aufgaben', U.A, aufg, (ohneWer ? ohneWer + ' ohne Wer · ' : '') + verteilt(U.A), !!ohneWer) +
-      block('Beschlüsse', U.B, besch(false), verteilt(U.B)) +
+    const ohneWer = U.A.filter((e) => !e.x.erl && !e.x.wer).length, K = [].concat.apply([], U.B.map((e) => e.k)), ohneWerK = K.filter((e) => !e.x.erl && !e.x.wer).length;
+    const mitK = (zeile) => (e) => zeile(e) + (e.k.length ? '<li class="um-k"><ul class="eintraege">' + e.k.map(aufg).join('') + '</ul></li>' : '');   // seit 1.9.3 (494): Aufgaben unter ihrem Beschluss
+    teile = block(K.length ? 'Weitere Aufgaben' : 'Aufgaben', U.A, aufg, (ohneWer ? ohneWer + ' ohne Wer · ' : '') + verteilt(U.A), !!ohneWer) +
+      block('Beschlüsse', U.B, mitK(besch(false)), (ohneWerK ? ohneWerK + ' Aufgaben ohne Wer · ' : '') + verteilt(U.B.concat(K)), !!ohneWerK) +
       block(zj ? zj.titel : 'Ziele', U.Z, besch(true), verteilt(U.Z)) +
       block('Bedarf und Nachfolge', U.D, bed, String(U.D.length)) +
       block('Aus der GL', U.G, glz, verteilt(U.G));
@@ -4952,8 +4995,9 @@ function umsetzungDruckHTML() {   // dieselbe Übersicht als Blatt: wer macht wa
   const stand = (ja, wort, x) => (jahr ? '<td class="nw">' + (ja ? '<span class="e-ok">✓</span>' + wort : 'offen') + '</td>' : '<td class="nw">' + (x && x.vert ? '<span class="e-ok">✓</span>' : '') + '</td>');   // «Am Schluss» seit 1.9 mit «Verteilt»
   const kopf = (K) => K.concat([jahr ? 'Stand' : 'Verteilt']);
   let h = '<header class="e-kopf"><h1>' + esc(m.titel) + '</h1><p>' + esc([m.abteilung, datumLang(m.datum) ? 'Strategietag vom ' + datumLang(m.datum) : '', jahr ? 'Umsetzung' : 'Wer macht was bis wann'].filter(Boolean).join(' · ')) + '</p></header>';
-  if (U.A.length) h += '<section class="e-teil"><h2>Aufgaben</h2>' + tab(kopf(['Was', 'Wer', 'Bis wann', 'Thema']), U.A.map((e) => '<tr><td>' + esc(e.x.was) + (e.x.bem ? ' <span class="e-grau">(' + esc(e.x.bem) + ')</span>' : '') + '</td><td class="nw">' + esc(e.x.wer) + '</td><td class="nw">' + esc(e.x.bis) + '</td><td>' + esc(e.th) + '</td>' + stand(e.x.erl, 'erledigt', e.x) + '</tr>')) + '</section>';
-  if (U.B.length) h += '<section class="e-teil"><h2>Beschlüsse</h2>' + tab(kopf(['Was', 'Wer', 'Bis wann', 'Thema']), U.B.map((e) => '<tr><td>' + esc(e.x.was) + '</td><td class="nw">' + esc(e.x.wer) + '</td><td class="nw">' + esc(e.x.bis) + '</td><td>' + esc(e.th) + '</td>' + stand(e.x.erl, 'umgesetzt', e.x) + '</tr>')) + '</section>';
+  if (U.A.length) h += '<section class="e-teil"><h2>' + (U.B.some((e) => e.k.length) ? 'Weitere Aufgaben' : 'Aufgaben') + '</h2>' + tab(kopf(['Was', 'Wer', 'Bis wann', 'Thema']), U.A.map((e) => '<tr><td>' + esc(e.x.was) + (e.x.bem ? ' <span class="e-grau">(' + esc(e.x.bem) + ')</span>' : '') + '</td><td class="nw">' + esc(e.x.wer) + '</td><td class="nw">' + esc(e.x.bis) + '</td><td>' + esc(e.th) + '</td>' + stand(e.x.erl, 'erledigt', e.x) + '</tr>')) + '</section>';
+  if (U.B.length) h += '<section class="e-teil"><h2>Beschlüsse</h2>' + tab(kopf(['Was', 'Wer', 'Bis wann', 'Thema']), U.B.map((e) => '<tr><td>' + esc(e.x.was) + '</td><td class="nw">' + esc(e.x.wer) + '</td><td class="nw">' + esc(e.x.bis) + '</td><td>' + esc(e.th) + '</td>' + stand(e.x.erl, 'umgesetzt', e.x) + '</tr>' +
+    e.k.map((a) => '<tr class="e-folge"><td>↳ ' + esc(a.x.was) + (a.x.bem ? ' <span class="e-grau">(' + esc(a.x.bem) + ')</span>' : '') + '</td><td class="nw">' + esc(a.x.wer) + '</td><td class="nw">' + esc(a.x.bis) + '</td><td></td>' + stand(a.x.erl, 'erledigt', a.x) + '</tr>').join(''))) + '</section>';   // seit 1.9.3 (494): darunter seine Aufgaben
   if (U.Z.length) h += '<section class="e-teil"><h2>' + esc(zj ? zj.titel : 'Ziele') + '</h2>' + tab(kopf(['Was', 'Wer', 'Bis wann']), U.Z.map((e) => '<tr><td>' + esc(mitTh(e.x, e.x.was)) + '</td><td class="nw">' + esc(e.x.wer) + '</td><td class="nw">' + esc(e.x.bis) + '</td>' + stand(e.x.erl, 'erreicht', e.x) + '</tr>')) + '</section>';
   if (U.D.length) h += '<section class="e-teil"><h2>Bedarf und Nachfolge</h2>' + tab(['Wen oder was', 'Warum', 'Bis wann', 'Stand'], U.D.map((e) => '<tr><td>' + esc(e.x.was) + '</td><td>' + esc([e.x.warum, e.x.notiz].filter(Boolean).join(' · ')) + '</td><td class="nw">' + esc(e.x.bis) + '</td><td class="nw">' + BSTAND[e.x.stand] + '</td></tr>')) + '</section>';
   if (U.G.length) h += '<section class="e-teil"><h2>Aus der GL</h2>' + tab(kopf(['Punkt', 'Entscheid', 'Wer', 'Bis wann']), U.G.map((e) => '<tr><td>' + esc(e.x.text) + '</td><td>' + esc(e.x.ergebnis) + '</td><td class="nw">' + esc(e.x.wer) + '</td><td class="nw">' + esc(e.x.bis) + '</td>' + stand(e.x.erl, 'erledigt', e.x) + '</tr>')) + '</section>';   // seit 1.9 (472)
@@ -4998,8 +5042,8 @@ function protokollHTML() {
   });
   if (gl.length) { h += '<section class="e-teil e-gl"><h2>Für die GL</h2><ul>' + gl.join('') + '</ul></section>'; etwas = true; }
 
-  const beschZeile = (b) => '<li' + (b.erl ? ' class="erl"' : '') + '>' + ok(b) + esc(b.was) + marke(b) + grau(metaText(b)) + '</li>';
   const aufgZeile = (a) => '<li' + (a.erl ? ' class="erl"' : '') + '>' + ok(a) + esc(a.was) + marke(a) + grau(aufgMeta(a)) + '</li>';
+  const beschZeile = (b, t) => { const A = t ? aufgZu(t, b) : []; return '<li' + (b.erl ? ' class="erl"' : '') + '>' + ok(b) + esc(b.was) + marke(b) + grau(metaText(b)) + (A.length ? '<ul class="e-folge">' + A.map(aufgZeile).join('') + '</ul>' : '') + '</li>'; };   // seit 1.9.3 (494): mit seinen Aufgaben
   const zielTabelle = (t) => '<div class="e-tab-rahmen"><table class="e-besch"><thead><tr><th>Was</th><th>Wer</th><th>Bis wann</th></tr></thead><tbody>' +
     t.beschluesse.map((b) => '<tr><td>' + ok(b) + esc(mitTh(b, b.was)) + marke(b) + '</td><td class="nw">' + esc(b.wer) + '</td><td class="nw">' + esc(b.bis) + '</td></tr>').join('') + '</tbody></table></div>';
   const rueckblickTeil = (t) => {   // was aus dem letzten Jahr geworden ist; die Baustellen sind eine Beilage
@@ -5052,8 +5096,8 @@ function protokollHTML() {
     let s = t.art === 'rueckblick' ? rueckblickTeil(t) : '';
     if (ziele && t.beschluesse.length) s += zielTabelle(t);
     s += dl([
-      [t.beschluesse.length > 1 ? 'Beschlüsse' : 'Beschluss', ziele ? '' : ul(t.beschluesse.map(beschZeile))],
-      [t.aufgaben.length > 1 ? 'Aufgaben' : 'Aufgabe', ul(t.aufgaben.map(aufgZeile))],
+      [t.beschluesse.length > 1 ? 'Beschlüsse' : 'Beschluss', ziele ? '' : ul(t.beschluesse.map((b) => beschZeile(b, t)))],
+      [(hatAufgZu(t) ? 'Weitere ' : '') + (aufgFrei(t).length > 1 ? 'Aufgaben' : 'Aufgabe'), ul(aufgFrei(t).map(aufgZeile))],
       ['Noch offen', park ? ul(t.notizen.filter((n) => !pkErledigt(n)).map((n) => '<li>' + esc(n.text) + marke(n) + (n.vj ? ' <span class="e-grau">(aus ' + esc(n.vj) + ')</span>' : '') + '</li>')) : ''],
       ['Gesagt', !park && beil('notizen') ? ul((t.stichworte || []).filter((x) => x.antwort).map((x) => '<li><b>' + esc(x.text) + ':</b> ' + esc(x.antwort) + '</li>')) : ''],
       ['Notizen', !park && beil('notizen') ? ul(t.notizen.map((n) => '<li>' + esc(n.text) + marke(n) + '</li>')) : '']
@@ -5247,7 +5291,9 @@ const SHEET = {
   aufgabe() {   // seit 1.4 (448): wer macht was bis wann, dazu Stand oder Bemerkung
     const a = imThema('aufgaben');
     if (!a) return '';
-    return formHuelle('Aufgabe', 'aufgabe-edit', '<label class="f" for="a-was"><span>Was ist zu tun?</span><textarea id="a-was" name="was" rows="2"' + (sheet.neu ? '' : ' data-fokus') + '>' + esc(a.was) + '</textarea></label>' +
+    const st = sheetThema(), B = st && st.art !== 'ziele' ? st.beschluesse : [];
+    const zuWahl = B.length ? '<label class="f" for="a-zu"><span>Folgt aus dem Beschluss</span><select id="a-zu" name="zu"><option value="">Keinem Beschluss</option>' + B.map((b) => '<option value="' + b.id + '"' + (a.zu === b.id ? ' selected' : '') + '>' + esc(b.was) + '</option>').join('') + '</select></label>' : '';   // seit 1.9.3 (494)
+    return formHuelle('Aufgabe', 'aufgabe-edit', '<label class="f" for="a-was"><span>Was ist zu tun?</span><textarea id="a-was" name="was" rows="2"' + (sheet.neu ? '' : ' data-fokus') + '>' + esc(a.was) + '</textarea></label>' + zuWahl +
       '<label class="f" for="a-wer"><span>Wer</span><input id="a-wer" name="wer" value="' + esc(a.wer) + '" autocomplete="off" list="dl-wer-s"></label>' + optionen('dl-wer-s', werAlle()) + chipsHTML('a-wer', werNamen(), a.wer, true) +
       '<label class="f" for="a-bis"><span>Bis wann</span><input id="a-bis" name="bis" value="' + esc(a.bis) + '" autocomplete="off"></label>' + chipsHTML('a-bis', bisListe(), a.bis, false) +
       (sheet.neu ? '' : '<label class="f" for="a-bem"><span>Stand oder Bemerkung</span><textarea id="a-bem" name="bem" rows="2">' + esc(a.bem || '') + '</textarea></label>' +
@@ -6120,6 +6166,8 @@ const AKT = {
     auf({ art: 'aufgabe', id: n.id, neu: true });
   },
   aufgabe(el) { auf({ art: 'aufgabe', id: el.dataset.id, tid: el.dataset.t || '' }); },
+  'b-aufg-neu'(el) { const t = aktThema(); if (!t) return; B_AUFG = { t: t.id, b: el.dataset.id }; render(); fokus('neu-aufg-b'); },   // seit 1.9.3 (494): Aufgabe unter dem Beschluss erfassen
+  'b-aufg-zu'() { B_AUFG = null; render(); },
   'a-erl'(el) { const t = el.dataset.t ? themaVon(el.dataset.t) : aktThema(), a = t && t.aufgaben.find((y) => y.id === el.dataset.id); if (!a) return; a.erl = !a.erl; geaendert(); },   // abhaken: im Thema (auch abgeschlossen) und in der Umsetzung
   'aufgabe-weg'() { entfernen('aufgaben', 'Aufgabe gelöscht'); },
   'a-zu-b'() {   // Aufgabe als Beschluss führen und umgekehrt: nichts neu tippen; Wer, Bis wann, Stand und «GL» gehen mit
@@ -6127,7 +6175,7 @@ const AKT = {
     if (!t || !a) return;
     merken();
     t.aufgaben = t.aufgaben.filter((y) => y !== a);
-    t.beschluesse.push({ id: a.id, was: a.was, wer: a.wer || '', bis: a.bis || '', gl: !!a.gl, erl: !!a.erl, vert: !!a.vert });
+    t.beschluesse.push({ id: a.id, was: a.was, wer: a.wer || '', bis: a.bis || '', gl: !!a.gl, erl: !!a.erl, vert: !!a.vert });   // ein Beschluss gehört zu keinem Beschluss: «zu» fällt weg
     S.glPunkte.forEach((g) => { if (g.quelle === 'a:' + a.id) g.quelle = 'b:' + a.id; });
     geaendert(true); toast('Steht jetzt bei den Beschlüssen', true);
   },
@@ -6137,6 +6185,7 @@ const AKT = {
     merken();
     t.beschluesse = t.beschluesse.filter((y) => y !== b);
     if (b.ziel && zt) zt.beschluesse = zt.beschluesse.filter((z) => z.von !== b.id);   // ein daraus übernommenes Ziel fällt mit weg
+    t.aufgaben.forEach((y) => { if (y.zu === b.id) delete y.zu; });   // seit 1.9.3: seine Aufgaben bleiben, ohne Beschluss
     t.aufgaben.push({ id: b.id, was: b.was, wer: b.wer || '', bis: b.bis || '', erl: !!b.erl, bem: '', gl: !!b.gl, vert: !!b.vert });
     S.glPunkte.forEach((g) => { if (g.quelle === 'b:' + b.id) g.quelle = 'a:' + b.id; });
     geaendert(true); toast('Steht jetzt bei den Aufgaben', true);
@@ -6352,7 +6401,7 @@ const AKT = {
     toast('Eigenes Thema angelegt', true);
   },
   'pk-weg'() { if (!sheet) return; merken(); const id = sheet.id, zur = sheet.zurueck; S.park.notizen = S.park.notizen.filter((x) => x.id !== id); speichern(); render(); if (zur) auf({ art: zur }); else zu(); toast('Vom Parkplatz gelöscht', true); },
-  'beschluss-weg'() { entfernen('beschluesse', 'Gelöscht'); },
+  'beschluss-weg'() { const t = sheetThema(); if (t && sheet) (t.aufgaben || []).forEach((y) => { if (y.zu === sheet.id) delete y.zu; }); entfernen('beschluesse', 'Gelöscht'); },   // seit 1.9.3: seine Aufgaben bleiben, ohne Beschluss
   'stichwort-weg'() { entfernen('stichworte', 'Stichwort gelöscht'); },
   'ziel-weg'() { entfernen('ziele', 'Ziel gelöscht'); },
   'fd-wahl'(el) { auf({ art: 'fd-neu', o: el.dataset.o === 'gl' ? 'gl' : 't' }); },
@@ -6446,13 +6495,15 @@ const FORMS = {
     const t = aktThema(), was = f.elements.was.value.trim();
     if (!t) return;
     if (!was) { f.elements.was.focus(); return; }
-    t.aufgaben.push({ id: uid(), was: was, wer: f.elements.wer.value.trim(), bis: ohneBis(f.elements.bis.value), erl: false, bem: '', gl: false });
-    geaendert(); fokus('neu-aufg');
+    const zu = f.dataset.zu && t.beschluesse.some((b) => b.id === f.dataset.zu) ? f.dataset.zu : '';   // seit 1.9.3 (494): unter einem Beschluss erfasst
+    t.aufgaben.push(Object.assign({ id: uid(), was: was, wer: f.elements.wer.value.trim(), bis: ohneBis(f.elements.bis.value), erl: false, bem: '', gl: false }, zu ? { zu: zu } : {}));
+    geaendert(); fokus(zu ? 'neu-aufg-b' : 'neu-aufg');
   },
   'aufgabe-edit'(f) {
     const a = imThema('aufgaben'), was = a && pflicht(f.elements.was);
     if (!was) return;
     a.was = was.replace(/\s*[\r\n]+\s*/g, ' '); a.wer = f.elements.wer.value.trim(); a.bis = ohneBis(f.elements.bis.value); a.gl = f.elements.gl.checked;
+    if (f.elements.zu) { if (f.elements.zu.value) a.zu = f.elements.zu.value; else delete a.zu; }   // seit 1.9.3 (494)
     if (f.elements.bem) a.bem = f.elements.bem.value.replace(/\s*[\r\n]+\s*/g, ' ').trim();
     if (f.elements.erl) a.erl = f.elements.erl.checked;
     geaendert(true);
