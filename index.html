@@ -1202,7 +1202,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '1.9.5';         // Version des Tools, steht in den Einstellungen
+const VERSION = '1.9.6';         // Version des Tools, steht in den Einstellungen
 const FORMAT = 12;             // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
@@ -1366,7 +1366,8 @@ function leer() {
     parkplatz: [],   // bis 1.2 die Punkte des Parkplatzes; seit 1.3 stehen sie in «park». Das Feld bleibt leer und nimmt nur noch Stände älterer Fassungen auf
     park: parkNeu(), // seit 1.3: der Parkplatz als letztes Traktandum; notizen = parkiert [{id, text, gl, vj (aus welchem Jahr)}], beschluesse wie in jedem Thema
     glPunkte: [],    // eigene Punkte für die GL, stehen nie im Ergebnis: [{id, text, gruppe, an (gesagt), ergebnis, thema}]
-    glGruppen: [],   // seit 0.9: Gruppen der GL-Punkte [{id, titel, notiz (Mitschrift seit 1.0), eltern (seit 1.4: Unterthema eines GL-Themas)}]
+    glGruppen: [],   // seit 0.9: Gruppen der GL-Punkte [{id, titel, notiz (Mitschrift seit 1.0), eltern (seit 1.4: Unterthema eines GL-Themas), zu (seit 1.9.6: abgeschlossen am)}]
+    glPkZu: '',      // seit 1.9.6 (502): Datum, an dem der Parkplatz der GL abgeschlossen wurde, sonst ''
     archiv: [],      // seit 1.0: abgeschlossene Jahre [{id, jahr, titel, abgeschlossen, meta, themen, parkplatz, park, budget, mitarbeiter, gl: {gruppen, punkte, felder}}]
     glFelder: [],    // seit 0.9: Felder im Reiter «GL» (Checkliste, Auswahl, Tabelle, Gruppen)
     rueckmeldungen: [],   // was am Tool auffällt, zum Weitergeben an Claude: [{id, datum, wo, art, text, version, umgebung, breite, status, uebergeben}]
@@ -1545,10 +1546,11 @@ function normal(d) {
   s.glPunkte = (Array.isArray(s.glPunkte) ? s.glPunkte : []).filter((x) => x && typeof x.text === 'string');
   s.glGruppen = (Array.isArray(s.glGruppen) ? s.glGruppen : []).filter((g) => g && typeof g === 'object' && typeof g.titel === 'string');
   s.glGruppen.forEach((g) => {
-    if (typeof g.id !== 'string' || !g.id) g.id = uid(); if (typeof g.notiz !== 'string') g.notiz = ''; if (typeof g.eltern !== 'string') g.eltern = '';
+    if (typeof g.id !== 'string' || !g.id) g.id = uid(); if (typeof g.notiz !== 'string') g.notiz = ''; if (typeof g.eltern !== 'string') g.eltern = ''; if (typeof g.zu !== 'string') g.zu = '';   // zu seit 1.9.6 (502)
     if (g.zeigen !== undefined) { const z = {}; ['budget', 'auslastung', 'kunden'].forEach((k) => { if (g.zeigen && g.zeigen[k] === true) z[k] = true; }); if (Object.keys(z).length) g.zeigen = z; else delete g.zeigen; }   // seit 1.9.1 (490)
   });
   s.glGruppen = glOrdnen(s.glGruppen);   // seit 1.4: Unterthemen stehen direkt hinter ihrem GL-Thema
+  s.glPkZu = typeof s.glPkZu === 'string' ? s.glPkZu : '';   // seit 1.9.6 (502)
   const glIds = s.glGruppen.map((g) => g.id);
   s.glPunkte.forEach((x) => { if (!x.id) x.id = uid(); if (x.gruppe !== GLPK && glIds.indexOf(x.gruppe) < 0) x.gruppe = ''; x.an = !!x.an; x.vert = !!x.vert; x.erl = !!x.erl; ['ergebnis', 'thema', 'wer', 'bis'].forEach((k) => { if (typeof x[k] !== 'string') x[k] = ''; }); if (pkAlt[x.quelle]) x.quelle = pkAlt[x.quelle]; });   // vert und erl seit 1.9 (472)
   s.glFelder = felderNormal(s.glFelder);
@@ -2374,6 +2376,7 @@ function gesichertMerken() { datei.schmutzig = false; hinweis = ''; try { localS
 function anzeigeMerken() { try { localStorage.setItem(KEY_A, JSON.stringify({ zoom: S.meta.zoom, modus: S.meta.modus, gl: glAn, bf: bfAn })); } catch (e) { /* ohne Zwischenspeicher weiter */ } }
 function nameMerken(name) {
   if (!name || !/\.html?$/i.test(name)) return;
+  name = nameSauber(name) || name;   // seit 1.9.6 (500): so, wie ihn Windows und OneDrive schreiben
   datei.vorschlag = name;
   try { localStorage.setItem(KEY_N, name); } catch (e) { /* ohne Zwischenspeicher weiter */ }
 }
@@ -3279,7 +3282,7 @@ const fertig = (t) => !!t.zu;
 const kinderVon = (t) => S.themen.filter((k) => k.eltern === t.id);
 const vaterVon = (t) => (t && t.eltern && S.themen.find((x) => x.id === t.eltern)) || null;
 const erledigt = (t) => { const k = kinderVon(t); return !!t.zu || (k.length > 0 && k.every(fertig)); };
-const ZU_ERLAUBT = ['anhang', 'thema', 'auf', 'seg', 'gruppen-drucken', 'oeffnen', 'a-erl'];   // was in einem abgeschlossenen Thema noch geht: ansehen, nicht ändern; seit 1.4 dazu eine Aufgabe abhaken (der Stand gehört nicht zum festgehaltenen Thema)
+const ZU_ERLAUBT = ['anhang', 'thema', 'auf', 'seg', 'gruppen-drucken', 'oeffnen', 'a-erl', 'gl-wahl'];   // was in einem abgeschlossenen Thema noch geht: ansehen, nicht ändern; seit 1.4 dazu eine Aufgabe abhaken (der Stand gehört nicht zum festgehaltenen Thema); seit 1.9.6 im abgeschlossenen GL-Thema zu seinen Unterthemen (gl-wahl)
 const gesperrt = (el) => !!(el.closest && el.closest('.thema.zu')) && !el.closest('.titel, .zu-band') && ZU_ERLAUBT.indexOf(el.dataset.a) < 0;
 const ZU_TEXT = 'Abgeschlossen. Zum Ändern zuerst das Schloss öffnen.';
 /* Nummern wie in einem Mindmap: «1», «1.2». Steht ein Rückblick zuoberst, ist er die Einleitung und zählt nicht mit. */
@@ -5030,13 +5033,16 @@ const ANSICHT = {
   gl() {   // seit 0.9: Gruppen, Haken «gesagt», Ergebnis je Punkt, dazu Felder; seit 1.0 GL-Themen, Punkte vom Strategietag, Mitschrift, Vorjahre; seit 1.4 Unterthemen (450)
     if (glAbgleich()) setTimeout(speichern, 0);
     const G = S.glGruppen, P = S.glPunkte;
-    const punkt = (x) => '<li class="glp' + (x.an ? ' an' : '') + '" data-zieh="gl" data-zid="' + x.id + '"><button type="button" class="glp-box" data-a="glhaken" data-id="' + x.id + '" aria-pressed="' + !!x.an + '" aria-label="Gesagt" title="Gesagt">' + ic('check') + '</button>' +
+    const punkt = (x, zu) => '<li class="glp' + (x.an ? ' an' : '') + '" data-zieh="gl" data-zid="' + x.id + '"><button type="button" class="glp-box" data-a="glhaken" data-id="' + x.id + '" aria-pressed="' + !!x.an + '" aria-label="Gesagt" title="Gesagt">' + ic('check') + '</button>' +
       '<button type="button" class="n-text" data-a="glpunkt" data-id="' + x.id + '"><span class="glp-t">' + (x.quelle ? '<span class="z-th st-chip">Strategietag · ' + esc(x.thema || '') + '</span>' : thChip(x)) + esc(x.text) + '</span>' + (x.weg ? '<span class="glp-weg">Am Strategietag nicht mehr mit «GL» markiert</span>' : '') + (x.ergebnis && !x.an ? '<span class="glp-e">' + esc(x.ergebnis) + '</span>' : '') + (x.wer || x.bis ? '<span class="glp-m">' + esc(metaText(x)) + '</span>' : '') + '</button>' +
-      (x.an ? '<input class="glp-antw" id="glantw-' + x.id + '" data-glantw="' + x.id + '" value="' + esc(x.ergebnis || '') + '" placeholder="Was sagt die GL dazu? …" aria-label="Was sagt die GL dazu?" autocomplete="off" enterkeyhint="done">' : '') + '</li>';
+      (x.an && (!zu || (x.ergebnis || '').trim()) ? '<input class="glp-antw" id="glantw-' + x.id + '" data-glantw="' + x.id + '" value="' + esc(x.ergebnis || '') + '" placeholder="Was sagt die GL dazu? …" aria-label="Was sagt die GL dazu?" autocomplete="off" enterkeyhint="done"' + (zu ? ' readonly' : '') + '>' : '') + '</li>';   // seit 1.9.6: abgeschlossen nur zum Lesen
     const von = (g) => P.filter((x) => (g ? x.gruppe === g.id : !x.gruppe));
     const info = (L) => '<span class="fd-info">' + (L.length ? L.filter((x) => x.an).length + ' von ' + L.length + ' gesagt' : '') + '</span>';
     const neu = (g) => '<form class="gl-neu" data-form="glpunkt" data-g="' + (g ? g.id : '') + '"><button aria-label="Punkt hinzufügen">' + ic('plus') + '</button><input name="text"' + (g ? '' : ' id="neu-glpunkt"') + ' placeholder="Punkt hinzufügen …" aria-label="Punkt hinzufügen' + (g ? ' zu ' + esc(g.titel) : '') + '" autocomplete="off" enterkeyhint="done"></form>';
     const mitschrift = (g) => '<button type="button" class="gl-mit" data-a="glmitschrift" data-id="' + g.id + '"><span class="gl-mit-k">Mitschrift</span><span class="gl-mit-t">' + esc(g.notiz) + '</span></button>';
+    /* Seit 1.9.6 (502): «Abschliessen» oben rechts wie bei den Themen; abgeschlossen steht das Band mit «Öffnen», und im Thema ändert sich nichts mehr */
+    const abschl = '<button type="button" class="btn klein abschl" data-a="gl-abschliessen" aria-label="Abschliessen" title="Haken setzen und einfrieren">' + ic('check') + '<span>Abschliessen</span></button>';
+    const band = (zu) => (zu ? '<div class="festband zu-band">' + ic('check') + '<span>Abgeschlossen am ' + esc(zu.split('-').reverse().map((x) => String(+x)).join('.')) + '</span><button type="button" class="btn klein" data-a="gl-oeffnen">' + ic('schloss') + '<span>Öffnen</span></button></div>' : '');
     /* Seit 1.9.5 (499): aufgebaut wie die Themen. Links die GL-Themen; die Unterthemen zeigt nur das gewählte (auf jeder Stufe eins),
        dazu «Noch keinem GL-Thema zugeordnet» (solange etwas darin steht) und zuunterst der eigene Parkplatz der GL (498).
        Rechts das gewählte: Bilder (490), Punkte, Mitschrift (486), Unterthemen. Einen Punkt links auf ein Thema ziehen ordnet ihn dort zu. */
@@ -5048,14 +5054,13 @@ const ANSICHT = {
     S.ui.glWahl = w;
     const gw = G.find((g) => g.id === w) || null, pfad = gw ? glPfad(G, gw) : [];
     const sub = (g) => { const A = new Set([g.id].concat(Array.from(glUnterAlle(g)).map((x) => x.id))); return P.filter((x) => A.has(x.gruppe)); };
-    const fertigG = (L) => L.length > 0 && L.every((x) => x.an);
     const nrT = (g) => glNr(g.titel);
     const items = [], dazu = (L, e) => L.forEach((g) => { items.push({ g: g, e: e }); if (pfad.indexOf(g) >= 0) dazu(glKinder(g), e + 1); });
     dazu(oben, 0);
     const link = (it, platz) => {
       const g = it.g, n = nrT(g), L = sub(g), on = g === gw, offen = !on && pfad.indexOf(g) >= 0;
       return '<button type="button" class="tlink' + (it.e ? ' kind kind' + Math.min(it.e, 3) : '') + (on ? ' on' : (offen ? ' offen' : '')) + '" style="order:' + platz + '" data-a="gl-wahl" data-gid="' + g.id + '" data-spalte="' + g.id + '"' + (on ? ' aria-current="true"' : '') + '>' +
-        '<span class="nr">' + (n.nr ? esc(n.nr) : (it.e ? '' : '·')) + '</span><span class="tl-t">' + esc(n.text) + '</span>' + (L.length && !fertigG(L) ? '<span class="tl-z tnum">' + L.length + '</span>' : '') + (fertigG(L) ? ic('check', 'ok') : '') + '</button>';
+        '<span class="nr">' + (n.nr ? esc(n.nr) : (it.e ? '' : '·')) + '</span><span class="tl-t">' + esc(n.text) + '</span>' + (L.length && !glErledigt(g) ? '<span class="tl-z tnum">' + L.length + '</span>' : '') + (glErledigt(g) ? ic('check', 'ok') : '') + '</button>';
     };
     const ebenen = [];
     items.forEach((it, i) => { (ebenen[it.e] || (ebenen[it.e] = [])).push(link(it, i + 1)); });
@@ -5063,36 +5068,37 @@ const ANSICHT = {
     const nav = '<nav class="tliste2" aria-label="GL-Themen"><div class="tz" data-h="gl0">' +
       (ohne.length || !oben.length ? '<button type="button" class="tlink' + (w === '-' ? ' on' : '') + '" style="order:0" data-a="gl-wahl" data-gid="-" data-spalte=""' + (w === '-' ? ' aria-current="true"' : '') + '><span class="nr">' + ic('flag') + '</span><span class="tl-t">Ohne GL-Thema</span>' + (ohne.length ? '<span class="tl-z tnum">' + ohne.length + '</span>' : '') + '</button>' : '') +
       (ebenen[0] || []).join('') +
-      '<button type="button" class="tlink pkl' + (w === GLPK ? ' on' : '') + '" style="order:99999" data-a="gl-wahl" data-gid="' + GLPK + '" data-spalte="' + GLPK + '"' + (w === GLPK ? ' aria-current="true"' : '') + ' aria-label="Parkplatz der GL, ' + pkOffenGL + ' offen"><span class="nr">P</span><span class="tl-t">Parkplatz</span>' + (pkOffenGL ? '<span class="tl-z tnum">' + pkOffenGL + '</span>' : '') + '</button>' +
+      '<button type="button" class="tlink pkl' + (w === GLPK ? ' on' : '') + '" style="order:99999" data-a="gl-wahl" data-gid="' + GLPK + '" data-spalte="' + GLPK + '"' + (w === GLPK ? ' aria-current="true"' : '') + ' aria-label="Parkplatz der GL, ' + pkOffenGL + ' offen"><span class="nr">P</span><span class="tl-t">Parkplatz</span>' + (pkOffenGL ? '<span class="tl-z tnum">' + pkOffenGL + '</span>' : '') + (S.glPkZu || (!pkOffenGL && park.length) ? ic('check', 'ok') : '') + '</button>' +
       '<button type="button" class="tlink neu" style="order:100000" data-a="gl-thema-neu">' + ic('plus') + '<span>GL-Thema</span></button>' +
       '<button type="button" class="tlink neu leise" style="order:100001" data-a="glgruppe-neu">' + ic('liste') + '<span>Liste einfügen</span></button></div>' +
       ebenen.slice(1).map((L, i) => '<div class="tz kinder" data-h="gl' + (i + 1) + '">' + L.join('') + '</div>').join('') + '</nav>';
     let kopf, inhalt;
     if (gw) {
-      const n = nrT(gw), vater = pfad.length > 1 ? pfad[pfad.length - 2] : null, L = von(gw), K = glKinder(gw), lang = /[\r\n]/.test(gw.notiz || '');
+      const n = nrT(gw), vater = pfad.length > 1 ? pfad[pfad.length - 2] : null, L = von(gw), K = glKinder(gw), lang = /[\r\n]/.test(gw.notiz || ''), zu = !!gw.zu;
       kopf = '<div class="titel"><div>' + (vater ? '<button type="button" class="pfad" data-a="gl-wahl" data-gid="' + vater.id + '">' + ic('left') + '<span>' + esc(vater.titel) + '</span></button>' : '') +
         '<h1>' + (n.nr ? '<span class="tnr tnum">' + esc(n.nr) + '</span> ' : '') + esc(n.text) + '</h1></div><div class="titel-r">' +
-        '<button type="button" class="btn klein" data-a="glunter-neu" data-id="' + gw.id + '">' + ic('plus') + '<span>Unterthema</span></button>' +
-        '<button type="button" class="rundb" data-a="glgruppe" data-id="' + gw.id + '" aria-label="' + (gw.eltern ? 'Unterthema' : 'GL-Thema') + ' umbenennen, verschieben, Zahlen zeigen oder löschen" title="Umbenennen, verschieben, Zahlen zeigen oder löschen">' + ic('pen') + '</button></div></div>';
-      inhalt = glZahlenHTML(gw) +
-        '<h2 class="bl">Punkte</h2><div class="gl-karte"><ul class="gl-liste">' + L.map(punkt).join('') + '</ul>' + neu(gw) + '</div>' +
-        '<h2 class="bl">Mitschrift</h2>' + (lang ? mitschrift(gw) : '<input class="gl-zeile" data-glmit="' + gw.id + '" value="' + esc(gw.notiz || '') + '" placeholder="Mitschreiben …" aria-label="Mitschrift zu ' + esc(gw.titel) + '" autocomplete="off" enterkeyhint="done">') +
-        (K.length ? '<h2 class="bl">Unterthemen</h2><div class="uliste">' + K.map((k) => { const m = nrT(k), S2 = sub(k); return '<button type="button" class="urow" data-a="gl-wahl" data-gid="' + k.id + '" data-spalte="' + k.id + '"><span class="u-nr tnum">' + esc(m.nr || '') + '</span><span class="u-t">' + esc(m.text) + '</span><span class="u-m">' + esc([S2.length ? (S2.some((x) => x.an) ? S2.filter((x) => x.an).length + ' von ' + S2.length + ' gesagt' : mehrzahl(S2.length, 'Punkt', 'Punkte')) : '', (k.notiz || '').trim() ? 'Mitschrift' : ''].filter(Boolean).join(' · ')) + '</span>' + (fertigG(S2) ? ic('check', 'ok') : '') + ic('right', 'pf') + '</button>'; }).join('') + '</div>' : '');
+        (zu ? '' : '<button type="button" class="btn klein" data-a="glunter-neu" data-id="' + gw.id + '">' + ic('plus') + '<span>Unterthema</span></button>' +
+        '<button type="button" class="rundb" data-a="glgruppe" data-id="' + gw.id + '" aria-label="' + (gw.eltern ? 'Unterthema' : 'GL-Thema') + ' umbenennen, verschieben, Zahlen zeigen oder löschen" title="Umbenennen, verschieben, Zahlen zeigen oder löschen">' + ic('pen') + '</button>' + abschl) + '</div></div>';
+      inhalt = band(gw.zu) + glZahlenHTML(gw) +
+        (zu && !L.length ? '' : '<h2 class="bl">Punkte</h2><div class="gl-karte"><ul class="gl-liste">' + L.map((x) => punkt(x, zu)).join('') + '</ul>' + (zu ? '' : neu(gw)) + '</div>') +
+        (zu && !(gw.notiz || '').trim() ? '' : '<h2 class="bl">Mitschrift</h2>' + (lang || zu ? mitschrift(gw) : '<input class="gl-zeile" data-glmit="' + gw.id + '" value="' + esc(gw.notiz || '') + '" placeholder="Mitschreiben …" aria-label="Mitschrift zu ' + esc(gw.titel) + '" autocomplete="off" enterkeyhint="done">')) +
+        (K.length ? '<h2 class="bl">Unterthemen</h2><div class="uliste">' + K.map((k) => { const m = nrT(k), S2 = sub(k); return '<button type="button" class="urow" data-a="gl-wahl" data-gid="' + k.id + '" data-spalte="' + k.id + '"><span class="u-nr tnum">' + esc(m.nr || '') + '</span><span class="u-t">' + esc(m.text) + '</span><span class="u-m">' + esc([S2.length ? (S2.some((x) => x.an) ? S2.filter((x) => x.an).length + ' von ' + S2.length + ' gesagt' : mehrzahl(S2.length, 'Punkt', 'Punkte')) : '', (k.notiz || '').trim() ? 'Mitschrift' : ''].filter(Boolean).join(' · ')) + '</span>' + (glErledigt(k) ? ic('check', 'ok') : '') + ic('right', 'pf') + '</button>'; }).join('') + '</div>' : '');
     } else if (w === GLPK) {
-      kopf = '<div class="titel"><div><h1>Parkplatz</h1></div></div>';
-      inhalt = '<p class="frage">Was an der GL unterwegs aufkommt. Am Schluss: einem GL-Thema zuordnen (Punkt nach links ziehen oder antippen), das Ergebnis festhalten oder stehen lassen.</p>' +
-        '<div class="gl-karte"><ul class="gl-liste">' + park.map(punkt).join('') + '</ul><form class="gl-neu" data-form="glpunkt" data-g="' + GLPK + '"><button aria-label="Parkieren">' + ic('plus') + '</button><input name="text" id="neu-glpk-seite" placeholder="Parkieren …" aria-label="Auf den Parkplatz der GL" autocomplete="off" enterkeyhint="done"></form></div>';
+      const zu = !!S.glPkZu;   // seit 1.9.6 (502): auch der Parkplatz der GL lässt sich abschliessen; ein neuer Punkt über «P» öffnet ihn wieder
+      kopf = '<div class="titel"><div><h1>Parkplatz</h1></div><div class="titel-r">' + (zu ? '' : abschl) + '</div></div>';
+      inhalt = band(S.glPkZu) + '<p class="frage">Was an der GL unterwegs aufkommt. Am Schluss: einem GL-Thema zuordnen (Punkt nach links ziehen oder antippen), das Ergebnis festhalten oder stehen lassen.</p>' +
+        (zu && !park.length ? '' : '<div class="gl-karte"><ul class="gl-liste">' + park.map((x) => punkt(x, zu)).join('') + '</ul>' + (zu ? '' : '<form class="gl-neu" data-form="glpunkt" data-g="' + GLPK + '"><button aria-label="Parkieren">' + ic('plus') + '</button><input name="text" id="neu-glpk-seite" placeholder="Parkieren …" aria-label="Auf den Parkplatz der GL" autocomplete="off" enterkeyhint="done"></form>') + '</div>');
     } else {
       kopf = '<div class="titel"><div><h1>' + (oben.length ? 'Noch keinem GL-Thema zugeordnet' : 'Meine Punkte für die GL') + '</h1></div></div>';
       inhalt = '<p class="frage">' + (oben.length ? 'Punkte vom Strategietag mit «GL» und eigene Punkte. Einen Punkt links auf ein GL-Thema ziehen oder antippen und das GL-Thema wählen.' : 'Was du an der GL-Strategietagung einbringen willst. Die Themen der GL legst du links mit «+ GL-Thema» an.') + '</p>' +
-        '<div class="gl-karte"><ul class="gl-liste">' + ohne.map(punkt).join('') + '</ul>' + neu(null) + '</div>';
+        '<div class="gl-karte"><ul class="gl-liste">' + ohne.map((x) => punkt(x, false)).join('') + '</ul>' + neu(null) + '</div>';
     }
     const vj = S.archiv.filter((a) => a.gl.punkte.length || a.gl.gruppen.some((g) => g.notiz)).slice().reverse();
     const vorjahre = vj.length ? '<details class="gl-vj"><summary>' + ic('right', 'pf') + '<span>Vorjahre nachlesen</span></summary>' + vj.map((a) => '<section><h3>' + esc(a.titel || String(a.jahr)) + '</h3>' +
       [{ id: '', titel: 'Ohne GL-Thema', notiz: '' }].concat(a.gl.gruppen, [{ id: GLPK, titel: 'Parkplatz', notiz: '' }]).map((g) => { const L = a.gl.punkte.filter((x) => (x.gruppe || '') === g.id); return L.length || g.notiz ? '<h4>' + esc(g.id ? glTitel(a.gl.gruppen, g.id) : g.titel) + '</h4><ul>' + L.map((x) => '<li>' + (x.an ? '✓ ' : '') + esc(x.text) + (x.ergebnis ? ' <span class="glp-e">' + esc(x.ergebnis) + '</span>' : '') + '</li>').join('') + '</ul>' + (g.notiz ? '<p class="e-klein">' + esc(g.notiz) + '</p>' : '') : ''; }).join('') + '</section>').join('') + '</details>' : '';
-    return '<div class="themen gl-ansicht" data-brett="gl">' + nav + '<section class="thema gl-thema" data-spalte="' + (gw ? gw.id : (w === GLPK ? GLPK : '')) + '">' + kopf + inhalt + '</section></div>' +
+    return '<div class="themen gl-ansicht" data-brett="gl">' + nav + '<section class="thema gl-thema' + ((gw ? gw.zu : (w === GLPK ? S.glPkZu : '')) ? ' zu' : '') + '" data-spalte="' + (gw ? gw.id : (w === GLPK ? GLPK : '')) + '">' + kopf + inhalt + '</section></div>' +
       '<div class="gl-unten">' + felderHTML(S.glFelder, 'gl', false) +
-      vorjahre + '<p class="muted klein hilfe">' + ic('info') + '<span>Nur für dich: Diese Punkte stehen nicht im Ergebnis und nicht im PDF. Die Themen der GL legst du links mit «+ GL-Thema» an, ihre Unterthemen (z. B. je Abteilung eines) mit «+ Unterthema». Einen Punkt auf ein Thema links ziehen ordnet ihn dort zu. Über den Stift zeigt ein Thema Budget, Auslastung oder Kunden; «P» oben rechts parkiert hier auf dem Parkplatz der GL. An der Tagung abhaken, was du gesagt hast; was die GL dazu sagt, hältst du im Punkt unter «Ergebnis» fest, alles andere in der Mitschrift. Beim neuen Jahr kommen die Entscheide der GL in den Rückblick. Den Reiter blendest du in den Einstellungen aus, je Gerät.</span></p></div>';
+      vorjahre + '<p class="muted klein hilfe">' + ic('info') + '<span>Nur für dich: Diese Punkte stehen nicht im Ergebnis und nicht im PDF. Die Themen der GL legst du links mit «+ GL-Thema» an, ihre Unterthemen (z. B. je Abteilung eines) mit «+ Unterthema». Einen Punkt auf ein Thema links ziehen ordnet ihn dort zu. «Abschliessen» setzt den Haken und friert ein Thema ein, «Öffnen» gibt es wieder frei. Über den Stift zeigt ein Thema Budget, Auslastung oder Kunden; «P» oben rechts parkiert hier auf dem Parkplatz der GL. An der Tagung abhaken, was du gesagt hast; was die GL dazu sagt, hältst du im Punkt unter «Ergebnis» fest, alles andere in der Mitschrift. Beim neuen Jahr kommen die Entscheide der GL in den Rückblick. Den Reiter blendest du in den Einstellungen aus, je Gerät.</span></p></div>';
   }
 };
 const feldGefuellt = (f) => (f.art === 'tabelle' ? (f.zeilen || []).length > 0 : f.punkte.length > 0);
@@ -5150,7 +5156,8 @@ function neuesJahr() {
   S.park.beschluesse = []; S.park.aufgaben = []; S.park.zu = '';
   S.budget = { ziel: null, auftraege: [], notiz: '' };
   S.glPunkte = S.glPunkte.filter((x) => !x.an && !x.ergebnis).map((x) => { const y = Object.assign({}, x); delete y.quelle; delete y.weg; return y; });
-  S.glGruppen.forEach((g) => { g.notiz = ''; });
+  S.glGruppen.forEach((g) => { g.notiz = ''; g.zu = ''; });   // seit 1.9.6 (502): im neuen Jahr sind die GL-Themen wieder offen
+  S.glPkZu = '';
   S.glFelder = [];
   S.archiv = (S.archiv || []).concat([a]);
   S.meta.titel = jahrPlus(S.meta.titel);
@@ -5207,6 +5214,10 @@ const glPfad = (G, g) => { const P = []; let n = 0; while (g && n++ < 50) { P.un
 const glTitel = (G, id) => (id === GLPK ? 'Parkplatz' : glPfad(G, G.find((x) => x.id === id)).map((x) => x.titel).join(' · '));
 const glKinder = (g) => S.glGruppen.filter((x) => x.eltern === g.id);
 const glPkOffen = () => S.glPunkte.filter((x) => x.gruppe === GLPK && !x.an && !(x.ergebnis || '').trim()).length;
+/* Seit 1.9.6 (Fahrplan 502): GL-Themen, Unterthemen und der Parkplatz der GL lassen sich wie die Themen abschliessen (zu: Datum) und mit dem
+   Schloss wieder öffnen. Den Haken links setzt nur das Abschliessen; ein GL-Thema hat ihn auch, wenn alle seine Unterthemen abgeschlossen sind. */
+const glErledigt = (g) => { const k = glKinder(g); return !!g.zu || (k.length > 0 && k.every((x) => !!x.zu)); };
+const glGesperrt = (id) => (id === GLPK ? !!S.glPkZu : !!(id && (S.glGruppen.find((x) => x.id === id) || {}).zu));
 /* Seit 1.9.5 (498): der eigene Parkplatz der GL. Seine Punkte tragen die Gruppe GLPK. Gewählt ist im Reiter GL S.ui.glWahl: ein GL-Thema,
    '-' für «Noch keinem GL-Thema zugeordnet» oder GLPK (498: aufgebaut wie die Themen). */
 const glNr = (titelText) => { const m = /^\s*(\d+(?:\.\d+)*)\.?\s+(\S.*)$/.exec(titelText || ''); return m ? { nr: m[1], text: m[2] } : { nr: '', text: titelText || '' }; };   // eine Nummer aus der Traktandenliste der GL steht wie bei den Themen im Kreis
@@ -5576,7 +5587,7 @@ function umgebung() {
   return br + ' ' + os + (ALS_DATEI ? ', als Datei' : (ALS_LINK ? ', über den Link' : ', Vorschau'));
 }
 function rmAlsText(liste) {
-  return 'Rückmeldungen zum Strategietag-Tool (Fassung ' + VERSION + '), bitte in den Fahrplan eintragen:\n\n' + liste.map((x, i) =>
+  return 'Rückmeldungen zum Strategietag-Tool (Fassung ' + VERSION + '), bitte umsetzen:\n\n' + liste.map((x, i) =>
     (i + 1) + '. ' + [RM_ARTEN[x.art], x.wo, zeitKurz(x.datum) ? zeitKurz(x.datum) + ' Uhr' : '', [x.umgebung, x.breite ? x.breite + ' px breit' : ''].filter(Boolean).join(', '), x.version && x.version !== VERSION ? 'notiert in Fassung ' + x.version : '', x.bild ? 'mit Bild' : ''].filter(Boolean).join(' · ') + '\n' + x.text).join('\n\n') + '\n';
 }
 function rmHalten() {   // was im Sheet schon getippt ist, übersteht ein Neuzeichnen
@@ -5840,7 +5851,7 @@ const SHEET = {
     if (!x) return '';
     const q = !!x.quelle;
     return formHuelle('Punkt für die GL', 'glpunkt-edit', (q ? '<div class="f"><span>Vom Strategietag · ' + esc(x.thema || '') + '</span><p class="gp-q">' + esc(x.text) + '</p><p class="muted klein">' + (x.thema === 'Parkplatz' ? 'Den Text änderst du auf dem Parkplatz.' : 'Den Text änderst du beim Thema.') + ' Wegnehmen: dort die Marke «GL» entfernen.</p></div>' : '<label class="f" for="gp-t"><span>Was du sagen willst</span><textarea id="gp-t" name="text" rows="3" data-fokus>' + esc(x.text) + '</textarea></label>') +
-      '<div class="zwei">' + '<label class="f" for="gp-g"><span>GL-Thema</span><select id="gp-g" name="gruppe"><option value="">Noch keinem zugeordnet</option>' + S.glGruppen.map((g) => '<option value="' + g.id + '"' + (g.id === x.gruppe ? ' selected' : '') + '>' + esc(glTitel(S.glGruppen, g.id)) + '</option>').join('') + '<option value="' + GLPK + '"' + (x.gruppe === GLPK ? ' selected' : '') + '>Parkplatz der GL</option></select></label>' +
+      '<div class="zwei">' + '<label class="f" for="gp-g"><span>GL-Thema</span><select id="gp-g" name="gruppe"><option value="">Noch keinem zugeordnet</option>' + S.glGruppen.filter((g) => !g.zu || g.id === x.gruppe).map((g) => '<option value="' + g.id + '"' + (g.id === x.gruppe ? ' selected' : '') + '>' + esc(glTitel(S.glGruppen, g.id)) + '</option>').join('') + (S.glPkZu && x.gruppe !== GLPK ? '' : '<option value="' + GLPK + '"' + (x.gruppe === GLPK ? ' selected' : '') + '>Parkplatz der GL</option>') + '</select></label>' +
       (q ? '' : '<label class="f" for="gp-th"><span>Thema</span>' + themaWahl('thema', x.thema || '', 'gp-th') + '</label>') + '</div>' +
       '<label class="f" for="gp-e"><span>Ergebnis: was die GL dazu sagt oder entscheidet</span><textarea id="gp-e" name="ergebnis" rows="3">' + esc(x.ergebnis || '') + '</textarea></label>' +
       '<details class="gp-auftrag"' + (x.wer || x.bis ? ' open' : '') + '><summary>Auftrag: wer und bis wann</summary><label class="f" for="gp-wer"><span>Wer</span><input id="gp-wer" name="wer" value="' + esc(x.wer || '') + '" autocomplete="off"></label>' + chipsHTML('gp-wer', werNamen(), x.wer, true) +
@@ -6040,7 +6051,7 @@ const SHEET = {
   },
   glpark() {   // seit 1.9.5 (498): der Parkplatz der GL zum Notieren an der Tagung: tippen, Enter. Zugeordnet wird im Reiter GL unter «Parkplatz»
     const L = S.glPunkte.filter((x) => x.gruppe === GLPK);
-    return huelle('Parkplatz der GL', '<p class="muted">Was an der GL aufkommt, aber zu keinem GL-Thema gehört. Getrennt vom Parkplatz des Strategietags.</p>' +
+    return huelle('Parkplatz der GL', '<p class="muted">Was an der GL aufkommt, aber zu keinem GL-Thema gehört. Getrennt vom Parkplatz des Strategietags.</p>' + (S.glPkZu ? '<p class="muted klein">Der Parkplatz der GL ist abgeschlossen. Ein neuer Punkt öffnet ihn wieder.</p>' : '') +
       '<form class="schnell" data-form="glpunkt" data-g="' + GLPK + '"><input name="text" id="neu-glpk" data-fokus placeholder="Parkieren …" aria-label="Auf den Parkplatz der GL" autocomplete="off" enterkeyhint="done"><button class="rund" aria-label="Hinzufügen">' + ic('plus') + '</button></form>' +
       '<ul class="pliste">' + (L.map((x) => '<li class="pk"><button type="button" class="pk-t" data-a="glpunkt" data-id="' + x.id + '">' + esc(x.text) + (x.ergebnis ? '<span class="glp-e pk-a">' + esc(x.ergebnis) + '</span>' : '') + '</button></li>').join('') || '<li class="leer">Der Parkplatz der GL ist leer.</li>') + '</ul>' +
       '<div class="pk-fuss"><span></span><button type="button" class="btn klein" data-a="glpk-seite"><span>Parkplatz öffnen</span>' + ic('right') + '</button></div>');
@@ -6179,7 +6190,17 @@ function diagrammePassen() {
 }
 
 /* ---------- Sichern: die ganze Datei samt Inhalt ---------- */
-function dateiname() { return datei.vorschlag || 'Strategietag_' + (S.meta.datum || 'ohne-Datum') + '.html'; }
+/* Seit 1.9.6 (Fahrplan 500): Der Name geht in der Schreibweise hinaus, die Windows und OneDrive brauchen (Unicode NFC). Am iPad kann
+   Safari einen Umlaut zerlegt liefern (u und ¨ als zwei Zeichen); OneDrive findet dann die alte Datei nicht und meldet beim Ersetzen,
+   Datei oder Ordner gebe es nicht (Annahme nach der Meldung vom 26.11.2026). Zeichen, die OneDrive in Namen nicht erlaubt, werden ersetzt. */
+function nameSauber(n) {
+  let s = String(n || '');
+  try { s = s.normalize('NFC'); } catch (e) { /* ohne normalize: wie er ist */ }
+  s = s.replace(/[\u0000-\u001f"*:<>?\/\\|]+/g, '-').replace(/\s+/g, ' ').trim();
+  const m = /^(.*?)(\.html?)$/i.exec(s), stamm = (m ? m[1] : s).replace(/[\s.]+$/, '');
+  return stamm ? stamm + (m ? m[2] : '.html') : '';
+}
+function dateiname() { return nameSauber(datei.vorschlag) || nameSauber('Strategietag_' + (S.meta.datum || 'ohne-Datum') + '.html'); }
 function dateiInhalt() {
   const AUF = '<scr' + 'ipt id="daten" type="application/json">', ZU = '</scr' + 'ipt>';
   const a = VORLAGE.indexOf(AUF);
@@ -6606,7 +6627,7 @@ const AKT = {
   'k-erh'(el) { const f = el.closest('form'); if (!f) return; f.elements.erhalten.value = el.dataset.v; $$('[data-a="k-erh"]', f).forEach((b) => { b.setAttribute('aria-pressed', String(b === el)); }); },
   'auftrag-weg'() { if (!sheet) return; merken(); S.kunden.auftraege = S.kunden.auftraege.filter((x) => x.id !== sheet.id); geaendert(true); toast('Offerte entfernt', true); },
   'kunden-weg'(el) { if (!bestaetigt(el, 'Wirklich alle entfernen?')) return; merken(); S.kunden.offerten = []; S.kunden.auftraege = []; S.kunden.jahr = ''; geaendert(); toast('Offerten und Aufträge entfernt', true); },
-  glpunkt(el) { auf({ art: 'glpunkt', id: el.dataset.id }); },
+  glpunkt(el) { const x = S.glPunkte.find((y) => y.id === el.dataset.id); if (x && glGesperrt(x.gruppe)) { toast(ZU_TEXT); return; } auf({ art: 'glpunkt', id: el.dataset.id }); },   // seit 1.9.6 (502): abgeschlossen ändert sich ein Punkt auch über «P» nicht
   'glpunkt-weg'() { if (!sheet) return; merken(); S.glPunkte = S.glPunkte.filter((x) => x.id !== sheet.id); geaendert(true); toast('Punkt gelöscht', true); },
   glhaken(el) { const x = S.glPunkte.find((y) => y.id === el.dataset.id); if (!x) return; merken(); x.an = !x.an; geaendert(); if (x.an) fokus('glantw-' + x.id); },
   'stw-an'(el) { const t = aktThema(), x = t && t.stichworte.find((y) => y.id === el.dataset.id); if (!x) return; x.an = !x.an; geaendert(); if (x.an) fokus('antw-' + x.id); },
@@ -6717,6 +6738,16 @@ const AKT = {
   },
   'glunter-neu'(el) { auf({ art: 'glthemen', eltern: el.dataset.id }); },
   'gl-wahl'(el) { S.ui.glWahl = el.dataset.gid || '-'; speichern(true); render(); if (window.matchMedia('(max-width: 52rem)').matches) { const t = document.querySelector('.gl-thema'); if (t) t.scrollIntoView({ block: 'start' }); } else window.scrollTo(0, 0); },   // seit 1.9.5 (499)
+  'gl-abschliessen'() {   // seit 1.9.6 (502): wie bei den Themen, für das gewählte GL-Thema, Unterthema oder den Parkplatz der GL
+    const w = S.ui.glWahl, g = S.glGruppen.find((x) => x.id === w);
+    if (!g && w !== GLPK) return;
+    merken();
+    if (g) g.zu = heute(); else S.glPkZu = heute();
+    geaendert();
+    const bleibt = g ? 0 : glPkOffen();
+    toast('Abgeschlossen' + (bleibt ? ', ' + mehrzahl(bleibt, 'Punkt bleibt', 'Punkte bleiben') + ' parkiert' : ''), true);
+  },
+  'gl-oeffnen'() { const w = S.ui.glWahl, g = S.glGruppen.find((x) => x.id === w); if (!g && w !== GLPK) return; merken(); if (g) g.zu = ''; else S.glPkZu = ''; geaendert(); toast('Wieder offen', true); },
   'gl-thema-neu'() { merken(); const g = { id: uid(), titel: 'Neues GL-Thema', notiz: '', eltern: '' }; S.glGruppen.push(g); S.ui.glWahl = g.id; speichern(); render(); auf({ art: 'glgruppe', id: g.id }); },   // wie «+ Thema»: anlegen, gleich umbenennen
   'glpk-seite'() { S.ui.bereich = 'gl'; S.ui.glWahl = GLPK; zu(); speichern(true); render(); window.scrollTo(0, 0); },   // seit 1.9.5 (498): der Parkplatz der GL
   'gl-zeigen'(el) {   // seit 1.9.1 (490): Budget, Auslastung, Kunden im GL-Thema ein- und ausschalten
@@ -7103,10 +7134,14 @@ const FORMS = {
   glpunkt(f) {
     const L = zeilenVon(f.elements.text.value), g = f.dataset.g || '';
     if (!L.length) return;
+    if (g && g !== GLPK && glGesperrt(g)) { toast(ZU_TEXT); return; }   // seit 1.9.6 (502)
     merken();
     L.forEach((text) => { S.glPunkte.push({ id: uid(), text: text, gruppe: g, an: false, ergebnis: '', thema: '' }); });
-    if (sheet && sheet.art === 'glpark') { speichern(); render(); renderSheet(false); fokus('neu-glpk'); return; }   // seit 1.9.5 (498): im Fenster bleibt das Feld bereit
+    const wieder = g === GLPK && !!S.glPkZu;   // seit 1.9.6 (502): Ein neuer Punkt öffnet den abgeschlossenen Parkplatz der GL wieder, wie beim Strategietag
+    if (wieder) S.glPkZu = '';
+    if (sheet && sheet.art === 'glpark') { speichern(); render(); renderSheet(false); fokus('neu-glpk'); if (wieder) toast('Der Parkplatz der GL ist wieder offen.'); return; }   // seit 1.9.5 (498): im Fenster bleibt das Feld bereit
     geaendert();
+    if (wieder) toast('Der Parkplatz der GL ist wieder offen.');
     const neu = document.querySelector('form[data-form="glpunkt"][data-g="' + g + '"] input');
     if (neu) neu.focus();
   },
@@ -7380,7 +7415,7 @@ function zugZiel(x, y) {   // wohin der Eintrag käme: vor einen Nachbarn («vor
 function zugMarken() {
   const z = zugZiel(zug.lx, zug.ly);
   $$('.ziel').forEach((s) => { if (!z || s !== z.spalte) s.classList.remove('ziel'); });
-  if (z && z.spalte) z.spalte.classList.add('ziel');
+  if (z && z.spalte && !(zug.art === 'gl' && glGesperrt(z.spalte.dataset.spalte || ''))) z.spalte.classList.add('ziel');   // seit 1.9.6: ein abgeschlossenes GL-Thema leuchtet nicht als Ziel
   markenWeg();
   if (z && z.vor) z.vor.classList.add('ein-vor'); else if (z && z.nach) z.nach.classList.add('ein-nach');
 }
@@ -7445,6 +7480,7 @@ function zugFallen(x, y, finger) {
   if (!gezogen) return;
   klickSperren(finger ? 150 : 80);
   if (!z) return;
+  if (art === 'gl' && z.spalte && glGesperrt(z.spalte.dataset.spalte || '')) { toast(ZU_TEXT); return; }   // seit 1.9.6 (502): in ein abgeschlossenes GL-Thema kommt nichts dazu
   if (art === 'thema') { themaFallen(id, z); return; }
   const q = zugQuelle(art, el);
   if (!q) return;
