@@ -1020,6 +1020,13 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
 .spl input[type="checkbox"]{width:1.4rem;height:1.4rem;accent-color:var(--accent-fill)}
 .spl input[type="text"]{min-width:0;height:2.5rem;padding:0 .7rem;border-radius:.7rem;border:1px solid var(--sep);background:var(--card);font-weight:600}
 .spl small{grid-column:2;color:var(--muted);font-size:.8125rem}
+.gl-st{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.4rem}   /* seit 1.9.10 (512): Auswahl «Aus dem Strategietag» im Reiter GL */
+.gl-st li{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:.15rem .75rem;padding:.6rem .85rem;border-radius:.9rem;background:var(--bg)}
+.gl-st li.gl-st-th{display:block;background:none;padding:.8rem .2rem 0;font-size:.8125rem;font-weight:600;color:var(--muted)}
+.gl-st input{width:1.4rem;height:1.4rem;accent-color:var(--accent-fill)}
+.gl-st label{cursor:pointer;line-height:1.35;overflow-wrap:anywhere}
+.gl-st small{grid-column:2;color:var(--muted);font-size:.8125rem}
+.gl-st li.da label{color:var(--muted)}
 .hinweis{display:flex;align-items:flex-start;gap:.5rem;color:var(--warn);background:var(--warn-soft);padding:.7rem .9rem;border-radius:.9rem;font-size:.9375rem}
 .toast{position:fixed;left:50%;bottom:1.5rem;transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:.9rem;padding:.75rem 1.1rem;border-radius:1.1rem;background:var(--ink);color:var(--bg);font-weight:500;box-shadow:0 8px 30px rgba(0,0,0,.25);animation:toastIn .22s cubic-bezier(.2,.8,.2,1);width:max-content;max-width:calc(100% - 2rem)}
 .toast button{color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:.15em;white-space:nowrap}
@@ -1205,7 +1212,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '1.9.9';         // Version des Tools, steht in den Einstellungen
+const VERSION = '1.9.10';         // Version des Tools, steht in den Einstellungen
 const FORMAT = 12;             // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
@@ -5070,7 +5077,7 @@ const ANSICHT = {
     if (glAbgleich()) setTimeout(speichern, 0);
     const G = S.glGruppen, P = S.glPunkte;
     const punkt = (x, zu) => '<li class="glp' + (x.an ? ' an' : '') + '" data-zieh="gl" data-zid="' + x.id + '"><button type="button" class="glp-box" data-a="glhaken" data-id="' + x.id + '" aria-pressed="' + !!x.an + '" aria-label="Gesagt" title="Gesagt">' + ic('check') + '</button>' +
-      '<button type="button" class="n-text" data-a="glpunkt" data-id="' + x.id + '"><span class="glp-t">' + (x.quelle ? '<span class="z-th st-chip">Strategietag · ' + esc(x.thema || '') + '</span>' : thChip(x)) + esc(x.text) + '</span>' + (x.weg ? '<span class="glp-weg">Am Strategietag nicht mehr mit «GL» markiert</span>' : '') + (x.ergebnis && !x.an ? '<span class="glp-e">' + esc(x.ergebnis) + '</span>' : '') + (x.wer || x.bis ? '<span class="glp-m">' + esc(metaText(x)) + '</span>' : '') + '</button>' +
+      '<button type="button" class="n-text" data-a="glpunkt" data-id="' + x.id + '"><span class="glp-t">' + (x.quelle || x.aus ? '<span class="z-th st-chip">Strategietag · ' + esc(x.thema || '') + '</span>' : thChip(x)) + esc(x.text) + '</span>' + (x.weg ? '<span class="glp-weg">Am Strategietag nicht mehr mit «GL» markiert</span>' : '') + (x.ergebnis && !x.an ? '<span class="glp-e">' + esc(x.ergebnis) + '</span>' : '') + (x.wer || x.bis ? '<span class="glp-m">' + esc(metaText(x)) + '</span>' : '') + '</button>' +
       (zu ? '' : '<button type="button" class="n-gl n-up" data-a="gl-beschluss" data-id="' + x.id + '" aria-label="Beschluss daraus machen" title="Beschluss daraus machen">' + ic('up') + '<span>Beschluss</span></button>') +   // seit 1.9.7 (504)
       (zu ? '' : '<button type="button" class="n-gl n-up" data-a="gl-aufgabe" data-id="' + x.id + '" aria-label="Aufgabe daraus machen" title="Aufgabe daraus machen: wer macht es bis wann?">' + ic('haken') + '<span>Aufgabe</span></button>') +   // seit 1.9.9 (508)
       (x.an && (!zu || (x.ergebnis || '').trim()) ? '<input class="glp-antw" id="glantw-' + x.id + '" data-glantw="' + x.id + '" value="' + esc(x.ergebnis || '') + '" placeholder="Was sagt die GL dazu? …" aria-label="Was sagt die GL dazu?" autocomplete="off" enterkeyhint="done"' + (zu ? ' readonly' : '') + '>' : '') + '</li>';   // seit 1.9.6: abgeschlossen nur zum Lesen
@@ -5157,7 +5164,8 @@ const ANSICHT = {
         (zu ? '' : '<button type="button" class="btn klein" data-a="glunter-neu" data-id="' + gw.id + '">' + ic('plus') + '<span>Unterthema</span></button>' +
         '<button type="button" class="rundb" data-a="glgruppe" data-id="' + gw.id + '" aria-label="' + (gw.eltern ? 'Unterthema' : 'GL-Thema') + ' umbenennen, verschieben, Zahlen zeigen oder löschen" title="Umbenennen, verschieben, Zahlen zeigen oder löschen">' + ic('pen') + '</button>' + abschl) + '</div></div>';
       inhalt = band(gw.zu) + glZahlenHTML(gw) +
-        (zu && !L.length ? '' : '<h2 class="bl">Punkte</h2><div class="gl-karte"><ul class="gl-liste">' + L.map((x) => punkt(x, zu)).join('') + '</ul>' + (zu ? '' : neu(gw)) + '</div>') +
+        (zu && !L.length ? '' : '<div class="bl-zeile"><h2 class="bl">Punkte</h2>' + (zu ? '' : '<button type="button" class="btn klein" data-a="gl-aus" data-g="' + gw.id + '">' + ic('plus') + '<span>Aus dem Strategietag</span></button>') + '</div>' +   // Knopf seit 1.9.10 (512)
+          '<div class="gl-karte"><ul class="gl-liste">' + L.map((x) => punkt(x, zu)).join('') + '</ul>' + (zu ? '' : neu(gw)) + '</div>') +
         glbBlock(gw.id, zu) + glaBlock(gw.id, zu) +
         (zu && !(gw.notiz || '').trim() ? '' : '<h2 class="bl">Mitschrift</h2>' + (lang || zu ? mitschrift(gw) : '<input class="gl-zeile" data-glmit="' + gw.id + '" value="' + esc(gw.notiz || '') + '" placeholder="Mitschreiben …" aria-label="Mitschrift zu ' + esc(gw.titel) + '" autocomplete="off" enterkeyhint="done">')) +
         (K.length ? '<h2 class="bl">Unterthemen</h2><div class="uliste">' + K.map((k) => { const m = nrT(k), S2 = sub(k); return '<button type="button" class="urow" data-a="gl-wahl" data-gid="' + k.id + '" data-spalte="' + k.id + '"><span class="u-nr tnum">' + esc(m.nr || '') + '</span><span class="u-t">' + esc(m.text) + '</span><span class="u-m">' + esc([S2.length ? (S2.some((x) => x.an) ? S2.filter((x) => x.an).length + ' von ' + S2.length + ' gesagt' : mehrzahl(S2.length, 'Punkt', 'Punkte')) : '', subB(k).length ? mehrzahl(subB(k).length, 'Beschluss', 'Beschlüsse') : '', subA(k).length ? mehrzahl(subA(k).length, 'Aufgabe', 'Aufgaben') : '', (k.notiz || '').trim() ? 'Mitschrift' : ''].filter(Boolean).join(' · ')) + '</span>' + (glErledigt(k) ? ic('check', 'ok') : '') + ic('right', 'pf') + '</button>'; }).join('') + '</div>' : '') +
@@ -5190,7 +5198,7 @@ const ANSICHT = {
       [{ id: '', titel: 'Ohne GL-Thema', notiz: '' }].concat(a.gl.gruppen, [{ id: GLPK, titel: 'Parkplatz', notiz: '' }]).map((g) => { const L = a.gl.punkte.filter((x) => (x.gruppe || '') === g.id), BB = (a.gl.beschluesse || []).filter((b) => (b.gruppe || '') === g.id), AA = (a.gl.aufgaben || []).filter((x) => (x.gruppe || '') === g.id); return L.length || BB.length || AA.length || g.notiz ? '<h4>' + esc(g.id ? glTitel(a.gl.gruppen, g.id) : g.titel) + '</h4><ul>' + L.map((x) => '<li>' + (x.an ? '✓ ' : '') + esc(x.text) + (x.ergebnis ? ' <span class="glp-e">' + esc(x.ergebnis) + '</span>' : '') + '</li>').join('') + BB.map((b) => '<li>' + (b.erl ? '✓ ' : '') + 'Beschluss: ' + esc(b.was) + (metaText(b) ? ' (' + esc(metaText(b)) + ')' : '') + '</li>').join('') + AA.map((x) => '<li>' + (x.erl ? '✓ ' : '') + 'Aufgabe: ' + esc(x.was) + (metaText(x) ? ' (' + esc(metaText(x)) + ')' : '') + '</li>').join('') + '</ul>' + (g.notiz ? '<p class="e-klein">' + esc(g.notiz) + '</p>' : '') : ''; }).join('') + '</section>').join('') + '</details>' : '';
     return '<div class="themen gl-ansicht" data-brett="gl">' + nav + '<section class="thema gl-thema' + ((gw ? gw.zu : (w === GLPK ? S.glPkZu : (w === GLRB ? S.glRbZu : ''))) ? ' zu' : '') + '"' + (w === GLRB ? '' : ' data-spalte="' + (gw ? gw.id : (w === GLPK ? GLPK : '')) + '"') + '>' + kopf + inhalt + '</section></div>' +
       '<div class="gl-unten">' +   // seit 1.9.9 (510): die Felder stehen im GL-Thema, nicht mehr hier unter jedem
-      vorjahre + '<p class="muted klein hilfe">' + ic('info') + '<span>Nur für dich: Diese Punkte stehen nicht im Ergebnis und nicht im PDF. Die Themen der GL legst du links mit «+ GL-Thema» an, ihre Unterthemen (z. B. je Abteilung eines) mit «+ Unterthema». Einen Punkt auf ein Thema links ziehen ordnet ihn dort zu. «Abschliessen» setzt den Haken und friert ein Thema ein, «Öffnen» gibt es wieder frei. Über den Stift zeigt ein Thema Budget, Auslastung oder Kunden; «P» oben rechts parkiert hier auf dem Parkplatz der GL. An der Tagung abhaken, was du gesagt hast; was die GL dazu sagt, hältst du im Punkt unter «Ergebnis» fest. Was sie beschliesst, kommt unter «Beschluss», mit «+ Aufgabe» darunter; eine Aufgabe ohne Beschluss unter «Aufgaben». «Beschluss» und «Aufgabe» beim Punkt übernehmen seinen Text. «Ziel» macht einen Beschluss zum Ziel der GL (im GL-Thema «Ziele» von selbst). Alles andere gehört in die Mitschrift. Ein Feld steht nur im GL-Thema, in dem du es anlegst. Nach «Neues Jahr» steht links zuoberst der Rückblick mit den Zielen und Entscheiden vom letzten Jahr. Den Reiter blendest du in den Einstellungen aus, je Gerät.</span></p></div>';
+      vorjahre + '<p class="muted klein hilfe">' + ic('info') + '<span>Nur für dich: Diese Punkte stehen nicht im Ergebnis und nicht im PDF. Die Themen der GL legst du links mit «+ GL-Thema» an, ihre Unterthemen (z. B. je Abteilung eines) mit «+ Unterthema». Einen Punkt auf ein Thema links ziehen ordnet ihn dort zu. «Aus dem Strategietag» holt Beschlüsse, Ziele, Aufgaben, Notizen und Bedarf als Punkte ins GL-Thema. «Abschliessen» setzt den Haken und friert ein Thema ein, «Öffnen» gibt es wieder frei. Über den Stift zeigt ein Thema Budget, Auslastung oder Kunden; «P» oben rechts parkiert hier auf dem Parkplatz der GL. An der Tagung abhaken, was du gesagt hast; was die GL dazu sagt, hältst du im Punkt unter «Ergebnis» fest. Was sie beschliesst, kommt unter «Beschluss», mit «+ Aufgabe» darunter; eine Aufgabe ohne Beschluss unter «Aufgaben». «Beschluss» und «Aufgabe» beim Punkt übernehmen seinen Text. «Ziel» macht einen Beschluss zum Ziel der GL (im GL-Thema «Ziele» von selbst). Alles andere gehört in die Mitschrift. Ein Feld steht nur im GL-Thema, in dem du es anlegst. Nach «Neues Jahr» steht links zuoberst der Rückblick mit den Zielen und Entscheiden vom letzten Jahr. Den Reiter blendest du in den Einstellungen aus, je Gerät.</span></p></div>';
   }
 };
 const feldGefuellt = (f) => (f.art === 'tabelle' ? (f.zeilen || []).length > 0 : f.punkte.length > 0);
@@ -5289,6 +5297,20 @@ function glMarkiert() {
     t.beschluesse.forEach((b) => { if (b.gl) L.push({ q: 'b:' + b.id, text: (t.art === 'ziele' ? 'Ziel: ' : 'Beschluss: ') + b.was + (metaText(b) ? ' (' + metaText(b) + ')' : ''), thema: t.titel }); });
     t.aufgaben.forEach((a) => { if (a.gl) L.push({ q: 'a:' + a.id, text: 'Aufgabe: ' + a.was + (metaText(a) ? ' (' + metaText(a) + ')' : ''), thema: t.titel }); });   // seit 1.4
     t.bedarf.forEach((b) => { if (b.gl) L.push({ q: 'd:' + b.id, text: 'Bedarf: ' + b.was + (bedarfMeta(b) ? ' (' + bedarfMeta(b) + ')' : '') + ', Stand: ' + BSTAND[b.stand], thema: t.titel }); });
+  });
+  return L;
+}
+/* Seit 1.9.10 (512): alles aus dem Strategietag, was sich im Reiter GL von Hand einfügen lässt, je Thema mit Nummer: Beschlüsse und Ziele,
+   Aufgaben, Bedarf und Notizen (dieselben Arten wie bei der Marke «GL», mit derselben Kennung q und demselben Wortlaut). */
+function stEintraege() {
+  const L = [], nr = nummern();
+  mitPark().forEach((t) => {
+    const E = [];
+    t.beschluesse.forEach((b) => { E.push({ q: 'b:' + b.id, text: (t.art === 'ziele' ? 'Ziel: ' : 'Beschluss: ') + b.was + (metaText(b) ? ' (' + metaText(b) + ')' : '') }); });
+    t.aufgaben.forEach((a) => { E.push({ q: 'a:' + a.id, text: 'Aufgabe: ' + a.was + (metaText(a) ? ' (' + metaText(a) + ')' : '') }); });
+    (t.bedarf || []).forEach((b) => { E.push({ q: 'd:' + b.id, text: 'Bedarf: ' + b.was + (bedarfMeta(b) ? ' (' + bedarfMeta(b) + ')' : '') + ', Stand: ' + BSTAND[b.stand] }); });
+    t.notizen.forEach((n) => { E.push({ q: 'n:' + n.id, text: n.text }); });
+    if (E.length) L.push({ th: mitNr(t, nr), titel: t.titel, e: E });
   });
   return L;
 }
@@ -6001,6 +6023,22 @@ const SHEET = {
       '<details class="gp-auftrag"' + (x.wer || x.bis ? ' open' : '') + '><summary>Auftrag: wer und bis wann</summary><label class="f" for="gp-wer"><span>Wer</span><input id="gp-wer" name="wer" value="' + esc(x.wer || '') + '" autocomplete="off"></label>' + chipsHTML('gp-wer', werNamen(), x.wer, true) +
       '<label class="f" for="gp-bis"><span>Bis wann</span><input id="gp-bis" name="bis" value="' + esc(x.bis || '') + '" autocomplete="off"></label>' + chipsHTML('gp-bis', bisListe(), x.bis, false) + '</details>' +
       '<label class="schalter" for="gp-an"><span>Gesagt</span><input type="checkbox" id="gp-an" name="an"' + (x.an ? ' checked' : '') + '></label>' + (q && !x.weg ? '' : loeschKnopf('glpunkt-weg', 'Punkt löschen')));
+  },
+  glaus() {   // seit 1.9.10 (512): Punkte aus dem Strategietag von Hand in ein GL-Thema einfügen; im Strategietag ändert sich nichts
+    const g = sheet && S.glGruppen.find((x) => x.id === sheet.g);
+    if (!g) return '';
+    const L = stEintraege(), titel = glTitel(S.glGruppen, g.id);
+    const da = (q) => S.glPunkte.some((x) => x.gruppe === g.id && (x.quelle === q || x.aus === q));
+    const wo = (x) => (x.gruppe === GLPK ? 'auf dem Parkplatz der GL' : (x.gruppe ? 'in «' + glTitel(S.glGruppen, x.gruppe) + '»' : 'unter «Ohne GL-Thema»'));
+    const hinweis = (q) => { const x = S.glPunkte.find((y) => y.gruppe !== g.id && (y.quelle === q || y.aus === q)); return !x ? '' : (x.quelle && !x.gruppe ? 'mit «GL» vorgemerkt, kommt von «Ohne GL-Thema» hierher' : 'steht auch ' + wo(x)); };
+    if (!L.length) return formHuelle('Aus dem Strategietag', 'glaus', '<p class="muted">Im Strategietag steht noch nichts: keine Beschlüsse, Ziele, Aufgaben, Notizen und kein Bedarf.</p>');
+    let i = 0;
+    return formHuelle('Aus dem Strategietag', 'glaus', '<p class="muted klein">Was du wählst, kommt als Punkt ins GL-Thema «' + esc(titel) + '». Im Strategietag ändert sich nichts.</p>' +
+      '<label class="schalter" for="st-alle"><span>Alle wählen</span><input type="checkbox" id="st-alle" data-wahl="st-alle"></label>' +
+      '<ul class="gl-st">' + L.map((t) => '<li class="gl-st-th">' + esc(t.th) + '</li>' + t.e.map((e) => {
+        const id = 'st-' + (i++), d = da(e.q), h = d ? '' : hinweis(e.q);
+        return '<li' + (d ? ' class="da"' : '') + '><input type="checkbox" id="' + id + '" name="st" value="' + esc(e.q) + '"' + (d ? ' checked disabled' : '') + '><label for="' + id + '">' + esc(e.text) + '</label>' + (d ? '<small>steht schon da</small>' : (h ? '<small>' + esc(h) + '</small>' : '')) + '</li>';
+      }).join('')).join('') + '</ul>', 'Einfügen');
   },
   glbeschluss() {   // seit 1.9.7 (504): Beschluss der GL: Was, Wer, Bis wann; dazu GL-Thema, umgesetzt, löschen
     const b = sheet && S.glBeschluesse.find((y) => y.id === sheet.id);
@@ -6927,6 +6965,7 @@ const AKT = {
     speichern(); render();
     auf({ art: 'glbeschluss', id: b.id, neu: true });
   },
+  'gl-aus'(el) { auf({ art: 'glaus', g: el.dataset.g }); },   // seit 1.9.10 (512)
   'gl-aufgabe'(el) {   // seit 1.9.9 (508): aus einem Punkt eine Aufgabe machen, wie «Beschluss»; der Punkt bleibt. «Abbrechen» im Fenster nimmt die Aufgabe wieder weg
     const x = S.glPunkte.find((y) => y.id === el.dataset.id);
     if (!x) return;
@@ -7379,6 +7418,26 @@ const FORMS = {
     b.aufgaben.push({ id: uid(), was: was, wer: f.elements.wer.value.trim(), bis: ohneBis(f.elements.bis.value), vert: false, erl: false });
     geaendert(); fokus('neu-glaufg');
   },
+  glaus(f) {   // seit 1.9.10 (512): gewählte Einträge des Strategietags als Punkte ins GL-Thema
+    const g = sheet && S.glGruppen.find((x) => x.id === sheet.g);
+    if (!g) { zu(); return; }
+    if (glGesperrt(g.id)) { toast(ZU_TEXT); return; }
+    const gew = Array.from(f.querySelectorAll('input[name="st"]:checked:not(:disabled)')).map((c) => c.value);
+    if (!gew.length) { zu(); return; }
+    const M = {};
+    stEintraege().forEach((t) => { t.e.forEach((e) => { M[e.q] = { text: e.text, thema: t.titel }; }); });
+    merken();
+    let n = 0;
+    gew.forEach((q) => {
+      const m = M[q];
+      if (!m) return;
+      const v = S.glPunkte.find((x) => x.quelle === q && !x.gruppe);   // mit «GL» vorgemerkt und noch ohne GL-Thema: derselbe Punkt kommt hierher, kein zweiter
+      if (v) v.gruppe = g.id; else S.glPunkte.push({ id: uid(), text: m.text, gruppe: g.id, an: false, ergebnis: '', thema: m.thema, aus: q });
+      n++;
+    });
+    geaendert(true);
+    toast(mehrzahl(n, 'Punkt', 'Punkte') + ' eingefügt', true);
+  },
   glfaufgabe(f) {   // seit 1.9.9 (508): Aufgabe ohne Beschluss im GL-Thema hinzufügen
     const g = f.dataset.g || '', was = f.elements.was.value.trim();
     if (!was) { f.elements.was.focus(); return; }
@@ -7518,6 +7577,8 @@ document.addEventListener('change', (e) => {
   if (d.wahl === 'kjahr') { S.kunden.jahr = e.target.value; speichern(true); render(); }
   if (d.wahl === 'pkthema' && e.target.value) pkZuThema(e.target.value);
   if (d.wahl === 'gleltern') glZu(e.target.value);   // seit 1.4: ein GL-Thema einem anderen als Unterthema zuweisen
+  if (d.wahl === 'st-alle') document.querySelectorAll('#sheets input[name="st"]:not(:disabled)').forEach((c) => { c.checked = e.target.checked; });   // seit 1.9.10 (512)
+  if (e.target.name === 'st') { const alle = document.getElementById('st-alle'), L = Array.from(document.querySelectorAll('#sheets input[name="st"]:not(:disabled)')); if (alle) alle.checked = L.length > 0 && L.every((c) => c.checked); }
   if (d.wahl === 'glreiter') { glAn = e.target.checked; anzeigeMerken(); if (!glAn && S.ui.bereich === 'gl') { S.ui.bereich = 'zahlen'; speichern(true); } render(); }
   if (d.wahl === 'bfreiter') { bfAn = e.target.checked; anzeigeMerken(); render(); }   // seit 1.6: «Bauführer» und «Auswertung» unter «Zahlen», je Gerät
   if (d.wahl === 'bfmass') { S.ui.bfmass = e.target.value; speichern(true); render(); }   // seit 1.9: Kennzahl unter «Über die Jahre»
