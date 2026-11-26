@@ -1202,7 +1202,7 @@ body.am-ziehen{user-select:none;-webkit-user-select:none}
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '1.9.6';         // Version des Tools, steht in den Einstellungen
+const VERSION = '1.9.7';         // Version des Tools, steht in den Einstellungen
 const FORMAT = 12;             // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
@@ -1368,6 +1368,7 @@ function leer() {
     glPunkte: [],    // eigene Punkte für die GL, stehen nie im Ergebnis: [{id, text, gruppe, an (gesagt), ergebnis, thema}]
     glGruppen: [],   // seit 0.9: Gruppen der GL-Punkte [{id, titel, notiz (Mitschrift seit 1.0), eltern (seit 1.4: Unterthema eines GL-Themas), zu (seit 1.9.6: abgeschlossen am)}]
     glPkZu: '',      // seit 1.9.6 (502): Datum, an dem der Parkplatz der GL abgeschlossen wurde, sonst ''
+    glBeschluesse: [],   // seit 1.9.7 (504): Beschlüsse im Reiter GL [{id, was, wer, bis, gruppe (wie bei den Punkten), vert, erl, aufgaben: [{id, was, wer, bis, vert, erl}]}]
     archiv: [],      // seit 1.0: abgeschlossene Jahre [{id, jahr, titel, abgeschlossen, meta, themen, parkplatz, park, budget, mitarbeiter, gl: {gruppen, punkte, felder}}]
     glFelder: [],    // seit 0.9: Felder im Reiter «GL» (Checkliste, Auswahl, Tabelle, Gruppen)
     rueckmeldungen: [],   // was am Tool auffällt, zum Weitergeben an Claude: [{id, datum, wo, art, text, version, umgebung, breite, status, uebergeben}]
@@ -1553,6 +1554,14 @@ function normal(d) {
   s.glPkZu = typeof s.glPkZu === 'string' ? s.glPkZu : '';   // seit 1.9.6 (502)
   const glIds = s.glGruppen.map((g) => g.id);
   s.glPunkte.forEach((x) => { if (!x.id) x.id = uid(); if (x.gruppe !== GLPK && glIds.indexOf(x.gruppe) < 0) x.gruppe = ''; x.an = !!x.an; x.vert = !!x.vert; x.erl = !!x.erl; ['ergebnis', 'thema', 'wer', 'bis'].forEach((k) => { if (typeof x[k] !== 'string') x[k] = ''; }); if (pkAlt[x.quelle]) x.quelle = pkAlt[x.quelle]; });   // vert und erl seit 1.9 (472)
+  /* seit 1.9.7 (504): Beschlüsse der GL mit ihren Aufgaben; ein Beschluss ohne bekanntes GL-Thema steht ohne Zuordnung */
+  s.glBeschluesse = (Array.isArray(s.glBeschluesse) ? s.glBeschluesse : []).filter((b) => b && typeof b === 'object' && typeof b.was === 'string');
+  s.glBeschluesse.forEach((b) => {
+    if (!b.id) b.id = uid(); if (b.gruppe !== GLPK && glIds.indexOf(b.gruppe) < 0) b.gruppe = '';
+    ['wer', 'bis'].forEach((k) => { if (typeof b[k] !== 'string') b[k] = ''; }); b.vert = !!b.vert; b.erl = !!b.erl;
+    b.aufgaben = (Array.isArray(b.aufgaben) ? b.aufgaben : []).filter((a) => a && typeof a === 'object' && typeof a.was === 'string');
+    b.aufgaben.forEach((a) => { if (!a.id) a.id = uid(); ['wer', 'bis'].forEach((k) => { if (typeof a[k] !== 'string') a[k] = ''; }); a.vert = !!a.vert; a.erl = !!a.erl; });
+  });
   s.glFelder = felderNormal(s.glFelder);
   s.rueckmeldungen = (Array.isArray(s.rueckmeldungen) ? s.rueckmeldungen : []).filter((x) => x && typeof x.text === 'string' && x.text.trim());
   s.rueckmeldungen.forEach((x) => { if (x.bild && typeof x.bild === 'object' && typeof x.bild.id === 'string') { if (typeof x.bild.inhalt === 'string' && x.bild.inhalt) anhMerken(x.bild.id, x.bild.inhalt); delete x.bild.inhalt; } else x.bild = null; });
@@ -1588,9 +1597,9 @@ function normal(d) {
   // seit 1.0: abgeschlossene Jahre, je gleich aufgeräumt wie der laufende Stand
   s.archiv = (Array.isArray(s.archiv) ? s.archiv : []).filter((a) => a && typeof a === 'object' && Array.isArray(a.themen)).map((a) => {
     const g = a.gl && typeof a.gl === 'object' ? a.gl : {};
-    const n = normal({ meta: a.meta, themen: a.themen, parkplatz: a.parkplatz, park: a.park, budget: a.budget, mitarbeiter: a.mitarbeiter, glPunkte: g.punkte, glGruppen: g.gruppen, glFelder: g.felder });
+    const n = normal({ meta: a.meta, themen: a.themen, parkplatz: a.parkplatz, park: a.park, budget: a.budget, mitarbeiter: a.mitarbeiter, glPunkte: g.punkte, glGruppen: g.gruppen, glFelder: g.felder, glBeschluesse: g.beschluesse });
     return { id: typeof a.id === 'string' && a.id ? a.id : uid(), jahr: Number(a.jahr) || 0, titel: typeof a.titel === 'string' ? a.titel : n.meta.titel, abgeschlossen: typeof a.abgeschlossen === 'string' ? a.abgeschlossen : '',
-      meta: n.meta, themen: n.themen, parkplatz: n.parkplatz, park: n.park, budget: n.budget, mitarbeiter: n.mitarbeiter, gl: { gruppen: n.glGruppen, punkte: n.glPunkte, felder: n.glFelder } };
+      meta: n.meta, themen: n.themen, parkplatz: n.parkplatz, park: n.park, budget: n.budget, mitarbeiter: n.mitarbeiter, gl: { gruppen: n.glGruppen, punkte: n.glPunkte, felder: n.glFelder, beschluesse: n.glBeschluesse } };
   });
   if (s.ui.ejahr && !s.archiv.some((a) => a.id === s.ui.ejahr)) s.ui.ejahr = '';
   if (['um', 'ganz', 'seite', 'team'].indexOf(s.ui.eart) < 0) s.ui.eart = 'um';   // seit 1.4: «Umsetzung» zuerst, «ganz» ist das Protokoll
@@ -2864,7 +2873,7 @@ function kundenLesen(g) {
 function beispielWeg() {
   S.beispiel = false; S.zahlen.perioden = []; S.zahlen.zeilen = []; S.zahlen.klar = {}; S.buch = null; S.ui.auf = {};
   S.themen.forEach((x) => { x.felder = []; x.stichworte = []; x.notizen = []; x.beschluesse = []; x.aufgaben = []; x.ziele = []; x.leute = []; x.baustellen = []; x.bedarf = []; x.fest = ''; x.zu = ''; x.anhaenge = []; });
-  S.parkplatz = []; S.park.notizen = []; S.park.beschluesse = []; S.park.aufgaben = []; S.park.zu = ''; S.glPunkte = []; S.glGruppen = []; S.glFelder = []; S.kunden.offerten = []; S.kunden.auftraege = []; S.kunden.am = ''; S.budget = { ziel: null, auftraege: [], notiz: '' }; S.mitarbeiter = [];
+  S.parkplatz = []; S.park.notizen = []; S.park.beschluesse = []; S.park.aufgaben = []; S.park.zu = ''; S.glPunkte = []; S.glGruppen = []; S.glFelder = []; S.glBeschluesse = []; S.glPkZu = ''; S.kunden.offerten = []; S.kunden.auftraege = []; S.kunden.am = ''; S.budget = { ziel: null, auftraege: [], notiz: '' }; S.mitarbeiter = [];
   S.namen = { kst: {}, ka: {}, am: '' }; S.vorb = { ma: '' };   // seit 1.9.5
 }
 /* Gelesene Tabellen übernehmen. Ein Jahr oder ein Auftrag (gleiches Jahr, gleiches Objekt), den es schon gibt, wird ergänzt statt verdoppelt. */
@@ -3282,7 +3291,7 @@ const fertig = (t) => !!t.zu;
 const kinderVon = (t) => S.themen.filter((k) => k.eltern === t.id);
 const vaterVon = (t) => (t && t.eltern && S.themen.find((x) => x.id === t.eltern)) || null;
 const erledigt = (t) => { const k = kinderVon(t); return !!t.zu || (k.length > 0 && k.every(fertig)); };
-const ZU_ERLAUBT = ['anhang', 'thema', 'auf', 'seg', 'gruppen-drucken', 'oeffnen', 'a-erl', 'gl-wahl'];   // was in einem abgeschlossenen Thema noch geht: ansehen, nicht ändern; seit 1.4 dazu eine Aufgabe abhaken (der Stand gehört nicht zum festgehaltenen Thema); seit 1.9.6 im abgeschlossenen GL-Thema zu seinen Unterthemen (gl-wahl)
+const ZU_ERLAUBT = ['anhang', 'thema', 'auf', 'seg', 'gruppen-drucken', 'oeffnen', 'a-erl', 'gl-wahl', 'gla-erl'];   // was in einem abgeschlossenen Thema noch geht: ansehen, nicht ändern; seit 1.4 dazu eine Aufgabe abhaken (der Stand gehört nicht zum festgehaltenen Thema); seit 1.9.6 im abgeschlossenen GL-Thema zu seinen Unterthemen (gl-wahl)
 const gesperrt = (el) => !!(el.closest && el.closest('.thema.zu')) && !el.closest('.titel, .zu-band') && ZU_ERLAUBT.indexOf(el.dataset.a) < 0;
 const ZU_TEXT = 'Abgeschlossen. Zum Ändern zuerst das Schloss öffnen.';
 /* Nummern wie in einem Mindmap: «1», «1.2». Steht ein Rückblick zuoberst, ist er die Einleitung und zählt nicht mit. */
@@ -3331,6 +3340,7 @@ const pkMeta = (n) => [n.von ? 'von ' + n.von : '', n.bei ? 'bei ' + n.bei : '']
 const aufgZu = (t, b) => (t.aufgaben || []).filter((a) => a.zu === b.id);
 const aufgFrei = (t) => (t.aufgaben || []).filter((a) => !a.zu || !t.beschluesse.some((b) => b.id === a.zu));
 const hatAufgZu = (t) => (t.aufgaben || []).some((a) => a.zu && t.beschluesse.some((b) => b.id === a.zu));
+let GLB_AUFG = null;   // seit 1.9.7 (504): unter welchem Beschluss der GL das Feld für eine neue Aufgabe offen ist
 let B_AUFG = null;   // { t: Thema, b: Beschluss }: unter welchem Beschluss das Feld für eine neue Aufgabe offen ist, bis «Fertig» oder ein anderes Thema
 const werAlle = () => ['Alle', 'Kader'].concat(S.mitarbeiter.filter((m) => imFolgejahr(m, sitzungsJahr())).map((m) => m.name));   // Vorschläge beim Tippen: eine Aufgabe kann jeder haben
 const bedarfMeta = (b) => [b.warum, b.bis ? 'bis ' + b.bis : '', b.notiz].filter(Boolean).join(' · ');
@@ -5035,6 +5045,7 @@ const ANSICHT = {
     const G = S.glGruppen, P = S.glPunkte;
     const punkt = (x, zu) => '<li class="glp' + (x.an ? ' an' : '') + '" data-zieh="gl" data-zid="' + x.id + '"><button type="button" class="glp-box" data-a="glhaken" data-id="' + x.id + '" aria-pressed="' + !!x.an + '" aria-label="Gesagt" title="Gesagt">' + ic('check') + '</button>' +
       '<button type="button" class="n-text" data-a="glpunkt" data-id="' + x.id + '"><span class="glp-t">' + (x.quelle ? '<span class="z-th st-chip">Strategietag · ' + esc(x.thema || '') + '</span>' : thChip(x)) + esc(x.text) + '</span>' + (x.weg ? '<span class="glp-weg">Am Strategietag nicht mehr mit «GL» markiert</span>' : '') + (x.ergebnis && !x.an ? '<span class="glp-e">' + esc(x.ergebnis) + '</span>' : '') + (x.wer || x.bis ? '<span class="glp-m">' + esc(metaText(x)) + '</span>' : '') + '</button>' +
+      (zu ? '' : '<button type="button" class="n-gl n-up" data-a="gl-beschluss" data-id="' + x.id + '" aria-label="Beschluss daraus machen" title="Beschluss daraus machen">' + ic('up') + '<span>Beschluss</span></button>') +   // seit 1.9.7 (504)
       (x.an && (!zu || (x.ergebnis || '').trim()) ? '<input class="glp-antw" id="glantw-' + x.id + '" data-glantw="' + x.id + '" value="' + esc(x.ergebnis || '') + '" placeholder="Was sagt die GL dazu? …" aria-label="Was sagt die GL dazu?" autocomplete="off" enterkeyhint="done"' + (zu ? ' readonly' : '') + '>' : '') + '</li>';   // seit 1.9.6: abgeschlossen nur zum Lesen
     const von = (g) => P.filter((x) => (g ? x.gruppe === g.id : !x.gruppe));
     const info = (L) => '<span class="fd-info">' + (L.length ? L.filter((x) => x.an).length + ' von ' + L.length + ' gesagt' : '') + '</span>';
@@ -5043,6 +5054,25 @@ const ANSICHT = {
     /* Seit 1.9.6 (502): «Abschliessen» oben rechts wie bei den Themen; abgeschlossen steht das Band mit «Öffnen», und im Thema ändert sich nichts mehr */
     const abschl = '<button type="button" class="btn klein abschl" data-a="gl-abschliessen" aria-label="Abschliessen" title="Haken setzen und einfrieren">' + ic('check') + '<span>Abschliessen</span></button>';
     const band = (zu) => (zu ? '<div class="festband zu-band">' + ic('check') + '<span>Abgeschlossen am ' + esc(zu.split('-').reverse().map((x) => String(+x)).join('.')) + '</span><button type="button" class="btn klein" data-a="gl-oeffnen">' + ic('schloss') + '<span>Öffnen</span></button></div>' : '');
+    /* Seit 1.9.7 (504): Beschlüsse der GL wie bei den Themen: Was, Wer, Bis wann, darunter «+ Aufgabe». Abgeschlossen nur zum Lesen. */
+    const subB = (g) => { const A = new Set([g.id].concat(Array.from(glUnterAlle(g)).map((x) => x.id))); return S.glBeschluesse.filter((b) => A.has(b.gruppe)); };
+    const glbBlock = (gid, zu) => {
+      const L = S.glBeschluesse.filter((b) => (b.gruppe || '') === gid);
+      if (zu && !L.length) return '';
+      const folge = (b) => {
+        const A = b.aufgaben, formOffen = !zu && GLB_AUFG === b.id;
+        if (!A.length && !formOffen) return '';
+        return '<li class="b-folge"><ul class="eintraege b-aufg">' + A.map((a) => '<li class="besch aufg' + (a.erl ? ' erl' : '') + '">' +
+            '<button type="button" class="b-ic abh" data-a="gla-erl" data-b="' + b.id + '" data-id="' + a.id + '" aria-pressed="' + !!a.erl + '" aria-label="Erledigt" title="Erledigt">' + ic('check') + '</button>' +
+            '<button type="button" class="b-text" data-a="gla" data-b="' + b.id + '" data-id="' + a.id + '"><span class="b-was">' + esc(a.was) + '</span>' + (metaText(a) ? '<span class="b-meta">' + esc(metaText(a)) + '</span>' : '') + '</button></li>').join('') + '</ul>' +
+          (formOffen ? '<form class="dreier b-aufg-form" data-form="glaufgabe" data-b="' + b.id + '"><input name="was" id="neu-glaufg" placeholder="Aufgabe: Was?" aria-label="Aufgabe zu ' + esc(b.was) + ': Was ist zu tun" autocomplete="off"><input name="wer" placeholder="Wer?" aria-label="Wer" autocomplete="off" list="dl-wer-gla"><input name="bis" placeholder="Bis wann?" aria-label="Bis wann" autocomplete="off" enterkeyhint="done" list="dl-bis-gla"><button class="rund" aria-label="Aufgabe hinzufügen">' + ic('plus') + '</button></form>' +
+            '<div class="b-aufg-fertig"><span class="muted klein">Gehört zu «' + esc(b.was) + '».</span><button type="button" class="textlink" data-a="glb-aufg-zu">Fertig</button></div>' : '') + '</li>';
+      };
+      return '<h2 class="bl">Beschluss</h2><ul class="eintraege">' + L.map((b) => '<li class="besch' + (b.erl ? ' erl' : '') + '" data-zieh="glb" data-zid="' + b.id + '"><span class="b-ic">' + ic('check') + '</span><button type="button" class="b-text" data-a="glb" data-id="' + b.id + '"><span class="b-was">' + esc(b.was) + '</span>' + (metaText(b) ? '<span class="b-meta">' + esc(metaText(b)) + '</span>' : '') + '</button>' +
+        (zu ? '' : '<button type="button" class="n-gl n-aufg" data-a="glb-aufg-neu" data-id="' + b.id + '" aria-label="Aufgabe zu diesem Beschluss" title="Aufgabe, die aus diesem Beschluss folgt">' + ic('plus') + '<span>Aufgabe</span></button>') + '</li>' + folge(b)).join('') + '</ul>' +
+        (zu ? '' : '<form class="dreier" data-form="glbeschluss" data-g="' + gid + '"><input name="was" id="neu-glb" placeholder="Beschluss: Was?" aria-label="Was wurde beschlossen" autocomplete="off"><input name="wer" placeholder="Wer?" aria-label="Wer" autocomplete="off" list="dl-wer-glb"><input name="bis" placeholder="Bis wann?" aria-label="Bis wann" autocomplete="off" enterkeyhint="done" list="dl-bis-glb"><button class="rund" aria-label="Beschluss hinzufügen">' + ic('plus') + '</button></form>' +
+          optionen('dl-wer-glb', ['GL'].concat(werAlle())) + optionen('dl-bis-glb', bisListe()) + optionen('dl-wer-gla', werAlle()) + optionen('dl-bis-gla', bisListe()));
+    };
     /* Seit 1.9.5 (499): aufgebaut wie die Themen. Links die GL-Themen; die Unterthemen zeigt nur das gewählte (auf jeder Stufe eins),
        dazu «Noch keinem GL-Thema zugeordnet» (solange etwas darin steht) und zuunterst der eigene Parkplatz der GL (498).
        Rechts das gewählte: Bilder (490), Punkte, Mitschrift (486), Unterthemen. Einen Punkt links auf ein Thema ziehen ordnet ihn dort zu. */
@@ -5081,24 +5111,25 @@ const ANSICHT = {
         '<button type="button" class="rundb" data-a="glgruppe" data-id="' + gw.id + '" aria-label="' + (gw.eltern ? 'Unterthema' : 'GL-Thema') + ' umbenennen, verschieben, Zahlen zeigen oder löschen" title="Umbenennen, verschieben, Zahlen zeigen oder löschen">' + ic('pen') + '</button>' + abschl) + '</div></div>';
       inhalt = band(gw.zu) + glZahlenHTML(gw) +
         (zu && !L.length ? '' : '<h2 class="bl">Punkte</h2><div class="gl-karte"><ul class="gl-liste">' + L.map((x) => punkt(x, zu)).join('') + '</ul>' + (zu ? '' : neu(gw)) + '</div>') +
+        glbBlock(gw.id, zu) +
         (zu && !(gw.notiz || '').trim() ? '' : '<h2 class="bl">Mitschrift</h2>' + (lang || zu ? mitschrift(gw) : '<input class="gl-zeile" data-glmit="' + gw.id + '" value="' + esc(gw.notiz || '') + '" placeholder="Mitschreiben …" aria-label="Mitschrift zu ' + esc(gw.titel) + '" autocomplete="off" enterkeyhint="done">')) +
-        (K.length ? '<h2 class="bl">Unterthemen</h2><div class="uliste">' + K.map((k) => { const m = nrT(k), S2 = sub(k); return '<button type="button" class="urow" data-a="gl-wahl" data-gid="' + k.id + '" data-spalte="' + k.id + '"><span class="u-nr tnum">' + esc(m.nr || '') + '</span><span class="u-t">' + esc(m.text) + '</span><span class="u-m">' + esc([S2.length ? (S2.some((x) => x.an) ? S2.filter((x) => x.an).length + ' von ' + S2.length + ' gesagt' : mehrzahl(S2.length, 'Punkt', 'Punkte')) : '', (k.notiz || '').trim() ? 'Mitschrift' : ''].filter(Boolean).join(' · ')) + '</span>' + (glErledigt(k) ? ic('check', 'ok') : '') + ic('right', 'pf') + '</button>'; }).join('') + '</div>' : '');
+        (K.length ? '<h2 class="bl">Unterthemen</h2><div class="uliste">' + K.map((k) => { const m = nrT(k), S2 = sub(k); return '<button type="button" class="urow" data-a="gl-wahl" data-gid="' + k.id + '" data-spalte="' + k.id + '"><span class="u-nr tnum">' + esc(m.nr || '') + '</span><span class="u-t">' + esc(m.text) + '</span><span class="u-m">' + esc([S2.length ? (S2.some((x) => x.an) ? S2.filter((x) => x.an).length + ' von ' + S2.length + ' gesagt' : mehrzahl(S2.length, 'Punkt', 'Punkte')) : '', subB(k).length ? mehrzahl(subB(k).length, 'Beschluss', 'Beschlüsse') : '', (k.notiz || '').trim() ? 'Mitschrift' : ''].filter(Boolean).join(' · ')) + '</span>' + (glErledigt(k) ? ic('check', 'ok') : '') + ic('right', 'pf') + '</button>'; }).join('') + '</div>' : '');
     } else if (w === GLPK) {
       const zu = !!S.glPkZu;   // seit 1.9.6 (502): auch der Parkplatz der GL lässt sich abschliessen; ein neuer Punkt über «P» öffnet ihn wieder
       kopf = '<div class="titel"><div><h1>Parkplatz</h1></div><div class="titel-r">' + (zu ? '' : abschl) + '</div></div>';
       inhalt = band(S.glPkZu) + '<p class="frage">Was an der GL unterwegs aufkommt. Am Schluss: einem GL-Thema zuordnen (Punkt nach links ziehen oder antippen), das Ergebnis festhalten oder stehen lassen.</p>' +
-        (zu && !park.length ? '' : '<div class="gl-karte"><ul class="gl-liste">' + park.map((x) => punkt(x, zu)).join('') + '</ul>' + (zu ? '' : '<form class="gl-neu" data-form="glpunkt" data-g="' + GLPK + '"><button aria-label="Parkieren">' + ic('plus') + '</button><input name="text" id="neu-glpk-seite" placeholder="Parkieren …" aria-label="Auf den Parkplatz der GL" autocomplete="off" enterkeyhint="done"></form>') + '</div>');
+        (zu && !park.length ? '' : '<div class="gl-karte"><ul class="gl-liste">' + park.map((x) => punkt(x, zu)).join('') + '</ul>' + (zu ? '' : '<form class="gl-neu" data-form="glpunkt" data-g="' + GLPK + '"><button aria-label="Parkieren">' + ic('plus') + '</button><input name="text" id="neu-glpk-seite" placeholder="Parkieren …" aria-label="Auf den Parkplatz der GL" autocomplete="off" enterkeyhint="done"></form>') + '</div>') + glbBlock(GLPK, zu);
     } else {
       kopf = '<div class="titel"><div><h1>' + (oben.length ? 'Noch keinem GL-Thema zugeordnet' : 'Meine Punkte für die GL') + '</h1></div></div>';
       inhalt = '<p class="frage">' + (oben.length ? 'Punkte vom Strategietag mit «GL» und eigene Punkte. Einen Punkt links auf ein GL-Thema ziehen oder antippen und das GL-Thema wählen.' : 'Was du an der GL-Strategietagung einbringen willst. Die Themen der GL legst du links mit «+ GL-Thema» an.') + '</p>' +
-        '<div class="gl-karte"><ul class="gl-liste">' + ohne.map((x) => punkt(x, false)).join('') + '</ul>' + neu(null) + '</div>';
+        '<div class="gl-karte"><ul class="gl-liste">' + ohne.map((x) => punkt(x, false)).join('') + '</ul>' + neu(null) + '</div>' + (S.glBeschluesse.some((b) => !b.gruppe) ? glbBlock('', false) : '');
     }
-    const vj = S.archiv.filter((a) => a.gl.punkte.length || a.gl.gruppen.some((g) => g.notiz)).slice().reverse();
+    const vj = S.archiv.filter((a) => a.gl.punkte.length || (a.gl.beschluesse || []).length || a.gl.gruppen.some((g) => g.notiz)).slice().reverse();
     const vorjahre = vj.length ? '<details class="gl-vj"><summary>' + ic('right', 'pf') + '<span>Vorjahre nachlesen</span></summary>' + vj.map((a) => '<section><h3>' + esc(a.titel || String(a.jahr)) + '</h3>' +
-      [{ id: '', titel: 'Ohne GL-Thema', notiz: '' }].concat(a.gl.gruppen, [{ id: GLPK, titel: 'Parkplatz', notiz: '' }]).map((g) => { const L = a.gl.punkte.filter((x) => (x.gruppe || '') === g.id); return L.length || g.notiz ? '<h4>' + esc(g.id ? glTitel(a.gl.gruppen, g.id) : g.titel) + '</h4><ul>' + L.map((x) => '<li>' + (x.an ? '✓ ' : '') + esc(x.text) + (x.ergebnis ? ' <span class="glp-e">' + esc(x.ergebnis) + '</span>' : '') + '</li>').join('') + '</ul>' + (g.notiz ? '<p class="e-klein">' + esc(g.notiz) + '</p>' : '') : ''; }).join('') + '</section>').join('') + '</details>' : '';
+      [{ id: '', titel: 'Ohne GL-Thema', notiz: '' }].concat(a.gl.gruppen, [{ id: GLPK, titel: 'Parkplatz', notiz: '' }]).map((g) => { const L = a.gl.punkte.filter((x) => (x.gruppe || '') === g.id), BB = (a.gl.beschluesse || []).filter((b) => (b.gruppe || '') === g.id); return L.length || BB.length || g.notiz ? '<h4>' + esc(g.id ? glTitel(a.gl.gruppen, g.id) : g.titel) + '</h4><ul>' + L.map((x) => '<li>' + (x.an ? '✓ ' : '') + esc(x.text) + (x.ergebnis ? ' <span class="glp-e">' + esc(x.ergebnis) + '</span>' : '') + '</li>').join('') + BB.map((b) => '<li>' + (b.erl ? '✓ ' : '') + 'Beschluss: ' + esc(b.was) + (metaText(b) ? ' (' + esc(metaText(b)) + ')' : '') + '</li>').join('') + '</ul>' + (g.notiz ? '<p class="e-klein">' + esc(g.notiz) + '</p>' : '') : ''; }).join('') + '</section>').join('') + '</details>' : '';
     return '<div class="themen gl-ansicht" data-brett="gl">' + nav + '<section class="thema gl-thema' + ((gw ? gw.zu : (w === GLPK ? S.glPkZu : '')) ? ' zu' : '') + '" data-spalte="' + (gw ? gw.id : (w === GLPK ? GLPK : '')) + '">' + kopf + inhalt + '</section></div>' +
       '<div class="gl-unten">' + felderHTML(S.glFelder, 'gl', false) +
-      vorjahre + '<p class="muted klein hilfe">' + ic('info') + '<span>Nur für dich: Diese Punkte stehen nicht im Ergebnis und nicht im PDF. Die Themen der GL legst du links mit «+ GL-Thema» an, ihre Unterthemen (z. B. je Abteilung eines) mit «+ Unterthema». Einen Punkt auf ein Thema links ziehen ordnet ihn dort zu. «Abschliessen» setzt den Haken und friert ein Thema ein, «Öffnen» gibt es wieder frei. Über den Stift zeigt ein Thema Budget, Auslastung oder Kunden; «P» oben rechts parkiert hier auf dem Parkplatz der GL. An der Tagung abhaken, was du gesagt hast; was die GL dazu sagt, hältst du im Punkt unter «Ergebnis» fest, alles andere in der Mitschrift. Beim neuen Jahr kommen die Entscheide der GL in den Rückblick. Den Reiter blendest du in den Einstellungen aus, je Gerät.</span></p></div>';
+      vorjahre + '<p class="muted klein hilfe">' + ic('info') + '<span>Nur für dich: Diese Punkte stehen nicht im Ergebnis und nicht im PDF. Die Themen der GL legst du links mit «+ GL-Thema» an, ihre Unterthemen (z. B. je Abteilung eines) mit «+ Unterthema». Einen Punkt auf ein Thema links ziehen ordnet ihn dort zu. «Abschliessen» setzt den Haken und friert ein Thema ein, «Öffnen» gibt es wieder frei. Über den Stift zeigt ein Thema Budget, Auslastung oder Kunden; «P» oben rechts parkiert hier auf dem Parkplatz der GL. An der Tagung abhaken, was du gesagt hast; was die GL dazu sagt, hältst du im Punkt unter «Ergebnis» fest. Was sie beschliesst, kommt unter «Beschluss», mit «+ Aufgabe» darunter; «Beschluss» beim Punkt übernimmt seinen Text. Alles andere gehört in die Mitschrift. Beim neuen Jahr kommen die Entscheide der GL in den Rückblick. Den Reiter blendest du in den Einstellungen aus, je Gerät.</span></p></div>';
   }
 };
 const feldGefuellt = (f) => (f.art === 'tabelle' ? (f.zeilen || []).length > 0 : f.punkte.length > 0);
@@ -5128,7 +5159,7 @@ function archivEintrag() {
   T.forEach((t) => { t.anhaenge = (t.anhaenge || []).map((a) => ({ name: a.name || 'Anhang', typ: a.typ || '' })); });
   return { id: uid(), jahr: Number(String(S.meta.datum || '').slice(0, 4)) || new Date().getFullYear(), titel: S.meta.titel, abgeschlossen: new Date().toISOString(),
     meta: kopie(S.meta), themen: T, parkplatz: [], park: PA, budget: kopie(S.budget), mitarbeiter: kopie(S.mitarbeiter),
-    gl: { gruppen: kopie(S.glGruppen), punkte: kopie(S.glPunkte.map((x) => Object.assign({}, x, { quelle: undefined, weg: undefined }))), felder: kopie(S.glFelder) } };
+    gl: { gruppen: kopie(S.glGruppen), punkte: kopie(S.glPunkte.map((x) => Object.assign({}, x, { quelle: undefined, weg: undefined }))), felder: kopie(S.glFelder), beschluesse: kopie(S.glBeschluesse) } };
 }
 function neuesJahr() {
   const a = archivEintrag(), T = S.themen, nameVon = (id) => { const t = T.find((x) => x.id === id); return t ? t.titel : ''; };
@@ -5142,6 +5173,11 @@ function neuesJahr() {
     beschlVJ.push({ id: uid(), was: a.was, wer: a.wer || '', bis: a.bis || '', thema: t.art === 'parkplatz' ? 'Parkplatz' : (t.eltern ? nameVon(t.eltern) + ' · ' + t.titel : t.titel), stand: a.erl ? 'erledigt' : '', aufg: true });
   }));
   const glVJ = S.glPunkte.filter((x) => x.ergebnis).map((x) => ({ id: uid(), text: x.text, ergebnis: x.ergebnis, gruppe: glTitel(S.glGruppen, x.gruppe), stand: x.erl ? 'erledigt' : '' }));   // stand seit 1.9 (472)
+  S.glBeschluesse.forEach((b) => {   // seit 1.9.7 (504): die Beschlüsse der GL und ihre Aufgaben kommen mit ihrem Stand in den Rückblick
+    const gr = glTitel(S.glGruppen, b.gruppe);
+    glVJ.push({ id: uid(), text: b.was, ergebnis: ['Beschluss', metaText(b)].filter(Boolean).join(' · '), gruppe: gr, stand: b.erl ? 'erledigt' : '' });
+    b.aufgaben.forEach((x) => { glVJ.push({ id: uid(), text: x.was, ergebnis: ['Aufgabe', metaText(x)].filter(Boolean).join(' · '), gruppe: gr, stand: x.erl ? 'erledigt' : '' }); });
+  });
   const rb = T.find((t) => t.art === 'rueckblick');
   T.forEach((t) => {
     t.notizen = []; t.stichworte = []; t.beschluesse = []; t.aufgaben = []; t.felder = []; t.anhaenge = []; t.zu = '';
@@ -5158,6 +5194,7 @@ function neuesJahr() {
   S.glPunkte = S.glPunkte.filter((x) => !x.an && !x.ergebnis).map((x) => { const y = Object.assign({}, x); delete y.quelle; delete y.weg; return y; });
   S.glGruppen.forEach((g) => { g.notiz = ''; g.zu = ''; });   // seit 1.9.6 (502): im neuen Jahr sind die GL-Themen wieder offen
   S.glPkZu = '';
+  S.glBeschluesse = []; GLB_AUFG = null;   // seit 1.9.7 (504): stehen im Archiv und im Rückblick
   S.glFelder = [];
   S.archiv = (S.archiv || []).concat([a]);
   S.meta.titel = jahrPlus(S.meta.titel);
@@ -5170,7 +5207,7 @@ function neuesJahr() {
 let ARCHIV = false;
 function mitArchiv(a, fn) {
   const echt = S;
-  S = Object.assign({}, echt, { meta: a.meta, themen: a.themen, parkplatz: a.parkplatz, park: a.park, budget: a.budget, mitarbeiter: a.mitarbeiter, glPunkte: a.gl.punkte, glGruppen: a.gl.gruppen, glFelder: a.gl.felder });
+  S = Object.assign({}, echt, { meta: a.meta, themen: a.themen, parkplatz: a.parkplatz, park: a.park, budget: a.budget, mitarbeiter: a.mitarbeiter, glPunkte: a.gl.punkte, glGruppen: a.gl.gruppen, glFelder: a.gl.felder, glBeschluesse: a.gl.beschluesse || [] });
   ARCHIV = true;
   try { return fn(); } finally { S = echt; ARCHIV = false; }
 }
@@ -5218,6 +5255,7 @@ const glPkOffen = () => S.glPunkte.filter((x) => x.gruppe === GLPK && !x.an && !
    Schloss wieder öffnen. Den Haken links setzt nur das Abschliessen; ein GL-Thema hat ihn auch, wenn alle seine Unterthemen abgeschlossen sind. */
 const glErledigt = (g) => { const k = glKinder(g); return !!g.zu || (k.length > 0 && k.every((x) => !!x.zu)); };
 const glGesperrt = (id) => (id === GLPK ? !!S.glPkZu : !!(id && (S.glGruppen.find((x) => x.id === id) || {}).zu));
+const glAufgVon = (bid, aid) => { const b = S.glBeschluesse.find((y) => y.id === bid); return (b && b.aufgaben.find((a) => a.id === aid)) || null; };   // seit 1.9.7 (504)
 /* Seit 1.9.5 (498): der eigene Parkplatz der GL. Seine Punkte tragen die Gruppe GLPK. Gewählt ist im Reiter GL S.ui.glWahl: ein GL-Thema,
    '-' für «Noch keinem GL-Thema zugeordnet» oder GLPK (498: aufgebaut wie die Themen). */
 const glNr = (titelText) => { const m = /^\s*(\d+(?:\.\d+)*)\.?\s+(\S.*)$/.exec(titelText || ''); return m ? { nr: m[1], text: m[2] } : { nr: '', text: titelText || '' }; };   // eine Nummer aus der Traktandenliste der GL steht wie bei den Themen im Kreis
@@ -5246,14 +5284,15 @@ function glZu(id) {   // das GL-Thema im offenen Fenster einem anderen als Unter
 
 /* ---------- Nach der GL fürs Team (seit 1.1): nur, was die GL entschieden hat, mit Wer und Bis wann; nie, was ohne Ergebnis bleibt ---------- */
 function teamSeiteHTML() {
-  const m = S.meta, P = S.glPunkte.filter((x) => (x.ergebnis || '').trim());
+  const m = S.meta, P = S.glPunkte.filter((x) => (x.ergebnis || '').trim()), GB = S.glBeschluesse;   // GB seit 1.9.7 (504)
   let h = '<header class="e-kopf"><h1>Nach der GL-Strategietagung</h1><p>' + esc([m.abteilung, datumLang(heute())].filter(Boolean).join(' · ')) + '</p></header>';
-  if (!P.length) return h + '<p class="e-klein">Noch nichts von der GL festgehalten. Im Reiter «GL» bei einem Punkt «Gesagt» antippen und das Ergebnis eintragen.</p>';
+  if (!P.length && !GB.length) return h + '<p class="e-klein">Noch nichts von der GL festgehalten. Im Reiter «GL» einen Beschluss erfassen oder bei einem Punkt «Gesagt» antippen und das Ergebnis eintragen.</p>';
   [{ id: '', titel: 'Weiteres' }].concat(S.glGruppen, [{ id: GLPK, titel: 'Parkplatz' }]).sort((a, b) => (a.id ? 0 : 1) - (b.id ? 0 : 1)).forEach((g) => {
-    const L = P.filter((x) => (x.gruppe || '') === g.id);
-    if (!L.length) return;
+    const L = P.filter((x) => (x.gruppe || '') === g.id), LB = GB.filter((b) => (b.gruppe || '') === g.id);
+    if (!L.length && !LB.length) return;
     h += '<section class="e-teil"><h2>' + esc(g.id ? glTitel(S.glGruppen, g.id) : g.titel) + '</h2><div class="e-tab-rahmen"><table class="e-besch"><thead><tr><th>Thema</th><th>Entscheid</th><th>Wer</th><th>Bis wann</th></tr></thead><tbody>' +
-      L.map((x) => '<tr><td>' + esc(x.text) + '</td><td>' + esc(x.ergebnis) + '</td><td class="nw">' + esc(x.wer || '') + '</td><td class="nw">' + esc(x.bis || '') + '</td></tr>').join('') + '</tbody></table></div></section>';
+      L.map((x) => '<tr><td>' + esc(x.text) + '</td><td>' + esc(x.ergebnis) + '</td><td class="nw">' + esc(x.wer || '') + '</td><td class="nw">' + esc(x.bis || '') + '</td></tr>').join('') +
+      LB.map((b) => '<tr><td>Beschluss</td><td>' + esc(b.was) + '</td><td class="nw">' + esc(b.wer) + '</td><td class="nw">' + esc(b.bis) + '</td></tr>' + b.aufgaben.map((a) => '<tr class="e-folge"><td></td><td>↳ ' + esc(a.was) + '</td><td class="nw">' + esc(a.wer) + '</td><td class="nw">' + esc(a.bis) + '</td></tr>').join('')).join('') + '</tbody></table></div></section>';
   });
   return h;
 }
@@ -5309,7 +5348,10 @@ function umsetzungTeile() {
   });
   /* seit 1.9 (472): was an der GL entschieden wurde (Punkt mit Ergebnis), nur mit eingeschaltetem Reiter GL */
   const G = glAn ? S.glPunkte.filter((x) => (x.ergebnis || '').trim()).map((x) => ({ t: null, x: x, th: glTitel(S.glGruppen, x.gruppe) })) : [];
-  return { A: A, B: B, Z: Z, D: D, G: G };
+  /* seit 1.9.7 (504): die Beschlüsse der GL mit ihren Aufgaben, in der Reihenfolge der GL-Themen, nur mit eingeschaltetem Reiter GL */
+  const ord = (g) => (g === '' ? -1 : (g === GLPK ? 1e6 : S.glGruppen.findIndex((x) => x.id === g)));
+  const GB = glAn ? S.glBeschluesse.slice().sort((a, b) => ord(a.gruppe) - ord(b.gruppe)).map((b) => ({ t: null, x: b, th: glTitel(S.glGruppen, b.gruppe), k: b.aufgaben.map((a) => ({ t: null, x: a, th: '', b: b })) })) : [];
+  return { A: A, B: B, Z: Z, D: D, G: G, GB: GB };
 }
 /* Seit 1.5: Die Umsetzung hat zwei Ansichten, weil es zwei verschiedene Arbeiten sind (Chef, 23.11.2026).
    «Am Schluss»: aufarbeiten, verteilen, zusammenfassen. Dieselbe Liste ohne Haken; bei den Aufgaben zeigt sich, wo «Wer» oder «Bis wann» noch fehlt.
@@ -5323,9 +5365,10 @@ function umWerListe(U) {
   U.B.forEach((e) => { L.push(Object.assign({ typ: 'b' }, e)); e.k.forEach((k) => { L.push(Object.assign({ typ: 'a' }, k, { th: e.th, zu: e.x.was })); }); });
   U.Z.forEach((e) => { L.push(Object.assign({ typ: 'z' }, e)); });
   U.G.forEach((e) => { L.push(Object.assign({ typ: 'g' }, e)); });
+  (U.GB || []).forEach((e) => { L.push(Object.assign({ typ: 'gb' }, e)); e.k.forEach((k) => { L.push(Object.assign({ typ: 'ga' }, k, { th: e.th, zu: e.x.was })); }); });   // seit 1.9.7 (504)
   return L;
 }
-const UM_TYP = { a: 'Aufgabe', b: 'Beschluss', z: 'Ziel', g: 'GL' };
+const UM_TYP = { a: 'Aufgabe', b: 'Beschluss', z: 'Ziel', g: 'GL', gb: 'GL-Beschluss', ga: 'Aufgabe' };
 function umNachWer(U) {   // [[Name, Einträge]]: je Person alles, wo sie unter «Wer» steht («Hans und Eva» zählt bei beiden); ohne Wer zuletzt
   const G = new Map();
   umWerListe(U).forEach((e) => {
@@ -5342,7 +5385,7 @@ function umTabelle() {   // Tabulatoren und Zeilen: lässt sich so in Excel einf
 }
 function umsetzungHTML() {
   const U = umsetzungTeile(), zj = S.themen.find((t) => t.art === 'ziele'), jahr = uArt() === 'jahr';
-  if (!U.A.length && !U.B.length && !U.Z.length && !U.D.length && !U.G.length) return '<section class="card um-leer"><p><b>Noch nichts festgehalten.</b></p><p class="muted">Beschlüsse, Aufgaben und Ziele entstehen in den Themen. Hier stehen sie danach alle an einem Ort: am Schluss zum Verteilen und Zusammenfassen, unterm Jahr zum Abhaken.</p></section>';
+  if (!U.A.length && !U.B.length && !U.Z.length && !U.D.length && !U.G.length && !U.GB.length) return '<section class="card um-leer"><p><b>Noch nichts festgehalten.</b></p><p class="muted">Beschlüsse, Aufgaben und Ziele entstehen in den Themen. Hier stehen sie danach alle an einem Ort: am Schluss zum Verteilen und Zusammenfassen, unterm Jahr zum Abhaken.</p></section>';
   const nachWer = !jahr && S.ui.uwer === 'wer';   // seit 1.9.5 (454): «Am Schluss» nach Person geordnet
   const wahl = '<div class="um-wahl">' + seg('uart', [['schluss', 'Am Schluss'], ['jahr', 'Unterm Jahr']], uArt(), 'klein') +
     '<span class="muted klein">' + (jahr ? 'Erledigtes abhaken. Beim neuen Jahr kommt alles als erledigt oder offen in den Rückblick.' : 'Wer macht was bis wann: ergänzen, verteilen und als verteilt abhaken, drucken.') + '</span></div>' +
@@ -5369,18 +5412,23 @@ function umsetzungHTML() {
         (zu.length ? '<details class="um-erl"' + (S.ui.auf['um-' + k] ? ' open' : '') + '><summary data-a="um-auf" data-k="' + k + '">' + ic('right', 'pf') + '<span>' + wort + ' (' + zu.length + ')</span></summary><ul class="eintraege">' + zu.map(zeile).join('') + '</ul></details>' : '');
     };
     const mitK = (zeile) => (e) => zeile(e) + (e.k && e.k.length ? '<li class="um-k"><ul class="eintraege">' + e.k.map(aufg).join('') + '</ul></li>' : '');   // seit 1.9.3 (494): Aufgaben unter ihrem Beschluss
+    const glbJ = (e) => '<li class="besch' + (e.x.erl ? ' erl' : '') + '"><button type="button" class="b-ic abh" data-a="glb-erl" data-id="' + e.x.id + '" aria-pressed="' + !!e.x.erl + '" aria-label="Umgesetzt" title="Umgesetzt">' + ic('check') + '</button>' +   // seit 1.9.7 (504)
+      '<button type="button" class="b-text" data-a="glb" data-id="' + e.x.id + '"><span class="b-was">' + esc(e.x.was) + '</span>' + (metaText(e.x) ? '<span class="b-meta">' + esc(metaText(e.x)) + '</span>' : '') + '</button>' + glTh(e) + '</li>' +
+      (e.k.length ? '<li class="um-k"><ul class="eintraege">' + e.k.map((a) => '<li class="besch aufg' + (a.x.erl ? ' erl' : '') + '"><button type="button" class="b-ic abh" data-a="gla-erl" data-b="' + e.x.id + '" data-id="' + a.x.id + '" aria-pressed="' + !!a.x.erl + '" aria-label="Erledigt" title="Erledigt">' + ic('check') + '</button>' +
+        '<button type="button" class="b-text" data-a="gla" data-b="' + e.x.id + '" data-id="' + a.x.id + '"><span class="b-was">' + esc(a.x.was) + '</span>' + (metaText(a.x) ? '<span class="b-meta">' + esc(metaText(a.x)) + '</span>' : '') + '</button></li>').join('') + '</ul></li>' : '');
     teile = block(U.B.some((e) => e.k.length) ? 'Weitere Aufgaben' : 'Aufgaben', U.A, aufg, (e) => !!e.x.erl, 'Erledigt', 'a') +
       block('Beschlüsse', U.B, mitK(besch(false)), (e) => !!e.x.erl, 'Umgesetzt', 'b') +
       block(zj ? zj.titel : 'Ziele', U.Z, besch(true), (e) => !!e.x.erl, 'Erreicht', 'z') +
       block('Bedarf und Nachfolge', U.D, bed, (e) => e.x.stand === 'besetzt', 'Besetzt', 'd') +
       block('Aus der GL', U.G, (e) => '<li class="besch aufg' + (e.x.erl ? ' erl' : '') + '"><button type="button" class="b-ic abh" data-a="gl-erl" data-id="' + e.x.id + '" aria-pressed="' + !!e.x.erl + '" aria-label="Erledigt" title="Erledigt">' + ic('check') + '</button>' +
-        '<button type="button" class="b-text" data-a="glpunkt" data-id="' + e.x.id + '"><span class="b-was">' + esc(e.x.text) + '</span><span class="b-meta">' + esc(glMeta(e.x)) + '</span></button>' + glTh(e) + '</li>', (e) => !!e.x.erl, 'Erledigt', 'g');
+        '<button type="button" class="b-text" data-a="glpunkt" data-id="' + e.x.id + '"><span class="b-was">' + esc(e.x.text) + '</span><span class="b-meta">' + esc(glMeta(e.x)) + '</span></button>' + glTh(e) + '</li>', (e) => !!e.x.erl, 'Erledigt', 'g') +
+      block('Beschlüsse der GL', U.GB, glbJ, (e) => !!e.x.erl, 'Umgesetzt', 'gb');
   } else {   // Am Schluss: ohne Haken, in der Reihenfolge der Themen; antippen öffnet den Eintrag zum Verteilen
     const meta = (text, marken) => (text || marken ? '<span class="b-meta">' + (text ? '<span>' + esc(text) + '</span>' : '') + marken + '</span>' : '');
     const stand = (ja, wort) => (ja ? '<span class="um-stand">' + wort + '</span>' : '');
     const fehlt = (x) => (x.erl ? '' : (x.wer ? '' : '<span class="um-fehlt">Wer?</span>') + (x.bis ? '' : '<span class="um-fehlt">Bis wann?</span>'));
     /* seit 1.9 (472): Der Kreis heisst hier «verteilt» (an die Leute weitergegeben, z. B. im Planner); erledigt meldet «Unterm Jahr» */
-    const vt = (k, e) => '<button type="button" class="b-ic abh vt" data-a="vert" data-k="' + k + '"' + (e.t ? ' data-t="' + e.t.id + '"' : '') + ' data-id="' + e.x.id + '" aria-pressed="' + !!e.x.vert + '" aria-label="Verteilt" title="Verteilt">' + ic('check') + '</button>';
+    const vt = (k, e) => '<button type="button" class="b-ic abh vt" data-a="vert" data-k="' + k + '"' + (e.t ? ' data-t="' + e.t.id + '"' : '') + (e.b ? ' data-b="' + e.b.id + '"' : '') + ' data-id="' + e.x.id + '" aria-pressed="' + !!e.x.vert + '" aria-label="Verteilt" title="Verteilt">' + ic('check') + '</button>';
     const aufg = (e) => '<li class="besch aufg um-v' + (e.x.erl ? ' erl' : '') + (e.x.vert ? ' vert' : '') + '">' + vt('a', e) + '<button type="button" class="b-text" data-a="aufgabe" data-t="' + e.t.id + '" data-id="' + e.x.id + '"><span class="b-was">' + esc(e.x.was) + '</span>' + meta(aufgMeta(e.x), fehlt(e.x) + stand(e.x.erl, 'erledigt')) + '</button>' + zumThema(e) + '</li>';
     const besch = (ziel) => (e) => '<li class="besch um-v' + (e.x.erl ? ' erl' : '') + (e.x.vert ? ' vert' : '') + '">' + vt('b', e) + '<button type="button" class="b-text" data-a="beschluss" data-t="' + e.t.id + '" data-id="' + e.x.id + '"><span class="b-was">' + esc(e.x.was) + '</span>' + meta(metaMit(e.x), stand(e.x.erl, ziel ? 'erreicht' : 'umgesetzt')) + '</button>' +
       (ziel ? zielTh(e) : zumThema(e)) + '</li>';
@@ -5390,10 +5438,14 @@ function umsetzungHTML() {
     const block = (titelText, L, zeile, info, warn) => (L.length ? '<div class="bl-zeile"><h2 class="bl">' + esc(titelText) + '</h2><span class="fd-info' + (warn ? ' um-warn' : '') + '">' + info + '</span></div><ul class="eintraege">' + L.map(zeile).join('') + '</ul>' : '');
     const ohneWer = U.A.filter((e) => !e.x.erl && !e.x.wer).length, K = [].concat.apply([], U.B.map((e) => e.k)), ohneWerK = K.filter((e) => !e.x.erl && !e.x.wer).length;
     const mitK = (zeile) => (e) => zeile(e) + (e.k.length ? '<li class="um-k"><ul class="eintraege">' + e.k.map(aufg).join('') + '</ul></li>' : '');   // seit 1.9.3 (494): Aufgaben unter ihrem Beschluss
+    /* seit 1.9.7 (504): Beschlüsse der GL zum Verteilen, ihre Aufgaben darunter (dort «Wer?» und «Bis wann?», wo es fehlt) */
+    const KG = [].concat.apply([], U.GB.map((e) => e.k)), ohneWerKG = KG.filter((e) => !e.x.erl && !e.x.wer).length;
+    const glbS = (e) => '<li class="besch um-v' + (e.x.erl ? ' erl' : '') + (e.x.vert ? ' vert' : '') + '">' + vt('gb', e) + '<button type="button" class="b-text" data-a="glb" data-id="' + e.x.id + '"><span class="b-was">' + esc(e.x.was) + '</span>' + meta(metaText(e.x), stand(e.x.erl, 'umgesetzt')) + '</button>' + glTh(e) + '</li>' +
+      (e.k.length ? '<li class="um-k"><ul class="eintraege">' + e.k.map((a) => '<li class="besch aufg um-v' + (a.x.erl ? ' erl' : '') + (a.x.vert ? ' vert' : '') + '">' + vt('ga', a) + '<button type="button" class="b-text" data-a="gla" data-b="' + e.x.id + '" data-id="' + a.x.id + '"><span class="b-was">' + esc(a.x.was) + '</span>' + meta(metaText(a.x), fehlt(a.x) + stand(a.x.erl, 'erledigt')) + '</button></li>').join('') + '</ul></li>' : '');
     if (nachWer) {   // seit 1.9.5 (454): je Person alles, wo sie unter «Wer» steht; «Alle» und Gruppen wie «Leitung» zählen als eigener Name
       const werZeile = (e) => {
-        const was = e.typ === 'g' ? e.x.text : e.x.was, data = e.typ === 'a' ? 'aufgabe' : (e.typ === 'g' ? 'glpunkt' : 'beschluss');
-        return '<li class="besch um-v' + (e.x.erl ? ' erl' : '') + (e.x.vert ? ' vert' : '') + '">' + vt(e.typ === 'z' ? 'b' : e.typ, e) + '<button type="button" class="b-text" data-a="' + data + '"' + (e.t ? ' data-t="' + e.t.id + '"' : '') + ' data-id="' + e.x.id + '"><span class="b-was">' + esc(was) + '</span>' +
+        const was = e.typ === 'g' ? e.x.text : e.x.was, data = e.typ === 'a' ? 'aufgabe' : (e.typ === 'g' ? 'glpunkt' : (e.typ === 'gb' ? 'glb' : (e.typ === 'ga' ? 'gla' : 'beschluss')));   // gb, ga seit 1.9.7 (504)
+        return '<li class="besch um-v' + (e.x.erl ? ' erl' : '') + (e.x.vert ? ' vert' : '') + '">' + vt(e.typ === 'z' ? 'b' : e.typ, e) + '<button type="button" class="b-text" data-a="' + data + '"' + (e.t ? ' data-t="' + e.t.id + '"' : '') + (e.b ? ' data-b="' + e.b.id + '"' : '') + ' data-id="' + e.x.id + '"><span class="b-was">' + esc(was) + '</span>' +
           meta([UM_TYP[e.typ], e.x.bis ? 'bis ' + e.x.bis : '', e.zu ? 'zu «' + e.zu + '»' : '', e.th].filter(Boolean).join(' · '), stand(e.x.erl, 'erledigt')) + '</button></li>';
       };
       teile = umNachWer(U).map((g) => '<div class="bl-zeile"><h2 class="bl">' + esc(g[0] || 'Ohne Wer') + ' (' + g[1].length + ')</h2><span class="fd-info' + (g[0] ? '' : ' um-warn') + '">' + verteilt(g[1]) + '</span></div><ul class="eintraege">' + g[1].map(werZeile).join('') + '</ul>').join('') +
@@ -5403,10 +5455,11 @@ function umsetzungHTML() {
       block('Beschlüsse', U.B, mitK(besch(false)), (ohneWerK ? ohneWerK + ' Aufgaben ohne Wer · ' : '') + verteilt(U.B.concat(K)), !!ohneWerK) +
       block(zj ? zj.titel : 'Ziele', U.Z, besch(true), verteilt(U.Z)) +
       block('Bedarf und Nachfolge', U.D, bed, String(U.D.length)) +
-      block('Aus der GL', U.G, glz, verteilt(U.G));
+      block('Aus der GL', U.G, glz, verteilt(U.G)) +
+      block('Beschlüsse der GL', U.GB, glbS, (ohneWerKG ? ohneWerKG + ' Aufgaben ohne Wer · ' : '') + verteilt(U.GB.concat(KG)), !!ohneWerKG);
   }
   return '<div class="umsetzung' + (jahr ? ' um-jahr' : ' um-schluss') + '">' + wahl + teile +
-    '<p class="muted klein hilfe">' + ic('info') + '<span>' + (jahr ? 'Abhaken und antippen geht hier auch, wenn das Thema abgeschlossen ist.' : 'Den Kreis antippen, sobald ein Eintrag verteilt ist. Einen Eintrag antippen: Wer und Bis wann setzen, als Aufgabe oder Beschluss führen, für die GL vormerken. Das geht auch, wenn das Thema abgeschlossen ist.' + (U.G.length ? ' «Aus der GL» kommt aus dem Reiter GL, aus Punkten mit Ergebnis.' : '')) + ' Neues entsteht im Thema; ein Tipp auf das Thema rechts führt dorthin.</span></p></div>';
+    '<p class="muted klein hilfe">' + ic('info') + '<span>' + (jahr ? 'Abhaken und antippen geht hier auch, wenn das Thema abgeschlossen ist.' : 'Den Kreis antippen, sobald ein Eintrag verteilt ist. Einen Eintrag antippen: Wer und Bis wann setzen, als Aufgabe oder Beschluss führen, für die GL vormerken. Das geht auch, wenn das Thema abgeschlossen ist.' + (U.G.length || U.GB.length ? ' Was von der GL kommt («Aus der GL», «Beschlüsse der GL»), stammt aus dem Reiter GL.' : '')) + ' Neues entsteht im Thema; ein Tipp auf das Thema rechts führt dorthin.</span></p></div>';
 }
 function umsetzungDruckHTML() {   // dieselbe Übersicht als Blatt: wer macht was bis wann; «Unterm Jahr» mit dem Stand
   const m = S.meta, U = umsetzungTeile(), zj = S.themen.find((t) => t.art === 'ziele'), jahr = uArt() === 'jahr';
@@ -5425,7 +5478,9 @@ function umsetzungDruckHTML() {   // dieselbe Übersicht als Blatt: wer macht wa
   if (U.Z.length) h += '<section class="e-teil"><h2>' + esc(zj ? zj.titel : 'Ziele') + '</h2>' + tab(kopf(['Was', 'Wer', 'Bis wann']), U.Z.map((e) => '<tr><td>' + esc(mitTh(e.x, e.x.was)) + '</td><td class="nw">' + esc(e.x.wer) + '</td><td class="nw">' + esc(e.x.bis) + '</td>' + stand(e.x.erl, 'erreicht', e.x) + '</tr>')) + '</section>';
   if (U.D.length) h += '<section class="e-teil"><h2>Bedarf und Nachfolge</h2>' + tab(['Wen oder was', 'Warum', 'Bis wann', 'Stand'], U.D.map((e) => '<tr><td>' + esc(e.x.was) + '</td><td>' + esc([e.x.warum, e.x.notiz].filter(Boolean).join(' · ')) + '</td><td class="nw">' + esc(e.x.bis) + '</td><td class="nw">' + BSTAND[e.x.stand] + '</td></tr>')) + '</section>';
   if (U.G.length) h += '<section class="e-teil"><h2>Aus der GL</h2>' + tab(kopf(['Punkt', 'Entscheid', 'Wer', 'Bis wann']), U.G.map((e) => '<tr><td>' + esc(e.x.text) + '</td><td>' + esc(e.x.ergebnis) + '</td><td class="nw">' + esc(e.x.wer) + '</td><td class="nw">' + esc(e.x.bis) + '</td>' + stand(e.x.erl, 'erledigt', e.x) + '</tr>')) + '</section>';   // seit 1.9 (472)
-  if (!U.A.length && !U.B.length && !U.Z.length && !U.D.length && !U.G.length) h += '<section class="e-teil"><p class="muted">Noch nichts festgehalten.</p></section>';
+  if (U.GB.length) h += '<section class="e-teil"><h2>Beschlüsse der GL</h2>' + tab(kopf(['Was', 'Wer', 'Bis wann', 'GL-Thema']), U.GB.map((e) => '<tr><td>' + esc(e.x.was) + '</td><td class="nw">' + esc(e.x.wer) + '</td><td class="nw">' + esc(e.x.bis) + '</td><td>' + esc(e.th) + '</td>' + stand(e.x.erl, 'umgesetzt', e.x) + '</tr>' +
+    e.k.map((a) => '<tr class="e-folge"><td>↳ ' + esc(a.x.was) + '</td><td class="nw">' + esc(a.x.wer) + '</td><td class="nw">' + esc(a.x.bis) + '</td><td></td>' + stand(a.x.erl, 'erledigt', a.x) + '</tr>').join(''))) + '</section>';   // seit 1.9.7 (504)
+  if (!U.A.length && !U.B.length && !U.Z.length && !U.D.length && !U.G.length && !U.GB.length) h += '<section class="e-teil"><p class="muted">Noch nichts festgehalten.</p></section>';
   return h;
 }
 
@@ -5857,6 +5912,25 @@ const SHEET = {
       '<details class="gp-auftrag"' + (x.wer || x.bis ? ' open' : '') + '><summary>Auftrag: wer und bis wann</summary><label class="f" for="gp-wer"><span>Wer</span><input id="gp-wer" name="wer" value="' + esc(x.wer || '') + '" autocomplete="off"></label>' + chipsHTML('gp-wer', werNamen(), x.wer, true) +
       '<label class="f" for="gp-bis"><span>Bis wann</span><input id="gp-bis" name="bis" value="' + esc(x.bis || '') + '" autocomplete="off"></label>' + chipsHTML('gp-bis', bisListe(), x.bis, false) + '</details>' +
       '<label class="schalter" for="gp-an"><span>Gesagt</span><input type="checkbox" id="gp-an" name="an"' + (x.an ? ' checked' : '') + '></label>' + (q && !x.weg ? '' : loeschKnopf('glpunkt-weg', 'Punkt löschen')));
+  },
+  glbeschluss() {   // seit 1.9.7 (504): Beschluss der GL: Was, Wer, Bis wann; dazu GL-Thema, umgesetzt, löschen
+    const b = sheet && S.glBeschluesse.find((y) => y.id === sheet.id);
+    if (!b) return '';
+    const wahl = '<label class="f" for="glb-g"><span>GL-Thema</span><select id="glb-g" name="gruppe"><option value="">Noch keinem zugeordnet</option>' + S.glGruppen.filter((g) => !g.zu || g.id === b.gruppe).map((g) => '<option value="' + g.id + '"' + (g.id === b.gruppe ? ' selected' : '') + '>' + esc(glTitel(S.glGruppen, g.id)) + '</option>').join('') +
+      (S.glPkZu && b.gruppe !== GLPK ? '' : '<option value="' + GLPK + '"' + (b.gruppe === GLPK ? ' selected' : '') + '>Parkplatz der GL</option>') + '</select></label>';
+    return formHuelle('Beschluss der GL', 'glb-edit', '<label class="f" for="glb-was"><span>Was wurde beschlossen?</span><textarea id="glb-was" name="was" rows="2" data-fokus' + (sheet.neu ? '="ende"' : '') + '>' + esc(b.was) + '</textarea></label>' +
+      '<label class="f" for="glb-wer"><span>Wer</span><input id="glb-wer" name="wer" value="' + esc(b.wer) + '" autocomplete="off" list="dl-wer-glbs"></label>' + optionen('dl-wer-glbs', ['GL'].concat(werAlle())) + chipsHTML('glb-wer', ['GL'].concat(werNamen()), b.wer, true) +
+      '<label class="f" for="glb-bis"><span>Bis wann</span><input id="glb-bis" name="bis" value="' + esc(b.bis) + '" autocomplete="off"></label>' + chipsHTML('glb-bis', bisListe(), b.bis, false) +
+      (sheet.neu ? '<p class="muted klein">Aus dem Punkt übernommen. «Abbrechen» nimmt den Beschluss wieder weg; der Punkt bleibt.</p>' : wahl + '<label class="schalter" for="glb-erl"><span>Umgesetzt</span><input type="checkbox" id="glb-erl" name="erl"' + (b.erl ? ' checked' : '') + '></label>' + loeschKnopf('glb-weg', 'Beschluss löschen')));
+  },
+  glaufgabe() {   // seit 1.9.7 (504): Aufgabe, die aus einem Beschluss der GL folgt
+    const a = sheet && glAufgVon(sheet.b, sheet.id), b = sheet && S.glBeschluesse.find((y) => y.id === sheet.b);
+    if (!a || !b) return '';
+    return formHuelle('Aufgabe', 'gla-edit', '<p class="muted klein">Folgt aus dem Beschluss der GL «' + esc(b.was) + '».</p>' +
+      '<label class="f" for="gla-was"><span>Was ist zu tun?</span><textarea id="gla-was" name="was" rows="2" data-fokus>' + esc(a.was) + '</textarea></label>' +
+      '<label class="f" for="gla-wer"><span>Wer</span><input id="gla-wer" name="wer" value="' + esc(a.wer) + '" autocomplete="off" list="dl-wer-glas"></label>' + optionen('dl-wer-glas', werAlle()) + chipsHTML('gla-wer', werNamen(), a.wer, true) +
+      '<label class="f" for="gla-bis"><span>Bis wann</span><input id="gla-bis" name="bis" value="' + esc(a.bis) + '" autocomplete="off"></label>' + chipsHTML('gla-bis', bisListe(), a.bis, false) +
+      '<label class="schalter" for="gla-erl"><span>Erledigt</span><input type="checkbox" id="gla-erl" name="erl"' + (a.erl ? ' checked' : '') + '></label>' + loeschKnopf('gla-weg', 'Aufgabe löschen'));
   },
   glgruppe() {   // seit 1.4 auch für Unterthemen: Titel, Mitschrift, «Gehört zu», verschieben, löschen
     const g = sheet && S.glGruppen.find((y) => y.id === sheet.id);
@@ -6692,6 +6766,7 @@ const AKT = {
     geaendert(); toast('Als Ziel ' + folgejahr() + ' übernommen', true);
   },
   vert(el) {   // seit 1.9 (472): «verteilt» in «Umsetzung › Am Schluss» für Aufgaben (a), Beschlüsse und Ziele (b) und Entscheide der GL (g)
+    if (el.dataset.k === 'gb' || el.dataset.k === 'ga') { const y = el.dataset.k === 'gb' ? S.glBeschluesse.find((b) => b.id === el.dataset.id) : glAufgVon(el.dataset.b, el.dataset.id); if (y) { y.vert = !y.vert; geaendert(); } return; }   // seit 1.9.7 (504): Beschlüsse der GL und ihre Aufgaben
     const k = el.dataset.k, t = k === 'g' ? null : themaVon(el.dataset.t);
     const x = k === 'g' ? S.glPunkte.find((y) => y.id === el.dataset.id) : (t ? (k === 'a' ? t.aufgaben : t.beschluesse).find((y) => y.id === el.dataset.id) : null);
     if (!x) return;
@@ -6734,10 +6809,11 @@ const AKT = {
     S.glGruppen = S.glGruppen.filter((x) => x !== g);
     S.glGruppen.forEach((x) => { if (x.eltern === g.id) x.eltern = g.eltern || ''; });   // seit 1.9: Unterthemen rücken eine Stufe hinauf
     S.glPunkte.forEach((x) => { if (x.gruppe === g.id) x.gruppe = g.eltern || ''; });
+    S.glBeschluesse.forEach((b) => { if (b.gruppe === g.id) b.gruppe = g.eltern || ''; });   // seit 1.9.7 (504): Beschlüsse ebenso
     geaendert(true); toast(g.eltern ? 'Unterthema gelöscht' : 'GL-Thema gelöscht', true);
   },
   'glunter-neu'(el) { auf({ art: 'glthemen', eltern: el.dataset.id }); },
-  'gl-wahl'(el) { S.ui.glWahl = el.dataset.gid || '-'; speichern(true); render(); if (window.matchMedia('(max-width: 52rem)').matches) { const t = document.querySelector('.gl-thema'); if (t) t.scrollIntoView({ block: 'start' }); } else window.scrollTo(0, 0); },   // seit 1.9.5 (499)
+  'gl-wahl'(el) { GLB_AUFG = null; S.ui.glWahl = el.dataset.gid || '-'; speichern(true); render(); if (window.matchMedia('(max-width: 52rem)').matches) { const t = document.querySelector('.gl-thema'); if (t) t.scrollIntoView({ block: 'start' }); } else window.scrollTo(0, 0); },   // seit 1.9.5 (499)
   'gl-abschliessen'() {   // seit 1.9.6 (502): wie bei den Themen, für das gewählte GL-Thema, Unterthema oder den Parkplatz der GL
     const w = S.ui.glWahl, g = S.glGruppen.find((x) => x.id === w);
     if (!g && w !== GLPK) return;
@@ -6747,6 +6823,25 @@ const AKT = {
     const bleibt = g ? 0 : glPkOffen();
     toast('Abgeschlossen' + (bleibt ? ', ' + mehrzahl(bleibt, 'Punkt bleibt', 'Punkte bleiben') + ' parkiert' : ''), true);
   },
+  /* seit 1.9.7 (504): Beschlüsse im Reiter GL */
+  'gl-beschluss'(el) {   // aus einem Punkt einen Beschluss machen; der Punkt bleibt. «Abbrechen» im Fenster nimmt den Beschluss wieder weg
+    const x = S.glPunkte.find((y) => y.id === el.dataset.id);
+    if (!x) return;
+    if (glGesperrt(x.gruppe)) { toast(ZU_TEXT); return; }
+    merken();
+    const b = { id: uid(), was: (x.ergebnis || '').trim() || x.text, wer: x.wer || '', bis: x.bis || '', gruppe: x.gruppe || '', vert: false, erl: false, aufgaben: [] };
+    S.glBeschluesse.push(b);
+    speichern(); render();
+    auf({ art: 'glbeschluss', id: b.id, neu: true });
+  },
+  glb(el) { auf({ art: 'glbeschluss', id: el.dataset.id }); },
+  'glb-erl'(el) { const b = S.glBeschluesse.find((y) => y.id === el.dataset.id); if (!b) return; b.erl = !b.erl; geaendert(); },
+  'glb-aufg-neu'(el) { GLB_AUFG = el.dataset.id; render(); fokus('neu-glaufg'); },
+  'glb-aufg-zu'() { GLB_AUFG = null; render(); },
+  gla(el) { auf({ art: 'glaufgabe', id: el.dataset.id, b: el.dataset.b }); },
+  'gla-erl'(el) { const a = glAufgVon(el.dataset.b, el.dataset.id); if (!a) return; a.erl = !a.erl; geaendert(); },
+  'glb-weg'() { const b = sheet && S.glBeschluesse.find((y) => y.id === sheet.id); if (!b) return; merken(); S.glBeschluesse = S.glBeschluesse.filter((y) => y !== b); if (GLB_AUFG === b.id) GLB_AUFG = null; geaendert(true); toast('Beschluss gelöscht', true); },
+  'gla-weg'() { const b = sheet && S.glBeschluesse.find((y) => y.id === sheet.b); if (!b) return; merken(); b.aufgaben = b.aufgaben.filter((a) => a.id !== sheet.id); geaendert(true); toast('Aufgabe gelöscht', true); },
   'gl-oeffnen'() { const w = S.ui.glWahl, g = S.glGruppen.find((x) => x.id === w); if (!g && w !== GLPK) return; merken(); if (g) g.zu = ''; else S.glPkZu = ''; geaendert(); toast('Wieder offen', true); },
   'gl-thema-neu'() { merken(); const g = { id: uid(), titel: 'Neues GL-Thema', notiz: '', eltern: '' }; S.glGruppen.push(g); S.ui.glWahl = g.id; speichern(); render(); auf({ art: 'glgruppe', id: g.id }); },   // wie «+ Thema»: anlegen, gleich umbenennen
   'glpk-seite'() { S.ui.bereich = 'gl'; S.ui.glWahl = GLPK; zu(); speichern(true); render(); window.scrollTo(0, 0); },   // seit 1.9.5 (498): der Parkplatz der GL
@@ -7145,6 +7240,38 @@ const FORMS = {
     const neu = document.querySelector('form[data-form="glpunkt"][data-g="' + g + '"] input');
     if (neu) neu.focus();
   },
+  glbeschluss(f) {   // seit 1.9.7 (504): Beschluss im GL-Thema hinzufügen
+    const g = f.dataset.g || '', was = f.elements.was.value.trim();
+    if (!was) { f.elements.was.focus(); return; }
+    if (g && glGesperrt(g)) { toast(ZU_TEXT); return; }
+    merken();
+    S.glBeschluesse.push({ id: uid(), was: was, wer: f.elements.wer.value.trim(), bis: ohneBis(f.elements.bis.value), gruppe: g, vert: false, erl: false, aufgaben: [] });
+    geaendert(); fokus('neu-glb');
+  },
+  'glb-edit'(f) {
+    const b = sheet && S.glBeschluesse.find((y) => y.id === sheet.id), was = b && pflicht(f.elements.was);
+    if (!was) return;
+    b.was = was.replace(/\s*[\r\n]+\s*/g, ' '); b.wer = f.elements.wer.value.trim(); b.bis = ohneBis(f.elements.bis.value);
+    if (f.elements.erl) b.erl = f.elements.erl.checked;
+    if (f.elements.gruppe) b.gruppe = f.elements.gruppe.value;
+    geaendert(true);
+  },
+  glaufgabe(f) {   // seit 1.9.7 (504): Aufgabe unter einem Beschluss der GL
+    const b = S.glBeschluesse.find((y) => y.id === f.dataset.b), was = f.elements.was.value.trim();
+    if (!b) return;
+    if (!was) { f.elements.was.focus(); return; }
+    if (glGesperrt(b.gruppe)) { toast(ZU_TEXT); return; }
+    merken();
+    b.aufgaben.push({ id: uid(), was: was, wer: f.elements.wer.value.trim(), bis: ohneBis(f.elements.bis.value), vert: false, erl: false });
+    geaendert(); fokus('neu-glaufg');
+  },
+  'gla-edit'(f) {
+    const a = sheet && glAufgVon(sheet.b, sheet.id), was = a && pflicht(f.elements.was);
+    if (!was) return;
+    a.was = was.replace(/\s*[\r\n]+\s*/g, ' '); a.wer = f.elements.wer.value.trim(); a.bis = ohneBis(f.elements.bis.value);
+    if (f.elements.erl) a.erl = f.elements.erl.checked;
+    geaendert(true);
+  },
   offerte(f) { if (offerteAusForm(f, null)) { geaendert(); fokus('neu-off'); } },
   'offerte-edit'(f) { if (offerteAusForm(f, sheet && sheet.id ? S.kunden.offerten.find((x) => x.id === sheet.id) : null)) geaendert(true); },
   'auftrag-edit'(f) {
@@ -7415,7 +7542,7 @@ function zugZiel(x, y) {   // wohin der Eintrag käme: vor einen Nachbarn («vor
 function zugMarken() {
   const z = zugZiel(zug.lx, zug.ly);
   $$('.ziel').forEach((s) => { if (!z || s !== z.spalte) s.classList.remove('ziel'); });
-  if (z && z.spalte && !(zug.art === 'gl' && glGesperrt(z.spalte.dataset.spalte || ''))) z.spalte.classList.add('ziel');   // seit 1.9.6: ein abgeschlossenes GL-Thema leuchtet nicht als Ziel
+  if (z && z.spalte && !((zug.art === 'gl' || zug.art === 'glb') && glGesperrt(z.spalte.dataset.spalte || ''))) z.spalte.classList.add('ziel');   // seit 1.9.6: ein abgeschlossenes GL-Thema leuchtet nicht als Ziel
   markenWeg();
   if (z && z.vor) z.vor.classList.add('ein-vor'); else if (z && z.nach) z.nach.classList.add('ein-nach');
 }
@@ -7448,6 +7575,7 @@ function klickSperren(ms) { klickSperre = true; clearTimeout(klickT); klickT = s
 function zugQuelle(art, el) {   // die Liste hinter dem gezogenen Eintrag, dazu das Feld, das die Spalte nennt
   if (art === 'karte') return { liste: S.mitarbeiter, feld: 'polier', setzen: (L) => { S.mitarbeiter = L; } };
   if (art === 'gl') return { liste: S.glPunkte, feld: 'gruppe', setzen: (L) => { S.glPunkte = L; } };
+  if (art === 'glb') return { liste: S.glBeschluesse, feld: 'gruppe', setzen: (L) => { S.glBeschluesse = L; } };   // seit 1.9.7 (504)
   if (art === 'fdp' || art === 'fdg' || art === 'fdz') {
     const f = feldAus(el), k = art === 'fdz' ? 'zeilen' : 'punkte';
     return f && Array.isArray(f[k]) ? { liste: f[k], feld: art === 'fdg' ? 'spalte' : '', setzen: (L) => { f[k] = L; } } : null;
@@ -7480,7 +7608,7 @@ function zugFallen(x, y, finger) {
   if (!gezogen) return;
   klickSperren(finger ? 150 : 80);
   if (!z) return;
-  if (art === 'gl' && z.spalte && glGesperrt(z.spalte.dataset.spalte || '')) { toast(ZU_TEXT); return; }   // seit 1.9.6 (502): in ein abgeschlossenes GL-Thema kommt nichts dazu
+  if ((art === 'gl' || art === 'glb') && z.spalte && glGesperrt(z.spalte.dataset.spalte || '')) { toast(ZU_TEXT); return; }   // seit 1.9.6 (502): in ein abgeschlossenes GL-Thema kommt nichts dazu
   if (art === 'thema') { themaFallen(id, z); return; }
   const q = zugQuelle(art, el);
   if (!q) return;
