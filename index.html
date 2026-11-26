@@ -5229,6 +5229,7 @@ function neuesJahr() {
   S.glPkZu = '';
   S.glBeschluesse = []; GLB_AUFG = null;   // seit 1.9.7 (504): stehen im Archiv und im Rückblick
   S.glVJ = glVJ; S.glRbZu = '';   // seit 1.9.8 (506): der Rückblick der GL fürs neue Jahr
+  if (glVJ.length) S.ui.glWahl = GLRB;   // der Reiter GL öffnet danach mit seinem Rückblick
   S.glFelder = [];
   S.archiv = (S.archiv || []).concat([a]);
   S.meta.titel = jahrPlus(S.meta.titel);
