@@ -1210,6 +1210,37 @@ button.marke{text-align:left;border-radius:.6rem}
 .gl-rb-mehr .eintraege{border-top:1px solid var(--sep);padding:.7rem 0 .9rem;margin:0}
 .toast span{cursor:pointer}
 
+/* ---------- seit 2.1 (530): Daten für alle ---------- */
+.zd-liste{margin-top:.2rem}
+.zd-hilfe{margin:.7rem .2rem 1rem}
+.zd-kopf2{margin-top:1.4rem;align-items:center}
+.zd-sparten{list-style:none;margin:0;padding:0 1rem;background:var(--card);border-radius:1.1rem;box-shadow:var(--shadow)}
+.zd-sparten li + li{border-top:1px solid var(--sep)}
+.zd-sp{display:flex;align-items:center;gap:.8rem;width:100%;padding:.8rem 0;text-align:left}
+.zd-sp-t{display:flex;flex-direction:column;min-width:0;flex:1 1 auto;gap:.1rem}
+.zd-sp-t b{font-weight:600;line-height:1.3}
+.zd-sp-t span{color:var(--muted);font-size:.875rem;line-height:1.35}
+.zd-sp > .ic{flex:none;width:1.1rem;height:1.1rem;color:var(--idle)}
+.zd-karte{display:flex;align-items:center;gap:.8rem 1rem;flex-wrap:wrap;padding:.9rem 1rem;margin:0 0 .9rem;background:var(--card);border-radius:1.1rem;box-shadow:var(--shadow)}
+.zd-karte-t{display:flex;flex-direction:column;gap:.1rem;min-width:12rem;flex:1 1 14rem}
+.zd-karte-t b{font-weight:600}
+.zd-karte-t span{color:var(--muted);font-size:.875rem;line-height:1.35}
+.zd-wahl,.zz-liste{padding:0 1rem;background:var(--card);border-radius:1.1rem;box-shadow:var(--shadow)}
+.zd-wahl .schalter + .schalter,.zz-z + .zz-z{border-top:1px solid var(--sep)}
+.zd-w span,.zz-z span{display:flex;flex-direction:column;min-width:0;gap:.1rem}
+.zd-w small,.zz-z small{color:var(--muted);font-size:.8125rem;font-weight:400;line-height:1.3}
+.zd-was{list-style:none;margin:1rem 0 0;padding:0;display:grid;gap:.55rem}
+.zd-was li{display:grid;grid-template-columns:8.5rem minmax(0,1fr);gap:.2rem .8rem;font-size:.9375rem;line-height:1.4}
+.zd-was li span{color:var(--muted)}
+.zz-z{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:.65rem 0}
+.zz-z b{font-weight:600;overflow-wrap:anywhere}
+.zz-z select{flex:none;max-width:55%;height:2.4rem;padding:0 .6rem;border-radius:.7rem;border:1px solid var(--sep);background:var(--card);font-weight:600}
+.seg.st-wahl{display:grid;grid-template-columns:minmax(0,1fr);gap:.1rem}
+.seg.st-wahl button{justify-content:center;text-align:center}
+@media (max-width:30rem){.zd-was li{grid-template-columns:minmax(0,1fr)}.zz-z{flex-direction:column;align-items:stretch}.zz-z select{max-width:none}}
+.zz-mehr{margin-top:.4rem}
+.zz-mehr[open] summary{margin-bottom:.3rem}
+
 /* ---------- Druck: nur das Ergebnis ---------- */
 #druck{display:none}
 @media print{
@@ -1278,6 +1309,7 @@ button.marke{text-align:left;border-radius:.6rem}
 <input type="file" id="anhang-wahl" accept="image/*,application/pdf,.pdf" multiple hidden>
 <input type="file" id="beitrag-wahl" accept=".html,.htm,.json,text/html,application/json" multiple hidden>
 <input type="file" id="gl-wahl" accept=".html,.htm,.json,text/html,application/json" hidden>
+<input type="file" id="zd-wahl" accept=".html,.htm,text/html" hidden>
 <div id="druck"></div>
 <script id="daten" type="application/json">null</script>
 <script>
@@ -1288,14 +1320,16 @@ button.marke{text-align:left;border-radius:.6rem}
    und Aufträge mit Ranglisten), Themen mit Notizen und Beschlüssen, Ergebnis als PDF. Eine Datei, kein Netz, keine Bibliothek.
    Seit 2.0 auch für die Tagung der GL: Dieselbe Datei gibt es als Abteilungsdatei und als GL-Datei; dazwischen gehen der Beitrag einer
    Abteilung und, aus der GL-Datei geholt, Ablauf und Ergebnisse (siehe «Das Tool für die ganze GL»).
+   Seit 2.1 dazu die Daten-Datei der Buchhaltung: einmal für alle eingelesen (Buchungen aller Sparten, Offertliste, Mitarbeitende, Namen);
+   jede Abteilung holt daraus die Daten ihrer Sparte (siehe «Daten für alle»).
    «Sichern» schreibt diese Datei samt Inhalt neu: Der Inhalt steht im Skript-Block «daten». Eine neuere Version des
    Tools liest diesen Block aus der alten Datei («Daten laden») und bringt ihn mit migriere() auf ihren Aufbau.
    Zusätzlich merkt sich der Browser den Stand je Dateipfad (localStorage).
    Drei Arten, das Tool zu öffnen: als Datei auf dem Rechner (schreibt direkt in die Datei), über einen Link
    (iPad, Handy: Datei laden, am Schluss über «Teilen» sichern) und eingebettet als Vorschau (nur ansehen). */
 const VORLAGE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-const VERSION = '2.0';            // Version des Tools, steht in den Einstellungen
-const FORMAT = 13;             // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
+const VERSION = '2.1';            // Version des Tools, steht in den Einstellungen
+const FORMAT = 14;             // Aufbau der Daten; ändert er sich, braucht migriere() einen neuen Schritt
 const VARIANTE = 'beispiel';   // 'leer' startet ohne Beispiel
 const KEY = 'strategietag-bi:v2:' + location.pathname;
 const KEY_G = KEY + ':gesichert';   // Stand, der zuletzt in eine Datei ging
@@ -1379,7 +1413,7 @@ const AUFTRAEGE_FRAGE = 'Reichen die Aufträge fürs Budget, und wie sind wir au
 const POSITIONEN = ['Abteilungsleiter', 'Bauführer', 'Hilfsbauführer', 'Polier', 'Vorarbeiter', 'Facharbeiter', 'Maschinist', 'Bauarbeiter', 'Lernender'];
 const istPolier = (m) => /polier/i.test(m.position || '');
 const fremd = (m) => !!(m && typeof m.abt === 'string' && m.abt.trim());   // seit 1.8: gehört zu einer anderen Abteilung. Zählt nur bei den Buchungen (Kürzel, Bauführer), nie beim Personal
-const imBuero = (m) => !istPolier(m) && /leiter|führer|fuehrer/i.test(m.position || '');
+const imBuero = (m) => !istPolier(m) && /leiter|führer|fuehrer/i.test(m.position || '') && !/(kran|maschinen|bagger|ger(ä|ae)te|stapler|walzen|fahrzeug|lok|gruppen)\s*-?\s*f(ü|ue)hrer/i.test(m.position || '');   // seit 2.1: ohne Kranführer, Maschinenführer usw.
 const istKader = (m) => istPolier(m) || imBuero(m) || /vorarbeiter/i.test(m.position || '');
 /* Kader getrennt nach Baustelle (Polier, Vorarbeiter) und Buero (Bauleitung, Abteilungsleitung); Chefs Notiz bei 147.7. Seit 0.8.7. */
 const kaderTeile = (B) => [['Baustelle', B.filter((m) => !imBuero(m))], ['Büro', B.filter((m) => imBuero(m))]].filter((g) => g[1].length);
@@ -1498,6 +1532,8 @@ function leer() {
     // Kunden: Offerten je Jahr [{id, jahr, gerechnet, erhalten}] und Aufträge [{id, jahr, objekt, planer, bauherr, bauherrArt, objektArt, speziell, mitbewerber, eingeladen, betrag, notiz}]
     kunden: { offerten: [], auftraege: [], ansicht: 'diagramme', jahr: '', filter: '', am: '' },   // am (seit 1.9.5, 474): wann zuletzt eingelesen
     namen: { kst: {}, ka: {}, am: '' },   // seit 1.9.5 (476): Namen der Kostenstellen und Kostenarten aus einer eigenen Liste {Nummer: Name}
+    zentral: null,   // seit 2.1 (530): nur in der Daten-Datei der Buchhaltung (meta.art 'daten'): Sparten, Zuordnungen, Buchungen je Sparte, Offertliste, Mitarbeitende, Namen (siehe zentralNeu)
+    zdaten: null,    // seit 2.1 (530): Abteilungsdatei: woher die Daten zuletzt geholt wurden {am, geholt, sparten, spNamen, datei}
     vorb: { ma: '' },   // seit 1.9.5 (474): Vorbereiten; ma: wann die Mitarbeiterliste zuletzt geprüft wurde
     ui: { bereich: 'zahlen', thema: '', auf: {}, bst: 'bf', eart: 'um', uart: 'schluss', beil: {}, zbl: '', zzeit: 'jahr', zsp: '', aw: { dim: 'gruppe', f: {}, mass: 'k' } }   // zbl, zzeit, zsp, aw (seit 1.6): Wahl unter «Zahlen» aus den Buchungen; eart: Ansicht im Ergebnis (seit 1.4 zuerst «Umsetzung»); uart: Ansicht der Umsetzung (seit 1.5: «Am Schluss» oder «Unterm Jahr»); beil: zugeschaltete Beilagen des Protokolls
   };
@@ -1621,6 +1657,7 @@ function migriere(d) {
   }
   if (d.v < 12) d.v = 12;   // 1.6: Buchungen als Quelle der Zahlen («buch»; der Inhalt liegt wie ein Anhang daneben), Wahl unter «Zahlen» in «ui»; alles zusätzlich, ältere Stände laden unverändert
   if (d.v < 13) d.v = 13;   // 2.0: Art der Datei (Abteilung oder GL), Verbindung zur Tagung der GL, Beitrag und Holen; alles zusätzlich, ältere Stände laden unverändert
+  if (d.v < 14) d.v = 14;   // 2.1: Daten-Datei der Buchhaltung (meta.art 'daten', zentral) und «Daten holen» in der Abteilungsdatei (zdaten); alles zusätzlich
   return d;
 }
 function themaNormal(t) {
@@ -1658,7 +1695,8 @@ function normal(d) {
   s.v = Math.max(FORMAT, (d && d.v) || 0);
   s.meta = Object.assign({}, l.meta, (d && d.meta) || {});
   /* seit 2.0 (520): Art der Datei und Verbindung zur Tagung der GL */
-  s.meta.art = s.meta.art === 'gl' ? 'gl' : 'abt'; s.meta.ohneTag = s.meta.art !== 'gl' && !!s.meta.ohneTag;
+  s.meta.art = s.meta.art === 'gl' ? 'gl' : (s.meta.art === 'daten' ? 'daten' : 'abt'); s.meta.ohneTag = s.meta.art === 'abt' && !!s.meta.ohneTag;
+  s.zentral = s.meta.art === 'daten' ? zentralNormal(d && d.zentral) : null; s.zdaten = s.meta.art === 'abt' ? zdatenNormal(d && d.zdaten) : null;   // seit 2.1 (530)
   const tg = d && d.tagung && typeof d.tagung === 'object' && !Array.isArray(d.tagung) ? d.tagung : {};
   s.tagung = Object.assign(tagungNeu(), tg);
   ['id', 'titel', 'datum', 'abtId', 'geholt', 'geholtStand', 'abgegeben', 'sig', 'glHat', 'erg'].forEach((k) => { if (typeof s.tagung[k] !== 'string') s.tagung[k] = ''; });
@@ -2197,8 +2235,11 @@ function buchWeg() {
 async function buchAusDatei(file) {
   let zeilen = null;
   if (/\.xls[xm]$/i.test(file.name)) {
-    const r = await xlsxListe(await file.arrayBuffer(), buchSpalten);
-    if (r) zeilen = r.zeilen;
+    /* seit 2.1 (530): stückweise gelesen, damit auch ein sehr grosser Auszug geht; wo der Browser das nicht kann, der bisherige Weg */
+    let sp = null, zl = [], r;
+    try { r = await xlsxStromListe(file, (k) => ((sp = buchSpalten(k))), (z) => { const aus = new Array(sp.length); for (let c = 0; c < sp.length; c++) aus[c] = sp[c] < 0 ? undefined : z[sp[c]]; zl.push(aus); }); } catch (e) { r = undefined; zl = []; }
+    if (r === undefined) { const a = await xlsxListe(await file.arrayBuffer(), buchSpalten); if (a) zeilen = a.zeilen; }
+    else if (r) zeilen = zl;
   } else if (!/\.xls$/i.test(file.name)) {
     const kopfzeile = (await file.slice(0, 4096).text()).split(/\r?\n/)[0] || '';
     if (!/kostenstelle/i.test(kopfzeile) || !/kostenart/i.test(kopfzeile)) return null;
@@ -2542,6 +2583,8 @@ let S;
 let glAn = IM_RAHMEN;    // Reiter «GL» mit den eigenen Punkten: je Gerät ein- oder ausgeblendet, am Anfang aus
 let ablaufAn = true;      // seit 2.0: Leiste «Jahresablauf» oben, je Gerät aus- und einzublenden
 let glFrageZu = '';       // seit 2.0: für diese GL-Datei (tagung.id) ist das Band «Bereitest du den Teil deiner Abteilung vor?» auf diesem Gerät geschlossen
+let zdFrageZu = '';       // seit 2.1: für diese Daten-Datei (zentral.id) ist das Band «Du willst die Daten deiner Abteilung holen?» auf diesem Gerät geschlossen
+const MA_FELDER = ['nr', 'name', 'vorname', 'abteilung', 'funktion', 'aktiv', 'initialen', 'vorgesetzter', 'eintritt', 'austritt', 'geburt'];   // seit 2.1 (530): mehr liest das Tool aus dem Mitarbeiter-Export von BauBit nicht
 (function start() {
   const lies = (f) => { try { return f(); } catch (e) { return null; } };
   const eing = lies(() => JSON.parse($('#daten').textContent || 'null'));
@@ -2553,7 +2596,7 @@ let glFrageZu = '';       // seit 2.0: für diese GL-Datei (tagung.id) ist das B
      werden. Der Browser merkt sich den Stand unter dem Pfad der geöffneten Datei. Ist jener Stand ein anderes Dokument und schon gesichert,
      zeigt das Öffnen wieder die Datei selbst; ist er noch nicht gesichert, bleibt er stehen, damit nichts verloren geht. */
   const abtN = (x) => String((x && x.meta && x.meta.abteilung) || '').replace(/\s*\([^)]*\)\s*/g, ' ').trim().toLowerCase();
-  const anderes = !!(lokal && ausDatei) && !lokal.beispiel && !ausDatei.beispiel && ((((lokal.meta || {}).art === 'gl') !== ((ausDatei.meta || {}).art === 'gl')) || (!!abtN(lokal) && !!abtN(ausDatei) && abtN(lokal) !== 'abteilung' && abtN(ausDatei) !== 'abteilung' && abtN(lokal) !== abtN(ausDatei)));
+  const anderes = !!(lokal && ausDatei) && !lokal.beispiel && !ausDatei.beispiel && ((((lokal.meta || {}).art || 'abt') !== ((ausDatei.meta || {}).art || 'abt')) || (!!abtN(lokal) && !!abtN(ausDatei) && abtN(lokal) !== 'abteilung' && abtN(ausDatei) !== 'abteilung' && abtN(lokal) !== abtN(ausDatei)));
   if (lokal && ausDatei) {
     if (anderes && (lokal.stand || '') === gesichert) S = vorbereiten(ausDatei);
     else if ((lokal.stand || '') > (ausDatei.stand || '')) { S = vorbereiten(lokal); datei.schmutzig = lokal.stand !== gesichert; } else S = vorbereiten(ausDatei);
@@ -2566,7 +2609,7 @@ let glFrageZu = '';       // seit 2.0: für diese GL-Datei (tagung.id) ist das B
   if (ALS_LINK && !S.beispiel && S.stand) hinweis = datei.schmutzig ? 'offen' : 'stand';
   // Schriftgrösse und Farben: was auf diesem Gerät zuletzt galt, nicht was ein anderes Gerät in die Datei schrieb
   const anz = lies(() => JSON.parse(localStorage.getItem(KEY_A) || 'null'));
-  if (anz && typeof anz === 'object') { if (anz.zoom) S.meta.zoom = anz.zoom; if (anz.modus) S.meta.modus = anz.modus; if (typeof anz.gl === 'boolean') glAn = anz.gl; if (typeof anz.bf === 'boolean') bfAn = anz.bf; if (typeof anz.ab === 'boolean') ablaufAn = anz.ab; if (typeof anz.glf === 'string') glFrageZu = anz.glf; }
+  if (anz && typeof anz === 'object') { if (anz.zoom) S.meta.zoom = anz.zoom; if (anz.modus) S.meta.modus = anz.modus; if (typeof anz.gl === 'boolean') glAn = anz.gl; if (typeof anz.bf === 'boolean') bfAn = anz.bf; if (typeof anz.ab === 'boolean') ablaufAn = anz.ab; if (typeof anz.glf === 'string') glFrageZu = anz.glf; if (typeof anz.zdf === 'string') zdFrageZu = anz.zdf; }
 })();
 
 function speichern(nurAnsicht) {
@@ -2575,10 +2618,10 @@ function speichern(nurAnsicht) {
   try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* ohne Zwischenspeicher weiter */ }
   if (nurAnsicht) return;
   datei.schmutzig = true; hinweis = '';
-  if (datei.handle) { clearTimeout(datei.plan); datei.plan = setTimeout(() => { sichern(true); }, 1500); }
+  if (datei.handle && !istDaten()) { clearTimeout(datei.plan); datei.plan = setTimeout(() => { sichern(true); }, 1500); }   // seit 2.1: die Daten-Datei ist gross und wird nur von Hand gesichert
 }
 function gesichertMerken() { datei.schmutzig = false; hinweis = ''; try { localStorage.setItem(KEY_G, S.stand || ''); } catch (e) { /* ohne Zwischenspeicher weiter */ } }
-function anzeigeMerken() { try { localStorage.setItem(KEY_A, JSON.stringify({ zoom: S.meta.zoom, modus: S.meta.modus, gl: glAn, bf: bfAn, ab: ablaufAn, glf: glFrageZu })); } catch (e) { /* ohne Zwischenspeicher weiter */ } }
+function anzeigeMerken() { try { localStorage.setItem(KEY_A, JSON.stringify({ zoom: S.meta.zoom, modus: S.meta.modus, gl: glAn, bf: bfAn, ab: ablaufAn, glf: glFrageZu, zdf: zdFrageZu })); } catch (e) { /* ohne Zwischenspeicher weiter */ } }
 function nameMerken(name) {
   if (!name || !/\.html?$/i.test(name)) return;
   name = nameSauber(name) || name;   // seit 1.9.6 (500): so, wie ihn Windows und OneDrive schreiben
@@ -3193,6 +3236,7 @@ async function importDateien(liste) {
   const daten = dateien.filter((f) => /\.(html?|json)$/i.test(f.name));
   if (daten.length > 1 && istGL()) { beitraegeLesen(daten); return; }   // seit 2.0: mehrere Dateien auf einmal sind in der GL-Datei Beiträge
   if (daten.length) { ladeDatei(daten[0]); return; }
+  if (istDaten()) { zentralImport(dateien); return; }   // seit 2.1 (530): die Buchhaltung liest für alle ein
   const teile = [], kunden = [], buch = [], namen = [];
   let fehler = 0, alt = false;
   const gross = dateien.some((f) => f.size > 1500000);
@@ -3242,6 +3286,10 @@ async function ladeDatei(file) {
   if (IM_RAHMEN) { toast('In dieser Vorschau ausgeschaltet. Öffne das Tool über seinen Link oder am Rechner per Doppelklick.'); return; }
   const merk = GL_MERK;   // seit 2.0: aus der GL-Datei heraus die eigene Datei öffnen und gleich daraus holen
   GL_MERK = null;
+  const zmerk = zdMerkNimm();   // seit 2.1 (530): aus der Daten-Datei heraus die eigene Datei öffnen und gleich daraus holen
+  let ZK = null;
+  try { ZK = await zdKopf(file); } catch (e) { ZK = null; }   // die Daten-Datei der Buchhaltung, erkannt an ihrem Verzeichnis, ohne sie ganz zu lesen
+  if (ZK) { zdGeladen(ZK); return; }
   let d, text = '';
   try { text = await file.text(); } catch (e) { toast('Die Datei liess sich nicht lesen.'); return; }
   /* seit 2.0: Ein Beitrag gehört in die GL-Datei; eine Datei mit Rückmeldungen ist keine Datei des Tools */
@@ -3257,6 +3305,11 @@ async function ladeDatei(file) {
   }
   /* seit 2.0: Die andere Art von Datei ersetzt nicht still, was hier steht. Die GL-Datei in einer Abteilungsdatei heisst «Von der GL holen»;
      eine Abteilungsdatei über der GL-Datei braucht eine Rückfrage. Eine frisch begonnene, benannte Datei zählt dabei nicht als leer. */
+  if (d.meta && d.meta.art === 'daten') { zdGeladen(zdKopfAusText(text, d, file.name)); return; }   // seit 2.1: eine Daten-Datei ohne Verzeichnis
+  if (istDaten() && !zentralLeer()) {   // seit 2.1: hier ist die Daten-Datei offen
+    if (d.meta && d.meta.art !== 'gl' && !datei.schmutzig) { const K = zmerk || zdKopfAusStand(); uebernehmen(d, file.name); sheetVor = ''; zdZeigen(K); return; }   // die Datei einer Abteilung: Sie ist jetzt offen und holt gleich aus der Daten-Datei von eben (die ist gesichert, es geht nichts verloren)
+    ladeWartet = { d: d, name: file.name }; auf({ art: 'fremdart' }); return;
+  }
   const glDatei = !!(d.meta && d.meta.art === 'gl'), frisch = S.beispiel || (ohneInhalt() && !istGL() && !S.meta.ohneTag && (!S.meta.abteilung || S.meta.abteilung === 'Abteilung'));
   if (glDatei && !istGL() && !frisch) { GLD = glLesen(d); auf({ art: 'glholen', roh: d, name: file.name }); return; }
   if (merk && !glDatei && istGL() && !datei.schmutzig) { uebernehmen(d, file.name); GLD = merk; auf({ art: 'glholen' }); return; }   // die eigene Datei ist offen, jetzt aus der GL-Datei von eben holen
@@ -3268,6 +3321,7 @@ async function ladeDatei(file) {
   uebernehmen(d, file.name);
 }
 function ohneInhalt() {   // nichts eingetragen und die Themen wie am Anfang
+  if (istDaten()) return zentralLeer();   // seit 2.1
   const vor = themenStart();
   return !S.zahlen.perioden.length && !S.buch && S.themen.length === vor.length && S.themen.every((x, i) => x.titel === vor[i].titel && x.frage === vor[i].frage && !S.park.notizen.length && !S.park.beschluesse.length && !S.park.aufgaben.length && !S.glPunkte.length && !S.glGruppen.length && !S.glFelder.length && !S.glBeschluesse.length && !S.glAufgaben.length && !S.kunden.offerten.length && !S.kunden.auftraege.length && !x.baustellen.length && !x.stichworte.length && !x.notizen.length && !x.beschluesse.length && !x.aufgaben.length && !x.ziele.length && !x.leute.length && !x.bedarf.length && !x.anhaenge.length) && !S.rueckmeldungen.length && S.budget.ziel === null && !S.budget.auftraege.length && !S.mitarbeiter.length;
 }
@@ -3467,7 +3521,8 @@ function ablage(imSheet) {
     '<textarea id="einfuegen" class="einfuegen" rows="1" placeholder="' + (FEIN ? 'Hier klicken und einfügen (Ctrl+V)' : 'Hier antippen und einfügen') + '" aria-label="BAB oder Buchungen hier einfügen"></textarea>' +
     '<button type="button" class="btn" data-a="datei-wahl">Dateien wählen</button>' +
     (IM_RAHMEN ? '<p class="klein warn">Vorschau: Hier wird nichts gesichert. Nur Beispielzahlen einfügen.</p>'
-      : (imSheet ? '' : '<button type="button" class="textlink" data-a="daten-wahl">Schon mit einer früheren Version gearbeitet? Gesicherte Datei laden</button>')) + '</section>';
+      : (imSheet ? '' : (istGL() || istDaten() ? '' : '<button type="button" class="textlink" data-a="zd-holen">Die Buchhaltung hat schon für alle eingelesen? Daten holen</button>') +   // seit 2.1 (530)
+        '<button type="button" class="textlink" data-a="daten-wahl">Schon mit einer früheren Version gearbeitet? Gesicherte Datei laden</button>')) + '</section>';
 }
 function tabelleHTML() {
   const Z = S.zahlen, P = Z.perioden;
@@ -5191,6 +5246,7 @@ function vorbStand() {
 }
 
 const ANSICHT = {
+  daten() { return zentralHTML(); },   // seit 2.1 (530): die Daten-Datei der Buchhaltung
   kunden() {
     const K = S.kunden;
     if (!K.offerten.length && !K.auftraege.length) return titel('Kunden', 'Offerten und Aufträge') + kundenAblage();
@@ -5999,6 +6055,7 @@ function stWas(q) {
    und «Bis wann» der Abteilung im Text («Beschluss: … (Polier · bis März)»); die GL setzt beides neu, darum gilt dort der reine Wortlaut. */
 const glPunktWas = (x) => (x.ergebnis || '').trim() || x.kurz || stWas(x.quelle || x.aus) || x.text;
 function bereiche() {
+  if (istDaten()) return [['daten', 'Daten']];   // seit 2.1 (530): die Daten-Datei der Buchhaltung
   if (istGL()) return [['gl', 'Tagung'], ['ergebnis', 'Ergebnis']];
   if (ohneTag()) return [['gl', 'GL'], ['ergebnis', 'Ergebnis']];
   return [['zahlen', 'Zahlen'], ['kunden', 'Kunden'], ['themen', 'Themen'], ['ergebnis', 'Ergebnis']].concat(glDa() ? [['gl', 'GL']] : []);
@@ -6638,7 +6695,7 @@ function ablaufAkt(L) {   // ein begonnener Schritt nach dem letzten getanen ist
   return i < 0 ? L.length - 1 : i;
 }
 function ablaufBandHTML() {
-  if (!ablaufAn || S.beispiel || glFrageOffen()) return '';   // zuerst klären, wer die GL-Datei vor sich hat
+  if (!ablaufAn || S.beispiel || glFrageOffen() || istDaten()) return '';   // zuerst klären, wer die GL-Datei vor sich hat
   const L = ablaufSchritte(), i = ablaufAkt(L), s = L[i];
   return '<div class="ab-band"><div class="ab-in"><button type="button" class="ab-b-t" data-a="sheet" data-s="ablauf" aria-label="Jahresablauf: Schritt ' + (i + 1) + ' von ' + L.length + ', ' + esc(s.titel) + '. Alle Schritte zeigen">' +
     '<span class="ab-pkt" aria-hidden="true">' + L.map((x, j) => '<i class="' + (x.ok ? 'ok' : '') + (j === i ? ' akt' : '') + '"></i>').join('') + '</span>' +
@@ -6705,7 +6762,7 @@ function rmDateiText(liste) {
   const stuecke = liste.map((x, i) => '<h2>' + (i + 1) + '. ' + esc([RM_ARTEN[x.art], x.wo].filter(Boolean).join(' · ')) + '</h2>' +
     '<p class="k">' + esc([zeitKurz(x.datum) ? zeitKurz(x.datum) + ' Uhr' : '', [x.umgebung, x.breite ? x.breite + ' px breit' : ''].filter(Boolean).join(', '), x.version ? 'notiert in Fassung ' + x.version : ''].filter(Boolean).join(' · ')) + '</p>' +
     '<p class="t">' + esc(x.text) + '</p>' + (url(x) ? '<img id="b' + (i + 1) + '" src="' + url(x) + '" alt="Bild zur Rückmeldung ' + (i + 1) + '">' : (x.bild ? '<p class="k">Das Bild dazu fehlte auf dem Gerät.</p>' : ''))).join('');
-  const daten = { app: 'strategietag-bi', typ: 'rueckmeldungen', v: 1, version: VERSION, am: am, abteilung: m.abteilung, datei: m.art === 'gl' ? 'GL-Datei' : 'Abteilungsdatei',
+  const daten = { app: 'strategietag-bi', typ: 'rueckmeldungen', v: 1, version: VERSION, am: am, abteilung: m.abteilung, datei: m.art === 'gl' ? 'GL-Datei' : (m.art === 'daten' ? 'Daten-Datei' : 'Abteilungsdatei'),
     liste: liste.map((x, i) => ({ nr: i + 1, art: RM_ARTEN[x.art], wo: x.wo, datum: x.datum, text: x.text, version: x.version, umgebung: x.umgebung, breite: x.breite || 0, bild: url(x) ? 'b' + (i + 1) : '' })) };
   return '<!DOCTYPE html>\n<html lang="de-CH"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><link rel="icon" href="data:,"><title>Rückmeldungen zum Strategietag-Tool</title><style>' + BLATT_STIL + '</style></head><body>' +
     '<h1>Rückmeldungen zum Strategietag-Tool</h1><p class="u">' + esc([m.abteilung, 'Fassung ' + VERSION, zeitKurz(am) + ' Uhr', mehrzahl(liste.length, 'Rückmeldung', 'Rückmeldungen')].filter(Boolean).join(' · ')) + '</p>' +
@@ -6722,6 +6779,661 @@ async function rmAlsDatei(liste, markieren) {
   if (markieren) { merken(); const jetzt = new Date().toISOString(); liste.forEach((x) => { x.status = 'uebergeben'; x.uebergeben = jetzt; }); speichern(); render(); }
   renderSheet(false);
   toast(hinausText(weg, name) + ' Die Datei enthält Text und Bilder: weitergeben oder in den Chat mit Claude legen.', markieren);
+}
+
+/* ====================================================================================================
+   Daten für alle (seit 2.1, Fahrplan 530)
+   Eine dritte Art von Datei: die Daten-Datei (meta.art 'daten'). Die Buchhaltung liest darin einmal für alle ein: den Gesamtauszug
+   «KSt-Istwerte» (alle Sparten, die ganze Historie; ersetzt alles), die Offertliste, den Mitarbeiter-Export aus BauBit (beide ergänzen)
+   und die Namen der Kostenstellen und Kostenarten. Jede Abteilung wählt in ihrer eigenen Datei «Daten holen», kreuzt ihre Sparte(n) an
+   und hat danach Buchungen, Offerten, Mitarbeiter und Namen. Niemand ausser der Buchhaltung schreibt in die Daten-Datei; darum können
+   alle gleichzeitig arbeiten.
+   Die Buchungen liegen je Sparte in einem eigenen Stück (wie ein Anhang neben dem Stand). In der gesicherten Datei stehen die Stücke
+   hinter dem Tool, zuletzt ein Verzeichnis mit ihrer Lage: So liest eine Abteilung nur ihr Stück, auch aus einer grossen Datei.
+   ==================================================================================================== */
+const istDaten = () => S.meta.art === 'daten';
+function zentralNeu() { return { id: uid(), sparten: [], zuOff: {}, zuMa: {}, spSpalte: '', buch: null, off: null, ma: null, namen: { am: '', kst: {}, ka: {} }, kstSp: {} }; }   // spSpalte: der Titel der Spalte, die im Auszug die Sparte nennt ('' = selbst erkennen)
+function zentralNormal(z) {
+  const n = zentralNeu(), obj = (x) => (x && typeof x === 'object' && !Array.isArray(x) ? x : null), txt = (x) => (typeof x === 'string' ? x : '');
+  if (!obj(z)) return n;
+  if (typeof z.id === 'string' && z.id) n.id = z.id;
+  n.spSpalte = txt(z.spSpalte);
+  n.sparten = (Array.isArray(z.sparten) ? z.sparten : []).filter((s) => s && typeof s.nr === 'string' && s.nr).map((s) => ({ nr: s.nr, name: txt(s.name) }));
+  ['zuOff', 'zuMa', 'kstSp'].forEach((k) => { const o = obj(z[k]); if (o) Object.keys(o).forEach((w) => { if (typeof o[w] === 'string') n[k][w] = o[w]; }); });
+  const b = obj(z.buch);
+  if (b && obj(b.teile)) {
+    n.buch = { am: txt(b.am), n: +b.n || 0, von: +b.von || 0, bis: +b.bis || 0, mitSparte: !!b.mitSparte, quelle: txt(b.quelle), kopf: (Array.isArray(b.kopf) ? b.kopf : []).filter((x) => typeof x === 'string' && x).slice(0, 80), teile: {} };   // kopf: die Spaltentitel des Auszugs (für die Wahl der Spalte mit der Sparte)
+    Object.keys(b.teile).forEach((nr) => { const t = obj(b.teile[nr]); if (t && typeof t.anh === 'string') n.buch.teile[nr] = { anh: t.anh, n: +t.n || 0, von: +t.von || 0, bis: +t.bis || 0, abg: typeof t.abg === 'number' ? t.abg : -1, z: +t.z || 0 }; });
+  }
+  const o = obj(z.off);
+  if (o && typeof o.anh === 'string') { n.off = { am: txt(o.am), n: +o.n || 0, anh: o.anh, z: +o.z || 0, werte: {} }; const w = obj(o.werte); if (w) Object.keys(w).forEach((k) => { n.off.werte[k] = +w[k] || 0; }); }
+  const m = obj(z.ma);
+  if (m && Array.isArray(m.liste)) n.ma = { am: txt(m.am), liste: m.liste.filter((p) => p && typeof p === 'object' && typeof p.name === 'string').map((p) => { const q = {}; MA_FELDER.forEach((k) => { q[k] = k === 'aktiv' ? p.aktiv !== false : txt(p[k]); }); return q; }) };
+  const nm = obj(z.namen);
+  if (nm) { n.namen.am = txt(nm.am); ['kst', 'ka'].forEach((k) => { const q = obj(nm[k]); if (q) Object.keys(q).forEach((w) => { if (typeof q[w] === 'string') n.namen[k][w] = q[w]; }); }); }
+  return n;
+}
+function zdatenNormal(x) {   // Abteilungsdatei: woher die Daten zuletzt kamen {am (Stand der Daten-Datei), geholt, sparten, spNamen, datei}
+  if (!x || typeof x !== 'object' || typeof x.am !== 'string' || !x.am) return null;
+  const sn = {}; if (x.spNamen && typeof x.spNamen === 'object') Object.keys(x.spNamen).forEach((k) => { if (typeof x.spNamen[k] === 'string') sn[k] = x.spNamen[k]; });
+  return { am: x.am, geholt: typeof x.geholt === 'string' ? x.geholt : '', sparten: (Array.isArray(x.sparten) ? x.sparten : []).filter((s) => typeof s === 'string'), spNamen: sn, datei: typeof x.datei === 'string' ? x.datei : '' };
+}
+const zentralLeer = () => { const Z = S.zentral; return !Z || (!Z.buch && !Z.off && !Z.ma && !Z.sparten.length && !Object.keys(Z.namen.kst).length && !Object.keys(Z.namen.ka).length && !Object.keys(Z.kstSp).length); };
+const zentralStand = (Z) => [Z.buch && Z.buch.am, Z.off && Z.off.am, Z.ma && Z.ma.am, Z.namen && Z.namen.am].filter(Boolean).sort().pop() || '';
+const spName = (s) => (s.nr ? (/^\d+$/.test(s.nr) ? s.nr + (s.name ? ' ' + s.name : '') : (s.name || s.nr)) : 'Ohne Sparte');
+const spVgl = (a, b) => (!a ? 1 : !b ? -1 : (/^\d+$/.test(a) && /^\d+$/.test(b) ? +a - +b : a.localeCompare(b, 'de')));
+const spEinfach = (t) => String(t || '').toLowerCase().replace(/\s*\([^)]*\)\s*/g, ' ').replace(/[^a-z0-9äöüéèàç]+/g, ' ').trim();
+
+/* ---------- Grosse Excel-Listen stückweise lesen: Das Blatt wird entpackt und Zeile um Zeile verarbeitet, ohne es ganz im Speicher zu halten ---------- */
+async function zipVerzeichnis(file) {   // Namen → { meth, cs (gepackt), lo (Lage) }, gelesen vom Ende der Datei
+  const n = Math.min(file.size, 70000), dv = new DataView(await file.slice(file.size - n).arrayBuffer());
+  let p = n - 22;
+  while (p >= 0 && dv.getUint32(p, true) !== 0x06054b50) p--;
+  if (p < 0) throw new Error('kein zip');
+  let anz = dv.getUint16(p + 10, true), gr = dv.getUint32(p + 12, true), off = dv.getUint32(p + 16, true);
+  if (off === 0xFFFFFFFF || anz === 0xFFFF || gr === 0xFFFFFFFF) {   // Zip64: sehr grosse Mappen
+    const q = p - 20;
+    if (q < 0 || dv.getUint32(q, true) !== 0x07064b50) throw new Error('zip64');
+    const o64 = Number(dv.getBigUint64(q + 8, true)), d2 = new DataView(await file.slice(o64, o64 + 56).arrayBuffer());
+    anz = Number(d2.getBigUint64(32, true)); gr = Number(d2.getBigUint64(40, true)); off = Number(d2.getBigUint64(48, true));
+  }
+  const buf = await file.slice(off, off + gr).arrayBuffer(), cd = new DataView(buf), dek = new TextDecoder(), aus = {};
+  let c = 0;
+  for (let i = 0; i < anz && c + 46 <= cd.byteLength; i++) {
+    const nl = cd.getUint16(c + 28, true), el = cd.getUint16(c + 30, true), kl = cd.getUint16(c + 32, true);
+    let cs = cd.getUint32(c + 20, true), us = cd.getUint32(c + 24, true), lo = cd.getUint32(c + 42, true);
+    const name = dek.decode(new Uint8Array(buf, c + 46, nl));
+    let x = c + 46 + nl;
+    const xe = x + el;
+    while (x + 4 <= xe) {
+      const id = cd.getUint16(x, true), l = cd.getUint16(x + 2, true);
+      if (id === 1) { let y = x + 4; if (us === 0xFFFFFFFF) { us = Number(cd.getBigUint64(y, true)); y += 8; } if (cs === 0xFFFFFFFF) { cs = Number(cd.getBigUint64(y, true)); y += 8; } if (lo === 0xFFFFFFFF) lo = Number(cd.getBigUint64(y, true)); }
+      x += 4 + l;
+    }
+    aus[name] = { meth: cd.getUint16(c + 10, true), cs: cs, lo: lo };
+    c += 46 + nl + el + kl;
+  }
+  return aus;
+}
+async function zipStrom(file, e) {   // der entpackte Inhalt eines Eintrags als Folge von Textstücken
+  const k = new DataView(await file.slice(e.lo, e.lo + 30).arrayBuffer()), start = e.lo + 30 + k.getUint16(26, true) + k.getUint16(28, true);
+  let s = file.slice(start, start + e.cs).stream();
+  if (e.meth === 8) s = s.pipeThrough(new DecompressionStream('deflate-raw'));
+  else if (e.meth !== 0) throw new Error('packung');
+  return s.pipeThrough(new TextDecoderStream()).getReader();
+}
+async function zipText(file, e) { const r = await zipStrom(file, e); let t = ''; for (;;) { const x = await r.read(); if (x.done) break; t += x.value; } return t; }
+/* Das erste Blatt, dessen Titelzeile waehle(kopf) annimmt: proZeile(zellen) je Zeile darunter; zellen[spalte] ist Text, Zahl oder { tag: n } für ein Datum.
+   Gibt { kopf, n, weitere } zurück; null, wenn kein Blatt passt; undefined, wenn dieser Browser nicht stückweise lesen kann (dann gilt der bisherige Weg).
+   weitere: wie viele spätere Blätter ebenfalls eine Titelzeile haben, die auchDa(kopf) annimmt (sie werden nicht gelesen; wer ruft, kann davor warnen). */
+async function xlsxStromListe(file, waehle, proZeile, auchDa) {
+  if (typeof DecompressionStream === 'undefined' || typeof TextDecoderStream === 'undefined' || !file.stream) return undefined;
+  const V = await zipVerzeichnis(file), txt = async (n) => (V[n] ? await zipText(file, V[n]) : null);
+  const wbT = await txt('xl/workbook.xml');
+  if (!wbT) return null;
+  const ziel = {}, relT = await txt('xl/_rels/workbook.xml.rels'), pfade = [];
+  let m, i = 0;
+  if (relT) { const re = /<Relationship\b[^>]*>/g; while ((m = re.exec(relT))) { const id = /\bId="([^"]+)"/.exec(m[0]), zl = /\bTarget="([^"]+)"/.exec(m[0]); if (id && zl) ziel[id[1]] = zl[1]; } }
+  const reS = /<sheet\b[^>]*>/g;
+  while ((m = reS.exec(wbT))) { const rid = /\br:id="([^"]+)"/.exec(m[0]); i++; pfade.push(((rid && ziel[rid[1]]) || ('worksheets/sheet' + i + '.xml')).replace(/^\/?xl\//, '').replace(/^\//, '')); }
+  let ss = null, datStil = null;
+  for (let b = 0; b < pfade.length; b++) {
+    const e = V['xl/' + pfade[b]];
+    if (!e) continue;
+    if (!ss) { ss = xlsxTexte((await txt('xl/sharedStrings.xml')) || ''); datStil = xlsxDatStil((await txt('xl/styles.xml')) || ''); }
+    const r = await zipStrom(file, e);
+    let rest = '', kopf = null, vorKopf = 0, n = 0, weiter = true;
+    const stueck = (teil) => {
+      xlsxZeilen('<sheetData>' + teil, ss, datStil, (z) => {
+        if (!kopf) {   // die Titelzeile steht in den ersten 30 Zeilen
+          if (++vorKopf > 31) { weiter = false; return false; }
+          const k = [];
+          for (let c = 0; c < z.length; c++) k.push(z[c] === undefined || typeof z[c] === 'object' ? '' : String(z[c]).trim());
+          if (waehle(k)) kopf = k;
+          return true;
+        }
+        proZeile(z); n++;
+        return true;
+      });
+    };
+    for (;;) {
+      const x = await r.read();
+      if (x.done) break;
+      rest += x.value;
+      if (rest.length > 3e6 || (!kopf && rest.indexOf('</row>') >= 0)) { const p = rest.lastIndexOf('</row>'); if (p >= 0) { stueck(rest.slice(0, p + 6)); rest = rest.slice(p + 6); } }
+      if (!weiter) { try { await r.cancel(); } catch (e2) { /* weiter */ } break; }
+    }
+    if (weiter && rest) stueck(rest);
+    if (!kopf) continue;
+    let weitere = 0;
+    if (auchDa) for (let c = b + 1; c < pfade.length; c++) {   // nur die Titelzeile der späteren Blätter ansehen
+      const e3 = V['xl/' + pfade[c]];
+      if (!e3) continue;
+      const r3 = await zipStrom(file, e3);
+      let t3 = '', z3 = 0, da = false;
+      for (;;) {
+        const x = await r3.read();
+        if (x.done) break;
+        t3 += x.value;
+        const p = t3.lastIndexOf('</row>');
+        if (p >= 0) { xlsxZeilen('<sheetData>' + t3.slice(0, p + 6), ss, datStil, (z) => { if (++z3 > 31) return false; const k = []; for (let q = 0; q < z.length; q++) k.push(z[q] === undefined || typeof z[q] === 'object' ? '' : String(z[q]).trim()); if (auchDa(k)) { da = true; return false; } return true; }); t3 = t3.slice(p + 6); }
+        if (da || z3 > 31) { try { await r3.cancel(); } catch (e4) { /* weiter */ } break; }
+      }
+      if (da) weitere++;
+    }
+    return { kopf: kopf, n: n, weitere: weitere };
+  }
+  return null;
+}
+
+/* ---------- Sparte: woran eine Buchung, eine Offerte oder ein Mitarbeiter zu einer Abteilung findet ---------- */
+function sparteSpalte(kopf) {   // die Spalte, die jede Zeile einer Sparte zuordnet; −1: keine
+  const RE = [/^sparten?\s*-?\s*(nr\.?|nummer|code)?$/i, /^(gesch(ä|ae)fts)?bereich$/i, /^profit\s*-?\s*center$/i, /^abteilung$/i];
+  for (let i = 0; i < RE.length; i++) { const c = kopf.findIndex((x) => RE[i].test(String(x == null ? '' : x).trim())); if (c >= 0) return c; }
+  return -1;
+}
+function sparteSpalteVon(kopf) {   // die von der Buchhaltung gewählte Spalte (Titel), sonst selbst erkannt
+  const w = S.zentral ? String(S.zentral.spSpalte || '').trim().toLowerCase() : '';
+  if (w) { const c = kopf.findIndex((x) => String(x == null ? '' : x).replace(/\s+/g, ' ').trim().toLowerCase() === w); if (c >= 0) return c; }
+  return sparteSpalte(kopf);
+}
+const sparteNameSpalte = (kopf) => kopf.findIndex((x) => /^sparten?\s*-?\s*(bez\S*|name|text)$/i.test(String(x == null ? '' : x).trim()));
+function sparteAus(v) {   // Zelle → [Kennung, Name]: «100», «100 Abteilung A», «Abteilung A»
+  const s = (typeof v === 'number' ? String(v) : String(v == null || typeof v === 'object' ? '' : v)).replace(/\s+/g, ' ').trim().replace(/^(\d+)\.0+$/, '$1');
+  if (!s) return ['', ''];
+  const m = /^(\d{1,8})(?:\s*[-–:·/]?\s*(\D.*))?$/.exec(s);
+  return m ? [ohneNull(m[1]), (m[2] || '').trim()] : [s, s];
+}
+/* Wohin ein Wert der Offertliste («Sparte») oder des BauBit-Exports («Abteilung») gehört: die eigene Zuordnung, sonst ein Vorschlag (gleiche Nummer oder gleicher Name) */
+function zuVorschlag(Z, wert) {
+  const a = sparteAus(wert), n = spEinfach(wert);
+  if (!n) return '';
+  if (/^\d+$/.test(a[0]) && Z.sparten.some((s) => s.nr === a[0])) return a[0];
+  const gleich = Z.sparten.filter((s) => spEinfach(s.name) === n || spEinfach(s.nr) === n);
+  if (gleich.length === 1) return gleich[0].nr;
+  const drin = Z.sparten.filter((s) => { const x = spEinfach(s.name); return x.length > 2 && n.length > 2 && (x.indexOf(n) >= 0 || n.indexOf(x) >= 0); });
+  return drin.length === 1 ? drin[0].nr : '';
+}
+const zuVon = (Z, art, wert) => { const e = Z[art][wert]; return typeof e === 'string' && (e === '' || Z.sparten.some((s) => s.nr === e)) ? e : zuVorschlag(Z, wert); };
+
+/* ---------- Stücke: grosser Inhalt neben dem Stand (Arbeitsspeicher und Ablage des Browsers), je Pfad der Seite gekennzeichnet ---------- */
+const ZB_VOR = 'zb|' + location.pathname + '|';
+const zbId = () => ZB_VOR + uid() + uid();
+/* Ein Stück ablegen: sofort im Arbeitsspeicher; die Ablage des Browsers läuft nach. zbFertig() wartet, bis alles dort liegt (false: Die Ablage hat etwas nicht angenommen). */
+const zbOffen = [];
+function zbMerken(id, inhalt) {
+  ANH[id] = inhalt;
+  zbOffen.push(anhDb().then((db) => new Promise((ok) => { const tx = db.transaction('a', 'readwrite'); tx.objectStore('a').put(inhalt, id); tx.oncomplete = () => ok(true); tx.onerror = () => ok(false); tx.onabort = () => ok(false); })).catch(() => false));
+}
+const zbFertig = () => Promise.all(zbOffen.splice(0)).then((L) => L.every(Boolean));
+async function zbInhalt(id) { if (!id) return null; if (ANH[id] != null) return ANH[id]; const x = await anhHolen(id); if (x != null) ANH[id] = x; return x; }
+function zbBenutzt() { const Z = S.zentral, L = []; if (istDaten() && Z) { if (Z.buch) Object.keys(Z.buch.teile).forEach((nr) => L.push(Z.buch.teile[nr].anh)); if (Z.off) L.push(Z.off.anh); } return L; }
+function zbAufraeumen() {   // beim Start: Stücke dieser Seite, die der Stand nicht mehr nennt, aus der Ablage des Browsers räumen
+  const da = new Set(zbBenutzt());
+  anhDb().then((db) => { const st = db.transaction('a', 'readwrite').objectStore('a'), r = st.getAllKeys(); r.onsuccess = () => { (r.result || []).forEach((k) => { if (typeof k === 'string' && k.indexOf(ZB_VOR) === 0 && !da.has(k)) st.delete(k); }); }; }).catch(() => { /* ohne Ablage */ });
+}
+
+/* ---------- Buchhaltung: einlesen ---------- */
+/* Ein Auszug mit Buchungen → je Sparte ein Sammler in R.sam. Die Sparte steht in einer eigenen Spalte; fehlt sie, gilt die Liste Kostenstelle → Sparte.
+   Gibt true zurück, wenn die Datei ein Auszug war. */
+async function zbuchLesen(file, R) {
+  const kstSp = S.zentral.kstSp, zelle = (v) => (typeof v === 'number' ? String(v) : String(v == null || typeof v === 'object' ? '' : v)).trim();
+  let sp = null, wahl = null;
+  const eine = [null];
+  const waehle = (k) => { sp = buchSpalten(k); if (!sp) return null; const iS = sparteSpalteVon(k); if (iS >= 0) R.mitSpalte = true; if (!R.kopf) R.kopf = k.map((x) => String(x == null ? '' : x).replace(/\s+/g, ' ').trim().slice(0, 60)).filter(Boolean); wahl = sp.concat([iS, sparteNameSpalte(k)]); return wahl; };
+  const nimm = (aus) => {   // aus: die gewählten Spalten, zuletzt Sparte und ihr Name
+    let nr = '';
+    if (wahl[sp.length] >= 0) { const a = sparteAus(aus[sp.length]); nr = a[0]; const nm = wahl[sp.length + 1] >= 0 ? zelle(aus[sp.length + 1]) : a[1]; if (nr && nm && nm !== nr && !R.namen[nr]) R.namen[nr] = nm; }
+    else nr = kstSp[ohneNull(zelle(aus[BF.kst]).replace(/\.0+$/, ''))] || '';
+    eine[0] = aus;
+    R.schlecht += buchZeilenDazu(R.sam[nr] || (R.sam[nr] = buchSammler()), eine);
+  };
+  if (/\.xls[xm]$/i.test(file.name)) {
+    let r;
+    try { r = await xlsxStromListe(file, waehle, (z) => { const aus = new Array(wahl.length); for (let c = 0; c < wahl.length; c++) aus[c] = wahl[c] < 0 ? undefined : z[wahl[c]]; nimm(aus); }, (k) => !!buchSpalten(k)); } catch (e) { if (sp) throw e; r = undefined; }
+    if (r && r.weitere) R.mehr = true;   // Buchungen auch auf späteren Blättern: gelesen ist nur das erste
+    if (r === undefined) { const a = await xlsxListe(await file.arrayBuffer(), waehle); if (!a) return false; a.zeilen.forEach(nimm); return true; }   // wo das stückweise Lesen nicht geht
+    return !!r;
+  }
+  if (/\.xls$/i.test(file.name)) return false;
+  const kopfzeile = (await file.slice(0, 4096).text()).split(/\r?\n/)[0] || '';
+  if (!/kostenstelle/i.test(kopfzeile) || !/kostenart/i.test(kopfzeile)) return false;
+  const g = gitterAusText(await file.text());
+  for (let r = 0; r < Math.min(g.length, 30); r++) {
+    if (!waehle((g[r] || []).map((x) => String(x == null ? '' : x).trim()))) continue;
+    for (let i = r + 1; i < g.length; i++) { const z = g[i]; if (z) nimm(wahl.map((c) => (c < 0 ? undefined : z[c]))); }
+    return true;
+  }
+  return false;
+}
+/* Mitarbeiter-Export aus BauBit: gelesen werden genau die Felder in MA_FELDER. Alles andere (Lohn, AHV-Nummer, Adresse, Personalien) verlässt die Datei nicht. */
+const BB_SP = [['nr', /^(mitarbeiter|personal|pers)\.?\s*-?\s*(nr\.?|nummer)$/i], ['name', /^(name|nachname)$/i], ['vorname', /^vorname$/i], ['abteilung', /^abteilung$/i], ['funktion', /^funktion$/i], ['aktiv', /^aktiv$/i],
+  ['initialen', /^(initialen|k(ü|ue)rzel)$/i], ['vorgesetzter', /^vorgesetzte(r)?$/i], ['eintritt', /^eintritt(sdatum)?$/i], ['austritt', /^austritt(sdatum)?$/i], ['geburt', /^(geburtstag|geburtsdatum)$/i]];
+function baubitSpalten(kopf) {   // Titelzeile → { Feld: Spalte } oder null
+  const sp = {};
+  BB_SP.forEach((s) => { const c = kopf.findIndex((x) => s[1].test(String(x == null ? '' : x).replace(/\s+/g, ' ').trim())); if (c >= 0) sp[s[0]] = c; });
+  return sp.name !== undefined && sp.vorname !== undefined && sp.abteilung !== undefined && (sp.funktion !== undefined || sp.eintritt !== undefined) ? sp : null;
+}
+function baubitZeile(sp, z) {
+  const txt = (k) => { const v = sp[k] === undefined ? '' : z[sp[k]]; return (v == null || typeof v === 'object' ? '' : String(v)).replace(/\s+/g, ' ').trim(); };
+  const dat = (k) => {   // Datum als «T.M.JJJJ»
+    const v = sp[k] === undefined ? '' : z[sp[k]], n = v && typeof v === 'object' && typeof v.tag === 'number' ? v.tag : (typeof v === 'number' && v > 3000 && v < 80000 ? v : (/^\d{4,5}(\.\d+)?$/.test(String(v == null ? '' : v).trim()) && +v > 3000 && +v < 80000 ? +v : null));
+    if (n !== null) { const d = new Date(Date.UTC(1899, 11, 30) + Math.floor(n + 1e-6) * 864e5); return d.getUTCDate() + '.' + (d.getUTCMonth() + 1) + '.' + d.getUTCFullYear(); }
+    const s = String(v == null || typeof v === 'object' ? '' : v).trim(), m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s);
+    return m ? +m[3] + '.' + +m[2] + '.' + m[1] : s.replace(/\s.*$/, '');
+  };
+  const name = txt('name'), vorname = txt('vorname');
+  if (!name && !vorname) return null;
+  return { nr: txt('nr').replace(/\.0+$/, ''), name: name, vorname: vorname, abteilung: txt('abteilung'), funktion: txt('funktion'), aktiv: true, _a: sp.aktiv === undefined ? null : txt('aktiv'),
+    initialen: txt('initialen'), vorgesetzter: txt('vorgesetzter'), eintritt: dat('eintritt'), austritt: dat('austritt'), geburt: dat('geburt') };
+}
+/* «Aktiv» deuten: Ja und Nein gelten, wie sie dastehen. Leere Zellen heissen «nein», wenn die Spalte sonst nur Ja kennt (Häkchen-Spalte),
+   sonst «ja» (dann fehlt die Angabe einfach). Wer schon ausgetreten ist, zählt ohnehin nicht mehr als aktiv (maDabei). */
+function baubitAktiv(L) {
+  const ja = (a) => /^(ja|j|yes|y|1|x|true|wahr|aktiv)$/i.test(a || ''), nein = (a) => /^(nein|n|no|0|false|falsch|inaktiv)$/i.test(a || '');
+  const hatJa = L.some((p) => ja(p._a)), hatNein = L.some((p) => nein(p._a));
+  L.forEach((p) => { p.aktiv = p._a === null ? true : (nein(p._a) ? false : (ja(p._a) ? true : !(hatJa && !hatNein))); delete p._a; });
+  return L;
+}
+const maDabei = (p) => { if (!p.aktiv) return false; const w = datumWert(p.austritt); return !(w > 0 && w < datumWert(heute())); };   // aktiv und nicht schon ausgetreten
+async function baubitLesen(file) {   // → Liste der Mitarbeitenden oder null (kein solcher Export)
+  let sp = null;
+  const L = [], dazu = (z) => { const p = baubitZeile(sp, z); if (p) L.push(p); };
+  if (/\.xls[xm]$/i.test(file.name)) {
+    let r;
+    try { r = await xlsxStromListe(file, (k) => ((sp = baubitSpalten(k))), dazu); } catch (e) { r = undefined; }
+    if (r === undefined) { sp = null; const B = await xlsxLesen(await file.arrayBuffer()); for (const b of B) { for (let i = 0; i < Math.min(b.g.length, 30) && !sp; i++) { sp = baubitSpalten(b.g[i] || []); if (sp) b.g.slice(i + 1).forEach(dazu); } if (sp) break; } }
+    return sp && L.length ? baubitAktiv(L) : null;
+  }
+  if (/\.xls$/i.test(file.name)) return null;
+  const g = gitterAusText(await file.text());
+  for (let i = 0; i < Math.min(g.length, 30); i++) { sp = baubitSpalten(g[i] || []); if (sp) { g.slice(i + 1).forEach(dazu); break; } }
+  return sp && L.length ? baubitAktiv(L) : null;
+}
+function kstSparteLesen(g) {   // Liste der Kostenstellen mit ihrer Sparte → { zu: {Kostenstelle: Sparte}, namen: {Sparte: Name} } oder null
+  for (let r = 0; r < Math.min(g.length, 30); r++) {
+    const kopf = (g[r] || []).map((x) => String(x == null ? '' : x).replace(/\s+/g, ' ').trim());
+    if (buchSpalten(kopf)) return null;
+    const iK = kopf.findIndex((x) => /^(kostenstelle|kst\.?|kostenstellen-?\s?(nr\.?|nummer)|kostenstellennummer|kst-?\s?nr\.?)$/i.test(x)), iS = sparteSpalte(kopf), iN = sparteNameSpalte(kopf);
+    if (iK < 0 || iS < 0) continue;
+    const zu = {}, namen = {};
+    g.slice(r + 1).forEach((z) => { if (!z) return; const k = ohneNull(String(z[iK] == null ? '' : z[iK]).trim().replace(/\.0+$/, '')), a = sparteAus(z[iS]); if (!k || !/\d/.test(k) || !a[0]) return; zu[k] = a[0]; const nm = iN >= 0 ? String(z[iN] == null ? '' : z[iN]).trim() : a[1]; if (nm && nm !== a[0] && !namen[a[0]]) namen[a[0]] = nm; });
+    if (Object.keys(zu).length) return { zu: zu, namen: namen };
+  }
+  return null;
+}
+function zSparteMerken(Z, nr, name) { if (!nr) return; let s = Z.sparten.find((x) => x.nr === nr); if (!s) { s = { nr: nr, name: '' }; Z.sparten.push(s); } if (!s.name && name) s.name = name; Z.sparten.sort((a, b) => spVgl(a.nr, b.nr)); }
+const buchZeileVon = (B, i) => ({ ym: B.ym[i], kst: B.KST[B.k[i]], ka: B.KA[B.a[i]], b: B.b[i], m: B.m[i], e: B.EIN[B.e[i]], h: B.HER[B.h[i]], t: B.TXT[B.t[i]], d: B.DK[B.d[i]], da: B.DKA[B.da[i]], bd: B.bd[i], bn: B.BEL[B.bn[i]], ae: B.ae[i],
+  bl: B.BL[B.k[i]], ksn: B.KSN[B.k[i]], bab: B.BAB[B.a[i]], bed: B.BED[B.a[i]], kan: B.KAN[B.a[i]] });
+function buchAnhaengen(L) {   // mehrere Sätze von Buchungen zu einem (verschiedene Sparten: nichts wird ersetzt)
+  if (L.length === 1) return L[0];
+  const S0 = buchSammler();
+  L.forEach((B) => { for (let i = 0; i < B.n; i++) S0.dazu(buchZeileVon(B, i)); });
+  return buchFest(S0.fertig());
+}
+/* Die Buchungen je Sparte als neue Stücke ablegen. Ersetzt alle bisherigen Buchungen der Daten-Datei. */
+function zbuchSetzen(T, info) {
+  const Z = S.zentral, teile = {};
+  let n = 0, von = Infinity, bis = -Infinity;
+  Object.keys(T).forEach((nr) => {
+    const B = T[nr];
+    if (!B || !B.n) return;
+    const text = JSON.stringify(buchInhalt(B)), id = zbId();
+    zbMerken(id, text);
+    teile[nr] = { anh: id, n: B.n, von: B.ymMin, bis: B.ymMax, abg: B.ymAbg, z: text.length };
+    n += B.n; von = Math.min(von, B.ymMin); bis = Math.max(bis, B.ymMax);
+    zSparteMerken(Z, nr, (info.spNamen || {})[nr]);
+  });
+  Z.buch = n ? { am: new Date().toISOString(), n: n, von: von, bis: bis, mitSparte: !!info.mitSpalte, quelle: String(info.quelle || '').slice(0, 200), kopf: Array.isArray(info.kopf) ? info.kopf.slice(0, 80) : [], teile: teile } : null;
+  return n;
+}
+/* Buchungen ohne Sparte nach der Liste Kostenstelle → Sparte verteilen (wenn der Auszug keine Spalte «Sparte» hatte und die Liste später kam) */
+async function zbUmverteilen() {
+  const Z = S.zentral, ohne = Z.buch && Z.buch.teile[''];
+  if (!ohne || !Object.keys(Z.kstSp).length) return 0;
+  const text = await zbInhalt(ohne.anh);
+  if (text == null) return 0;
+  const B = buchFest(JSON.parse(text)), sam = {};
+  let bewegt = 0;
+  for (let i = 0; i < B.n; i++) { const nr = Z.kstSp[ohneNull(B.KST[B.k[i]])] || ''; if (nr) bewegt++; (sam[nr] || (sam[nr] = buchSammler())).dazu(buchZeileVon(B, i)); }
+  if (!bewegt) return 0;
+  const T = {};
+  for (const nr of Object.keys(Z.buch.teile)) { if (nr === '') continue; const t = await zbInhalt(Z.buch.teile[nr].anh); if (t == null) return 0; T[nr] = buchFest(JSON.parse(t)); }   // fehlt ein Stück auf diesem Gerät, bleibt alles, wie es ist
+  Object.keys(sam).forEach((nr) => { const X = buchFest(sam[nr].fertig()); T[nr] = T[nr] && nr !== '' ? buchAnhaengen([T[nr], X]) : X; });
+  const vor = Z.buch;
+  zbuchSetzen(T, { mitSpalte: vor.mitSparte, quelle: vor.quelle, kopf: vor.kopf, spNamen: {} });
+  if (Z.buch) Z.buch.am = vor.am;
+  return bewegt;
+}
+/* Alles, was die Buchhaltung einliest: Das Tool erkennt jede Datei selbst (Auszug, Offertliste, Mitarbeiter-Export, Namen, Kostenstellen mit Sparte). */
+let ZB_DATEIEN = [];   // die Dateien des zuletzt eingelesenen Auszugs, solange die Seite offen ist: Wird eine andere Spalte für die Sparte gewählt, liest das Tool sie nochmals
+async function zentralImport(dateien) {
+  if (IM_RAHMEN) { toast('In dieser Vorschau ausgeschaltet.'); return; }
+  const Z0 = S.zentral, R = { sam: {}, namen: {}, schlecht: 0, mitSpalte: false, kopf: null }, buchDateien = [], buchF = [], mehrBl = [], vonVor = Z0.buch ? Z0.buch.von : 0, F = { ma: [], off: [], namen: null, kst: null, unbekannt: [], alt: false, ohneSparte: 0 };
+  toast('Die Dateien werden gelesen …'); await new Promise((ok) => setTimeout(ok, 30));
+  let T = null;
+  for (const f of dateien) {
+    try {
+      const Rf = { sam: {}, namen: R.namen, schlecht: 0, mitSpalte: false, kopf: null, mehr: false };
+      if (await zbuchLesen(f, Rf)) {   // Überschneiden sich zwei Auszüge, gilt je Sparte und Monat der spätere, damit nichts doppelt zählt
+        buchDateien.push(f.name); buchF.push(f); if (Rf.mehr) mehrBl.push(f.name); R.schlecht += Rf.schlecht; R.mitSpalte = R.mitSpalte || Rf.mitSpalte; R.kopf = R.kopf || Rf.kopf;
+        const X = {}; Object.keys(Rf.sam).forEach((nr) => { const B = buchFest(Rf.sam[nr].fertig()); if (B && B.n) X[nr] = B; });
+        if (!T) T = X; else Object.keys(X).forEach((nr) => { T[nr] = T[nr] ? buchVerbinden(T[nr], X[nr]) : X[nr]; });
+        continue;
+      }
+      const ma = await baubitLesen(f);
+      if (ma) { F.ma = F.ma.concat(ma); continue; }
+      const blaetter = await gitterAusDatei(f);
+      let erkannt = false;
+      blaetter.forEach((b) => { const k = kstSparteLesen(b.g); if (k) { F.kst = F.kst || { zu: {}, namen: {} }; Object.assign(F.kst.zu, k.zu); Object.assign(F.kst.namen, k.namen); erkannt = true; } });
+      const nm = namenAusGittern(blaetter);
+      if (nm) { F.namen = F.namen || { kst: {}, ka: {} }; Object.assign(F.namen.kst, nm.kst); Object.assign(F.namen.ka, nm.ka); erkannt = true; }
+      if (!erkannt) { const k = blaetter.map((b) => kundenLesen(b.g)).filter((x) => x && x.art === 'liste'); if (k.length) { k.forEach((x) => { F.off = F.off.concat(x.zeilen); }); erkannt = true; } }
+      if (!erkannt) F.unbekannt.push(f.name);
+    } catch (e) { F.unbekannt.push(f.name); if (e && e.message === 'xls') F.alt = true; }
+  }
+  if (S.zentral !== Z0 || !istDaten()) { $('#toasts').innerHTML = ''; return; }   // inzwischen wurde etwas anderes geladen
+  const offAlt = F.off.length && Z0.off ? JSON.parse((await zbInhalt(Z0.off.anh)) || '[]') : [];
+  const leerAuszug = !!T && !Object.keys(T).some((nr) => T[nr].n > 0);   // ein Auszug ohne eine einzige Buchung: Er ersetzt nichts
+  if (leerAuszug) T = null;
+  if (!T && !F.ma.length && !F.off.length && !F.namen && !F.kst) {
+    toast(leerAuszug ? 'In diesem Auszug steht keine einzige Buchung. Es bleibt alles, wie es ist.' : F.alt ? 'Alte Excel-Dateien (.xls) kann ich nicht lesen: bitte als .xlsx sichern.' : 'Darin finde ich weder Buchungen noch Offertliste, Mitarbeiter oder Namen. Es braucht die Liste mit ihrer Kopfzeile, so wie sie aus Nevaris, BauBit oder Excel kommt.');
+    return;
+  }
+  merken();
+  const Z = S.zentral, teile = [];
+  zdFrageWeg();
+  if (F.kst) { Object.assign(Z.kstSp, F.kst.zu); Object.keys(F.kst.namen).forEach((nr) => zSparteMerken(Z, nr, F.kst.namen[nr])); new Set(Object.keys(F.kst.zu).map((k) => F.kst.zu[k])).forEach((nr) => zSparteMerken(Z, nr, '')); teile.push(mehrzahl(Object.keys(F.kst.zu).length, 'Kostenstelle', 'Kostenstellen') + ' mit Sparte'); }
+  if (F.namen) { Object.assign(Z.namen.kst, F.namen.kst); Object.assign(Z.namen.ka, F.namen.ka); Z.namen.am = new Date().toISOString(); teile.push('Namen von ' + mehrzahl(Object.keys(F.namen.kst).length, 'Kostenstelle', 'Kostenstellen') + ' und ' + mehrzahl(Object.keys(F.namen.ka).length, 'Kostenart', 'Kostenarten')); }
+  if (T) {
+    if (!R.mitSpalte && Object.keys(Z.kstSp).length && T['']) {   // die Liste Kostenstelle → Sparte kam in derselben Auswahl oder früher
+      const B = T[''], sam = {}; delete T[''];
+      for (let i = 0; i < B.n; i++) { const nr = Z.kstSp[ohneNull(B.KST[B.k[i]])] || ''; (sam[nr] || (sam[nr] = buchSammler())).dazu(buchZeileVon(B, i)); }
+      Object.keys(sam).forEach((nr) => { const X = buchFest(sam[nr].fertig()); T[nr] = T[nr] ? buchAnhaengen([T[nr], X]) : X; });
+    }
+    const n = zbuchSetzen(T, { mitSpalte: R.mitSpalte, quelle: buchDateien.join(', '), kopf: R.kopf, spNamen: R.namen });
+    ZB_DATEIEN = buchF;
+    F.ohneSparte = Z.buch && Z.buch.teile[''] ? Z.buch.teile[''].n : 0;
+    teile.push(fmt(n) + ' Buchungen in ' + mehrzahl(Object.keys(Z.buch ? Z.buch.teile : {}).filter(Boolean).length, 'Sparte', 'Sparten') + (R.schlecht ? ' (' + fmt(R.schlecht) + ' Zeilen nicht lesbar)' : ''));
+  }
+  if (F.off.length) {
+    const key = (a) => a.jahr + '|' + String(a.objekt).toLowerCase().replace(/\s+/g, ' ').trim() + '|' + String(a.sparte || '').toLowerCase().trim(), M = new Map();
+    offAlt.forEach((a) => { M.set(key(a), a); });
+    let neu = 0;
+    F.off.forEach((a) => { if (!M.has(key(a))) neu++; M.set(key(a), a); });
+    const L = Array.from(M.values()), werte = {};
+    L.forEach((a) => { const w = String(a.sparte || '').trim(); werte[w] = (werte[w] || 0) + 1; });
+    const text = JSON.stringify(L), id = zbId();
+    zbMerken(id, text);
+    Z.off = { am: new Date().toISOString(), n: L.length, anh: id, z: text.length, werte: werte };
+    teile.push(mehrzahl(F.off.length, 'Offerte', 'Offerten') + (offAlt.length ? ' (' + neu + ' neu)' : ''));
+  }
+  if (F.ma.length) {
+    const L = Z.ma ? Z.ma.liste.slice() : [], key = (p) => (p.nr ? 'n:' + p.nr : 'x:' + nameSchluessel(p.vorname + ' ' + p.name));
+    const I = new Map(); L.forEach((p, i) => { I.set(key(p), i); });
+    let neu = 0;
+    F.ma.forEach((p) => { const i = I.get(key(p)); if (i === undefined) { I.set(key(p), L.length); L.push(p); neu++; } else L[i] = p; });
+    Z.ma = { am: new Date().toISOString(), liste: L };
+    teile.push(mehrzahl(F.ma.length, 'Mitarbeiter', 'Mitarbeitende') + (neu < F.ma.length ? ' (' + neu + ' neu)' : ''));
+  }
+  speichern();
+  if (F.kst && !T) { const b = await zbUmverteilen(); if (b) { teile.push(fmt(b) + ' Buchungen ihrer Sparte zugeteilt'); speichern(); } }
+  const liegt = await zbFertig();   // erst melden, wenn alles auch in der Ablage des Browsers liegt (übersteht ein Neuladen)
+  render();
+  const kuerzer = T && Z.buch && vonVor && Z.buch.von > vonVor;   // die Historie beginnt später als bisher: vielleicht kam nur ein Teil des Auszugs
+  toast('Eingelesen: ' + teile.join(', ') + '.' + (F.ohneSparte ? ' ' + fmt(F.ohneSparte) + ' Buchungen haben keine Sparte.' : '') + (F.unbekannt.length ? ' Nicht erkannt: ' + F.unbekannt.join(', ') + '.' : '') +
+    (leerAuszug ? ' Im Auszug steht keine Buchung: Die bisherigen bleiben.' : '') +
+    (kuerzer ? ' Achtung: Die Buchungen beginnen jetzt erst im ' + ymName(Z.buch.von) + ' (vorher ' + ymName(vonVor) + '). Besteht der Auszug aus mehreren Dateien, lies sie zusammen ein.' : '') +
+    (mehrBl.length ? ' Achtung: «' + mehrBl.join('», «') + '» hat Buchungen auf mehreren Blättern; gelesen ist nur das erste. Sichere jedes Blatt als eigene Datei.' : '') +
+    (liegt ? '' : ' Dieser Browser kann so viel nicht zwischenlagern: jetzt gleich «Sichern».'), true);
+}
+
+/* ---------- Buchhaltung: Übersicht ---------- */
+function zUebersicht(Z) {   // je Sparte: Buchungen, Offerten, Mitarbeitende; dazu «ohne Sparte»
+  const R = {}, zeile = (nr) => R[nr] || (R[nr] = { nr: nr, name: '', buch: null, off: 0, ma: 0 });
+  Z.sparten.forEach((s) => { zeile(s.nr).name = s.name; });
+  if (Z.buch) Object.keys(Z.buch.teile).forEach((nr) => { zeile(nr).buch = Z.buch.teile[nr]; });
+  if (Z.off) Object.keys(Z.off.werte).forEach((w) => { zeile(zuVon(Z, 'zuOff', w)).off += Z.off.werte[w]; });
+  if (Z.ma) Z.ma.liste.forEach((p) => { if (maDabei(p)) zeile(zuVon(Z, 'zuMa', p.abteilung)).ma++; });
+  return Object.keys(R).sort(spVgl).map((k) => R[k]);
+}
+function zOffene(Z) {   // Werte der Offertliste und Abteilungen aus BauBit, die noch zu keiner Sparte gehören
+  const off = Z.off ? Object.keys(Z.off.werte).filter((w) => !zuVon(Z, 'zuOff', w)) : [], maW = {};
+  if (Z.ma) Z.ma.liste.forEach((p) => { if (maDabei(p)) maW[p.abteilung] = (maW[p.abteilung] || 0) + 1; });
+  return { off: off, ma: Object.keys(maW).filter((w) => !zuVon(Z, 'zuMa', w)), maW: maW };
+}
+const isoTag = (iso) => isoKurz(String(iso || '').slice(0, 10));
+function zentralHTML() {
+  const Z = S.zentral, U = zUebersicht(Z), O = zOffene(Z), nK = Object.keys(Z.namen.kst).length, nA = Object.keys(Z.namen.ka).length, aktiv = Z.ma ? Z.ma.liste.filter(maDabei).length : 0;
+  const teil = (ok, t, text, hilfe) => '<li class="vb-z' + (ok ? ' ok' : '') + '"><span class="vb-ic" role="img" aria-label="' + (ok ? 'Eingelesen' : 'Fehlt noch') + '">' + ic('check') + '</span><div class="vb-t"><b>' + esc(t) + '</b><span>' + esc(text) + '</span>' + (ok ? '' : '<small>' + esc(hilfe) + '</small>') + '</div></li>';
+  const ohne = U.find((x) => !x.nr), mit = U.filter((x) => x.nr), offen = O.off.length + O.ma.length;
+  const zeile = (x) => {
+    const was = [x.buch ? fmt(x.buch.n) + ' Buchungen bis ' + ymName(x.buch.bis) + (x.buch.abg >= 0 && x.buch.abg !== x.buch.bis ? ', abgegrenzt bis ' + ymName(x.buch.abg) : '') : 'Keine Buchungen', x.off ? mehrzahl(x.off, 'Offerte', 'Offerten') : '', x.ma ? mehrzahl(x.ma, 'Mitarbeiter', 'Mitarbeitende') : ''].filter(Boolean);
+    return '<li><button type="button" class="zd-sp" data-a="zsp" data-nr="' + esc(x.nr) + '" aria-label="' + esc(spName(x)) + ': Name ändern"><span class="zd-sp-t"><b>' + esc(spName(x)) + '</b><span>' + esc(was.join(' · ')) + '</span></span>' + ic('right') + '</button></li>';
+  };
+  return titel('Daten für alle', 'Einmal einlesen, jede Abteilung holt ihre Sparte', '<button type="button" class="btn stark" data-a="datei-wahl">' + ic('plus') + '<span>Einlesen</span></button>') +
+    '<ul class="vb-liste zd-liste">' +
+    teil(!!Z.buch, 'Buchungen aller Sparten', Z.buch ? fmt(Z.buch.n) + ' Buchungen, ' + ymName(Z.buch.von) + ' bis ' + ymName(Z.buch.bis) + ' · eingelesen am ' + isoTag(Z.buch.am) : 'Noch keine Buchungen', 'Der Auszug «KSt-Istwerte» aus Nevaris mit allen Sparten und der ganzen Historie, auch als mehrere Dateien. Er ersetzt alle bisherigen Buchungen.') +
+    teil(!!Z.off, 'Offertliste', Z.off ? mehrzahl(Z.off.n, 'Offerte', 'Offerten') + ' · eingelesen am ' + isoTag(Z.off.am) : 'Noch keine Offertliste', 'Eure Offertliste mit der Spalte «Sparte». Was es schon gibt, wird nachgeführt; nichts fällt weg.') +
+    teil(!!Z.ma, 'Mitarbeiterliste', Z.ma ? mehrzahl(aktiv, 'aktiver Mitarbeiter', 'aktive Mitarbeitende') + (Z.ma.liste.length > aktiv ? ', ' + (Z.ma.liste.length - aktiv) + ' ausgetreten' : '') + ' · eingelesen am ' + isoTag(Z.ma.am) : 'Noch keine Mitarbeiterliste', 'Der Mitarbeiter-Export aus BauBit. Gelesen werden nur Name, Abteilung, Funktion, Vorgesetzter, Initialen, Eintritt, Austritt und Geburtstag; Lohn, AHV-Nummer und Adresse bleiben draussen.') +
+    teil(nK + nA > 0, 'Namen der Kostenstellen und Kostenarten', nK + nA ? nK + ' Kostenstellen und ' + nA + ' Kostenarten' : 'Noch keine Liste', 'Die Liste aus Nevaris mit Nummer und Bezeichnung. Steht darin auch die Sparte der Kostenstelle, teilt das Tool die Buchungen danach zu.') +
+    '</ul>' +
+    '<p class="muted klein zd-hilfe">«Einlesen» erkennt jede Datei selbst' + (FEIN ? '; die Dateien lassen sich auch auf das Tool ziehen' : '') + '. Danach «Sichern»: Die Datei gehört in den Ordner der GL. Jede Abteilung wählt in ihrer eigenen Datei «Vorbereiten» und dort «Daten holen».</p>' +
+    (ohne && ohne.buch ? '<p class="hinweis">' + ic('info') + '<span>' + esc(fmt(ohne.buch.n)) + ' Buchungen haben keine Sparte. ' + (Z.buch && Z.buch.mitSparte ? 'In diesen Zeilen ist die Spalte mit der Sparte leer.' : 'Im Auszug finde ich keine Spalte «Sparte». Heisst sie bei euch anders, wähle sie. Sonst lies die Liste der Kostenstellen mit ihrer Sparte ein.') + '</span>' +
+      (Z.buch && !Z.buch.mitSparte && Z.buch.kopf.length ? '<button type="button" class="btn klein stark" data-a="sheet" data-s="zzu">Spalte wählen</button>' : '') + '</p>' : '') +
+    (offen ? '<p class="hinweis">' + ic('info') + '<span>' + esc([O.off.length ? mehrzahl(O.off.length, 'Wert', 'Werte') + ' aus der Offertliste' : '', O.ma.length ? mehrzahl(O.ma.length, 'Abteilung', 'Abteilungen') + ' aus BauBit' : ''].filter(Boolean).join(' und ')) + ' ' + (offen === 1 ? 'gehört' : 'gehören') + ' noch zu keiner Sparte.</span><button type="button" class="btn klein stark" data-a="sheet" data-s="zzu">Zuordnen</button></p>' : '') +
+    '<div class="titel zd-kopf2"><div><h2 class="bl">Sparten</h2></div><div class="titel-r">' + (Z.off || Z.ma || (Z.buch && Z.buch.kopf.length) ? '<button type="button" class="btn klein" data-a="sheet" data-s="zzu">' + ic('liste') + '<span>Zuordnung</span></button>' : '') + '<button type="button" class="btn klein" data-a="sheet" data-s="zspneu">' + ic('plus') + '<span>Sparte</span></button></div></div>' +
+    (mit.length ? '<ul class="zd-sparten">' + mit.map(zeile).join('') + '</ul>' : '<p class="leer">Noch keine Sparte. Sie kommen mit dem Auszug: aus seiner Spalte «Sparte».</p>');
+}
+
+/* ---------- Daten-Datei sichern: das Tool mit dem Stand, dahinter die Stücke, zuletzt ihr Verzeichnis ---------- */
+async function datenDateiBlob() {
+  const AUF = '<scr' + 'ipt id="daten" type="application/json">', ZU = '</scr' + 'ipt>';
+  const a = VORLAGE.indexOf(AUF);
+  if (a < 0) return null;
+  const b = VORLAGE.indexOf(ZU, a), sauber = (t) => t.replace(/</g, '\\u003c').replace(ZEILENTRENNER, (c) => '\\u' + c.charCodeAt(0).toString(16)), gr = (t) => new Blob([t]).size;
+  const json = sauber(JSON.stringify({ app: 'strategietag-bi', v: FORMAT, version: VERSION, gesichertAm: new Date().toISOString(), daten: S }, mitAnhaengen));
+  const vor = VORLAGE.slice(0, a + AUF.length), nachT = VORLAGE.slice(b), teile = [vor, json, nachT], Z = S.zentral;
+  const idx = { v: 1, am: zentralStand(Z), daten: [gr(vor), gr(json)], stuecke: {} };
+  let pos = gr(vor) + gr(json) + gr(nachT);
+  const dazu = async (name, anh) => {
+    const inhalt = await zbInhalt(anh);
+    if (inhalt == null) throw new Error('stueck');
+    const k = '\n<scr' + 'ipt type="application/json" data-stueck="' + esc(name) + '">', t = sauber(inhalt);
+    teile.push(k, t, ZU); idx.stuecke[name] = [pos + gr(k), gr(t)]; pos += gr(k) + gr(t) + gr(ZU);
+  };
+  if (Z.buch) for (const nr of Object.keys(Z.buch.teile)) await dazu('buch:' + nr, Z.buch.teile[nr].anh);
+  if (Z.off) await dazu('off', Z.off.anh);
+  teile.push('\n<!--strategietag-daten ' + JSON.stringify(idx).replace(/-->/g, '--\\u003e').replace(/</g, '\\u003c') + ' -->\n');
+  return new Blob(teile, { type: 'text/html' });
+}
+/* Eine gesicherte Daten-Datei: Verzeichnis und Stand, ohne die Stücke zu lesen. null: keine Daten-Datei */
+const ZD_MARKE = '<!--strategietag-daten ';
+async function zdKopf(file) {
+  const n = Math.min(file.size, 262144), ende = await file.slice(file.size - n).text(), p = ende.lastIndexOf(ZD_MARKE);
+  if (p < 0) return null;
+  const q = ende.indexOf(' -->', p);
+  if (q < 0) return null;
+  const idx = JSON.parse(ende.slice(p + ZD_MARKE.length, q));
+  if (!idx || !Array.isArray(idx.daten) || !idx.stuecke) return null;
+  const k = JSON.parse(await file.slice(idx.daten[0], idx.daten[0] + idx.daten[1]).text());
+  if (!k || !k.daten || !k.daten.meta || k.daten.meta.art !== 'daten') return null;
+  return { name: file.name, kopf: k, Z: zentralNormal(k.daten.zentral), lies: async (st) => { const s = idx.stuecke[st]; return s ? await file.slice(s[0], s[0] + s[1]).text() : null; } };
+}
+function zdKopfAusText(text, d, name) {   // dieselbe Datei ohne Verzeichnis gelesen (z. B. von einem Programm neu gesichert): die Stücke stehen im Text
+  const lies = async (st) => { const auf = 'data-stueck="' + esc(st) + '">', a = text.indexOf(auf); if (a < 0) return null; const b = text.indexOf('</scr' + 'ipt>', a); return b < 0 ? null : text.slice(a + auf.length, b); };
+  return { name: name, kopf: { daten: d }, Z: zentralNormal(d.zentral), lies: lies };
+}
+function zdKopfAusStand() {   // die Daten-Datei, die gerade offen ist (für «Meine Datei öffnen»)
+  const Z = JSON.parse(JSON.stringify(S.zentral));
+  return { name: datei.name || datei.vorschlag || 'Daten für alle', kopf: { daten: { meta: S.meta, zentral: Z } }, Z: zentralNormal(Z), lies: async (st) => { const t = st === 'off' ? Z.off : (Z.buch ? Z.buch.teile[st.slice(5)] : null); return t ? await zbInhalt(t.anh) : null; } };
+}
+/* Die Daten-Datei im Tool öffnen (Buchhaltung): der Stand, dazu alle Stücke unter neuen Kennungen in den Arbeitsspeicher */
+async function zdOeffnen(K) {
+  const d = JSON.parse(JSON.stringify(K.kopf.daten)), Z = d.zentral || {};
+  const neu = async (st, t) => { if (!t || typeof t.anh !== 'string') return; const inhalt = await K.lies(st); if (inhalt == null) return; const id = zbId(); zbMerken(id, inhalt); t.anh = id; };
+  if (Z.buch && Z.buch.teile) for (const nr of Object.keys(Z.buch.teile)) await neu('buch:' + nr, Z.buch.teile[nr]);
+  if (Z.off) await neu('off', Z.off);
+  await zbFertig();
+  uebernehmen(d, K.name);
+}
+/* Per Doppelklick geöffnet: Die Stücke stehen hinter dem Tool im Dokument. Sobald es ganz geladen ist, kommen sie in den Arbeitsspeicher
+   (nicht in die Ablage des Browsers: Sie stehen ja in der Datei und sind bei jedem Öffnen wieder da). Sie gehören zum Stand, der in der
+   Datei steht, und werden unter dessen Kennungen abgelegt: Zeigt das Tool einen neueren, noch nicht gesicherten Stand, findet er darunter,
+   was sich nicht geändert hat; was neu eingelesen wurde, liegt unter eigenen Kennungen in der Ablage des Browsers. */
+function zbAusDom() {
+  if (!document.querySelector('script[data-stueck]')) return;
+  let Z = null;
+  try { const e = JSON.parse($('#daten').textContent || 'null'), d = e && e.daten; if (d && d.meta && d.meta.art === 'daten' && d.zentral && typeof d.zentral === 'object') Z = d.zentral; } catch (e) { Z = null; }
+  if (!Z) return;
+  const hol = (st, t) => { if (!t || typeof t.anh !== 'string' || ANH[t.anh] != null) return; const el = document.querySelector('script[data-stueck="' + st.replace(/["\\]/g, '\\$&') + '"]'); if (el && el.textContent) ANH[t.anh] = el.textContent; };
+  if (Z.buch && Z.buch.teile && typeof Z.buch.teile === 'object') Object.keys(Z.buch.teile).forEach((nr) => hol('buch:' + nr, Z.buch.teile[nr]));
+  if (Z.off) hol('off', Z.off);
+}
+
+/* ---------- Wer die Daten-Datei öffnet, ohne sie zu führen: zur eigenen Datei, die gleich daraus holt ---------- */
+let ZD = null;        // die gewählte Daten-Datei, aus der gerade geholt wird
+let ZD_MERK = null;   // aus der offenen Daten-Datei heraus die eigene Datei öffnen und gleich daraus holen
+let ZD_MERK_T = 0;    // … gilt nur kurz: Wer die Dateiwahl abbricht und viel später etwas anderes lädt, wird nicht überrascht
+const zdMerkNimm = () => { const K = ZD_MERK && Date.now() - ZD_MERK_T < 10 * 60000 ? ZD_MERK : null; ZD_MERK = null; return K; };
+const zdFrageOffen = () => istDaten() && !S.beispiel && !IM_RAHMEN && !zentralLeer() && zdFrageZu !== S.zentral.id;
+function zdFrageWeg() { if (istDaten() && S.zentral && zdFrageZu !== S.zentral.id) { zdFrageZu = S.zentral.id; anzeigeMerken(); } }   // wer einliest, führt die Daten-Datei
+function zdFrageHTML() {
+  if (!zdFrageOffen()) return '';
+  return '<div class="probe leise gl-frage"><span>Das ist die Daten-Datei der Buchhaltung: Hier wird für alle eingelesen. Brauchst du die Daten deiner Abteilung?</span><button type="button" data-a="sheet" data-s="zdmeine">Meine Abteilung</button>' +
+    '<button type="button" class="zu" data-a="zd-frage-zu" aria-label="Hinweis schliessen: Ich führe die Daten-Datei" title="Schliessen: Ich führe die Daten-Datei">×</button></div>';
+}
+
+/* ---------- Abteilung: Daten holen ---------- */
+async function zdGewaehlt(file) {   // aus der Dateiwahl «Daten holen»
+  if (!file) return;
+  if (IM_RAHMEN) { toast('In dieser Vorschau ausgeschaltet.'); return; }
+  if (S.beispiel) { toast(BEISPIEL_TEXT); return; }
+  let K = null;
+  try { K = await zdKopf(file); } catch (e) { K = null; }
+  if (!K) {   // ohne Verzeichnis: die ganze Datei ansehen
+    try { const text = await file.text(), d = datenAusText(text); if (d && d.meta && d.meta.art === 'daten') K = zdKopfAusText(text, d, file.name); } catch (e) { K = null; }
+  }
+  if (!K) { toast('Das ist keine Daten-Datei. Sie entsteht bei der Buchhaltung über «Eigene Datei beginnen» › «Für die Buchhaltung».'); return; }
+  zdZeigen(K);
+}
+function zdZeigen(K, roh) {   // roh: über «Datei laden» gekommen – dann gibt es auch den Weg «Als Daten-Datei öffnen»
+  if (zentralStand(K.Z) === '') { toast('Diese Daten-Datei ist noch leer.'); return; }
+  ZD = K; auf({ art: 'zdholen', roh: !!roh });
+}
+function zdVorwahl(Z) {   // welche Sparten angekreuzt sind: die vom letzten Mal, sonst die mit dem Namen der Abteilung
+  const da = (nr) => !!(Z.buch && Z.buch.teile[nr]) || Z.sparten.some((s) => s.nr === nr);
+  const alt = S.zdaten ? S.zdaten.sparten.filter(da) : [];
+  if (alt.length) return alt;
+  const n = spEinfach(S.meta.abteilung), T = Z.sparten.filter((s) => { const x = spEinfach(s.name); return x && n && n !== 'abteilung' && (x === n || (x.length > 3 && n.length > 3 && (x.indexOf(n) >= 0 || n.indexOf(x) >= 0))); });
+  return T.length === 1 ? [T[0].nr] : [];
+}
+async function zdHolen(K, nrs) {
+  const Z = K.Z, texte = [];
+  for (const nr of nrs) { if (Z.buch && Z.buch.teile[nr]) { const t = await K.lies('buch:' + nr); if (t == null) throw new Error('stueck'); texte.push(t); } }
+  const offAlle = Z.off ? JSON.parse((await K.lies('off')) || '[]') : [];
+  if (ZD !== K) return;   // inzwischen abgebrochen
+  // ab hier ohne Warten: ein Schritt, ein «Rückgängig»
+  const bereich = S.ui.bereich, r = { buch: 0, off: 0, offNeu: 0, ma: 0, maNeu: 0, namen: 0 };
+  merken();
+  const vorHolen = rueckStapel[rueckStapel.length - 1];   // der Stand vor dem Holen: Dorthin führt «Rückgängig»
+  if (texte.length) {   // Buchungen: immer die ganze Historie, sie ersetzt alles
+    const L = texte.map((t) => buchFest(JSON.parse(t))), B = buchAnhaengen(L), text = L.length === 1 ? texte[0] : JSON.stringify(buchInhalt(B)), id = 'buch-' + uid(), vor = S.buch || {};
+    anhMerken(id, text);
+    S.buch = { id: id, typ: BUCH_TYP, groesse: text.length, n: B.n, von: B.ymMin, bis: B.ymMax, abg: B.ymAbg, am: Z.buch.am || new Date().toISOString(), std: vor.std && typeof vor.std === 'object' ? vor.std : {}, la: vor.la && typeof vor.la === 'object' ? vor.la : {}, blOhne: Array.isArray(vor.blOhne) ? vor.blOhne : [], zaehlBis: null };
+    BUCH = B; BUCH_ID = id; r.buch = B.n;
+    if (['diagramme', 'bf', 'aw'].indexOf(S.zahlen.ansicht) < 0) S.zahlen.ansicht = 'diagramme';
+  }
+  const meine = new Set(nrs);
+  {   // Namen: die Kostenarten alle, die Kostenstellen nur der eigenen Sparten (aus den Buchungen und aus der Liste Kostenstelle → Sparte)
+    const eig = new Set();
+    if (texte.length) BUCH.KST.forEach((k) => { eig.add(ohneNull(k)); });
+    Object.keys(Z.kstSp).forEach((k) => { if (meine.has(Z.kstSp[k])) eig.add(k); });
+    let nK = 0;
+    Object.keys(Z.namen.kst).forEach((k) => { if (eig.has(k)) { S.namen.kst[k] = Z.namen.kst[k]; nK++; } });
+    const nA = Object.keys(Z.namen.ka).length;
+    Object.assign(S.namen.ka, Z.namen.ka);
+    if (nK + nA) { S.namen.am = heute(); r.namen = nK + nA; }
+  }
+  if (Z.ma) {
+    /* Mitarbeitende ergänzen. Neu dazu kommt, wer aktiv ist; Eintritt, Austritt und Geburtstag werden nachgeführt. Wer schon in der Liste steht,
+       behält, was die Abteilung selbst gesetzt hat: Position, Polier und Kürzel. Ein Kürzel kommt nur zu Bauführern und Leitern, und nur,
+       wenn es eindeutig und noch frei ist (ein Kürzel gehört immer nur einer Person). */
+    const voll = (p) => [p.vorname, p.name].filter(Boolean).join(' '), eigene = S.mitarbeiter.filter((m) => !fremd(m));
+    const da = (name) => { const k = nameSchluessel(name); return eigene.some((m) => nameSchluessel(m.name) === k); };
+    const P = Z.ma.liste.filter((p) => meine.has(zuVon(Z, 'zuMa', p.abteilung)) && (maDabei(p) || da(voll(p))));
+    const polierVon = (p) => {   // der Vorgesetzte, wenn er Polier derselben Sparte ist
+      const k = nameSchluessel(p.vorgesetzter);
+      if (!k) return '';
+      const v = P.find((x) => x !== p && (nameSchluessel(voll(x)) === k || (x.initialen && x.initialen.toLowerCase() === p.vorgesetzter.toLowerCase())));
+      return v && /polier/i.test(v.funktion) ? voll(v) : '';
+    };
+    const belegt = new Set(), anz = {};
+    S.mitarbeiter.forEach((m) => { kzVon(m).forEach((k) => belegt.add(k)); });
+    P.forEach((p) => { const k = kzForm(p.initialen); if (k) anz[k] = (anz[k] || 0) + 1; });
+    const kz = (p) => { const k = kzForm(p.initialen); return k && anz[k] === 1 && !belegt.has(k) && imBuero({ position: p.funktion }) ? k : ''; };
+    const Zl = P.map((p) => ({ name: voll(p), position: p.funktion, polier: polierVon(p), eintritt: p.eintritt, austritt: p.austritt, geburt: p.geburt, kuerzel: kz(p) }));
+    if (Zl.length) {
+      const vorher = new Map(S.mitarbeiter.map((m) => [m.id, { position: m.position, polier: m.polier, kuerzel: m.kuerzel || '' }]));
+      const n = maAnwenden(Zl);
+      S.mitarbeiter.forEach((m) => {
+        const v = vorher.get(m.id);
+        if (!v) return;
+        if (v.position) m.position = v.position;
+        if (v.polier) m.polier = v.polier; else if (istPolier(m)) m.polier = '';
+        if (v.kuerzel) m.kuerzel = v.kuerzel;
+      });
+      r.ma = Zl.length; r.maNeu = n.neu;
+    }
+  }
+  if (offAlle.length) {   // Offerten ergänzen wie beim eigenen Einlesen der Offertliste
+    const L = offAlle.filter((a) => meine.has(zuVon(Z, 'zuOff', String(a.sparte || '').trim())));
+    if (L.length) {
+      const key = (a) => a.jahr + '|' + String(a.objekt).toLowerCase().replace(/\s+/g, ' ').trim(), alt = new Set(S.kunden.auftraege.map(key)), amVor = S.kunden.am || '', amZ = String(Z.off.am || '').slice(0, 10);
+      r.off = L.length; r.offNeu = L.filter((a) => !alt.has(key(a))).length;
+      kundenUebernehmen([{ art: 'liste', zeilen: L }]);
+      S.kunden.am = amZ > amVor ? amZ : amVor;   // «eingelesen am» ist der Tag, an dem die Buchhaltung die Liste eingelesen hat (oder ein späterer eigener Stand)
+    }
+  }
+  const spN = {}; nrs.forEach((nr) => { const s = Z.sparten.find((x) => x.nr === nr); spN[nr] = s ? s.name : ''; });
+  S.zdaten = { am: zentralStand(Z), geholt: new Date().toISOString(), sparten: nrs.slice(), spNamen: spN, datei: K.name || '' };
+  { const i = rueckStapel.lastIndexOf(vorHolen); if (i >= 0) rueckStapel.length = i + 1; }   // was unterwegs gemerkt wurde (Offerten), gehört zu diesem einen Schritt
+  const zuZahlen = r.buch > 0 && sheetVor !== 'vorbereiten' && bereiche().some((b) => b[0] === 'zahlen');   // die Buchungen sind da: Man sieht es unter «Zahlen»
+  S.ui.bereich = zuZahlen ? 'zahlen' : bereich; ZD = null;
+  geaendert(true);
+  if (zuZahlen && bereich !== 'zahlen') window.scrollTo(0, 0);
+  const teile = [r.buch ? fmt(r.buch) + ' Buchungen' + (S.buch.abg >= 0 ? ', abgegrenzt bis ' + ymName(S.buch.abg) : '') : '', r.off ? mehrzahl(r.off, 'Offerte', 'Offerten') + ' (' + r.offNeu + ' neu)' : '', r.ma ? mehrzahl(r.ma, 'Mitarbeiter', 'Mitarbeitende') + ' (' + r.maNeu + ' neu)' : '', r.namen ? 'Namen' : ''].filter(Boolean);
+  toast(teile.length ? 'Daten geholt: ' + teile.join(', ') + '.' : 'Für diese Sparte steht in der Daten-Datei noch nichts.', true);
+  if (sheetVor === 'vorbereiten') auf({ art: 'vorbereiten' });
+}
+let sheetVor = '';   // aus welchem Fenster «Daten holen» kam
+const zdatenText = () => { const z = S.zdaten; if (!z) return ''; return 'Geholt am ' + isoTag(z.geholt) + ' · Stand der Daten-Datei: ' + isoTag(z.am) + (z.sparten.length ? ' · ' + z.sparten.map((nr) => spName({ nr: nr, name: z.spNamen[nr] || '' })).join(', ') : ''); };
+function zdKarteHTML() {   // im Fenster «Vorbereiten»
+  const z = S.zdaten;
+  return '<div class="zd-karte"><div class="zd-karte-t"><b>Daten der Buchhaltung</b><span>' + esc(z ? zdatenText() : 'Die Buchhaltung liest einmal für alle ein. «Daten holen» bringt Buchungen, Offerten, Mitarbeitende und Namen deiner Sparte.') + '</span></div>' +
+    '<button type="button" class="btn' + (z ? '' : ' stark') + '" data-a="zd-holen"' + (IM_RAHMEN ? ' disabled' : '') + '>' + ic('herab') + '<span>Daten holen</span></button></div>';
+}
+
+/* Eine Daten-Datei wurde über «Datei laden» gewählt (oder aufs Tool gezogen) */
+function zdGeladen(K) {
+  if (istGL()) { ZD = K; auf({ art: 'zdholen' }); return; }   // dort gibt es daraus nichts zu holen: nur erklären
+  if (S.beispiel || (istDaten() ? (zentralLeer() || !datei.schmutzig) : (ohneInhalt() && !S.meta.ohneTag && (!S.meta.abteilung || S.meta.abteilung === 'Abteilung')))) { zdOeffnen(K).catch(() => { toast('Die Daten-Datei liess sich nicht öffnen.'); }); return; }
+  if (istDaten()) { ZD = K; auf({ art: 'zdholen', nurOeffnen: true }); return; }   // hier ist etwas noch nicht gesichert
+  sheetVor = sheet ? sheet.art : '';
+  zdZeigen(K, true);
+}
+/* Einstellungen der Daten-Datei: nur, was sie braucht */
+function zdEinstellungenHTML() {
+  const m = S.meta;
+  return huelle('Einstellungen',
+    '<section class="gr"><p class="muted klein">Daten-Datei der Buchhaltung: Hier wird einmal für alle eingelesen. Jede Abteilung holt daraus in ihrer eigenen Datei die Daten ihrer Sparte.</p></section>' +
+    '<section class="gr"><h3>Darstellung</h3><div class="reihe zw"><span>Schriftgrösse</span><div class="stepper"><button type="button" data-a="zoom" data-d="-1" aria-label="Schrift kleiner">' + ic('minus') + '</button><b class="tnum">' + Math.round(m.zoom * 100) + ' %</b><button type="button" data-a="zoom" data-d="1" aria-label="Schrift grösser">' + ic('plus') + '</button></div></div>' +
+    '<div class="reihe zw"><span>Farben</span>' + seg('modus', [['auto', 'Automatisch'], ['hell', 'Hell'], ['dunkel', 'Dunkel']], m.modus) + '</div></section>' +
+    '<section class="gr"><h3>Daten</h3><div class="reihe"><button type="button" class="btn" data-a="daten-wahl"' + (IM_RAHMEN ? ' disabled' : '') + '>' + ic('upload') + '<span>Aus gesicherter Datei laden</span></button>' +
+    (IM_RAHMEN ? '' : '<button type="button" class="btn" data-a="herunter">' + ic('disk') + '<span>Als Datei herunterladen</span></button>') + '</div>' +
+    '<p class="muted klein">' + (IM_RAHMEN ? 'In dieser Vorschau ausgeschaltet.' : standText() + ' Nach jedem Einlesen «Sichern» und die Datei im Ordner der GL ersetzen.') + '</p>' +
+    '<div class="reihe"><button type="button" class="btn" data-a="start"' + (IM_RAHMEN ? ' disabled' : '') + '>' + ic('plus') + '<span>Neue Datei beginnen</span></button></div></section>' +
+    '<p class="muted klein mitte">Version ' + VERSION + '</p>');
 }
 
 /* ---------- Rückmeldung zum Tool: hier sammeln, als Text für Claude kopieren ---------- */
@@ -6801,12 +7513,12 @@ function rmKopieren(liste, markieren) {
 /* ---------- Leiste ---------- */
 function kopfHTML() {
   const rmOffen = S.rueckmeldungen.filter((x) => x.status === 'offen').length;
-  const fest = !!datei.handle, offen = datei.schmutzig && !IM_RAHMEN;   // fest: Änderungen gehen von selbst in die Datei
+  const fest = !!datei.handle && !(istDaten() && datei.schmutzig), offen = datei.schmutzig && !IM_RAHMEN;   // fest: Änderungen gehen von selbst in die Datei (seit 2.1: nicht bei der Daten-Datei, sie wird von Hand gesichert)
   const glP = istGL() || ohneTag() || (S.ui.bereich === 'gl' && glAn);   // seit 2.0: in der GL-Datei und ohne eigenen Strategietag gilt immer der Parkplatz der GL
-  return '<div class="kopf1"><button type="button" class="marke" data-a="sheet" data-s="ablauf" title="Jahresablauf zeigen"><b>' + esc(S.meta.titel) + '</b><span>' + esc(istGL() ? (glTagTextGL() || 'GL-Tagung') : S.meta.abteilung) + '</span></button>' +
-    seg('bereich', bereiche(), S.ui.bereich, 'bereich') +
+  return '<div class="kopf1"><button type="button" class="marke" data-a="sheet" data-s="' + (istDaten() ? 'einstellungen' : 'ablauf') + '" title="' + (istDaten() ? 'Einstellungen' : 'Jahresablauf zeigen') + '"><b>' + esc(S.meta.titel) + '</b><span>' + esc(istGL() ? (glTagTextGL() || 'GL-Tagung') : S.meta.abteilung) + '</span></button>' +
+    (bereiche().length > 1 ? seg('bereich', bereiche(), S.ui.bereich, 'bereich') : '') +
     '<div class="kopf-r"><button type="button" class="rundb" data-a="sheet" data-s="rueckmeldung" title="Rückmeldung zum Tool" aria-label="Rückmeldung zum Tool' + (rmOffen ? ', ' + rmOffen + ' noch nicht übergeben' : '') + '">' + ic('sprech') + (rmOffen ? '<i class="badge tnum">' + rmOffen + '</i>' : '') + '</button>' +
-    (glP ? '<button type="button" class="rundb" data-a="sheet" data-s="glpark" title="Parkplatz der GL" aria-label="Parkplatz der GL, ' + glPkOffen() + ' offen">' + ic('park') + (glPkOffen() ? '<i class="badge tnum">' + glPkOffen() + '</i>' : '') + '</button>'   // seit 1.9.5 (498): im Reiter GL der eigene Parkplatz
+    (istDaten() ? '' : glP ? '<button type="button" class="rundb" data-a="sheet" data-s="glpark" title="Parkplatz der GL" aria-label="Parkplatz der GL, ' + glPkOffen() + ' offen">' + ic('park') + (glPkOffen() ? '<i class="badge tnum">' + glPkOffen() + '</i>' : '') + '</button>'   // seit 1.9.5 (498): im Reiter GL der eigene Parkplatz
       : '<button type="button" class="rundb" data-a="sheet" data-s="parkplatz" title="Parkplatz" aria-label="Parkplatz, ' + pkOffen() + ' offen">' + ic('park') + (pkOffen() ? '<i class="badge tnum">' + pkOffen() + '</i>' : '') + '</button>') +
     '<button type="button" class="btn klein" data-a="sichern" aria-label="' + (fest ? 'Gesichert in der Datei ' + esc(datei.name) : (offen ? 'Sichern, es gibt ungesicherte Änderungen' : 'Sichern')) + '">' + ic(fest ? 'check' : 'disk') + '<span>' + (fest ? 'Gesichert' : 'Sichern') + '</span>' + (offen ? '<i class="punkt"></i>' : '') + '</button>' +
     '<button type="button" class="rundb" data-a="sheet" data-s="einstellungen" aria-label="Einstellungen">' + ic('gear') + '</button></div></div>';
@@ -7086,16 +7798,20 @@ const SHEET = {
     const zeile = (x) => '<li class="vb-z' + (x.ok ? ' ok' : '') + '"><span class="vb-ic" role="img" aria-label="' + (x.ok ? 'Erledigt' : 'Offen') + '">' + ic('check') + '</span>' +
       '<div class="vb-t"><b>' + esc(x.titel) + '</b><span>' + esc(x.text) + '</span>' + (x.ok ? '' : '<small>' + esc(x.hilfe) + '</small>') + '</div><div class="vb-k">' + x.knoepfe + '</div></li>';
     return huelle('Vorbereiten', '<p class="muted">Vor dem Strategietag am ' + esc(datumLang(S.meta.datum)) + ' nachführen. ' + (n === V.length ? 'Alles ist nachgeführt.' : n + ' von ' + V.length + ' erledigt.') + '</p>' +
+      zdKarteHTML() +   // seit 2.1 (530): die Daten der Buchhaltung holen
       '<ul class="vb-liste">' + V.map(zeile).join('') + '</ul>' +
       '<p class="muted klein">Einlesen erkennt die Datei selbst: Auszug, BAB, Namen oder Offertliste.' + (FEIN ? ' Die Dateien lassen sich auch auf das Tool ziehen.' : '') + ' Ein Haken heisst: seit dem ' + esc(isoKurz(vorbAb())) + ' nachgeführt.</p>');
   },
   /* ----- seit 2.0 (520): das Tool für die ganze GL ----- */
   start() {   // eine eigene Datei beginnen: für eine Abteilung oder für die GL-Tagung
-    const gl = sheet.wahl === 'gl', voll = !S.beispiel && !ohneInhalt(), w = sheet.werte || {}, jahr = new Date().getFullYear() + 1;
+    const gl = sheet.wahl === 'gl', dt = sheet.wahl === 'daten', voll = !S.beispiel && !ohneInhalt(), w = sheet.werte || {}, jahr = new Date().getFullYear() + 1;   // dt seit 2.1 (530)
     return formHuelle('Eigene Datei beginnen', 'start',
-      (voll ? '<p class="hinweis">' + ic('info') + '<span>Das ersetzt, was auf diesem Gerät steht. Vorher «Sichern», falls du es noch brauchst.</span></p>' : '') +
-      '<div class="f"><span>Wofür ist die Datei?</span><div class="seg" role="group">' + [['abt', 'Für meine Abteilung'], ['gl', 'Für die GL-Tagung']].map((o) => '<button type="button" data-a="start-wahl" data-v="' + o[0] + '" aria-pressed="' + ((gl ? 'gl' : 'abt') === o[0]) + '">' + o[1] + '</button>').join('') + '</div></div>' +
-      (gl ? '<label class="f" for="st-titel"><span>Titel</span><input id="st-titel" name="titel" value="' + esc(w.titel || 'GL-Strategie ' + jahr) + '" autocomplete="off" data-fokus></label>' +
+      (sheet.zd && !dt && !gl ? '<p class="muted klein">Die Daten-Datei selbst bleibt, wie sie ist. Danach wählst du deine Sparte.</p>'
+        : voll ? '<p class="hinweis">' + ic('info') + '<span>Das ersetzt, was auf diesem Gerät steht. Vorher «Sichern», falls du es noch brauchst.</span></p>' : '') +
+      '<div class="f"><span>Wofür ist die Datei?</span><div class="seg st-wahl" role="group">' + [['abt', 'Für meine Abteilung'], ['gl', 'Für die GL-Tagung'], ['daten', 'Für die Buchhaltung']].map((o) => '<button type="button" data-a="start-wahl" data-v="' + o[0] + '" aria-pressed="' + ((dt ? 'daten' : gl ? 'gl' : 'abt') === o[0]) + '">' + o[1] + '</button>').join('') + '</div></div>' +
+      (dt ? '<p class="muted">Daten für alle: Hier liest die Buchhaltung einmal ein, was jede Abteilung braucht. Buchungen aller Sparten mit der ganzen Historie, die Offertliste, die Mitarbeiterliste aus BauBit und die Namen der Kostenstellen.</p>' +
+          '<p class="muted klein">Gesichert wird eine Datei für alle. Jede Abteilung holt daraus in ihrer eigenen Datei die Daten ihrer Sparte; niemand sonst schreibt hinein.</p>'
+        : gl ? '<label class="f" for="st-titel"><span>Titel</span><input id="st-titel" name="titel" value="' + esc(w.titel || 'GL-Strategie ' + jahr) + '" autocomplete="off" data-fokus></label>' +
           '<label class="f" for="st-datum"><span>Datum der Tagung</span><input id="st-datum" type="date" name="datum" value="' + esc(w.datum || heute()) + '"></label>' +
           '<label class="f" for="st-teile"><span>Teile der Tagung in ihrer Reihenfolge, eine Zeile je Teil</span><textarea id="st-teile" name="teile" rows="8" autocomplete="off" spellcheck="false" placeholder="Abteilung A&#10;Abteilung B&#10;Abteilung C&#10;Diverses">' + esc(w.teile || '') + '</textarea></label>' +
           '<p class="muted klein">Jede Zeile wird ein Teil der Tagung. Für jede Abteilung einen Teil: Sie gibt später ihren Beitrag dazu ab und leitet ihn an der Tagung. Teile wie «Diverses» gehören keiner Abteilung. Unterthemen, Leitung und Reihenfolge änderst du danach.</p>'
@@ -7197,7 +7913,8 @@ const SHEET = {
     const w = ladeWartet;
     if (!w) return '';
     const name = w.d.meta && typeof w.d.meta.abteilung === 'string' ? w.d.meta.abteilung : '';
-    return huelle('Andere Datei öffnen?', '<p class="hinweis">' + ic('info') + '<span>' + (istGL() ? 'Das ist die Datei einer Abteilung' + (name ? ' («' + esc(name) + '»).' : '.') + ' Hier ist die GL-Datei offen.'
+    return huelle('Andere Datei öffnen?', '<p class="hinweis">' + ic('info') + '<span>' + (istDaten() ? 'Das ist ' + (w.d.meta && w.d.meta.art === 'gl' ? 'die GL-Datei' : 'die Datei einer Abteilung' + (name && name !== 'Abteilung' ? ' («' + esc(name) + '»)' : '')) + '. Hier ist die Daten-Datei der Buchhaltung offen.'
+        : istGL() ? 'Das ist die Datei einer Abteilung' + (name ? ' («' + esc(name) + '»).' : '.') + ' Hier ist die GL-Datei offen.'
         : 'Das ist die Datei einer anderen Abteilung («' + esc(name) + '»). Hier ist die Datei von «' + esc(S.meta.abteilung) + '» offen.') + '</span></p>' +
       '<p>Öffnen ersetzt, was auf diesem Gerät steht.' + (datei.schmutzig ? ' Hier ist etwas noch nicht gesichert.' : '') + (datei.handle ? ' Die Datei «' + esc(datei.name || datei.handle.name || '') + '» bleibt, wie sie zuletzt gesichert wurde.' : '') +
       (istGL() ? ' Einen Beitrag der Abteilung liest du über «Beiträge einlesen» ein: Er entsteht in ihrer Datei über «Beitrag abgeben».' : '') + '</p>' +
@@ -7228,7 +7945,71 @@ const SHEET = {
       (!url ? '<p class="muted">Der Inhalt fehlt auf diesem Gerät. Lade die gesicherte Datei, dann ist er wieder da.</p>'
         : (bild ? '<img src="' + esc(url) + '" alt="' + esc(a.name) + '">' : '<iframe src="' + esc(sheet.url) + '" title="' + esc(a.name) + '"></iframe>')) + '</div></div></div>';
   },
+  /* ----- seit 2.1 (530): Daten für alle ----- */
+  zdholen() {   // eine Daten-Datei wurde gewählt: in der Abteilungsdatei daraus holen
+    const K = ZD;
+    if (!K) return '';
+    const Z = K.Z, st = zentralStand(Z), woher = '«' + esc(K.name || 'Daten für alle') + '»' + (st ? ', Stand vom ' + esc(isoTag(st)) : '');
+    const oeffnen = '<button type="button" class="btn' + (sheet.nurOeffnen ? ' rot' : '') + '" data-a="zd-roh">' + (sheet.nurOeffnen ? 'Trotzdem öffnen' : 'Als Daten-Datei öffnen') + '</button>';
+    if (sheet.nurOeffnen) return huelle('Daten-Datei öffnen?', '<p class="hinweis">' + ic('info') + '<span>Hier ist etwas noch nicht gesichert. Öffnen ersetzt, was auf diesem Gerät steht.</span></p><p class="muted">' + woher + '.</p><div class="reihe">' + oeffnen + '<button type="button" class="btn stark" data-a="zu">Abbrechen</button></div>');
+    if (istGL()) return huelle('Daten-Datei', '<p class="muted">Das ist die Daten-Datei der Buchhaltung (' + woher + '). Jede Abteilung holt daraus in ihrer eigenen Datei die Daten ihrer Sparte: «Vorbereiten» › «Daten holen». In der GL-Datei gibt es daraus nichts zu holen.</p>' +
+      '<p class="muted klein">Du führst die Daten-Datei für die Buchhaltung? Dann öffne sie hier; das ersetzt, was auf diesem Gerät steht.' + (datei.schmutzig ? ' Hier ist etwas noch nicht gesichert.' : '') + '</p><div class="reihe">' + oeffnen + '</div>');
+    const U = zUebersicht(Z).filter((x) => x.nr || x.buch), vor = sheet.wahl || (sheet.wahl = zdVorwahl(Z));
+    const zeile = (x, i) => '<label class="schalter zd-w" for="zd-sp' + i + '"><span><b>' + esc(spName(x)) + '</b><small>' + esc([x.buch ? fmt(x.buch.n) + ' Buchungen' : '', x.off ? mehrzahl(x.off, 'Offerte', 'Offerten') : '', x.ma ? mehrzahl(x.ma, 'Mitarbeiter', 'Mitarbeitende') : ''].filter(Boolean).join(' · ') || 'Noch nichts') + '</small></span>' +
+      '<input type="checkbox" id="zd-sp' + i + '" name="sp" value="' + esc(x.nr) + '"' + (vor.indexOf(x.nr) >= 0 ? ' checked' : '') + '></label>';
+    const nNamen = Object.keys(Z.namen.kst).length + Object.keys(Z.namen.ka).length;
+    return formHuelle('Daten holen', 'zdholen',
+      '<p class="muted">Aus ' + woher + '.</p>' +
+      (U.length ? '<div class="f"><span>' + (U.length > 1 ? 'Welche Sparte bist du? Mehrere sind möglich.' : 'Deine Sparte') + '</span><div class="zd-wahl">' + U.map(zeile).join('') + '</div></div>' : '<p class="leer">In dieser Daten-Datei steht noch keine Sparte.</p>') +
+      '<ul class="zd-was">' +
+      (Z.buch ? '<li><b>Buchungen</b><span>Immer die ganze Historie bis ' + esc(ymName(Z.buch.bis)) + '. Sie ersetzen alle bisherigen Buchungen' + (S.buch && S.buch.n ? ' (heute ' + esc(fmt(S.buch.n)) + ')' : '') + '.</span></li>' : '') +
+      (Z.off || Z.ma ? '<li><b>' + [Z.off ? 'Offerten' : '', Z.ma ? 'Mitarbeitende' : ''].filter(Boolean).join(' und ') + '</b><span>Werden ergänzt. Was du selbst nachgetragen hast, bleibt.</span></li>' : '') +
+      (nNamen ? '<li><b>Namen</b><span>der Kostenstellen und Kostenarten kommen mit.</span></li>' : '') + '</ul>' +
+      (sheet.roh ? '<p class="muted klein">Du führst die Daten-Datei für die Buchhaltung? <button type="button" class="textlink" data-a="zd-roh">Als Daten-Datei öffnen</button> (ersetzt, was hier steht).</p>' : ''), 'Übernehmen');
+  },
+  zdmeine() {   // Daten-Datei geöffnet, um die Daten der eigenen Abteilung zu holen: die eigene Datei öffnen oder beginnen
+    return huelle('Meine Abteilung',
+      (datei.schmutzig ? '<p class="hinweis">' + ic('info') + '<span>In dieser Daten-Datei ist etwas noch nicht gesichert. Zuerst «Sichern», falls du es noch brauchst.</span></p>' : '') +
+      '<p class="muted">Die Daten-Datei führt die Buchhaltung. Die Daten deiner Sparte holst du in deiner eigenen Datei.</p>' +
+      '<section class="gr"><h3>Ich habe schon eine Datei</h3><div class="reihe"><button type="button" class="btn stark" data-a="zd-meine">' + ic('datei') + '<span>Meine Datei öffnen</span></button></div>' +
+      '<p class="muted klein">Sie holt dann gleich aus dieser Daten-Datei: Du wählst nur noch deine Sparte.</p></section>' +
+      '<section class="gr"><h3>Ich beginne neu</h3><div class="reihe"><button type="button" class="btn" data-a="zd-neu">' + ic('plus') + '<span>Meine Datei beginnen</span></button></div>' +
+      '<p class="muted klein">Es entsteht deine eigene Datei. Die Daten-Datei selbst bleibt, wie sie ist.</p></section>');
+  },
+  zsparte() {   // Daten-Datei: eine Sparte benennen
+    const Z = S.zentral, s = Z && Z.sparten.find((x) => x.nr === sheet.nr);
+    if (!s) return '';
+    const u = zUebersicht(Z).find((x) => x.nr === s.nr) || { off: 0, ma: 0 }, leerS = !u.buch && !u.off && !u.ma;
+    return formHuelle('Sparte ' + s.nr, 'zsparte',
+      '<label class="f" for="zs-n"><span>Name der Sparte</span><input id="zs-n" name="name" value="' + esc(s.name) + '" autocomplete="off" placeholder="z. B. Abteilung A" data-fokus></label>' +
+      '<p class="muted klein">' + esc([u.buch ? fmt(u.buch.n) + ' Buchungen, ' + ymName(u.buch.von) + ' bis ' + ymName(u.buch.bis) : 'Keine Buchungen', u.off ? mehrzahl(u.off, 'Offerte', 'Offerten') : '', u.ma ? mehrzahl(u.ma, 'Mitarbeiter', 'Mitarbeitende') : ''].filter(Boolean).join(' · ')) + '. Mit diesem Namen steht die Sparte bei den Abteilungen zur Wahl.</p>' +
+      (leerS ? loeschKnopf('zsp-weg', 'Sparte entfernen') : ''));
+  },
+  zspneu() {
+    return formHuelle('Neue Sparte', 'zspneu',
+      '<div class="zwei"><label class="f" for="zn-nr"><span>Nummer</span><input id="zn-nr" name="nr" inputmode="numeric" autocomplete="off" placeholder="z. B. 100" data-fokus></label><label class="f" for="zn-n"><span>Name</span><input id="zn-n" name="name" autocomplete="off" placeholder="z. B. Abteilung A"></label></div>' +
+      '<p class="muted klein">Die Sparten kommen sonst von selbst aus dem Auszug. Von Hand braucht es sie nur, wenn Offerten oder Mitarbeitende schon vor den Buchungen zugeordnet werden sollen.</p>', 'Hinzufügen');
+  },
+  zzu() {   // Daten-Datei: Werte der Offertliste und Abteilungen aus BauBit den Sparten zuordnen
+    const Z = S.zentral;
+    if (!Z) return '';
+    const O = zOffene(Z), opt = (akt) => '<option value=""' + (akt ? '' : ' selected') + '>Keine Sparte</option>' + Z.sparten.map((s) => '<option value="' + esc(s.nr) + '"' + (s.nr === akt ? ' selected' : '') + '>' + esc(spName(s)) + '</option>').join('');
+    const reihe = (art, w, n, i) => '<label class="zz-z" for="zz-' + art + i + '"><span><b>' + esc(w || '(leer)') + '</b><small>' + esc(n) + '</small></span><select id="zz-' + art + i + '" name="' + art + '" data-w="' + esc(w) + '">' + opt(zuVon(Z, art, w)) + '</select></label>';
+    const sort = (a, b) => a.localeCompare(b, 'de'), offW = Z.off ? Object.keys(Z.off.werte).sort(sort) : [], maW = Object.keys(O.maW).sort(sort);
+    const kopf = Z.buch ? Z.buch.kopf : [], selbst = kopf.length ? sparteSpalte(kopf) : -1, gew = String(Z.spSpalte || '').toLowerCase(), hatGew = !!gew && kopf.some((k) => k.toLowerCase() === gew);
+    const oben = kopf.length > 0 && !(Z.buch && Z.buch.mitSparte);   // keine Spalte erkannt: Dann steht die Wahl zuoberst, sonst zugeklappt am Schluss
+    const spFeld = kopf.length ? '<label class="f" for="zz-sp"><span>' + (oben ? 'Auszug: Spalte mit der Sparte' : 'Diese Spalte des Auszugs nennt die Sparte') + '</span><select id="zz-sp" name="spSpalte"><option value=""' + (hatGew ? '' : ' selected') + '>' + (selbst >= 0 ? 'Selbst erkannt: «' + esc(kopf[selbst]) + '»' : 'Keine (nach der Liste der Kostenstellen)') + '</option>' +
+      kopf.map((k) => '<option value="' + esc(k) + '"' + (hatGew && k.toLowerCase() === gew ? ' selected' : '') + '>' + esc(k) + '</option>').join('') + '</select></label>' : '';
+    const spWahl = oben ? spFeld : '', spUnten = !oben && spFeld ? '<details class="ma-weg zz-mehr"><summary>Spalte der Sparte im Auszug</summary>' + spFeld + '</details>' : '';
+    return formHuelle('Zuordnung', 'zzu',
+      (!Z.sparten.length && !kopf.length ? '<p class="hinweis">' + ic('info') + '<span>Noch keine Sparte. Lies zuerst den Auszug ein, oder lege die Sparten mit «+ Sparte» an.</span></p>' : '<p class="muted">' + (offW.length || maW.length ? 'Wozu gehört, was in den Listen steht? Gleiche Nummern und Namen schlägt das Tool vor.' : 'Welche Spalte des Auszugs sagt, zu welcher Sparte eine Buchung gehört?') + '</p>') +
+      spWahl +
+      (offW.length ? '<div class="f"><span>Offertliste: Spalte «Sparte»</span><div class="zz-liste">' + offW.map((w, i) => reihe('zuOff', w, mehrzahl(Z.off.werte[w], 'Offerte', 'Offerten'), i)).join('') + '</div></div>' : '') +
+      (maW.length ? '<div class="f"><span>Mitarbeiter-Export: «Abteilung»</span><div class="zz-liste">' + maW.map((w, i) => reihe('zuMa', w, mehrzahl(O.maW[w], 'Mitarbeiter', 'Mitarbeitende'), i)).join('') + '</div></div>' : '') +
+      (!offW.length && !maW.length && !kopf.length ? '<p class="leer">Noch nichts zuzuordnen: Offertliste und Mitarbeiterliste sind noch nicht eingelesen.</p>' : '') + spUnten);
+  },
   einstellungen() {
+    if (istDaten()) return zdEinstellungenHTML();   // seit 2.1 (530)
     const m = S.meta, VB = vorbStand(), vbN = VB.filter((x) => x.ok).length, gl = istGL(), nurGL = gl || ohneTag();   // seit 2.0: je nach Art der Datei
     return huelle('Einstellungen',
       '<section class="gr"><label class="f" for="e-titel"><span>Titel</span><input id="e-titel" data-f="titel" value="' + esc(m.titel) + '" autocomplete="off"></label>' +
@@ -7477,7 +8258,7 @@ function standText() {
 }
 function obenHTML() {
   if (S.beispiel) return '<div class="probe"><span>Beispiel: alle Angaben sind erfunden</span>' + (IM_RAHMEN ? '' : '<button type="button" data-a="start">Eigene Datei beginnen</button><button type="button" data-a="daten-wahl">Gesicherte Datei laden</button>') + '</div>';   // «Eigene Datei beginnen» seit 2.0
-  const band = glFrageHTML() + ablaufBandHTML();   // seit 2.0: wer die GL-Datei öffnet, ohne sie zu führen; wo die Datei im Jahr steht
+  const band = glFrageHTML() + zdFrageHTML() + ablaufBandHTML();   // seit 2.0: wer die GL-Datei öffnet, ohne sie zu führen; wo die Datei im Jahr steht
   if (IM_RAHMEN) return '<div class="probe"><span>Nur Ansicht: Änderungen gehen hier verloren.</span></div>' + band;
   if (hinweis === 'offen') return '<div class="probe"><span>Auf diesem Gerät ist etwas noch nicht gesichert (Stand ' + zeitKnapp(S.stand) + ').</span><button type="button" data-a="sichern">Jetzt sichern</button><button type="button" class="zu" data-a="hinweis-zu" aria-label="Hinweis schliessen">×</button></div>' + band;
   if (hinweis === 'stand') return '<div class="probe leise"><span>Stand auf diesem Gerät: ' + zeitKnapp(S.stand) + '.</span><button type="button" data-a="daten-wahl">Neuere Datei laden</button><button type="button" class="zu" data-a="hinweis-zu" aria-label="Hinweis schliessen">×</button></div>' + band;
@@ -7554,7 +8335,7 @@ function nameSauber(n) {
   return stamm ? stamm + (m ? m[2] : '.html') : '';
 }
 function dateiname() {   // seit 2.0 mit der Abteilung im Namen; die GL-Datei heisst wie ihr Titel
-  return nameSauber(datei.vorschlag) || nameSauber(istGL() ? (S.meta.titel || 'GL-Strategie') + '.html' : 'Strategietag_' + (S.meta.abteilung && S.meta.abteilung !== 'Abteilung' ? S.meta.abteilung + '_' : '') + (S.meta.datum || 'ohne-Datum') + '.html');
+  return nameSauber(datei.vorschlag) || nameSauber(istDaten() ? 'Daten für alle.html' : istGL() ? (S.meta.titel || 'GL-Strategie') + '.html' : 'Strategietag_' + (S.meta.abteilung && S.meta.abteilung !== 'Abteilung' ? S.meta.abteilung + '_' : '') + (S.meta.datum || 'ohne-Datum') + '.html');
 }
 function dateiInhalt() {
   const AUF = '<scr' + 'ipt id="daten" type="application/json">', ZU = '</scr' + 'ipt>';
@@ -7567,8 +8348,9 @@ function dateiInhalt() {
 /* weg: '' = der übliche Weg dieses Geräts, 'datei' = in eine gewählte Datei schreiben, 'herunter' = herunterladen */
 async function sichern(still, weg) {
   if (IM_RAHMEN) { if (!still) auf({ art: 'sichern' }); return; }
-  const text = dateiInhalt();
-  if (!text) { if (!still) toast('Sichern ist hier nicht möglich.'); return; }
+  let text = null;
+  try { text = istDaten() ? await datenDateiBlob() : dateiInhalt(); } catch (e) { text = null; }   // seit 2.1: die Daten-Datei mit ihren Stücken und dem Verzeichnis
+  if (!text) { if (!still) toast(istDaten() ? 'Sichern klappt nicht: Ein Teil der Daten fehlt auf diesem Gerät. Lies den Auszug nochmals ein oder lade die Daten-Datei.' : 'Sichern ist hier nicht möglich.'); return; }
   const kopfNeu = () => { $('#kopf').innerHTML = kopfHTML(); $('#oben').innerHTML = obenHTML(); if (sheet && sheet.art === 'einstellungen') renderSheet(false); };
   // 1. Direkt in die Datei: am Rechner (Edge, Chrome). Einmal wählen, danach gehen Änderungen von selbst hinein.
   const teilen = TEILEN_ZUERST && kannTeilen();
@@ -7582,7 +8364,7 @@ async function sichern(still, weg) {
       await w.write(text); await w.close();
       datei.name = datei.handle.name; nameMerken(datei.name); gesichertMerken();
       kopfNeu();
-      if (!still) toast('Gesichert als «' + datei.name + '». Diese Datei enthält alles; Änderungen gehen ab jetzt von selbst hinein.');
+      if (!still) toast(istDaten() ? 'Gesichert als «' + datei.name + '». Nach dem nächsten Einlesen wieder «Sichern».' : 'Gesichert als «' + datei.name + '». Diese Datei enthält alles; Änderungen gehen ab jetzt von selbst hinein.');
       return;
     } catch (e) {
       if (e && e.name === 'AbortError') return;
@@ -7907,7 +8689,7 @@ const AKT = {
     const f = $('form[data-form="start"]'), w = sheet.werte || {};
     if (f) ['abteilung', 'datum', 'titel', 'teile'].forEach((k) => { if (f.elements[k]) w[k] = f.elements[k].value; });
     if (f && f.elements.ohne) w.ohne = f.elements.ohne.checked;
-    sheet.werte = w; sheet.wahl = el.dataset.v === 'gl' ? 'gl' : 'abt';
+    sheet.werte = w; sheet.wahl = ['gl', 'daten'].indexOf(el.dataset.v) >= 0 ? el.dataset.v : 'abt';   // 'daten' seit 2.1
     renderSheet(false);
   },
   'gl-holen'() { if (S.beispiel && !IM_RAHMEN) { toast(BEISPIEL_TEXT); return; } if (IM_RAHMEN) { toast('In dieser Vorschau ausgeschaltet. Öffne das Tool über seinen Link oder am Rechner per Doppelklick.'); return; } $('#gl-wahl').click(); },
@@ -7935,6 +8717,22 @@ const AKT = {
   'meineabt-laden'() { GL_MERK = glLesen(kopie(S)); zu(); $('#daten-wahl').click(); },
   'toast-zu'() { clearTimeout(toastT); $('#toasts').innerHTML = ''; },
   'glp-privat'(el) { const x = S.glPunkte.find((y) => y.id === el.dataset.id); if (!x) return; merken(); if (x.privat) delete x.privat; else x.privat = true; geaendert(); },
+  /* ----- seit 2.1 (530): Daten für alle ----- */
+  'zd-holen'() { if (S.beispiel) { toast(BEISPIEL_TEXT); return; } sheetVor = sheet ? sheet.art : ''; $('#zd-wahl').click(); },   // Abteilung: die Daten-Datei wählen
+  'zd-roh'() { const K = ZD; if (!K) return; ZD = null; zu(); zdOeffnen(K).catch(() => { toast('Die Daten-Datei liess sich nicht öffnen.'); }); },
+  'zd-meine'() {   // aus der offenen Daten-Datei heraus: die eigene Datei öffnen, sie holt gleich daraus
+    if (!istDaten()) return;
+    if (datei.schmutzig) { toast('In dieser Daten-Datei ist etwas noch nicht gesichert. Zuerst «Sichern».'); return; }
+    ZD_MERK = zdKopfAusStand(); ZD_MERK_T = Date.now(); zu(); $('#daten-wahl').click();
+  },
+  'zd-neu'() {   // … oder die eigene Datei beginnen; danach geht «Daten holen» von selbst auf
+    if (!istDaten()) return;
+    if (datei.schmutzig) { toast('In dieser Daten-Datei ist etwas noch nicht gesichert. Zuerst «Sichern».'); return; }
+    auf({ art: 'start', wahl: 'abt', zd: zdKopfAusStand() });
+  },
+  'zd-frage-zu'() { zdFrageWeg(); render(); },
+  zsp(el) { auf({ art: 'zsparte', nr: el.dataset.nr || '' }); },
+  'zsp-weg'() { if (!sheet || sheet.art !== 'zsparte') return; merken(); S.zentral.sparten = S.zentral.sparten.filter((x) => x.nr !== sheet.nr); geaendert(true); toast('Sparte entfernt', true); },
   seg(el) {
     const k = el.dataset.k, v = el.dataset.v;
     if (k === 'bereich') { S.ui.bereich = v; speichern(true); render(); window.scrollTo(0, 0); }
@@ -8397,9 +9195,51 @@ function offerteAusForm(f, o) {
 }
 const ohneBis = (text) => text.trim().replace(/^bis\s+/i, '');
 const FORMS = {
+  /* ----- seit 2.1 (530): Daten für alle ----- */
+  zdholen(f) {
+    const K = ZD;
+    if (!K) { zu(); return; }
+    const nrs = Array.from(f.querySelectorAll('input[name="sp"]:checked')).map((c) => c.value);
+    if (!nrs.length) { toast('Kreuze mindestens eine Sparte an.'); return; }
+    const knopf = f.querySelector('button[type="submit"]');
+    if (knopf) { knopf.disabled = true; knopf.textContent = 'Einen Moment …'; }
+    zdHolen(K, nrs).catch(() => { if (sheet && sheet.art === 'zdholen') renderSheet(false); toast('Die Daten-Datei liess sich nicht lesen. Wähle sie nochmals.'); });
+  },
+  zsparte(f) {
+    const s = S.zentral.sparten.find((x) => x.nr === sheet.nr);
+    if (!s) { zu(); return; }
+    merken(); s.name = f.elements.name.value.replace(/\s+/g, ' ').trim(); geaendert(true);
+  },
+  zspneu(f) {
+    const a = sparteAus(f.elements.nr.value);
+    if (!a[0]) { pflicht(f.elements.nr); return; }
+    if (S.zentral.sparten.some((x) => x.nr === a[0])) { toast('Diese Sparte gibt es schon.'); return; }
+    merken(); zSparteMerken(S.zentral, a[0], f.elements.name.value.replace(/\s+/g, ' ').trim() || (a[1] !== a[0] ? a[1] : '')); zdFrageWeg(); geaendert(true);
+  },
+  zzu(f) {
+    merken();
+    const Z = S.zentral;
+    Array.from(f.querySelectorAll('select[data-w]')).forEach((el) => { if (el.name === 'zuOff' || el.name === 'zuMa') Z[el.name][el.dataset.w] = el.value; });
+    /* Eine Sparte ohne Namen heisst wie die eine Abteilung aus BauBit, die zu ihr gehört */
+    Z.sparten.forEach((s) => { if (s.name) return; const A = Object.keys(Z.zuMa).filter((w) => w && Z.zuMa[w] === s.nr); if (A.length === 1) s.name = A[0]; });
+    const spEl = f.elements.spSpalte, spNeu = spEl ? String(spEl.value || '') : Z.spSpalte, spAnders = spNeu.toLowerCase() !== String(Z.spSpalte || '').toLowerCase();
+    Z.spSpalte = spNeu;
+    geaendert(true);
+    if (!spAnders) { toast('Zuordnung gespeichert', true); return; }
+    /* Eine andere Spalte nennt die Sparte: Der Auszug muss nochmals gelesen werden. Liegen seine Dateien noch im Arbeitsspeicher, gleich jetzt. */
+    if (ZB_DATEIEN.length) zentralImport(ZB_DATEIEN); else toast('Gespeichert. Lies den Auszug nochmals ein: Dann gilt die neue Spalte.', true);
+  },
   /* ----- seit 2.0 (520): das Tool für die ganze GL ----- */
   start(f) {
-    const gl = !!f.elements.teile, ui = S.ui;
+    if (sheet && sheet.wahl === 'daten') {   // seit 2.1 (530): die Daten-Datei der Buchhaltung
+      merken();
+      const s0 = leer();
+      s0.meta.zoom = S.meta.zoom; s0.meta.modus = S.meta.modus; s0.meta.art = 'daten'; s0.meta.titel = 'Daten für alle'; s0.meta.abteilung = 'Buchhaltung'; s0.zentral = zentralNeu(); s0.stand = new Date().toISOString();
+      S = normal(s0); dateiFrisch(); zdFrageWeg(); geaendert(true); window.scrollTo(0, 0);
+      toast('Daten-Datei begonnen. Jetzt einlesen, dann «Sichern».', true);
+      return;
+    }
+    const gl = !!f.elements.teile, ui = S.ui, zdK = !gl && sheet && sheet.zd ? sheet.zd : null;   // zdK seit 2.1: aus der Daten-Datei heraus begonnen
     if (!gl && !pflicht(f.elements.abteilung)) return;
     if (gl && !pflicht(f.elements.titel)) return;
     const datum = /^\d{4}-\d{2}-\d{2}$/.test(f.elements.datum.value) ? f.elements.datum.value : heute();
@@ -8426,6 +9266,7 @@ const FORMS = {
     glFrageWeg();   // wer die GL-Datei anlegt, führt sie
     dateiFrisch();
     speichern(); zu(); render(); window.scrollTo(0, 0);
+    if (zdK) { $('#toasts').innerHTML = ''; sheetVor = ''; zdZeigen(zdK); return; }   // seit 2.1 (530): gleich die Daten der eigenen Sparte holen; die Meldung kommt danach
     toast(gl ? '«' + S.meta.titel + '» begonnen. Jetzt «Sichern» und die Datei in den Ordner der GL legen.' : 'Datei für «' + S.meta.abteilung + '» begonnen. Jetzt «Sichern» und einen Ort für deine Datei wählen.', true);
   },
   meineabt(f) {   // aus der offenen GL-Datei die eigene Datei beginnen, schon mit der Tagung verbunden
@@ -8936,6 +9777,7 @@ $('#anhang-wahl').addEventListener('change', (e) => { const fl = Array.from(e.ta
 $('#anhang-wahl').addEventListener('cancel', () => { ANH_ZIEL = ''; });
 $('#beitrag-wahl').addEventListener('change', (e) => { const fl = Array.from(e.target.files || []); e.target.value = ''; if (fl.length) beitraegeLesen(fl); });   // seit 2.0: Beiträge der Abteilungen in die GL-Datei
 $('#gl-wahl').addEventListener('change', (e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) glDateiWahl(f); });   // seit 2.0: die GL-Datei, aus der eine Abteilung holt
+$('#zd-wahl').addEventListener('change', (e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) zdGewaehlt(f); });   // seit 2.1: die Daten-Datei, aus der eine Abteilung holt
 window.addEventListener('beforeunload', (e) => { if (IM_RAHMEN || !datei.schmutzig || S.beispiel) return; e.preventDefault(); e.returnValue = ''; });
 
 /* Hinweise an den Diagrammen: beim Zeigen und mit der Tastatur */
@@ -9187,7 +10029,9 @@ document.addEventListener('input', (e) => {   // Suche in der Kunden-Tabelle (24
 });
 
 render();
-buchAufraeumen();   // seit 1.6: alte Auszüge aus der Ablage des Browsers räumen
+buchAufraeumen();
+zbAufraeumen();   // seit 2.1 (530)
+window.addEventListener('load', () => { zbAusDom(); });   // die Stücke einer per Doppelklick geöffneten Daten-Datei stehen hinter dem Tool   // seit 1.6: alte Auszüge aus der Ablage des Browsers räumen
 })();
 </script>
 </body>
